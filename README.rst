@@ -35,7 +35,7 @@ This project is backed by `Centrologic <https://www.centrologic.com/>`_. You can
 If you need help implementing or hosting django-codenerix, please contact us:
 http://www.centrologic.com/contacto/
 
-.. image:: http://www.centrologic.com/wp-content/uploads/2017/01/logo-nuevo-centrologic-e1485883629754.png
+.. image:: http://www.centrologic.com/wp-content/uploads/2015/09/logo-centrologic.png
     :target: http://www.centrologic.com
     :alt: Centrologic is supported mainly by Centrologic Computational Logistic Center
 
