@@ -91,3 +91,8 @@ ENV/
 # vim temporal files
 *.swp
 
+# CODENERIX files
+/django_codenerix*.egg-info
+/codenerix*
+setup.py
+
