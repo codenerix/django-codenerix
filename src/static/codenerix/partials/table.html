@@ -1,0 +1,118 @@
+<!--
+
+django-codenerix
+
+Copyright 2017 Centrologic Computational Logistic Center S.L.
+
+Project URL : http://www.codenerix.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-->
+                <table ng-if="!data.meta.ngincludes.customtable" class="table table-condensed table-hover list">
+                    <thead>
+                        <tr>
+                            <th class="text-center" ng-click="$event.stopPropagation()" ng-show="data.table.head.extra_fields.field_check!=None">
+                                <input type="checkbox" name="checkline_head" ng-init="CDNX_checkline_head=data.table.head.extra_fields.field_check" ng-model="CDNX_checkline_head" />
+                            </th>
+                            <th ng-repeat="column in data.table.head.columns" ng-init="orderer=data.table.head.ordering[column.id]" ng-class="{'text-center':column.align=='center','text-left':column.align=='left','text-right':column.align=='right'}">
+                                <a ng-click="switch_order(column.id)" ng-class="data.table.head.datetimeQ==column.pk ? 'thspecial' : 'thnormal'">{{column.name}}<span ng-if="orderer">&nbsp;({{orderer|abs}})</span>&nbsp;<span class="glyphicon" ng-if="orderer!=0" ng-class="{'glyphicon-sort-by-alphabet':orderer>0,'glyphicon-sort-by-alphabet-alt':orderer<0}"></span>
+                                </a>
+                            </th>
+                            <th class="text-center" ng-click="$event.stopPropagation()" ng-show="data.table.head.extra_fields.field_delete">
+                                &nbsp;
+                            </th>
+                        </tr>
+                        <tr ng-show="data.meta.search_filter_button">
+                            <th class="text-center" ng-click="$event.stopPropagation()" ng-show="data.table.head.extra_fields.field_check!=None">
+                                &nbsp;
+                            </th>
+                            <th ng-repeat="column in data.table.head.columns">
+                                <div ng-if="data.filter.subfiltersC.length" ng-repeat="filter in data.filter.subfiltersC">
+                                    <form name="search"
+                                        data-custom-submit="refresh()"
+                                        ng-if="column.id==filter.key"
+                                        role="form">
+                                        <div class="input-group input-group-sm">
+                                            <input name='filter.choosen' ng-model='filter.choosen' type='hidden'>
+                                            <ui-select multiple ng-model="$parent.filter.choosen" theme="bootstrap"
+                                                ng-if="filter.kind=='multidynamicselect'"
+                                                ng-init="options['filter.choosen']=filter.choices"
+                                                on-select="saveSelected(options['filter.choosen'], filter.choosen);selectedOptionSelect(search.filter.choosen,filter.choice);"
+                                                ng-disabled="disabled"
+                                                reset-search-input="true"
+                                                ng-change="refresh()">
+                                                    <ui-select-match placeholder="">
+                                                    {{$item.label}}
+                                                    </ui-select-match>
+                                                    <ui-select-choices
+                                                        repeat="value.id as value in options['filter.choosen']"
+                                                        refresh="getForeignKeys(http,filter.choicedynamic[1],options, multi_dynamic_select_dict(filter.choicedynamic.slice(2),'search'),'filter.choosen',filter.choosen,$select.search, filter.choicedynamic[0])"
+                                                        refresh-delay="0">
+                                                        <div ng-bind-html="value.label| highlightSelect: $select.search"></div>
+                                                    </ui-select-choices>
+                                            </ui-select>
+                                            <ui-select multiple ng-model="filter.choosen" theme="bootstrap"
+                                                    on-select="selectedOptionSelect(search.filter.choosen,filter.choice)"
+                                                    reset-search-input="true"
+                                                    ng-disabled="disabled" 
+                                                    ng-if="filter.kind=='multiselect'"
+                                                    ng-init="filter.choice; $select.selected=options.filter.choosen; search.filter.choosen.$setViewValue(filter.choice);"
+                                                    ng-change="refresh()">
+                                                <ui-select-match placeholder="">{{$item.label}}</ui-select-match>
+                                                <ui-select-choices repeat="value.id as value in filter.choice | filter: {label: $select.search}">
+                                                    <div ng-bind-html="value.label| highlightSelect: $select.search">
+                                                        {{ value.label }}
+                                                    </div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                            <select ng-if="filter.kind=='select'" class="form-control input-sm" ng-model="filter.choosen" ng-change="refresh()" style="min-width:66px" ng-class="{'input-filter':filter.choosen}">
+                                                <option ng-repeat='entry in filter.choice' value='{{$index}}' ng-selected='$index==filter.choosen'>{{entry}}</option>
+                                            </select>
+                                            <input ng-if="filter.kind=='input'" type="text" class="form-control input-sm " ng-model="filter.value" ng-class="{'input-filter':filter.value}">
+                                            <button ng-if="filter.kind=='input'" ng-hide="true" type="submit" class="form-control btn btn-default btn-sm" ng-click="refresh()"><span class="glyphicon glyphicon-search"></span></button>
+                                            <input ng-if="filter.kind=='daterange'" date-range-picker type="text" class="form-control input-sm date-pickerr" ng-class="{'input-filter':filter.value}" ng-change="refresh()" ng-model="filter.value" options="">
+
+                                            <script type="text/javascript">
+                                                $(".date-picker").each(function(){
+                                                    if (!$(this).hasClass("drp")){
+                                                        $(this).daterangepicker(cnf_daterangepicker)
+                                                            .on("apply.daterangepicker", function (){
+                                                                angular.element(".date-picker").scope().refresh();
+                                                            })
+                                                            .addClass("drp");
+                                                    }
+                                                });
+                                            </script> 
+                                        </div>
+                                    </form>
+                                </div>
+                            </th>
+                            <th class="text-center" ng-click="$event.stopPropagation()" ng-show="data.table.head.extra_fields.field_delete">
+                                &nbsp;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody codenerix-vtable>
+                        <tr ng-repeat="row in data.table.body" ng-click="detail(row.pk)" ui-view>
+                            <!-- This is the default behavior -->
+                            <!-- <ng-include src="'/static/demo/partials/info.html'"/>  -->
+<!--                            <td ng-repeat="column in data.table.head.columns" ng-switch="isList(row[column.pk])">
+                                <ul ng-switch-when="true" ng-init="key=getKey(column.pk)">
+                                    <li ng-repeat="info in row[column.pk]">{{info}}</li>
+                                </ul>
+                                <span ng-switch-when="false">{{row[column.pk]}}</span>
+                                <td> -->
+                        </tr>
+                    </tbody>
+                </table>

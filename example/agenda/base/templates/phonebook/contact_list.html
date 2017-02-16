@@ -1,0 +1,31 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block body %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>{% trans 'Nombre(s)' %}</th>
+            <th>{% trans 'Apellidos' %}</th>
+            <th>{% trans 'Alias' %}</th>
+            <th>{% trans 'Organización' %}</th>
+            <th><a href="#"><i class="fa fa-plus-square-o fa-lg" aria-hidden="true"></i></a></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for contact in object_list %}
+        <tr>
+            <td>{{ contact.first_name }}</td>
+            <td>{{ contact.last_name }}</td>
+            <td>{{ contact.alias }}</td>
+            <td>{{ contact.organization }}</td>
+            <td>
+                <a href="{{ contact.detail_url }}"><i class="fa fa-address-card-o fa-lg" aria-hidden="true"></i></a>
+                <a href="{{ contact.edit_url }}"><i class="fa fa-pencil-square-o fa-lg" aria-hidden="true"></i></a>
+                <a href="{{ contact.delete_url }}"><i class="fa fa-trash-o fa-lg" aria-hidden="true"></i></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

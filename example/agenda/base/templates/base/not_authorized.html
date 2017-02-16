@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block body %}
+<div style='float:left; display: block;'>
+<h1><font color='#FF0000'>{% trans "You are not authorized to access to this part of the page" %}.</font> <span onclick='history.back();' style='cursor:pointer;'><font color='#FF0000' size='3'><u>{% trans "Click here to go back" %}.</u></font></span></h1>
+</div>
+{% endblock %}

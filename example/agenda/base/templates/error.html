@@ -1,0 +1,18 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block body %}
+<center style='padding-top:7px'>
+    <h1>
+        <font color='#FF0000'>{% trans "ERROR detected in your request" %}</font>
+    </h1>
+    <font color='#FF0000' size='3'>{{error}}</font>
+    <br/>
+    <br/>
+    <span onclick='history.back();' style='cursor:pointer;'>
+        <font color='#FF0000' size='3'>
+            <u>{% trans "Click here to go back" %}.</u>
+        </font>
+    </span>
+</center>
+{% endblock %}

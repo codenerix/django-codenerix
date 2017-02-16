@@ -1,0 +1,394 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>CodenerixModel &#8212; CODENERIX 20161221001 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/guzzle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20161221001',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GenList" href="../views/genlist.html" />
+    <link rel="prev" title="Library Reference" href="../libraryreference.html" />
+  
+   
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../views/genlist.html" title="GenList"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../libraryreference.html" title="Library Reference"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">CODENERIX 20161221001 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libraryreference.html" accesskey="U">Library Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../libraryreference.html">Library Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CodenerixModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../views/genlist.html">GenList</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../views/gencreate.html">GenCreate and GenCreateModal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../views/genupdate.html">GenUpdate and GenUpdateModal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../views/gendelete.html">GenDelete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../views/gendetail.html">GenDetail and GenDetailModal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../views/genforeignkey.html">GenForeignKey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../forms/genform.html">GenForm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../forms/genmodelform.html">GenModelForm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../urls.html">Urls</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../settings.html">Settings</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Contents</h2>
+    <div class="sidebar-localtoc">
+      <ul>
+<li><a class="reference internal" href="#">CodenerixModel</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#fields-self-info">__fields__(self, info)</a><ul>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#return">Return</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#limitq-self-info">__limitQ__(self, info)</a><ul>
+<li><a class="reference internal" href="#id1">Parameters</a></li>
+<li><a class="reference internal" href="#id2">Return</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#searchq-self-info">__searchQ__(self, info)</a><ul>
+<li><a class="reference internal" href="#id3">Parameters</a></li>
+<li><a class="reference internal" href="#id4">Return</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#searchf-self-info">__searchF__(self, info)</a><ul>
+<li><a class="reference internal" href="#id5">Parameters</a></li>
+<li><a class="reference internal" href="#id6">Return</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#more-examples">More examples</a><ul>
+<li><a class="reference internal" href="#basic-genmodelform">Basic GenModelForm</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+</div>
+<h3>Versions</h3>
+<ul>
+    <li><a href="codenerixmodel.html">master</a></li>
+</ul>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../index.html">Docs</a></li>
+              
+                <li><a href="../libraryreference.html">Library Reference</a></li>
+              
+              <li>CodenerixModel</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="codenerixmodel">
+<span id="class-codenerixmodel"></span><h1>CodenerixModel<a class="headerlink" href="#codenerixmodel" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">codenerix.models</span> <span class="k">import</span> <span class="n">CodenerixModel</span>
+
+<span class="k">class</span> <span class="nc">ModelName</span><span class="p">(</span><span class="n">CodenerixModel</span><span class="p">):</span>
+
+    <span class="n">attr1</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;attr1Label&#39;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+    <span class="n">attr2</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;attr2Label&#39;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__fields__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Staticheader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__fields__</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;attr1&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;attr1Label&#39;</span><span class="p">),</span> <span class="mi">100</span><span class="p">))</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;attr2&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;attr2Label&#39;</span><span class="p">),</span> <span class="mi">100</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">fields</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&#39;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#class-codenerixmodel"><span class="std std-ref">CodenerixModel</span></a> is a generic class used to define a single data model. This class inherits from django class models.Model</p>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fields-self-info">
+<h3>__fields__(self, info)<a class="headerlink" href="#fields-self-info" title="Permalink to this headline">¶</a></h3>
+<p>This is a mandatory method to tell Codenerix which of the model fields must be showed. If this method is declared in a <a class="reference internal" href="../views/genlist.html#class-genlist"><span class="std std-ref">GenList</span></a> for this model, the <a class="reference internal" href="../views/genlist.html#class-genlist"><span class="std std-ref">GenList</span></a> definition will prevail.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__fields__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">info</span><span class="p">):</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;nameField1&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;labelField1&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s">&#39;left&#39;</span><span class="p">))</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;nameField2&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;labelField2&#39;</span><span class="p">),</span> <span class="k">None</span><span class="p">,</span> <span class="s">&#39;center&#39;</span><span class="p">))</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;nameField3&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;labelField3&#39;</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">fields</span>
+</pre></div>
+</div>
+<div class="section" id="parameters">
+<h4>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>info: Contains all the basic information from the session.</li>
+</ul>
+</div>
+<div class="section" id="return">
+<h4>Return<a class="headerlink" href="#return" title="Permalink to this headline">¶</a></h4>
+<ul>
+<li><p class="first">List of parameters list. Each list represents a model field and associated parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Identifier: Field name, have to be a member of the model. <code class="docutils literal"><span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">null</span></code></li>
+<li>Label : Field label. <code class="docutils literal"><span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">null</span></code></li>
+<li>Size : Size in pixels of the form widget.</li>
+<li>Alignment: Alignment of the columns name. Options are (left | center | right).</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="limitq-self-info">
+<h3>__limitQ__(self, info)<a class="headerlink" href="#limitq-self-info" title="Permalink to this headline">¶</a></h3>
+<p>Filters data for a static value (For example, if you want that a certain role only see its own clients, limitQ can filter the resulting queryset by the clients of the logged user). If this method is declared in a <a class="reference internal" href="../views/genlist.html#class-genlist"><span class="std std-ref">GenList</span></a> for this model, the <a class="reference internal" href="../views/genlist.html#class-genlist"><span class="std std-ref">GenList</span></a> definition will prevail.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__limitQ__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+    <span class="n">criteria</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">criteria</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Q</span><span class="p">(</span><span class="n">model__pk</span><span class="o">=</span><span class="n">pk_condition</span><span class="p">))</span>
+    <span class="n">criteria</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Q</span><span class="p">(</span><span class="n">model__field1</span><span class="o">=</span><span class="n">condition</span><span class="p">))</span>
+    <span class="n">limits</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">limits</span><span class="p">[</span><span class="s">&#39;profile_people_limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">or_</span><span class="p">,</span> <span class="n">criterials</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">limits</span>
+</pre></div>
+</div>
+<div class="section" id="id1">
+<h4>Parameters<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>info: Contains all basic information from the session.</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h4>Return<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>Returns a dictionary with a set of Q conditions.</p>
+</div>
+</div>
+<div class="section" id="searchq-self-info">
+<h3>__searchQ__(self, info)<a class="headerlink" href="#searchq-self-info" title="Permalink to this headline">¶</a></h3>
+<p>Manages a text filter. If this method is declared in a <a class="reference internal" href="../views/genlist.html#class-genlist"><span class="std std-ref">GenList</span></a> for this model, the <a class="reference internal" href="../views/genlist.html#class-genlist"><span class="std std-ref">GenList</span></a> definition will prevail.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__searchQ__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="n">text_filters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">text_filters</span><span class="p">[</span><span class="s">&#39;identifier1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">CharField1__icontains</span><span class="o">=</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">text_filters</span><span class="p">[</span><span class="s">&#39;identifier2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">TextField1__icontains</span><span class="o">=</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">text_filters</span><span class="p">[</span><span class="s">&#39;identifier3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">IntegerField</span><span class="o">=</span><span class="mi">34</span><span class="p">)</span>
+
+    <span class="c">#If text have this a especific word can return another Q condition.</span>
+    <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">u&#39;magic&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">text_filters</span><span class="p">[</span><span class="s">&#39;identifier4&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">identifier</span><span class="o">=</span><span class="mi">34</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">text_filters</span>
+</pre></div>
+</div>
+<div class="section" id="id3">
+<h4>Parameters<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>info: Contains all basic information from the session.</li>
+<li>text: Text used to filter.</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h4>Return<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>Returns a dictionary with all Q conditions.</p>
+</div>
+</div>
+<div class="section" id="searchf-self-info">
+<h3>__searchF__(self, info)<a class="headerlink" href="#searchf-self-info" title="Permalink to this headline">¶</a></h3>
+<p>Declare predefined search filters. If this method is declared in a <a class="reference internal" href="../views/genlist.html#class-genlist"><span class="std std-ref">GenList</span></a> for this model, the <a class="reference internal" href="../views/genlist.html#class-genlist"><span class="std std-ref">GenList</span></a> definition will prevail.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__searchF__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+    <span class="n">list1</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">l1</span> <span class="ow">in</span> <span class="n">Model</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">list1</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">l1</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">l1</span><span class="o">.</span><span class="n">field1</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">l1</span><span class="o">.</span><span class="n">field2</span><span class="p">))</span>
+
+    <span class="n">list2</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">li</span> <span class="ow">in</span> <span class="n">Model2</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">list2</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">li</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">li</span><span class="o">.</span><span class="n">field</span><span class="p">)))</span>
+
+    <span class="n">text_filters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">text_filters</span><span class="p">[</span><span class="s">&#39;field1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Field1&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Q</span><span class="p">(</span><span class="n">field1__startswith</span><span class="o">=</span><span class="n">x</span><span class="p">),</span> <span class="p">[(</span><span class="s">&#39;h&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Starts with h&#39;</span><span class="p">)),</span> <span class="p">(</span><span class="s">&#39;S&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Starts with S&#39;</span><span class="p">))])</span>
+    <span class="n">text_filters</span><span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Field2&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Q</span><span class="p">(</span><span class="n">field2__pk</span><span class="o">=</span><span class="n">x</span><span class="p">),</span> <span class="n">list1</span><span class="p">)</span>
+    <span class="n">text_filters</span><span class="p">[</span><span class="s">&#39;external&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;Field3&#39;</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Q</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">x</span><span class="p">),</span><span class="n">list2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text_filters</span>
+</pre></div>
+</div>
+<div class="section" id="id5">
+<h4>Parameters<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>info: Contains all basic information from the session.</li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h4>Return<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<p>Returns a dictionary of tuples. Each tuple have three fields with following structure:</p>
+<ul class="simple">
+<li>Name: Name of the selector. If match a model field name, the filter will positionate in the column, else the choicebox will put on default site.</li>
+<li>Function: Is a lambda function to specify search methods.</li>
+<li>Choices: A tuple with two fields (value, label).</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="more-examples">
+<h2>More examples<a class="headerlink" href="#more-examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic-genmodelform">
+<h3>Basic GenModelForm<a class="headerlink" href="#basic-genmodelform" title="Permalink to this headline">¶</a></h3>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">codenerix.models</span> <span class="k">import</span> <span class="n">CodenerixModel</span>
+
+
+<span class="k">class</span> <span class="nc">ModelName</span><span class="p">(</span><span class="n">CodenerixModel</span><span class="p">):</span>
+
+    <span class="n">attr1</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;attr1Label&#39;</span><span class="p">),</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="k">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
+    <span class="n">attr2</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s">&#39;attr2Label&#39;</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="k">False</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__fields__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Staticheader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__fields__</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;attr1&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;attr1Label&#39;</span><span class="p">),</span> <span class="mi">100</span><span class="p">))</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;attr2&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;attr2Label&#39;</span><span class="p">),</span> <span class="mi">100</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">fields</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">u&#39;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="../libraryreference.html" title="previous chapter (use the left arrow)">Library Reference</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="../views/genlist.html" title="next chapter (use the right arrow)">GenList</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../views/genlist.html" title="GenList"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../libraryreference.html" title="Library Reference"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">CODENERIX 20161221001 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libraryreference.html" >Library Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        <span>
+            <img src="http://www.centrologic.com/wp-content/uploads/2015/09/logo-centrologic.png" alt="Centrologic Software" title="Centrologic Software" width='200px'>
+            - <a href="http://www.centrologic.com">http://www.centrologic.com</a> - info@centrologic.com
+        </span>
+        <span class="creativecommons">
+            <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                <img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+            </a>
+            <br />
+            This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+            </a>.
+        </span>
+    </div>
+  </body>
+</html>

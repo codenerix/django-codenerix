@@ -1,0 +1,239 @@
+{% load staticfiles %}{% load i18n %}{% with user_settings=user.settings.all.0 %}{{settings}}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en" }}" ng-app="codenerixApp">
+<head>
+    <meta charset="utf-8">
+    <title>{% trans "DEMO: Agenda Telefónica" %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% trans "Codenerix Demo Example" %}">
+    <meta name="author" content="Centrologic Software">
+    
+    {% block pre_extra_css %}{% endblock %}
+    {{cnf.codenerix_css|safe}}
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+        <script src="{% static "codenerix/lib/bootstrap/js/html5shiv.js" %}"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"></script>
+    <![endif]-->
+    
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static "img/apple-touch-icon-144-precomposed.png" %}">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{% static "img/apple-touch-icon-114-precomposed.png" %}">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static "img/apple-touch-icon-72-precomposed.png" %}">
+    <link rel="apple-touch-icon-precomposed" href="{% static "img/apple-touch-icon-57-precomposed.png" %}">
+    <link rel="shortcut icon" href="{% static "img/favicon.png" %}">
+    {% block javascript_constants %}
+        {% if ws_entry_point or static_partial_row %}
+            <script type="text/javascript">
+                {% if ws_entry_point %}var ws_entry_point="{{ws_entry_point}}";{% endif %}
+                {% if static_partial_row %}var static_partial_row="{{static_partial_row}}";{% endif %}
+            </script>
+        {% endif %}
+    {% endblock %}
+</head>
+
+<body ng-cloack ng-init="now=0;lastconnection=0" class="ng-cloak">
+    <div class="container-fluid">
+        <div class="row clearfix">&nbsp;</div>
+        <div class="row clearfix">&nbsp;</div>
+        <div class="row clearfix">&nbsp;</div>
+        <div class="row clearfix">
+            <div class="col-md-12 column">
+                <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+                    <div class="navbar-header">
+                        <div class="pull-right">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainmenu" ng-init="navCollapsed = true" ng-click="navCollapsed = !navCollapsed">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                        </div>
+                        <div class="pull-right hidden-md hidden-lg connection-error-mini">
+                            <span class="fa fa-warning btn btn-danger bliking" popover-placement="bottom" popover="{% trans "Connection lost" %} {%verbatim%}{{(now-lastconnection)/1000|number:0}}{%endverbatim%} {% trans "seconds ago" %}" popover-trigger="mouseenter" ng-show="now-lastconnection>{{cnf.connection_error}}"></span>
+                        </div>
+                        <div class="pull-left">
+                            <a href="{% url 'home' %}"><i class="fa fa-address-book fa-4x" aria-hidden="true"></i></a>
+                        </div>
+                        <div class="pull-left hidden-xs">
+                            <a class="navbar-brand" href="{% url 'home' %}">
+                                {% trans "DEMO: Agenda Telefónica" %}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="collapse navbar-collapse" id="mainmenu" ng-class="{'in':!navCollapsed}">
+                        <ul class="nav navbar-nav">
+                            {% if user.is_authenticated %}
+                             <li class=" {%ifequal menu.0 "manager"%}active{%endifequal%}" uib-dropdown>
+                                <a href="#" class="" data-toggle="dropdown" uib-dropdown-toggle>
+                                    <i class="fa fa-address-book-o" aria-hidden="true"></i>
+                                    {% trans "Agenda" %}
+                                    <strong class="caret"></strong>
+                                </a>
+                                <ul class="" uib-dropdown-menu>
+                                    <li {% ifequal menu.1 "Contactos" %}class="active"{% endifequal %}>
+                                        <a href="{% url 'contact_list' %}">
+                                            <i class="fa fa-user-circle" aria-hidden="true"></i>
+                                            {% trans "Contactos" %}
+                                        </a>
+                                    </li>
+                                    <li {% ifequal menu.1 "Grupos" %}class="active"{% endifequal %}>
+                                        <a href="{% url 'contactgroup_list' %}">
+                                            <i class="fa fa-users" aria-hidden="true"></i>
+                                            {% trans "Grupos" %}
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a href="{% url 'logout' %}">
+                                            {% trans "Logout" %}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            {%endif%}
+                            <li uib-dropdown>
+                                <a href="#" data-toggle="dropdown" uib-dropdown-toggle>
+                                    <span class="glyphicon glyphicon-info-sign"></span>
+                                    
+                                    {% trans "About" %}
+                                    <strong class="caret"></strong>
+                                </a>
+                                <ul class="" uib-dropdown-menu>
+                                    <li>
+                                        <a href="http://www.codenerix.com" target="_blank">
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                            Codenerix
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a href="https://github.com/centrologic/django-codenerix" target="_blank">
+                                            <i class="fa fa-github" aria-hidden="true"></i>
+                                            {% trans "Github" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="http://doc.codenerix.com/" target="_blank">
+                                            <i class="fa fa-book" aria-hidden="true"></i>
+                                            {% trans "Documentation" %}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="http://www.centrologic.com/{% if LANGUAGE_CODE == 'es' %}equipo/{% else %}en/team-members/{% endif %}" target="_blank">
+                                            <span class="glyphicon glyphicon-tower"></span>
+                                            {% trans "The team" %}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul> 
+                      
+                        <ul class="nav navbar-nav pull-right nav-pills" ng-controller="AlarmsCtrl">
+                           <li class=" {%ifequal menu.0 "user"%}active{%endifequal%}" uib-dropdown>
+                                <a href="http://www.codenerix.com" target="_blank">
+                                    <img src="{% static "img/logo-codenerix.png" %}" width="160">
+                                </a>
+                            </li>
+                        </ul>
+                        {% if user.is_authenticated %}
+                        <div class="navbar-form navbar-left bread">
+                            <div class="pull-left {% block breadcrumb_hide %}hidden-xs hidden-sm{% endblock %}">
+                                <ol class="breadcrumb">
+                                    {% if menu.0 %} 
+                                        {% if menu.1 %}
+                                            <li>
+                                                {% ifequal menu.0 "manager" %}
+                                                <span class="glyphicon glyphicon-th" popover-trigger="mouseenter" popover="{{bread.0}}" popover-placement="bottom">
+                                                {% else %}
+                                                    {% ifequal menu.0 "documents" %}
+                                                        <span class="glyphicon glyphicon-file" popover-trigger="mouseenter" popover="{{bread.0}}" popover-placement="bottom">
+                                                    {% else %}
+                                                        {% ifequal menu.0 "config" %}
+                                                            <span class="glyphicon glyphicon-cog" popover-trigger="mouseenter" popover="{{bread.0}}" popover-placement="bottom">
+                                                        {% else %}
+                                                            {% ifequal menu.0 "user" %}
+                                                                <span class="glyphicon glyphicon-user" popover-trigger="mouseenter" popover="{{bread.0}}" popover-placement="bottom">
+                                                            {% else %}
+                                                                {{bread.0}}
+                                                            {% endifequal %}
+                                                        {% endifequal %}
+                                                    {% endifequal %}
+                                                {% endifequal %}
+                                            </li>
+                                            <li class="active end">{{bread.1}}</li>
+                                        {% else %}
+                                            <li class="active end">{{bread.0}}</li>
+                                        {% endif %}
+                                    {% endif %}
+                                </ol>
+                            </div>
+                            <div class="pull-left {% block breadcrumb_element_hide %}hidden-xs hidden-sm{% endblock %} elementname normalelementname recortar_texto" ng-if="elementname">{% verbatim %}{{elementname}}{% endverbatim %}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <h6>
+            {% block body %}
+                <div ui-view></div>
+            {% endblock %}
+        </h6>
+    </div>
+
+    <br />
+    <br />
+    <br />
+    
+    <div id="footer">
+        <p>
+            <div class="col-sm-12">
+                <img src="{% static "img/centrologic.png" %}" alt="Centrologic Software" title="Centrologic Software">
+                <span class="hidden-xs">- <a href="http://www.centrologic.com">http://www.centrologic.com</a> <span class="hidden-xs hidden-sm">- info@centrologic.com</span></span>
+                <span class="pull-right">{% trans "DEMO: Agenda Telefónica" %} v{{VERSION}}</span>
+            </div>
+        </p>
+    </div>
+    {% with langcode=LANGUAGE_CODE|default:"en" %}
+    <script type="text/javascript">
+        var cnf_alarms_looptime = {{cnf.alarms_looptime}};
+        var cnf_alarms_quickloop = {{cnf.alarms_quickloop}};
+        var cnf_alarms_errorloop = {{cnf.alarms_errorloop}};
+        var cnf_debug = {{cnf.debug}};
+        var cnf_debug_txt = "{% trans "An error has occurred, it is reported to the administrator" %}";
+        var withfocus=true;
+        {% if user.is_authenticated %}
+            {% if not user_settings.updatewithoutfocus %}
+                window.addEventListener("focus", function(event) { withfocus=true; }, false);
+                window.addEventListener("blur", function(event) { withfocus=false; }, false);
+            {% endif %}
+        {% endif %}
+
+        var cnf_daterangepicker = {{cnf.daterangepicker}};
+    </script>
+    <script type="text/javascript" src="{% static "js/mnotify.js" %}"></script>
+    {{cnf.codenerix_js|safe}}
+    {% endwith %}
+    {% block angular_app_libraries %}<script type="text/javascript" src="{% static "codenerix/js/base.js" %}"></script>{% endblock %}
+    {% block angular_app_services %}
+        {% if ws_entry_point %}
+            <script type="text/javascript">
+                angular.module('codenerixServices', ['ngResource'])
+                .factory('Register', ['$resource', function($resource){
+                    return $resource('/{{ws_entry_point}}/:pk/:action', { json:'{}', pk:null, action:null },{
+                        query:{ method: "GET", params: { json:'@json' }, isArray: false },
+                        get:{ method: "GET", params: { pk:'@pk', action:'@action' }, isArray: false },
+                    }); 
+                }]);
+            </script>
+        {% endif %}
+    {% endblock %}
+    {% block extra_js %}{% endblock %}
+</div>
+</body>
+</html>{% endwith %}

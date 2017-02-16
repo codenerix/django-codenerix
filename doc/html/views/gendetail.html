@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>GenDetail and GenDetailModal &#8212; CODENERIX 20161221001 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/guzzle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20161221001',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GenForeignKey" href="genforeignkey.html" />
+    <link rel="prev" title="GenDelete" href="gendelete.html" />
+  
+   
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="genforeignkey.html" title="GenForeignKey"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="gendelete.html" title="GenDelete"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">CODENERIX 20161221001 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libraryreference.html" accesskey="U">Library Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../libraryreference.html">Library Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../models/codenerixmodel.html">CodenerixModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="genlist.html">GenList</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gencreate.html">GenCreate and GenCreateModal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="genupdate.html">GenUpdate and GenUpdateModal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gendelete.html">GenDelete</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GenDetail and GenDetailModal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="genforeignkey.html">GenForeignKey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../forms/genform.html">GenForm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../forms/genmodelform.html">GenModelForm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../urls.html">Urls</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../settings.html">Settings</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Contents</h2>
+    <div class="sidebar-localtoc">
+      <ul>
+<li><a class="reference internal" href="#">GenDetail and GenDetailModal</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#attributte">Attributte</a><ul>
+<li><a class="reference internal" href="#exclude-fields">exclude_fields</a></li>
+<li><a class="reference internal" href="#extra-context">extra_context</a></li>
+<li><a class="reference internal" href="#groups">groups</a><ul>
+<li><a class="reference internal" href="#initialize-groups-using-forms">Initialize groups using forms:</a></li>
+<li><a class="reference internal" href="#initialize-groups-in-views">Initialize groups in views:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#linkedit">linkedit</a></li>
+<li><a class="reference internal" href="#linkdelete">linkdelete</a></li>
+<li><a class="reference internal" href="#model">model</a></li>
+<li><a class="reference internal" href="#tabs">tabs</a></li>
+<li><a class="reference internal" href="#template-model">template_model</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#get-context-data-self-kwargs">get_context_data(self, **kwargs)</a><ul>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#return">Return</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#more-examples">More examples</a><ul>
+<li><a class="reference internal" href="#basic-detail">Basic Detail</a></li>
+<li><a class="reference internal" href="#detail-with-sublist">Detail with sublist</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+</div>
+<h3>Versions</h3>
+<ul>
+    <li><a href="../master/views/gendetail.html">master</a></li>
+</ul>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../index.html">Docs</a></li>
+              
+                <li><a href="../libraryreference.html">Library Reference</a></li>
+              
+              <li>GenDetail and GenDetailModal</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="gendetail-and-gendetailmodal">
+<span id="class-gendetail"></span><h1>GenDetail and GenDetailModal<a class="headerlink" href="#gendetail-and-gendetailmodal" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">codenerix.views</span> <span class="k">import</span> <span class="n">GenDetail</span><span class="p">,</span> <span class="n">GenDetailModal</span>
+<span class="kn">from</span> <span class="nn">.forms</span> <span class="k">import</span> <span class="n">ModelNameForm</span>
+
+<span class="k">class</span> <span class="nc">ModelNameDetails</span><span class="p">(</span><span class="n">GenDetail</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ModelName</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">ModelNameForm</span><span class="o">.</span><span class="n">__groups_details__</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">ModelNameDetailModal</span><span class="p">(</span><span class="n">GenDetailModal</span><span class="p">,</span> <span class="n">ModelNameDetails</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># forms.py</span>
+<span class="k">class</span> <span class="nc">ModelNameForm</span><span class="p">(</span><span class="n">ModelNameForm</span><span class="p">):</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">ModelName</span>
+
+    <span class="k">def</span> <span class="nf">__groups__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Details&#39;</span><span class="p">),</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="p">[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                <span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                <span class="p">[</span><span class="s">&#39;field3&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+            <span class="p">)</span>
+       <span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__groups_details__</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Details&#39;</span><span class="p">),</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="p">[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                <span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                <span class="p">[</span><span class="s">&#39;field3&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#class-gendetail"><span class="std std-ref">GenDetail and GenDetailModal</span></a> are Codenerix generic classes used to show details of an instance. Is recomended that the name of each class which inherit from GenDetail or GenDetailModal follow the following pattern: ModelName+Detail or ModelName+DetailModal respectively.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Example:</dt>
+<dd><p class="first">If model is User, then, GenDetail deiclarations should be, <code class="docutils literal"><span class="pre">class</span> <span class="pre">UserDetail(GenDetail):</span></code></p>
+<p class="last">If model is User, then, GenDetailModal declarations should be, <code class="docutils literal"><span class="pre">class</span> <span class="pre">UserDetailModal(GenDetailModal):</span></code></p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="attributte">
+<h2>Attributte<a class="headerlink" href="#attributte" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="exclude-fields">
+<h3>exclude_fields<a class="headerlink" href="#exclude-fields" title="Permalink to this headline">¶</a></h3>
+<p>Exclude a list of fields of showing.
+<code class="docutils literal"><span class="pre">Warning.</span> <span class="pre">If</span> <span class="pre">you</span> <span class="pre">don't</span> <span class="pre">have</span> <span class="pre">a</span> <span class="pre">field</span> <span class="pre">in</span> <span class="pre">exclude_fields</span> <span class="pre">or</span> <span class="pre">in</span> <span class="pre">groups,</span></code>
+<code class="docutils literal"><span class="pre">this</span> <span class="pre">field</span> <span class="pre">will</span> <span class="pre">appear</span> <span class="pre">without</span> <span class="pre">format</span> <span class="pre">at</span> <span class="pre">botton.</span></code></p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">exclude_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span> <span class="s">&#39;field2&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="extra-context">
+<h3>extra_context<a class="headerlink" href="#extra-context" title="Permalink to this headline">¶</a></h3>
+<p>Dictionary used to send extra information to the template.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">extra_context</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;extra_field&#39;</span><span class="p">:</span> <span class="s">&#39;new information&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="groups">
+<h3>groups<a class="headerlink" href="#groups" title="Permalink to this headline">¶</a></h3>
+<p>Manage how the fields layout in the template. There is two ways to initialize groups, in views or using a form. <strong>It&#8217;s recommendable use a static methods on forms.</strong></p>
+<div class="section" id="initialize-groups-using-forms">
+<h4>Initialize groups using forms:<a class="headerlink" href="#initialize-groups-using-forms" title="Permalink to this headline">¶</a></h4>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">groups</span> <span class="o">=</span> <span class="n">ModelNameForm</span><span class="o">.</span><span class="n">__groups_details__</span><span class="p">()</span>
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">__groups_details__</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="n">_</span><span class="p">(</span><span class="s">&#39;Details&#39;</span><span class="p">),</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="p">[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+            <span class="p">[</span><span class="s">&#39;field3&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">)</span>
+   <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="initialize-groups-in-views">
+<h4>Initialize groups in views:<a class="headerlink" href="#initialize-groups-in-views" title="Permalink to this headline">¶</a></h4>
+<p>In this case, you should create a new group with this structure.</p>
+<p>Groups are a list of tuples. Each tuple create a new space of information and have the name of the space, how many columns to use (based in Bootstrap 12 columns model), and fields with extra information. This fields are represented by a list of options which follow this order:</p>
+<ul class="simple">
+<li>attr[0]: Referer field name. You should put here name of the attribute. <code class="docutils literal"><span class="pre">Mandatory</span></code>.</li>
+<li>attr[1]: Number of columns used to show these fields (Default value is 6).</li>
+<li>attr[2]: Label color (Default value is black).</li>
+<li>attr[3]: Label padding color (Default value is white).</li>
+<li>attr[4]: Alignment of the label (Default value is &#8216;left&#8217;). Options are (left|center|right)</li>
+<li>attr[5]: Label and field are in the same line? (Boolean). Is used for check box and roundcheck.</li>
+<li>attr[6]: Alternative label. If there is some text specified Codenerix will show it on the template (Default value is None).</li>
+</ul>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span>
+        <span class="n">_</span><span class="p">(</span><span class="s">&#39;Details&#39;</span><span class="p">),</span> <span class="mi">12</span><span class="p">,</span>
+        <span class="p">[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s">&#39;#23fe33&#39;</span><span class="p">,</span> <span class="s">&#39;#005476&#39;</span><span class="p">,</span> <span class="s">&quot;center&quot;</span><span class="p">,</span> <span class="k">True</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s">&quot;field inline, centered and label green with padding dark blue.&quot;</span><span class="p">)],</span>
+        <span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="s">&#39;field3&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="linkedit">
+<h3>linkedit<a class="headerlink" href="#linkedit" title="Permalink to this headline">¶</a></h3>
+<p>If True adds a link to edit the model (Default value is True).</p>
+</div>
+<div class="section" id="linkdelete">
+<h3>linkdelete<a class="headerlink" href="#linkdelete" title="Permalink to this headline">¶</a></h3>
+<p>If True adds a link to delete the model (Default value is True).</p>
+</div>
+<div class="section" id="model">
+<h3>model<a class="headerlink" href="#model" title="Permalink to this headline">¶</a></h3>
+<p>Model used to present the detail view.</p>
+</div>
+<div class="section" id="tabs">
+<h3>tabs<a class="headerlink" href="#tabs" title="Permalink to this headline">¶</a></h3>
+<p>List of dictionaries used to create sublist tabs. Each dictionary should have this keys:</p>
+<ul class="simple">
+<li>id  : Sublist identifier.</li>
+<li>name: Tab name.</li>
+<li>ws  : Sublist related name.</li>
+<li>rows:</li>
+</ul>
+<blockquote>
+<div><div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">What&#8217;s <em>rows</em> for?</p>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="template-model">
+<h3>template_model<a class="headerlink" href="#template-model" title="Permalink to this headline">¶</a></h3>
+<p>If specified, Codenerix will load this template. If doesn’t exist, Codenerix will try to figure out automatically which template to use. If the specified template doesn’t exist, this view won’t work.</p>
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-context-data-self-kwargs">
+<h3>get_context_data(self, **kwargs)<a class="headerlink" href="#get-context-data-self-kwargs" title="Permalink to this headline">¶</a></h3>
+<p>Method used in <a class="reference internal" href="#class-gendetail"><span class="std std-ref">GenDetail and GenDetailModal</span></a> to add or edit some fields in the context. Override Django default behaviour.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Object</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">context</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">context</span>
+</pre></div>
+</div>
+<div class="section" id="parameters">
+<h4>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h4>
+<p>Base class keyword parameters.</p>
+</div>
+<div class="section" id="return">
+<h4>Return<a class="headerlink" href="#return" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>context: Dictionary with context data.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="more-examples">
+<h2>More examples<a class="headerlink" href="#more-examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic-detail">
+<h3>Basic Detail<a class="headerlink" href="#basic-detail" title="Permalink to this headline">¶</a></h3>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">codenerix.views</span> <span class="k">import</span> <span class="n">GenDetail</span><span class="p">,</span> <span class="n">ModelNameDetailModal</span>
+<span class="kn">from</span> <span class="nn">.forms</span> <span class="k">import</span> <span class="n">ModelNameForm</span>
+
+
+<span class="k">class</span> <span class="nc">ModelNameDetails</span><span class="p">(</span><span class="n">GenDetail</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ModelName</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">ModelNameForm</span><span class="o">.</span><span class="n">__groups_details__</span><span class="p">()</span> <span class="c"># Declaration it&#39;s at bottom</span>
+    <span class="n">exclude_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;field4&#39;</span><span class="p">,</span> <span class="s">&#39;field5&#39;</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">ModelNameDetailModal</span><span class="p">(</span><span class="n">GenDetailModal</span><span class="p">,</span> <span class="n">ModelNameDetails</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="detail-with-sublist">
+<h3>Detail with sublist<a class="headerlink" href="#detail-with-sublist" title="Permalink to this headline">¶</a></h3>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">codenerix.views</span> <span class="k">import</span> <span class="n">GenDetail</span><span class="p">,</span> <span class="n">ModelNameDetailModal</span>
+<span class="kn">from</span> <span class="nn">.forms</span> <span class="k">import</span> <span class="n">ModelNameForm</span>
+
+
+<span class="k">class</span> <span class="nc">ModelNameDetails</span><span class="p">(</span><span class="n">GenDetail</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ModelName</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">ModelNameForm</span><span class="o">.</span><span class="n">__groups_details__</span><span class="p">()</span> <span class="c"># Declaration it&#39;s at bottom</span>
+
+    <span class="n">tabs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="s">&#39;tabId&#39;</span><span class="p">,</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s">&#39;Tab 1&#39;</span><span class="p">),</span>
+            <span class="s">&#39;ws&#39;</span><span class="p">:</span> <span class="s">&#39;relatedname_sublist&#39;</span><span class="p">,</span>
+            <span class="s">&#39;rows&#39;</span><span class="p">:</span> <span class="s">&#39;base&#39;</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+    <span class="n">exclude_fields</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># forms.py</span>
+<span class="k">class</span> <span class="nc">ModelNameForm</span><span class="p">(</span><span class="n">GenModelForm</span><span class="p">):</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">ModelName</span>
+
+    <span class="k">def</span> <span class="nf">__groups__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Details&#39;</span><span class="p">),</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="p">[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                <span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                <span class="p">[</span><span class="s">&#39;field3&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+            <span class="p">)</span>
+       <span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__groups_details__</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s">&#39;Details&#39;</span><span class="p">),</span> <span class="mi">12</span><span class="p">,</span>
+                <span class="p">[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                <span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                <span class="p">[</span><span class="s">&#39;field3&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+            <span class="p">)</span>
+       <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="gendelete.html" title="previous chapter (use the left arrow)">GenDelete</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="genforeignkey.html" title="next chapter (use the right arrow)">GenForeignKey</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="genforeignkey.html" title="GenForeignKey"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="gendelete.html" title="GenDelete"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">CODENERIX 20161221001 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libraryreference.html" >Library Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        <span>
+            <img src="http://www.centrologic.com/wp-content/uploads/2015/09/logo-centrologic.png" alt="Centrologic Software" title="Centrologic Software" width='200px'>
+            - <a href="http://www.centrologic.com">http://www.centrologic.com</a> - info@centrologic.com
+        </span>
+        <span class="creativecommons">
+            <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                <img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+            </a>
+            <br />
+            This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+            </a>.
+        </span>
+    </div>
+  </body>
+</html>

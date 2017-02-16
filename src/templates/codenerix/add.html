@@ -1,0 +1,44 @@
+{% extends "codenerix/form.html" %}
+{% load i18n %}
+{% comment %}
+
+django-codenerix
+
+Copyright 2017 Centrologic Computational Logistic Center S.L.
+
+Project URL : http://www.codenerix.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+{% endcomment %}
+
+{% block form_head %}{% endblock %}
+{% block form_action %}{% trans "Adding new" %}{% endblock %}
+
+{% block buttons_top %}
+    {% if linkback %}
+        <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
+        <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+    {% endif %}
+    <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
+    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+{% endblock %}
+
+{% block buttons_bottom %}
+    {% if linkback %}
+        <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
+        <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+    {% endif %}
+    <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
+    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+{% endblock %}

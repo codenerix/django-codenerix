@@ -1,0 +1,105 @@
+{% load i18n %}
+{% load codenerix_lists %}
+{% load codenerix_common %}
+{% comment %}
+
+django-codenerix
+
+Copyright 2017 Centrologic Computational Logistic Center S.L.
+
+Project URL : http://www.codenerix.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+{% endcomment %}
+
+{{html_head}}
+
+{% block ini_modal %}{% endblock %}
+
+{% with langcode=LANGUAGE_CODE|default:"en" %}
+    {# if there is an existing title for the form, it is shown #}
+    <div class="col-sm-12 col-md-12 internal-name">
+        <h4>{{object}}</h4>
+    </div>
+    {# BUTTONS at the top #}
+    <div class="col-sm-12 col-md-12 internal-buttNOons-top">
+        <div class="form-group text-center">----------
+            {% block extra_btn_up %}
+            {% endblock %}
+            {% if linkback %}
+                <label  class="sr-only"  for="submit_back">{% trans "Go to back" %}</label>
+                <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+            {% endif %}
+        </div>
+    </div>
+    {% block details %}
+        {% for item in object_detail %}
+            
+            {% if item.value.0.name %}
+            {# if the current item have several elements in value it is a group #}
+                <div class="col-sm-12 col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><strong>{{item.name}}</strong></div>
+                        <div class="panel-body">
+                {% for subitem in item.value %}
+                    {% if subitem.value.0.name %}
+                        <div class="col-sm-12 col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <strong>{{subitem.name}}</strong>
+                                </div>
+                                <div class="panel-body">
+                                {% for subsubitem in subitem.value %}
+                                    <label >{{subsubitem.name}}:</label>
+                                    {{subsubitem.value|nicenull|TrueFalse|safe}}<br>
+                                {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        
+                        <label >{{subitem.name}}:</label>
+                        {{subitem.value|nicenull|TrueFalse|safe}}<br>
+                        
+                    {% endif %}
+                {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                
+                <label>{{item.name}}:</label>{{item.value|nicenull|TrueFalse|safe}}<br>
+                
+            {% endif %}
+        {% endfor %}
+    {% endblock %}
+    
+    {# BUTTONS at the bottom #}
+    <div class="col-sm-12 col-md-12">
+        <div class="form-group text-center">
+            {% block buttons_bottom %}
+
+            {% block extra_btn_down %}
+            {% endblock %}
+
+            {% if linkback %}
+                <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
+                <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+            {% endif %}
+            {% endblock %}
+        </div>
+    </div>
+{% endwith %}
+
+{% block end_modal %}{% endblock %}

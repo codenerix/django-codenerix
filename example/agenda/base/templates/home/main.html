@@ -1,0 +1,43 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block body %}
+        <center>
+            <div id="inferior1">
+            <h1><b>{% trans "Mi Agenda" %}</b></h1><br>
+            <div class="row">
+                <div class="col-lg-1"></div>
+                <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Mis Contactos</div>
+                        <div class="list-group">
+                            <ul>
+                            {% for contact in contacts %}
+                                <li class="list-group-item"><a href="{{contact.details_url}}">{{contact.full_name}}</a></li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2"></div>
+                <div class="col-lg-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Mis Grupos</div>
+                        <div class="list-group">
+                            <ul>
+                            {% for group in groups %}
+                                <li class="list-group-item"><a href="{{group.edit_url}}">{{group.name}}</a></li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div> 
+                </div>
+                <div class="col-lg-1"></div> 
+            </div>
+           </div>
+            <br/>
+            <br/>
+        </center>
+        <div class="clearfix"></div>
+{% endblock %}

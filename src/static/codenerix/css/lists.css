@@ -1,0 +1,99 @@
+/*
+ *
+ * django-codenerix
+ *
+ * Copyright 2017 Centrologic Computational Logistic Center S.L.
+ *
+ * Project URL : http://www.codenerix.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ .list th a {
+    color: #333333;
+    cursor: pointer;
+}
+
+.list th .thspecial {
+    text-decoration: underline;
+}
+
+.filters .filter_title {
+    font-size:10px;
+    font-weight: bold;
+}
+
+.pagination .choice {
+    cursor:pointer;
+}
+
+.pagination {
+    margin:0px;
+}
+
+.panelfilters > div {
+    margin-left:5px;
+    margin-right:5px;
+}
+.listfilters h5,h6 {
+    margin-top:0px;
+}
+.listfilters > div {
+    padding-left:5px;
+    padding-right:5px;
+}
+
+.listfilters .results {
+    margin-top:5px;
+}
+
+.djng-field-errors {
+    top:-5px;
+    position:absolute;
+    right:10px;
+    text-align:right;
+}
+
+input[type="checkbox"] {
+    margin:0px;
+}
+
+.internal-view {
+    margin-top: 10px;
+}
+
+.internal-view > .internal-menu {
+    width:1%;
+    margin:0px 15px 0px -15px;
+}
+.internal-view > .internal-body {
+    width:99%;
+    padding-left:15px;
+}
+
+.internal-name {
+    margin: -6px 0px 6px 15px;
+    height: 30px;
+}
+.internal-buttons-top {
+    margin-top: -30px;
+}
+
+.scrolling-container{
+    overflow:auto;
+    white-space:nowrap;
+}
+
+.md-autocomplete-suggestions-container {
+    z-index:9999 !important;
+}

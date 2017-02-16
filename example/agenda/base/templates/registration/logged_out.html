@@ -1,0 +1,9 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block subtitle %}{% trans "Loggued out!" %}{% endblock %}
+{% block body %}
+<p style='text-align:center; margin-top:100px;'>{% trans "Thanks for spending some quality time with the Web site today." %}</p>
+
+<p style='text-align:center;'><a href="/login/?next={% if next %}{{next}}{% else %}{% url 'home' %}{% endif %}">{% trans 'Log in again' %}</a></p>
+{% endblock %}

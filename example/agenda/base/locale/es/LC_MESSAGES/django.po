@@ -1,0 +1,575 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Agenda\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-02-15 10:40+0000\n"
+"PO-Revision-Date: 2017-02-15 12:17+0100\n"
+"Last-Translator: Roberto Antonio Becerra García <rbecerra@centrologic.com>\n"
+"Language-Team: Centrologic <LL@li.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#: agenda/base/admin.py:15
+msgid "Change"
+msgstr "Cambiar"
+
+#: agenda/base/forms.py:60 agenda/base/templates/base/base.html:79
+msgid "Contactos"
+msgstr ""
+
+#: agenda/base/forms.py:68
+msgid "Information"
+msgstr "Información"
+
+#: agenda/base/management/commands/populate.py:11
+msgid "Populates the database with example data"
+msgstr "Rellena la base de datos con ejemplos"
+
+#: agenda/base/models.py:13
+msgid "Spanish"
+msgstr "Español"
+
+#: agenda/base/models.py:14
+msgid "English"
+msgstr "Inglés"
+
+#: agenda/base/models.py:19 agenda/base/models.py:29
+#: agenda/base/templates/phonebook/contact_list.html:8
+msgid "Nombre(s)"
+msgstr ""
+
+#: agenda/base/models.py:20 agenda/base/models.py:30
+#: agenda/base/templates/phonebook/contact_list.html:9
+msgid "Apellidos"
+msgstr ""
+
+#: agenda/base/models.py:21 agenda/base/models.py:31
+#: agenda/base/templates/phonebook/contact_list.html:10
+msgid "Alias"
+msgstr ""
+
+#: agenda/base/models.py:22
+#: agenda/base/templates/phonebook/contact_list.html:11
+msgid "Organización"
+msgstr ""
+
+#: agenda/base/models.py:23
+msgid "Cumpleaños"
+msgstr ""
+
+#: agenda/base/models.py:24
+msgid "Dirección"
+msgstr ""
+
+#: agenda/base/models.py:25
+msgid "Creado por"
+msgstr ""
+
+#: agenda/base/models.py:32
+msgid "Organization"
+msgstr "Organización"
+
+#: agenda/base/models.py:58 agenda/base/models.py:97 agenda/base/models.py:127
+msgid "Ha llegado al limite de registros"
+msgstr ""
+
+#: agenda/base/models.py:62 agenda/base/models.py:78
+msgid "contacto"
+msgstr ""
+
+#: agenda/base/models.py:63 agenda/base/models.py:107
+#: agenda/base/models.py:119
+msgid "contactos"
+msgstr ""
+
+#: agenda/base/models.py:67
+msgid "Desconocido"
+msgstr ""
+
+#: agenda/base/models.py:68
+msgid "Móvil"
+msgstr ""
+
+#: agenda/base/models.py:69
+msgid "Trabajo"
+msgstr ""
+
+#: agenda/base/models.py:70
+msgid "Hogar"
+msgstr ""
+
+#: agenda/base/models.py:75
+msgid "ubicación"
+msgstr ""
+
+#: agenda/base/models.py:76
+msgid "código pais"
+msgstr ""
+
+#: agenda/base/models.py:77
+msgid "número"
+msgstr ""
+
+#: agenda/base/models.py:82 agenda/base/views.py:171
+msgid "Ubicación"
+msgstr ""
+
+#: agenda/base/models.py:83 agenda/base/views.py:172
+msgid "Código País"
+msgstr ""
+
+#: agenda/base/models.py:84 agenda/base/views.py:173
+msgid "Número"
+msgstr ""
+
+#: agenda/base/models.py:85 agenda/base/views.py:133
+msgid "Contacto"
+msgstr ""
+
+#: agenda/base/models.py:101
+msgid "teléfono"
+msgstr ""
+
+#: agenda/base/models.py:102
+msgid "teléfonos"
+msgstr ""
+
+#: agenda/base/models.py:106
+msgid "nombre"
+msgstr ""
+
+#: agenda/base/models.py:108
+msgid "creado por"
+msgstr ""
+
+#: agenda/base/models.py:118
+msgid "Nombre"
+msgstr ""
+
+#: agenda/base/models.py:131
+msgid "grupo"
+msgstr ""
+
+#: agenda/base/models.py:132
+msgid "grupos"
+msgstr ""
+
+#: agenda/base/templates/base/base.html:7
+msgid "Codenerix Demo Example"
+msgstr "Ejemplo Demostrativo de Codenerix"
+
+#: agenda/base/templates/base/base.html:56
+msgid "Connection lost"
+msgstr "Conexión perdida"
+
+#: agenda/base/templates/base/base.html:56
+msgid "seconds ago"
+msgstr "hace segundos"
+
+#: agenda/base/templates/base/base.html:72
+msgid "Agenda"
+msgstr ""
+
+#: agenda/base/templates/base/base.html:85
+msgid "Grupos"
+msgstr ""
+
+#: agenda/base/templates/base/base.html:95
+msgid "About Codenerix"
+msgstr "Acerca de Codenerix"
+
+#: agenda/base/templates/base/base.html:109
+msgid "Github"
+msgstr ""
+
+#: agenda/base/templates/base/base.html:115
+#: agenda/base/templates/rosetta/base.html:36
+msgid "Documentation"
+msgstr "Documentación"
+
+#: agenda/base/templates/base/base.html:121
+msgid "About the team"
+msgstr "Sobre el equipo"
+
+#: agenda/base/templates/base/base.html:212
+msgid "An error has occurred, it is reported to the administrator"
+msgstr "Ha ocurrido un error, ha sido reportado al administrador"
+
+#: agenda/base/templates/base/not_authorized.html:6
+msgid "You are not authorized to access to this part of the page"
+msgstr "Usted no está autorizado a acceder a esta parte de la página"
+
+#: agenda/base/templates/base/not_authorized.html:6
+#: agenda/base/templates/error.html:14
+msgid "Click here to go back"
+msgstr "Haz clic aquí para regresar"
+
+#: agenda/base/templates/error.html:7
+msgid "ERROR detected in your request"
+msgstr "ERROR detectado en su pedido"
+
+#: agenda/base/templates/home/main.html:8
+msgid "Mi Agenda"
+msgstr ""
+
+#: agenda/base/templates/nopage.html:4
+msgid "News"
+msgstr "Noticias"
+
+#: agenda/base/templates/nopage.html:7
+msgid "Page not found in the selected language"
+msgstr "La página no se encuentra en el lenguaje seleccionado"
+
+#: agenda/base/templates/registration/logged_out.html:4
+msgid "Loggued out!"
+msgstr "¡Ha salido!"
+
+#: agenda/base/templates/registration/logged_out.html:6
+msgid "Thanks for spending some quality time with the Web site today."
+msgstr "Gracias por utilizar parte de su preciado tiempo en este sitio hoy"
+
+#: agenda/base/templates/registration/logged_out.html:8
+msgid "Log in again"
+msgstr "Entrar de nuevo"
+
+#: agenda/base/templates/registration/login.html:13
+#: agenda/base/templates/registration/login1.html:13
+msgid "Bienvenido a AgendaTelefónica"
+msgstr ""
+
+#: agenda/base/templates/registration/login.html:17
+msgid "Username:"
+msgstr "Usuario:"
+
+#: agenda/base/templates/registration/login.html:21
+msgid "Password:"
+msgstr "Contraseña:"
+
+#: agenda/base/templates/registration/login.html:31
+#: agenda/base/templates/registration/login1.html:26
+#: agenda/base/templates/registration/password_reset_complete.html:13
+msgid "Log in"
+msgstr "Entrar"
+
+#: agenda/base/templates/registration/login.html:38
+#: agenda/base/templates/registration/login1.html:33
+msgid "Forgotten your password?"
+msgstr "¿Ha olvidado su contraseña?"
+
+#: agenda/base/templates/registration/login.html:39
+#: agenda/base/templates/registration/login1.html:34
+msgid "Click here to get a new one."
+msgstr "Haga clic aquí para obtener uno nuevo."
+
+#: agenda/base/templates/registration/login1.html:18
+msgid "Captcha:"
+msgstr ""
+
+#: agenda/base/templates/registration/password_change_done.html:4
+#: agenda/base/templates/registration/password_change_done.html:8
+msgid "Password change successful"
+msgstr "Contraseña actualizada satisfactoriamente"
+
+#: agenda/base/templates/registration/password_change_done.html:10
+msgid "Your password was changed."
+msgstr "Su contraseña fue actualizada."
+
+#: agenda/base/templates/registration/password_change_form.html:4
+#: agenda/base/templates/registration/password_change_form.html:16
+msgid "Password change"
+msgstr "Contraseña actualizada"
+
+#: agenda/base/templates/registration/password_change_form.html:12
+msgid "Please correct the error below."
+msgstr "Por favor corrija el error debajo."
+
+#: agenda/base/templates/registration/password_change_form.html:12
+msgid "Please correct the errors below."
+msgstr "Por favor corrija los errores debajo."
+
+#: agenda/base/templates/registration/password_change_form.html:18
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+"Por favor introduzca su antigua contraseña por razones de seguridad, y luego "
+"introduzca su nueva contraseña dos veces para poder verificar que la ha "
+"tecleado correctamente."
+
+#: agenda/base/templates/registration/password_change_form.html:24
+msgid "Old password"
+msgstr "Contraseña antigua"
+
+#: agenda/base/templates/registration/password_change_form.html:29
+msgid "New password"
+msgstr "Nueva contraseña"
+
+#: agenda/base/templates/registration/password_change_form.html:34
+msgid "Password (again)"
+msgstr "Contraseña (Otra vez)"
+
+#: agenda/base/templates/registration/password_change_form.html:40
+#: agenda/base/templates/registration/password_reset_confirm.html:25
+msgid "Change my password"
+msgstr "Cambiar mi contraseña"
+
+#: agenda/base/templates/registration/password_reset_complete.html:4
+#: agenda/base/templates/registration/password_reset_complete.html:9
+msgid "Password reset complete"
+msgstr "Reinicio de contraseña completado"
+
+#: agenda/base/templates/registration/password_reset_complete.html:11
+msgid "Your password has been set.  You may go ahead and log in now."
+msgstr "Su contraseña se ha establecido. Ya puede avanzar y entrar."
+
+#: agenda/base/templates/registration/password_reset_confirm.html:4
+#: agenda/base/templates/registration/password_reset_form.html:4
+#: agenda/base/templates/registration/password_reset_form.html:8
+msgid "Password reset"
+msgstr "Contraseña reiniciada"
+
+#: agenda/base/templates/registration/password_reset_confirm.html:8
+msgid "Enter new password"
+msgstr "Entre su nueva contraseña"
+
+#: agenda/base/templates/registration/password_reset_confirm.html:10
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+"Por favor introduzca su contraseña dos veces de forma que podamos verificar "
+"que la ha tecleado correctamente"
+
+#: agenda/base/templates/registration/password_reset_confirm.html:17
+msgid "New password:"
+msgstr "Nueva contraseña:"
+
+#: agenda/base/templates/registration/password_reset_confirm.html:22
+msgid "Confirm password:"
+msgstr "Confirmar contraseña:"
+
+#: agenda/base/templates/registration/password_reset_confirm.html:31
+msgid "Password reset unsuccessful"
+msgstr "Reinicio de contraseña sin éxito"
+
+#: agenda/base/templates/registration/password_reset_confirm.html:33
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
+"El vínculo de restablecimiento de la contraseña no es correcto, posiblemente "
+"porque ya ha sido utilizado. Por favor solicite un nuevo restablecimiento de "
+"contraseña."
+
+#: agenda/base/templates/registration/password_reset_done.html:4
+#: agenda/base/templates/registration/password_reset_done.html:8
+msgid "Password reset successful"
+msgstr "Contraseña reiniciada exitosamente"
+
+#: agenda/base/templates/registration/password_reset_done.html:10
+msgid ""
+"We've e-mailed you instructions for setting your password to the e-mail "
+"address you submitted. You should be receiving it shortly."
+msgstr ""
+"Le hemos enviado por correo electrónico instrucciones para establecer su "
+"contraseña a la dirección que usted ha proporcionado. Debería recibirlo en "
+"breve."
+
+#: agenda/base/templates/registration/password_reset_email.html:2
+#, python-format
+msgid ""
+"You're receiving this email because you requested a password reset for your "
+"user account at %(site_name)s."
+msgstr ""
+"Usted está recibiendo este correo debido a que solicitó un restablecimiento "
+"de contraseña para su cuenta de usuario en %(site_name)s."
+
+#: agenda/base/templates/registration/password_reset_email.html:4
+msgid "Please go to the following page and choose a new password:"
+msgstr "Por favor diríjase a la siguiente página y elija una nueva contraseña."
+
+#: agenda/base/templates/registration/password_reset_email.html:8
+msgid "Your username, in case you've forgotten:"
+msgstr "Su nombre de usuario en caso de que lo haya olvidado:"
+
+#: agenda/base/templates/registration/password_reset_email.html:10
+msgid "Thanks for using our site!"
+msgstr "¡Gracias por utilizar nuestro sitio!"
+
+#: agenda/base/templates/registration/password_reset_email.html:12
+#, python-format
+msgid "The %(site_name)s team"
+msgstr "El equipo de %(site_name)s"
+
+#: agenda/base/templates/registration/password_reset_form.html:10
+msgid ""
+"Forgotten your password? Enter your e-mail address below, and we'll e-mail "
+"instructions for setting a new one."
+msgstr ""
+"¿Ha olvidado su contraseña? Introduzca su dirección de correo electrónico "
+"debajo y le enviaremos instrucciones para establecer uno nuevo."
+
+#: agenda/base/templates/registration/password_reset_form.html:14
+msgid "E-mail address:"
+msgstr "Dirección e-mail:"
+
+#: agenda/base/templates/registration/password_reset_form.html:14
+msgid "Reset my password"
+msgstr "Restablecer mi contraseña"
+
+#: agenda/base/templates/rosetta/base.html:27
+msgid "Codenerix translation panel"
+msgstr "Panel de traducción de Codenerix"
+
+#: agenda/base/templates/rosetta/base.html:31
+msgid "Welcome,"
+msgstr "Bienvenido,"
+
+#: agenda/base/templates/rosetta/base.html:38
+msgid "Go to administration panel"
+msgstr "Ir a la administración del panel"
+
+#: agenda/base/templates/rosetta/base.html:41
+msgid "Change password"
+msgstr "Cambiar contraseña"
+
+#: agenda/base/templates/rosetta/base.html:43
+msgid "Log out"
+msgstr "Salir"
+
+#: agenda/base/templates/rosetta/base.html:55
+msgid "Translation system"
+msgstr "Sistema de traducción"
+
+#: agenda/base/templates/rosetta/pofile.html:7
+msgid "Pick another file"
+msgstr "Seleccione otro archivo"
+
+#: agenda/base/templates/rosetta/pofile.html:8
+msgid "Download this catalog"
+msgstr "Descargue este catálogo"
+
+#: agenda/base/templates/rosetta/pofile.html:15 agenda/base/views.py:49
+msgid "Home"
+msgstr "Inicio"
+
+#: agenda/base/templates/rosetta/pofile.html:18
+#, python-format
+msgid "Progress: %(percent_translated)s%%"
+msgstr "Progreso: %(percent_translated)s%%"
+
+#: agenda/base/templates/rosetta/pofile.html:20
+msgid "File is read-only: download the file when done editing!"
+msgstr ""
+"El archivo es de solo-lectura: ¡descargue el archivo cuando termine de "
+"editarlo!"
+
+#: agenda/base/templates/rosetta/pofile.html:21
+msgid ""
+"Some items in your last translation block couldn't be saved: this usually "
+"happens when the catalog file changes on disk after you last loaded it."
+msgstr ""
+"Algunos elementos en su último bloque de traducción no se han podido "
+"guardar: esto ocurre generalmente cuando el archivo del catálogo cambian en "
+"el disco luego de que usted los haya cargado."
+
+#: agenda/base/templates/rosetta/pofile.html:25
+#, python-format
+msgid "Translate into %(rosetta_i18n_lang_name)s"
+msgstr "Traducir en %(rosetta_i18n_lang_name)s"
+
+#: agenda/base/templates/rosetta/pofile.html:28
+msgid "Display:"
+msgstr "Mostrar:"
+
+#: agenda/base/templates/rosetta/pofile.html:29
+msgid "Untranslated only"
+msgstr "Sin traducción solamente"
+
+#: agenda/base/templates/rosetta/pofile.html:30
+msgid "Translated only"
+msgstr "Traducidos solamente"
+
+#: agenda/base/templates/rosetta/pofile.html:31
+msgid "Fuzzy only"
+msgstr "Difusos solamente"
+
+#: agenda/base/templates/rosetta/pofile.html:32
+msgid "All"
+msgstr "Todo"
+
+#: agenda/base/templates/rosetta/pofile.html:39
+msgid "Search"
+msgstr "Buscar"
+
+#: agenda/base/templates/rosetta/pofile.html:41
+msgid "Go"
+msgstr "Ir"
+
+#: agenda/base/templates/rosetta/pofile.html:61
+msgid "Original"
+msgstr "Original"
+
+#: agenda/base/templates/rosetta/pofile.html:64
+msgid "Fuzzy"
+msgstr "Difuso"
+
+#: agenda/base/templates/rosetta/pofile.html:65
+msgid "Occurrences(s)"
+msgstr "Ocurrencia(s)"
+
+#: agenda/base/templates/rosetta/pofile.html:79
+#: agenda/base/templates/rosetta/pofile.html:82
+#: agenda/base/templates/rosetta/pofile.html:97
+#: agenda/base/templates/rosetta/pofile.html:100
+msgid "Context hint"
+msgstr "Pista contextual"
+
+#: agenda/base/templates/rosetta/pofile.html:107
+msgid "suggest"
+msgstr "sugerir"
+
+#: agenda/base/templates/rosetta/pofile.html:118
+#, python-format
+msgid "%(more_count)s more"
+msgid_plural "%(more_count)s more"
+msgstr[0] "%(more_count)s mas"
+msgstr[1] "%(more_count)s mas"
+
+#: agenda/base/templates/rosetta/pofile.html:130
+msgid "Save and translate next block"
+msgstr "Guardar y traducir el siguiente bloque"
+
+#: agenda/base/templates/rosetta/pofile.html:134
+msgid "Skip to page:"
+msgstr "Saltar a la página:"
+
+#: agenda/base/templates/rosetta/pofile.html:147
+msgid "Displaying:"
+msgstr "Mostrando:"
+
+#: agenda/base/templates/rosetta/pofile.html:151
+#, python-format
+msgid "%(hits)s/%(message_number)s message"
+msgid_plural "%(hits)s/%(message_number)s messages"
+msgstr[0] "%(hits)s/%(message_number)s mensaje"
+msgstr[1] "%(hits)s/%(message_number)s mensajes"
+
+#: agenda/base/views.py:105 agenda/base/views.py:196 agenda/base/views.py:233
+msgid ""
+"Ha llegado al limite de registros. Quedan {} minutos para reestablecer la "
+"base de datos"
+msgstr ""
+
+#: agenda/base/views.py:126
+msgid "Teléfonos"
+msgstr ""

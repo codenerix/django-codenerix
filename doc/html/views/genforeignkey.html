@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="../_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="../_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>GenForeignKey &#8212; CODENERIX 20161221001 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/guzzle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/banner.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '20161221001',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GenForm" href="../forms/genform.html" />
+    <link rel="prev" title="GenDetail and GenDetailModal" href="gendetail.html" />
+  
+   
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../forms/genform.html" title="GenForm"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="gendetail.html" title="GenDetail and GenDetailModal"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">CODENERIX 20161221001 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libraryreference.html" accesskey="U">Library Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../libraryreference.html">Library Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../models/codenerixmodel.html">CodenerixModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="genlist.html">GenList</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gencreate.html">GenCreate and GenCreateModal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="genupdate.html">GenUpdate and GenUpdateModal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gendelete.html">GenDelete</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gendetail.html">GenDetail and GenDetailModal</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">GenForeignKey</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../forms/genform.html">GenForm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../forms/genmodelform.html">GenModelForm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../urls.html">Urls</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../settings.html">Settings</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="../search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Contents</h2>
+    <div class="sidebar-localtoc">
+      <ul>
+<li><a class="reference internal" href="#">GenForeignKey</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#attributte">Attributte</a><ul>
+<li><a class="reference internal" href="#label">label</a></li>
+<li><a class="reference internal" href="#model">model</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#get-foreign-self-queryset-search-filters">get_foreign(self, queryset, search, filters)</a><ul>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#return">Return</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#more-examples">More examples</a><ul>
+<li><a class="reference internal" href="#basic-detail">Basic Detail</a></li>
+<li><a class="reference internal" href="#foreignkey-with-filters">Foreignkey with filters</a></li>
+<li><a class="reference internal" href="#overriding-get">Overriding get</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+</div>
+<h3>Versions</h3>
+<ul>
+    <li><a href="../master/views/genforeignkey.html">master</a></li>
+</ul>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="../index.html">Docs</a></li>
+              
+                <li><a href="../libraryreference.html">Library Reference</a></li>
+              
+              <li>GenForeignKey</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="genforeignkey">
+<span id="class-genforeignkey"></span><h1>GenForeignKey<a class="headerlink" href="#genforeignkey" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">codenerix.views</span> <span class="k">import</span> <span class="n">GenForeignKey</span>
+
+
+<span class="k">class</span> <span class="nc">ModelNameForeign</span><span class="p">(</span><span class="n">GenForeignKey</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ModelName</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;{label1} - {label2}&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_foreign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queryset</span><span class="p">,</span> <span class="n">search</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+        <span class="c"># Filter with search string</span>
+        <span class="n">qsobject</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">field__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">qsobject</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">queryset</span><span class="p">[:</span><span class="n">settings</span><span class="o">.</span><span class="n">LIMIT_FOREIGNKEY</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#class-genforeignkey"><span class="std std-ref">GenForeignKey</span></a> is a Codenerix generic class used to obtain a dynamic list in foreign key boxes. Is recomended that the name of each class which inherit from <a class="reference internal" href="#class-genforeignkey"><span class="std std-ref">GenForeignKey</span></a> follow the following pattern: NameModel+Foreign.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Example:</dt>
+<dd><p class="first last">If model is User, then declarations should be, <code class="docutils literal"><span class="pre">class</span> <span class="pre">UserForeign(GenForeignKey):</span></code></p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="attributte">
+<h2>Attributte<a class="headerlink" href="#attributte" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="label">
+<h3>label<a class="headerlink" href="#label" title="Permalink to this headline">¶</a></h3>
+<p>Is the structure of the string that the user will see in textbox. If you want a dynamic name, you can invoke using structure <code class="docutils literal"><span class="pre">{field_name}</span></code></p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># Result of this label, if field1=hello and field2=goodbye will be</span>
+<span class="c"># &quot;This is hello - goodbye&quot;</span>
+<span class="n">label</span> <span class="o">=</span> <span class="s">&#39;This is {field1} - {field2}&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="model">
+<h3>model<a class="headerlink" href="#model" title="Permalink to this headline">¶</a></h3>
+<p>Model base for which Codenerix will make search.</p>
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="get-foreign-self-queryset-search-filters">
+<h3>get_foreign(self, queryset, search, filters)<a class="headerlink" href="#get-foreign-self-queryset-search-filters" title="Permalink to this headline">¶</a></h3>
+<p>Method used to specify query search based in data sended by the client. An user can start to write in the foreign text box and the associated <a class="reference internal" href="#class-genforeignkey"><span class="std std-ref">GenForeignKey</span></a> returns all founded coincidences.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ExampleForeign</span><span class="p">(</span><span class="n">GenForeignKey</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Example</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;{field}&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_foreign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queryset</span><span class="p">,</span> <span class="n">search</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">field_string__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">field2__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">queryset</span><span class="p">[:</span><span class="n">settings</span><span class="o">.</span><span class="n">LIMIT_FOREIGNKEY</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="parameters">
+<h4>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>queryset: Initialized queryset. All filter will make search using base model.</li>
+<li>search: Text introduced to match.</li>
+<li>filters: Dictionary of extra filters to customize searchs. This dictionary have one form field name and its value (if the field are not fill,  the value will be empy and its posible that don&#8217;t find any tuple). <code class="docutils literal"><span class="pre">More</span> <span class="pre">information</span> <span class="pre">in</span> <span class="pre">autofill</span> <span class="pre">of</span> <span class="pre">form.</span></code></li>
+</ul>
+</div>
+<div class="section" id="return">
+<h4>Return<a class="headerlink" href="#return" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>queryset: Return a queryset.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="more-examples">
+<h2>More examples<a class="headerlink" href="#more-examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic-detail">
+<h3>Basic Detail<a class="headerlink" href="#basic-detail" title="Permalink to this headline">¶</a></h3>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ExampleForeign</span><span class="p">(</span><span class="n">GenForeignKey</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Example</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;{field}&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_foreign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queryset</span><span class="p">,</span> <span class="n">search</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">Q</span><span class="p">(</span><span class="n">field_string__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span> <span class="o">|</span> <span class="n">Q</span><span class="p">(</span><span class="n">field2__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">qs</span><span class="p">[:</span><span class="n">settings</span><span class="o">.</span><span class="n">LIMIT_FOREIGNKEY</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="foreignkey-with-filters">
+<h3>Foreignkey with filters<a class="headerlink" href="#foreignkey-with-filters" title="Permalink to this headline">¶</a></h3>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ModelNameForeign</span><span class="p">(</span><span class="n">GenForeignKey</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ModelName</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;{field}&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_foreign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queryset</span><span class="p">,</span> <span class="n">search</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+        <span class="c"># Build general queryset</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span>
+
+        <span class="n">form_field</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;filter_name&#39;</span><span class="p">,</span> <span class="k">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">att_filter</span><span class="p">:</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">qs</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field2</span><span class="o">=</span><span class="n">form_field</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">qs</span><span class="p">[:</span><span class="n">settings</span><span class="o">.</span><span class="n">LIMIT_FOREIGNKEY</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="overriding-get">
+<h3>Overriding get<a class="headerlink" href="#overriding-get" title="Permalink to this headline">¶</a></h3>
+<p>Sometimes is necesary to create your own query with request parameters, this allows to change the structure and customize the result.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">JsonResponse</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleForeign</span><span class="p">(</span><span class="n">GenForeignKey</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Example</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="s">&#39;{lbl1} - {lbl2}&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;search&#39;</span><span class="p">,</span> <span class="k">None</span><span class="p">)</span>
+
+        <span class="n">filterstxt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;filter&#39;</span><span class="p">,</span> <span class="s">&#39;{}&#39;</span><span class="p">)</span>
+        <span class="n">filters</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">filterstxt</span><span class="p">)</span>
+
+        <span class="n">queryset</span> <span class="o">=</span> <span class="n">Example</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">search</span> <span class="o">!=</span> <span class="s">&#39;*&#39;</span><span class="p">:</span>
+            <span class="n">qsobject</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">charAttr__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span>
+            <span class="n">qsobject</span> <span class="o">|=</span> <span class="n">Q</span><span class="p">(</span><span class="n">charAttr2__icontains</span><span class="o">=</span><span class="n">search</span><span class="p">)</span>
+            <span class="n">queryset</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">qsobject</span><span class="p">)</span>
+
+        <span class="n">pk_pk</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;extraOption&#39;</span><span class="p">,</span> <span class="k">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pk_pk</span><span class="p">:</span>
+            <span class="n">queryset</span> <span class="o">=</span> <span class="n">queryset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pk_pk</span><span class="o">=</span><span class="n">pk_pk</span><span class="p">)</span>
+
+        <span class="n">answer</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;clear&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;attr1&#39;</span><span class="p">,</span> <span class="s">&#39;attr2&#39;</span><span class="p">],</span>
+            <span class="s">&#39;readonly&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;attr1&#39;</span><span class="p">,</span> <span class="s">&#39;attr2&#39;</span><span class="p">],</span>
+            <span class="s">&#39;rows&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s">&#39;attr1&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s">&#39;attr2&#39;</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                    <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="s">&#39;---------&#39;</span><span class="p">,</span>
+                    <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="k">None</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="nb">object</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">[:</span><span class="n">settings</span><span class="o">.</span><span class="n">LIMIT_FOREIGNKEY</span><span class="p">]:</span>
+            <span class="n">answer</span><span class="p">[</span><span class="s">&#39;rows&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s">&#39;attr1&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                <span class="s">&#39;attr2&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="o">.</span><span class="n">__unicode__</span><span class="p">(),</span>
+                <span class="s">&#39;label&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="o">.</span><span class="n">__unicode__</span><span class="p">(),</span>
+                <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span>
+            <span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">JsonResponse</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="gendetail.html" title="previous chapter (use the left arrow)">GenDetail and GenDetailModal</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="../forms/genform.html" title="next chapter (use the right arrow)">GenForm</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../forms/genform.html" title="GenForm"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="gendetail.html" title="GenDetail and GenDetailModal"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">CODENERIX 20161221001 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libraryreference.html" >Library Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        <span>
+            <img src="http://www.centrologic.com/wp-content/uploads/2015/09/logo-centrologic.png" alt="Centrologic Software" title="Centrologic Software" width='200px'>
+            - <a href="http://www.centrologic.com">http://www.centrologic.com</a> - info@centrologic.com
+        </span>
+        <span class="creativecommons">
+            <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                <img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+            </a>
+            <br />
+            This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+            </a>.
+        </span>
+    </div>
+  </body>
+</html>

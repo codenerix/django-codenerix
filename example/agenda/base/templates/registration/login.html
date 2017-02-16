@@ -1,0 +1,52 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block body %}
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            {% if error_message %}
+            <p class="errornote">{{ error_message }}</p>
+            {% endif %}
+            <center>
+            <div id="content-main">
+                <form action="{% url 'login' %}" method="POST" id="login-form">{% csrf_token %}
+                    <center><h1>{% trans "Bienvenido a AgendaTelefónica" %}</h1></center>
+                    <br/>
+                    <table>
+                        <tr>
+                            <td style='text-align:right'><label for="id_username">{% trans 'Username:' %}</label></td>
+                            <td><input type="text" name="username" id="id_username" /></td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:right'><label for="id_password">{% trans 'Password:' %}</label></td>
+                            <td>
+                                <input type="password" name="password" id="id_password" />
+                                <input type="hidden" name="this_is_the_login_form" value="1" />
+                                <input type="hidden" name="next" value="{{ next }}" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan='2'>
+                                <br/>
+                                <center><label>&nbsp;</label><input type="submit" value="{% trans 'Log in' %}" /></center>
+                                <br/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan='2'>
+                                <center>
+                                    <div style='clear:both; margin-top:8px;'>{% trans "Forgotten your password?" %}</div>
+                                    <div style='clear:both;'><a href="#">{% trans "Click here to get a new one." %}</a></div>
+                                </center>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            </center>
+            <script type="text/javascript">
+            document.getElementById('id_username').focus()
+            </script>
+        </div>
+    </div>
+{% endblock %}

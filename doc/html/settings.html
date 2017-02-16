@@ -1,0 +1,421 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>Settings &#8212; CODENERIX 20161221001 documentation</title>
+    
+    <link rel="stylesheet" href="_static/guzzle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/banner.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '20161221001',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Urls" href="urls.html" />
+  
+   
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="urls.html" title="Urls"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">CODENERIX 20161221001 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libraryreference.html">Library Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Settings</a></li>
+</ul>
+
+    
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Contents</h2>
+    <div class="sidebar-localtoc">
+      <ul>
+<li><a class="reference internal" href="#">Settings</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#django-enviroment-configuration">Django enviroment configuration</a><ul>
+<li><a class="reference internal" href="#middleware">MIDDLEWARE</a></li>
+<li><a class="reference internal" href="#installed-apps">INSTALLED_APPS</a></li>
+<li><a class="reference internal" href="#authentication-backends">AUTHENTICATION_BACKENDS</a></li>
+<li><a class="reference internal" href="#templates">TEMPLATES</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+</div>
+<h3>Versions</h3>
+<ul>
+    <li><a href="master/settings.html">master</a></li>
+</ul>
+      
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>Settings</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="settings">
+<h1>Settings<a class="headerlink" href="#settings" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="c"># Warning. When you start a new project with django, you should keep base configuration from django.</span>
+
+<span class="c"># Codenerix Constants</span>
+
+
+<span class="n">USERNAME_MIN_SIZE</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">PASSWORD_MIN_SIZE</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">ALARMS_LOOPTIME</span> <span class="o">=</span> <span class="mi">15000</span>     <span class="c"># Refresh alarms every 15 seconds (15.000 miliseconds)</span>
+<span class="n">ALARMS_QUICKLOOP</span> <span class="o">=</span> <span class="mi">1000</span>     <span class="c"># Refresh alarms every 1 seconds (1.000 miliseconds) when the system is on quick loop processing (without focus)</span>
+<span class="n">ALARMS_ERRORLOOP</span> <span class="o">=</span> <span class="mi">5000</span>     <span class="c"># Refresh alarms every 5 seconds (5.000 miliseconds) when the http request fails</span>
+<span class="n">CONNECTION_ERROR</span> <span class="o">=</span> <span class="mi">60000</span>    <span class="c"># Connection error after 60 seconds (60.000 miliseconds)</span>
+<span class="n">ALL_PAGESALLOWED</span> <span class="o">=</span> <span class="k">True</span>
+
+<span class="n">LIMIT_FOREIGNKEY</span> <span class="o">=</span> <span class="mi">25</span>
+
+<span class="n">CODENERIX_CSS</span> <span class="o">=</span> <span class="s">&#39;&lt;link href=&quot;/static/codenerix/codenerix.css&quot; rel=&quot;stylesheet&quot;&gt;&#39;</span>
+<span class="n">CODENERIX_JS</span> <span class="o">=</span><span class="s">&#39;&lt;script type=&quot;text/javascript&quot; src=&quot;/static/codenerix/codenerix.js&quot;&gt;&lt;/script&gt;&#39;</span>
+<span class="n">CODENERIX_JS</span> <span class="o">+=</span><span class="s">&#39;&lt;script type=&quot;text/javascript&quot; src=&quot;/static/codenerix/codenerix.extra.js&quot;&gt;&lt;/script&gt;&#39;</span>
+
+<span class="c"># Other definitions about dates, hours</span>
+<span class="n">DATETIME_FORMAT</span><span class="o">=</span><span class="s">&#39;Y-m-d H:i&#39;</span>
+
+<span class="n">DATETIME_INPUT_FORMATS</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;%Y-%m-%d %H:%M&#39;</span><span class="p">,)</span>
+
+<span class="n">TIME_FORMAT</span><span class="o">=</span><span class="s">&#39;H:i&#39;</span>
+
+<span class="n">TIME_INPUT_FORMATS</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;%H:%M&#39;</span><span class="p">,</span> <span class="s">&#39;%H%M&#39;</span><span class="p">)</span>
+
+<span class="n">DATETIME_RANGE_FORMAT</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;%Y-%m-%d&#39;</span><span class="p">,</span> <span class="s">&#39;YYYY-MM-DD&#39;</span><span class="p">)</span>
+
+<span class="n">DATERANGEPICKER_OPTIONS</span> <span class="o">=</span> <span class="s">&#39;{{&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;    format: &quot;{Format}&quot;,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;    timePicker: true,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;    timePicker12Hour: false,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;    showDropdowns: true,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;    locale: {{&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;        firstDay: 1,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;        fromLabel: &quot;{From}&quot;,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;        toLabel: &quot;{To}&quot;,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;        applyLabel: &quot;{Apply}&quot;,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;        cancelLabel: &quot;{Cancel}&quot;,&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;        daysOfWeek: [&quot;{Su}&quot;, &quot;{Mo}&quot;, &quot;{Tu}&quot;, &quot;{We}&quot;, &quot;{Th}&quot;, &quot;{Fr}&quot;,&quot;{Sa}&quot;],&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;        monthNames: [&quot;{January}&quot;, &quot;{February}&quot;, &quot;{March}&quot;, &quot;{April}&quot;, &quot;{May}&quot;, &quot;{June}&quot;, &quot;{July}&quot;, &quot;{August}&quot;, &quot;{September}&quot;, &quot;{October}&quot;, &quot;{November}&quot;, &quot;{December}&quot;],&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;    }},&#39;</span>
+<span class="n">DATERANGEPICKER_OPTIONS</span><span class="o">+=</span> <span class="s">&#39;}}&#39;</span>
+
+
+<span class="c"># Codenerix keys</span>
+
+<span class="n">SECRET_KEY</span> <span class="o">=</span> <span class="s">&#39;*******************************&#39;</span>
+<span class="n">PUBLIC_KEY</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;KERNEL&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;*************&#39;</span><span class="p">,</span> <span class="s">&#39;*************&#39;</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="n">MIDDLEWARE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&#39;django.middleware.security.SecurityMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.sessions.middleware.SessionMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.middleware.common.CommonMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.middleware.csrf.CsrfViewMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.messages.middleware.MessageMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.middleware.clickjacking.XFrameOptionsMiddleware&#39;</span><span class="p">,</span>
+
+    <span class="c"># Codenerix middlewares</span>
+    <span class="s">&#39;codenerix.authbackend.TokenAuthMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;codenerix.authbackend.LimitedAuthMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;codenerix.middleware.SecureRequiredMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;codenerix.middleware.CurrentUserMiddleware&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c"># Installed apps</span>
+<span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&#39;django.contrib.admin&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.auth&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.contenttypes&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.sessions&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.messages&#39;</span><span class="p">,</span>
+    <span class="s">&#39;django.contrib.staticfiles&#39;</span><span class="p">,</span>
+
+    <span class="c"># Codenerix apps</span>
+    <span class="s">&#39;codenerix&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c"># Authentication backends</span>
+
+<span class="n">AUTHENTICATION_BACKENDS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&quot;codenerix.authbackend.TokenAuth&quot;</span><span class="p">,</span>                <span class="c"># TokenAuth</span>
+    <span class="s">&quot;codenerix.authbackend.LimitedAuth&quot;</span><span class="p">,</span>            <span class="c"># LimitedAuth</span>
+<span class="p">)</span>
+
+<span class="c"># Templates</span>
+<span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+        <span class="s">&#39;DIRS&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s">&#39;APP_DIRS&#39;</span><span class="p">:</span> <span class="k">True</span><span class="p">,</span>
+        <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;context_processors&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s">&#39;django.template.context_processors.debug&#39;</span><span class="p">,</span>
+                <span class="s">&#39;django.template.context_processors.request&#39;</span><span class="p">,</span>
+                <span class="s">&#39;django.contrib.auth.context_processors.auth&#39;</span><span class="p">,</span>
+                <span class="s">&#39;django.contrib.messages.context_processors.messages&#39;</span><span class="p">,</span>
+                <span class="s">&#39;codenerix.context.codenerix&#39;</span><span class="p">,</span>
+                <span class="s">&#39;codenerix.context.codenerix_js&#39;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Codenerix have some constants and extra parameters detailed in the next table.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="82%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>USERNAME_MIN_SIZE</td>
+<td>Minimun size for usernames</td>
+</tr>
+<tr class="row-odd"><td>PASSWORD_MIN_SIZE</td>
+<td>Minimun size for password</td>
+</tr>
+<tr class="row-even"><td>ALARMS_LOOPTIME</td>
+<td>Time of alarms refresh (miliseconds)</td>
+</tr>
+<tr class="row-odd"><td>ALARMS_QUICKLOOP</td>
+<td>Time of alarms refresh when the system is on quick loop processing (without focus)(miliseconds)</td>
+</tr>
+<tr class="row-even"><td>ALARMS_ERRORLOOP</td>
+<td>Time of alarms refresh when the http request fails (miliseconds)</td>
+</tr>
+<tr class="row-odd"><td>CONNECTION_ERROR</td>
+<td>Connection error after X seconds (miliseconds)</td>
+</tr>
+<tr class="row-even"><td>ALL_PAGESALLOWED</td>
+<td>In genlist, allowed search all pages exist.</td>
+</tr>
+<tr class="row-odd"><td>LIMIT_FOREIGNKEY</td>
+<td>Limit of rows showed when you do a query. (Default 100)</td>
+</tr>
+<tr class="row-even"><td>DATETIME_FORMAT</td>
+<td>Format of datetime.</td>
+</tr>
+<tr class="row-odd"><td>DATETIME_INPUT_FORMATS</td>
+<td>Format of datetime for inputs.</td>
+</tr>
+<tr class="row-even"><td>TIME_FORMAT=&#8221;H:i&#8221;</td>
+<td>Format of time.</td>
+</tr>
+<tr class="row-odd"><td>TIME_INPUT_FORMATS</td>
+<td>Format of time for inputs.</td>
+</tr>
+<tr class="row-even"><td>DATETIME_RANGE_FORMAT</td>
+<td>Format of datetime for ranges.</td>
+</tr>
+<tr class="row-odd"><td>DATERANGEPICKER_OPTIONS</td>
+<td>Extra options for daterangericker</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="django-enviroment-configuration">
+<h2>Django enviroment configuration<a class="headerlink" href="#django-enviroment-configuration" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="middleware">
+<h3>MIDDLEWARE<a class="headerlink" href="#middleware" title="Permalink to this headline">¶</a></h3>
+<p>Codenerix have four middlewares which are required to add to Django configuration:</p>
+<ul class="simple">
+<li>codenerix.authbackend.TokenAuthMiddleware</li>
+<li>codenerix.authbackend.LimitedAuthMiddleware</li>
+<li>codenerix.middleware.SecureRequiredMiddleware</li>
+<li>codenerix.middleware.CurrentUserMiddleware</li>
+</ul>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">MIDDLEWARE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="o">.....</span>
+    <span class="c"># Codenerix middlewares</span>
+    <span class="s">&#39;codenerix.authbackend.TokenAuthMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;codenerix.authbackend.LimitedAuthMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;codenerix.middleware.SecureRequiredMiddleware&#39;</span><span class="p">,</span>
+    <span class="s">&#39;codenerix.middleware.CurrentUserMiddleware&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="installed-apps">
+<h3>INSTALLED_APPS<a class="headerlink" href="#installed-apps" title="Permalink to this headline">¶</a></h3>
+<p>Apps required by Codenerix to work correctly.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="o">....</span><span class="p">,</span>
+    <span class="s">&#39;codenerix&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="authentication-backends">
+<h3>AUTHENTICATION_BACKENDS<a class="headerlink" href="#authentication-backends" title="Permalink to this headline">¶</a></h3>
+<p>Django have a system of authentication, but Codenerix implements its own system. You must add the following two modules:</p>
+<ul class="simple">
+<li>codenerix.authbackend.TokenAuth</li>
+<li>codenerix.authbackend.LimitedAuth</li>
+</ul>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">AUTHENTICATION_BACKENDS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;codenerix.authbackend.TokenAuth&#39;</span><span class="p">,</span>                <span class="c"># TokenAuth</span>
+    <span class="s">&#39;codenerix.authbackend.LimitedAuth&#39;</span><span class="p">,</span>            <span class="c"># LimitedAuth</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="templates">
+<h3>TEMPLATES<a class="headerlink" href="#templates" title="Permalink to this headline">¶</a></h3>
+<p>Finally, is necessary to add to the templates options the two Codenerix context managers:</p>
+<ul class="simple">
+<li>codenerix.context.codenerix</li>
+<li>codenerix.context.codenerix_js</li>
+</ul>
+<div class="code python highlight-default"><div class="highlight"><pre><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+        <span class="s">&#39;DIRS&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s">&#39;APP_DIRS&#39;</span><span class="p">:</span> <span class="k">True</span><span class="p">,</span>
+        <span class="s">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&#39;context_processors&#39;</span><span class="p">:</span> <span class="p">[</span>
+                 <span class="o">...</span><span class="p">,</span>
+                <span class="s">&#39;codenerix.context.codenerix&#39;</span><span class="p">,</span>
+                <span class="s">&#39;codenerix.context.codenerix_js&#39;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="urls.html" title="previous chapter (use the left arrow)">Urls</a>
+      </div>
+    
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="urls.html" title="Urls"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">CODENERIX 20161221001 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        <span>
+            <img src="http://www.centrologic.com/wp-content/uploads/2015/09/logo-centrologic.png" alt="Centrologic Software" title="Centrologic Software" width='200px'>
+            - <a href="http://www.centrologic.com">http://www.centrologic.com</a> - info@centrologic.com
+        </span>
+        <span class="creativecommons">
+            <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                <img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" />
+            </a>
+            <br />
+            This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">
+                Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
+            </a>.
+        </span>
+    </div>
+  </body>
+</html>

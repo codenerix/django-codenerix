@@ -1,0 +1,58 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block body %}
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            {% if error_message %}
+            <p class="errornote">{{ error_message }}</p>
+            {% endif %}
+            <center>
+            <div id="content-main">
+                <form action="{% url 'login' %}" method="POST" id="login-form">{% csrf_token %}
+                    <h2>{% trans "Demo de Codenerix" %}</h2>
+                    <h1>{% trans "Bienvenido a Agenda Telefónica" %}</h1>
+                    <br/>
+                    <table>
+                        {% if form.errors %}
+                            <tr>
+                                <td>
+                                    <div class="alert alert-danger" role="alert">
+                                        <center>
+                                            <h4>
+                                                {% trans "Captcha didn't validate, try again!" %}
+                                            </h4>
+                                        </center>
+                                    </div>
+                                </td>
+                            <tr>
+                        {% endif %}
+                        <tr>
+                            <td>
+                                <center>
+                                    {{form.recaptcha}}
+                                </center>
+                            </td>
+                            
+                        </tr>
+                        <tr>
+                            <td colspan='2'>
+                                <br/>
+                    <center><label>&nbsp;</label>
+                    <input class="btn btn-success" type="submit" value="{% trans 'Log in' %}" /></center>
+                                <br/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan='2' class="center">
+                                <img src="{% static "img/logo_codenerix_big.png" %}" style="max-width:  800px" />
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            </center>
+        </div>
+    </div>
+{% endblock %}
