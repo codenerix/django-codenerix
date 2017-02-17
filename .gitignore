@@ -95,4 +95,4 @@ ENV/
 /django_codenerix*.egg-info
 /codenerix*
 setup.py
-
+src/version.py
