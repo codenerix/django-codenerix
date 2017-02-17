@@ -1,0 +1,27 @@
+.container-fixed {
+  top: 0;
+  bottom: 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+}
+
+.container-fixed .col {
+  height: 100%;
+  overflow: auto;
+  padding:0px;
+}
+
+.row-xs-12 { height: 100%;                  margin-left:0px; margin-right:0px; }
+.row-xs-11 { height: 91.66666666666666%;    margin-left:0px; margin-right:0px; }
+.row-xs-10 { height: 83.33333333333334%;    margin-left:0px; margin-right:0px; }
+.row-xs-9 {  height: 75%;                   margin-left:0px; margin-right:0px; }
+.row-xs-8 {  height: 66.66666666666666%;    margin-left:0px; margin-right:0px; }
+.row-xs-7 {  height: 58.333333333333336%;   margin-left:0px; margin-right:0px; }
+.row-xs-6 {  height: 50%;                   margin-left:0px; margin-right:0px; }
+.row-xs-5 {  height: 41.66666666666667%;    margin-left:0px; margin-right:0px; }
+.row-xs-4 {  height: 33.33333333333333%;    margin-left:0px; margin-right:0px; }
+.row-xs-3 {  height: 25%;                   margin-left:0px; margin-right:0px; }
+.row-xs-2 {  height: 16.666666666666664%;   margin-left:0px; margin-right:0px; }
+.row-xs-1 {  height: 8.333333333333332%;    margin-left:0px; margin-right:0px; }
+
