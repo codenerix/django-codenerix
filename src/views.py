@@ -2655,6 +2655,9 @@ class GenModify(object):
         # Update context
         context.update(self.extra_context)
 
+        if 'form_ngcontroller' in self._attributes:
+            context['form'].set_attribute('ngcontroller', self.form_ngcontroller)
+
         # Return context
         return context
 

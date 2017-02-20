@@ -30,9 +30,13 @@ from codenerix.widgets import StaticSelect, DynamicSelect, DynamicInput, MultiSt
 class BaseForm(object):
     
     __language = None
+    attributes = {}
     
     def set_language(self, language):
         self.__language = language
+
+    def set_attribute(self, key, value):
+        self.attributes[key] = value
     
     def get_name(self):
         # If name atrribute exists in Meta

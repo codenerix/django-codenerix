@@ -43,6 +43,9 @@ limitations under the License.
     data-custom-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" 
     class="form-horizontal"
     role="form"
+    {% if form.attributes.ngcontroller %}
+    ng-controller="{{ form.attributes.ngcontroller }}"
+    {% endif %}
     autocomplete="off"
     ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'">
         {% block extra_form_top%}{% endblock %}
