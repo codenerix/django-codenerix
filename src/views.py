@@ -707,6 +707,8 @@ class GenBase(object):
             else:
                 internal_id = len(mydetailsextra.get('tabs',[]))
         
+        first = True
+        tab_auto_open = None
         for tab in mydetailsclss.tabs:
             # Get destination LIST class
             tabdetailsclss = get_class(resolve(reverse(tab["ws"], kwargs={"pk": 0})).func)
@@ -714,8 +716,19 @@ class GenBase(object):
             # Build the sublist tab
             tabfinal=tab.copy()
             
-            # Set kind
+            # Set kind (this is autorender)
             tabfinal['auto'] = True
+            
+            # Remember first tab
+            if first:
+                tab_auto_open = tabfinal
+                first = False
+            
+            # Set to open automatically the first tab from the list (this function can be improved)
+            if 'auto_open' not in tabfinal.keys():
+                tabfinal['auto_open'] = False
+            elif tabfinal['auto_open']:
+                tab_auto_open = None
             
             # Get static partial row information
             if 'static_partial_row' not in tab:
@@ -735,6 +748,10 @@ class GenBase(object):
             # Save in the right queue
             tabs_js.append(tabfinal)
             tabs_autorender.append(tabfinal)
+        
+        # Set default auto_open if none was set
+        if tab_auto_open:
+            tab_auto_open['auto_open'] = True
         
         # Deliver tabs information to the context
         if js:

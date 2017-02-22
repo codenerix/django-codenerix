@@ -159,7 +159,7 @@ limitations under the License.
 
 {% block body %}
 {% if tabs_autorender %}
-    <div id="tabs" ng-init="tabs_autorender={};tabsref={};{% for tab in tabs_autorender %}tabs_autorender['tab_{{tab.id}}']={% ifequal tab.internal_id tabs_autorender.0.internal_id%}true{%else%}false{%endifequal%}; tabsref['t{{tab.internal_id}}']='tab_{{tab.id}}';{% endfor %}" ngcloack>
+    <div id="tabs" ng-init="tabs_autorender={};tabsref={};{% for tab in tabs_autorender %}tabs_autorender['tab_{{tab.id}}']={% if tab.auto_open%}true{%else%}false{%endif%}; tabsref['t{{tab.internal_id}}']='tab_{{tab.id}}';{% endfor %}" ngcloack>
         <uib-accordion id="accordion" close-others="true" class="hidden-md hidden-lg">
             {% for tab in tabs_autorender %}
                 <uib-accordion-group is-open="tabs_autorender.tab_{{tab.id}}">

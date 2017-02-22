@@ -69,12 +69,13 @@ angular.module('codenerixControllers', [])
                 $scope.tabs_autorender['t'+$scope.tabsref[listid]]=true;
                 CDNX_tabsref=$scope.tabsref;
             }
-            $state.go('details0.sublist'+listid+'.rows');
+            $state.go('details0.sublist'+listid+'.rows',{'listid':listid});
             var register = angular.injector(['codenerixInlineServices']).get('Register'+listid);
             multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, register, ListMemory, listid, subws_entry_point[listid], undefined, true);
         } else {
+            // Activate autorender tabs
             angular.forEach(tabs_js, function(tab, i){
-                if (tab.auto) {
+                if (tab.auto_open) {
                     $state.go('details0.sublist'+i+'.rows',{'listid':i});
                     return;
                 }
@@ -86,8 +87,9 @@ angular.module('codenerixControllers', [])
 .controller("SubListStaticCtrl", ["$scope", "$uibModal","$templateCache", "$http", "$timeout","$state", 
     function($scope, $uibModal, $templateCache, $http, $timeout, $state) {
         multisublist($scope, $uibModal, $templateCache, $http, $timeout);
+        // Activate non-autorender tabs
         angular.forEach(tabs_js, function(tab, i){
-            if (tab.auto) {
+            if (!tab.auto) {
                 $state.go('details0.sublist'+i+'.rows',{'listid':i});
                 return;
             }
