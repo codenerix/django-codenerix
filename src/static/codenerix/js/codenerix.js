@@ -1194,6 +1194,17 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
     };
 }]];
 
+var codenerix_directive_autofocus = ['codenerixAutofocus', ['$timeout', function($timeout) {
+    return {
+        restrict: 'AC',
+        link: function(_scope, _element) {
+            $timeout(function(){
+                _element[0].focus();
+            }, 0);
+        }
+    };
+}]];
+
 
 var codenerix_run=['$http','$rootScope','$cookies',
     function ($http,$rootScope,$cookies) {
@@ -1330,6 +1341,7 @@ function codenerix_builder(libraries, routes) {
     
     // Set Codenerix directives
     .directive(codenerix_directive_vtable[0], codenerix_directive_vtable[1])
+    .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
     
     // Set routing system
     .run(codenerix_run);
