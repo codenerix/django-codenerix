@@ -2415,15 +2415,16 @@ function changeEstimatedDateFlight($scope){
 
 function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
 
-    modal_manager($scope, $uibModal, $templateCache, $http, $scope);
+    modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
     
+    $scope.reload = undefined;
     $scope.onClickTab = function (url) {
         $templateCache.remove(url);
         $scope.currentTab = url;
         $scope.ws=url;
         $scope.wsbase=url + "/";
         
-        modal_manager($scope, $uibModal, $templateCache, $http, $scope);
+        modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
         
         $scope.base_reload = [$scope.refreshTab,url];
     };
