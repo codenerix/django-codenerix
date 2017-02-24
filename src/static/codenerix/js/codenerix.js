@@ -1194,6 +1194,17 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
     };
 }]];
 
+var codenerix_directive_autofocus = ['codenerixAutofocus', ['$timeout', function($timeout) {
+    return {
+        restrict: 'AC',
+        link: function(_scope, _element) {
+            $timeout(function(){
+                _element[0].focus();
+            }, 0);
+        }
+    };
+}]];
+
 
 var codenerix_run=['$http','$rootScope','$cookies',
     function ($http,$rootScope,$cookies) {
@@ -1330,6 +1341,7 @@ function codenerix_builder(libraries, routes) {
     
     // Set Codenerix directives
     .directive(codenerix_directive_vtable[0], codenerix_directive_vtable[1])
+    .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
     
     // Set routing system
     .run(codenerix_run);
@@ -2403,15 +2415,16 @@ function changeEstimatedDateFlight($scope){
 
 function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
 
-    modal_manager($scope, $uibModal, $templateCache, $http, $scope);
+    modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
     
+    $scope.reload = undefined;
     $scope.onClickTab = function (url) {
         $templateCache.remove(url);
         $scope.currentTab = url;
         $scope.ws=url;
         $scope.wsbase=url + "/";
         
-        modal_manager($scope, $uibModal, $templateCache, $http, $scope);
+        modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
         
         $scope.base_reload = [$scope.refreshTab,url];
     };
