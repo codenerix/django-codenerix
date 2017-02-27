@@ -414,3 +414,12 @@ ul.djng-field-errors li.invalid:hover{
     position: relative;
     top: -1px;
 }
+
+.md-chips ._md-chip-input-container{
+    width: 40%;
+}
+
+.md-chips:not(.md-readonly){
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+}

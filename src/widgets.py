@@ -66,27 +66,27 @@ class StaticSelectMulti(forms.widgets.Select):
     
     def render(self, name, value, attrs=None, choices=()):
         # Initialization
-        #required=self.attrs.get('ng-required','false')
-        vmodel=self.field_name
-        #vid=attrs.get('id','id_{0}'.format(name))
-        #vstyle=attrs.get('style','')
-        vform=self.form_name
+        # required=self.attrs.get('ng-required','false')
+        vmodel = self.field_name
+        # vid=attrs.get('id','id_{0}'.format(name))
+        # vstyle=attrs.get('style','')
+        vform = self.form_name
         if self.static:
-            placeholder = escapejs(_('Comience a escribir'))
+            placeholder = escapejs(_('Press * and select an option'))
         else:
-            placeholder = _('Pulse * o empieze a escribir')
+            placeholder = _('Press * or start typing')
 
             if not self.autofill_url:
-                raise IOError ("autofill_url not defined")
+                raise IOError("autofill_url not defined")
             
-            vurl = reverse(self.autofill_url,kwargs={'search':'a'})[:-1]
+            vurl = reverse(self.autofill_url, kwargs={'search': 'a'})[:-1]
             # Get access to the get_label() method and request for the label of the bound input
             if value:
-                func = resolve(vurl+'*').func
+                func = resolve(vurl + '*').func
                 clss = get_class(func)
                 if self.__language:
                     clss.language = self.__language
-                label=clss().get_label(value)
+                label = clss().get_label(value)
             
         if value is None:
             value = []
@@ -94,81 +94,69 @@ class StaticSelectMulti(forms.widgets.Select):
         valuejs = []
 
         if self.static:
-            init=''
+            init = ''
             if not value:
-                value=[]
-           # debug = ''
-            if hasattr(self,"field"):
-                #debug = "field"
-                for (key,label) in self.field.choices:
-                    if value==key:
-                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(key,escapejs(smart_unicode(label))))
-                    init+=u'{{"id":"{0}","label":"{1}"}},'.format(key,escapejs(smart_unicode(label)))
+                value = []
+            if hasattr(self, "field"):
+                for (key, label) in self.field.choices:
+                    if value == key:
+                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_unicode(label))))
+                    init += u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_unicode(label)))
             elif type(self.choices) == list:
-                #debug = "list"
-                for (key,label) in self.choices:
-                    if value==key:
-                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(key,escapejs(smart_unicode(label))))
-                    init+=u'{{"id":"{0}","label":"{1}"}},'.format(key,escapejs(smart_unicode(label)))
+                
+                for (key, label) in self.choices:
+                    if value == key:
+                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_unicode(label))))
+                    init += u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_unicode(label)))
             else:
                 # FORCE RELOAD DATAS
                 elements = self.choices.queryset
                 elements._result_cache = None
-
                 for choice in elements:
-                    init+=u'{{"id":"{0}","label":"{1}"}},'.format(choice.pk,escapejs(smart_unicode(choice)))
+                    init += u'{{"id":"{0}","label":"{1}"}},'.format(choice.pk, escapejs(smart_unicode(choice)))
                     if value and (type(value) is list) and (choice.pk in value):
-                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(int(choice.pk),escapejs(smart_unicode(choice))))
-                
-                
+                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(int(choice.pk), escapejs(smart_unicode(choice))))
         else:
-            init ="getForeignKeys(http,'{0}',amc_items,{{".format(vurl)
-            comma=False
+            init = "getForeignKeys(http,'{0}',amc_items,{{".format(vurl)
+            comma = False
             for field in self.autofill:
                 if comma:
-                    init+=","
+                    init += ","
                 else:
-                    comma=True
-                init+="'{0}':{1}.{0}".format(field,vform)
-            init+="}},'{0}',{0},$select.search,{1})\"".format(vmodel,self.autofill_deepness)
+                    comma = True
+                init += "'{0}':{1}.{0}".format(field, vform)
+            init += "}},'{0}',{0},$select.search,{1})\"".format(vmodel, self.autofill_deepness)
         
-        
-
-
-
-        html =u'<md-chips ng-model="amc_select.{0}" md-autocomplete-snap id="{0}" name="{0}" '.format(vmodel)
-        html+=u'    md-transform-chip="amc_transformChip($chip)"'
-        #html+=u'    initial = "loadVegetables()"'
-        html+=u"    ng-init = 'amc_items.{0} = [".format(vmodel)
+        html = u'<md-chips ng-model="amc_select.{0}" md-autocomplete-snap id="{0}" name="{0}" '.format(vmodel)
+        html += u'    md-transform-chip="amc_transformChip($chip)"'
+        # html += u'    initial = "loadVegetables()"'
+        html += u"    ng-init = 'amc_items.{0} = [".format(vmodel)
         #        {"name":"Broccoli","type":"Brassica","_lowername":"broccoli","_lowertype":"brassica"}
-        html+=init
+        html += init
         if valuejs:
-            #html+=u" ng-init = 'amc_select.{0} = [".format(vmodel)
-            html+=u"]; amc_select.{0} = [".format(vmodel)
-            html+=''.join(valuejs)
-            html+=u"]'"
-        html+=u"]'"
-        html+=u'    md-require-match="amc_autocompleteDemoRequireMatch">'
-        html+=u'    <md-autocomplete'
-
-
-        html+=u'            md-selected-item="amc_selectedItem.{}"'.format(vmodel)
-        html+=u'            md-search-text="amc_searchText.{}"'.format(vmodel)
-        html+=u'            md-items="item in amc_querySearch(amc_searchText.{0}, \'{0}\', \'{0}\')"'.format(vmodel)
-        html+=u'            md-item-text="item.id"'
-        html+=u'            placeholder="{}">'.format(placeholder)
-        html+=u'        <span md-highlight-text="amc_searchText.{}">'.format(vmodel)
-        html+=u'            {{item.label}}</span>'
-        html+=u'    </md-autocomplete>'
-        html+=u'    <md-chip-template>'
-        html+=u'        <span>'
-        html+=u'        {{$chip.label}}'
-        html+=u'        </span>'
-        html+=u'    </md-chip-template>'
-        html+=u'</md-chips>'
-        #html+=init
-        #html+=debug
+            # html += u" ng-init = 'amc_select.{0} = [".format(vmodel)
+            html += u"]; amc_select.{0} = [".format(vmodel)
+            html += ''.join(valuejs)
+            html += u"]'"
+        html += u"]'"
+        html += u'    md-require-match="amc_autocompleteDemoRequireMatch">'
+        html += u'    <md-autocomplete'
+        html += u'            md-selected-item="amc_selectedItem.{}"'.format(vmodel)
+        html += u'            md-search-text="amc_searchText.{}"'.format(vmodel)
+        html += u'            md-items="item in amc_querySearch(amc_searchText.{0}, \'{0}\', \'{0}\')"'.format(vmodel)
+        html += u'            md-item-text="item.id"'
+        html += u'            placeholder="{}">'.format(placeholder)
+        html += u'        <span md-highlight-text="amc_searchText.{}">'.format(vmodel)
+        html += u'            {{item.label}}</span>'
+        html += u'    </md-autocomplete>'
+        html += u'    <md-chip-template>'
+        html += u'        <span>'
+        html += u'        {{$chip.label}}'
+        html += u'        </span>'
+        html += u'    </md-chip-template>'
+        html += u'</md-chips>'
         return html
+
 
 class StaticSelect(forms.widgets.Select):
     '''
@@ -195,7 +183,7 @@ class StaticSelect(forms.widgets.Select):
         vid=attrs.get('id','id_{0}'.format(name))
         vstyle=attrs.get('style','')
         vform=self.form_name
-        placeholder = escapejs(_('Comience a escribir'))
+        placeholder = escapejs(_('Select an option'))
         is_multiple = hasattr(self,"multiple") and self.multiple
         
         # Render
@@ -339,70 +327,83 @@ class DynamicSelect(forms.widgets.Select):
     
     def render(self, name, value, attrs=None, choices=()):
         if not self.autofill_url:
-            raise IOError ("autofill_url not defined")
+            raise IOError("autofill_url not defined")
         # Initialization
-        required=self.attrs.get('ng-required','false')
-        vmodel=self.field_name
-        vid=attrs.get('id','id_{0}'.format(name))
-        vstyle=attrs.get('style','')
-        vform=self.form_name
-        vurl = reverse(self.autofill_url,kwargs={'search':'a'})[:-1]
+        required = self.attrs.get('ng-required', 'false')
+        vmodel = self.field_name
+        vid = attrs.get('id', 'id_{0}'.format(name))
+        vstyle = attrs.get('style', '')
+        vform = self.form_name
+        vurl = reverse(self.autofill_url, kwargs={'search': 'a'})[:-1]
         # Get access to the get_label() method and request for the label of the bound input
         if value:
-            func = resolve(vurl+'*').func
+            func = resolve(vurl + '*').func
             clss = get_class(func)
             if self.__language:
                 clss.language = self.__language
-            label=clss().get_label(value)
+            label = clss().get_label(value)
         
-        placeholder = _('Pulse * o empieze a escribir')
+        placeholder = _('Press * or start typing')
 
         # Render
-        html =u"<input name='{0}' ng-required='{1}' ng-model='{0}' id='{0}' type='hidden'".format(vmodel,required)
+        html = u"<input name='{0}' ng-required='{1}' ng-model='{0}' id='{0}' type='hidden'".format(vmodel, required)
         if value:
-            html+=" ng-init=\"{0}={1}\"".format(vmodel,value,vform)
-        html+=">"
-        html+='<ui-select'
-        if hasattr(self,"multiple") and self.multiple:
-            html+=' multiple '
+            html += " ng-init=\"{0}={1}\"".format(vmodel, value, vform)
+        html += ">"
+        html += '<ui-select'
+        if hasattr(self, "multiple") and self.multiple:
+            html += ' multiple '
         if value:
-            html+=u" ng-init=\"options.{0}=[{{'id':null,'label':'{3}'}},{{'id':{1},'label':'{2}'}}]; $select.selected=options.{0}[1]\"".format(vmodel,value,escapejs(label), placeholder)
+            html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{3}'}},{{'id':{1},'label':'{2}'}}]; $select.selected=options.{0}[1]\"".format(vmodel, value, escapejs(label), placeholder)
         else:
             # init options for form modal
-            html+=u" ng-init=\"options.{0}=[{{'id':null,'label':'{1}'}}]; \"".format(vmodel, placeholder)
-        html+=" id=\"{0}\"".format(vid)
-        html+=" ng-model=\"$parent.{0}\"".format(vmodel)
-        html+=" on-select=\"selectedOptionSelect({0}.{1},{2})\"".format(vform,vmodel,value)
-        html+=' theme="bootstrap"'
-        html+=' ng-disabled="disabled"'
-        html+=' reset-search-input="false"'
-        html+='>'
-        html+=' <ui-select-match placeholder="{}">'.format(placeholder)
-        html+=' <div ng-bind-html="$select.selected.label"></div>'
-        html+=' </ui-select-match>'
-        html+=' <ui-select-choices'
-        html+="     style=\"{0}\"".format(vstyle)
-        html+="     repeat=\"value.id as value in options.{0}\"".format(vmodel)
-        html+="     refresh=\"getForeignKeys(http,'{0}',options,{{".format(vurl)
-        comma=False
+            html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{1}'}}]; \"".format(vmodel, placeholder)
+            html += u" ng-click=\"option_default=getForeignKeys(http,'{0}',options,{{".format(vurl)
+            comma = False
+            for field in self.autofill:
+                if comma:
+                    html += ","
+                else:
+                    comma = True
+                html += "'{0}':{1}.{0}".format(field, vform)
+            html += "}},'{0}',{1},'*',{2}); options.{0}=option_default['rows']\"".format(vmodel, vmodel, self.autofill_deepness)
+
+        html += " id=\"{0}\"".format(vid)
+        html += " ng-model=\"$parent.{0}\"".format(vmodel)
+        html += " on-select=\"selectedOptionSelect({0}.{1},{2})\"".format(vform, vmodel, value)
+        html += ' theme="bootstrap"'
+        html += ' ng-disabled="disabled"'
+        html += ' reset-search-input="false"'
+        html += '>'
+        html += ' <ui-select-match placeholder="{}">'.format(placeholder)
+        html += ' <div ng-bind-html="$select.selected.label"></div>'
+        html += ' </ui-select-match>'
+        html += ' <ui-select-choices'
+        html += "     style=\"{0}\"".format(vstyle)
+        html += "     repeat=\"value.id as value in options.{0}\"".format(vmodel)
+        html += "     refresh=\"getForeignKeys(http,'{0}',options,{{".format(vurl)
+        comma = False
         for field in self.autofill:
             if comma:
-                html+=","
+                html += ","
             else:
-                comma=True
-            html+="'{0}':{1}.{0}".format(field,vform)
-        html+="}},'{0}',{1},$select.search,{2})\"".format(vmodel,vmodel,self.autofill_deepness)
-        html+='     refresh-delay="0">'
-        html+='     <div ng-bind-html="value.label| highlightSelect: $select.search"></div>'
-        html+=' </ui-select-choices>'
-        html+='</ui-select>'
+                comma = True
+            html += "'{0}':{1}.{0}".format(field, vform)
+        html += "}},'{0}',{1},$select.search,{2})\"".format(vmodel, vmodel, self.autofill_deepness)
+        html += '     refresh-delay="0">'
+        html += '     <div ng-bind-html="value.label| highlightSelect: $select.search"></div>'
+        html += ' </ui-select-choices>'
+        html += '</ui-select>'
         return html
 
+
 class MultiStaticSelect(StaticSelectMulti):
-    static=True
+    static = True
+
 
 class MultiDynamicSelect(StaticSelectMulti):
-    static=False
+    static = False
+
 
 class MultiStaticSelect_old(StaticSelect):
     multiple=True
