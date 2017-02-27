@@ -1,1 +1,1 @@
-../../src/debug.py
+../codenerix/debug.py
