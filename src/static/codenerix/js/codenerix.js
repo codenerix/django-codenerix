@@ -871,8 +871,10 @@ function dynamic_fields(scope) {
                                 }
                             }
                             // Set new value
-                            scope[scope.form_name][key].$setViewValue(value3);
-                            scope[scope.form_name][key].$render();
+                            if (scope[scope.form_name] != undefined && scope[scope.form_name][key] != undefined){
+                                scope[scope.form_name][key].$setViewValue(value3);
+                                scope[scope.form_name][key].$render();
+                            }
                         }
                     }));
                     return;
