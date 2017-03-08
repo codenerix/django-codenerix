@@ -192,6 +192,7 @@ class BaseForm(object):
                 ('inline',False),       # input in line with label
                 ('label',True),
                 ('extra',None),
+                ('extra_div',None),
                 ]
         labels=[x[0] for x in attributes]
         
@@ -224,6 +225,7 @@ class BaseForm(object):
                 if len(styles)>=4: token['textalign']=g[1][3]
                 if len(styles)>=5: token['inline']=g[1][4]
                 if len(styles)>=7: token['extra']=g[1][5]
+                if len(styles)>=8: token['extra_div']=g[1][6]
             else:
                 token['columns']=g[1]
             fs=g[2:]
