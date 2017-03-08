@@ -19,12 +19,14 @@
 # limitations under the License.
 
 from django.template import Library
-from codenerix.templatetags_lists import widgetize, istype, addextra, addattr, lockattr, setattrs, ngmodel, inireadonly, date2timewidget, datewidget, unlist, foreignkey, headstyle, column_counter, add_columns, linkedinfo, get_depa, getws, get_field_list, invalidator
+from codenerix.templatetags_lists import join_list, widgetize, istype, addextra, addattr, lockattr, setattrs, ngmodel, inireadonly, date2timewidget, datewidget, unlist, foreignkey, headstyle, column_counter, add_columns, linkedinfo, get_depa, getws, get_field_list, invalidator
 
 def fbuilder1(f): return lambda arg: f(arg)
 def fbuilder2(f): return lambda arg1,arg2: f(arg1,arg2)
 
 register = Library()
+
+register.filter('join_list',fbuilder2(join_list))
 register.filter('widgetize',fbuilder1(widgetize))
 register.filter('istype',fbuilder2(istype))
 register.filter('addextra',fbuilder2(addextra))

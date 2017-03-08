@@ -26,6 +26,7 @@ from djng.forms.angular_base import TupleErrorList
 
 from codenerix.helpers import model_inspect
 
+
 def widgetize(i):
     # Initialize structure
     attrs=i.__dict__.get("field",{}).__dict__.get("widget",{}).__dict__.get('attrs',{})
@@ -258,3 +259,10 @@ def get_field_list(forms):
 
 def invalidator(formname, inp):
     return mark_safe("{{'codenerix_invalid':{0}.{1}.$invalid}}".format(formname,ngmodel(inp)))
+
+
+def join_list(l, string):
+    if l:
+        return string.join(l)
+    else:
+        return ''
