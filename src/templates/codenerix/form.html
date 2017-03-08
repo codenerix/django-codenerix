@@ -43,11 +43,13 @@ limitations under the License.
     data-custom-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" 
     class="form-horizontal"
     role="form"
+    autocomplete="off"
+    ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'">
+    <div 
     {% if form.attributes.ngcontroller %}
     ng-controller="{{ form.attributes.ngcontroller }}"
     {% endif %}
-    autocomplete="off"
-    ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'">
+    >
         {% block extra_form_top%}{% endblock %}
         <input type="text" id="id_elementid" name="elementid" ng-model="elementid" ng-value="elementid" style="display:none" />
         <input type="text" id="__pk__" name="__pk__" ng-model="__pk__" ng-value="{{object.pk}}" value="{{object.pk}}" style="display:none" />
@@ -177,7 +179,7 @@ limitations under the License.
                                                 {% with zi=forloop.revcounter|stringformat:"s" %}
                                                 {% with zindex="style=z-index:"|add:zi %}
                                                 {% with attrs=input|widgetize|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:field.extra|lockattr:cannot_update %}
-                                                <div class="col-sm-{{field.columns}}" ng-class="{{form.form_name|invalidator:input}}">
+                                                <div class="col-sm-{{field.columns}}" ng-class="{{form.form_name|invalidator:input}}" {{field.extra_div|join_list:" "}}>
                                                     {# FIELD: INI {{{2 #}
 
                                                     {% if field.html_helper_pre %}
@@ -556,6 +558,7 @@ limitations under the License.
             </div>
         </div>
         {% block extra_form_bottom%}{% endblock %}
+</div>        
 </form>
 {% endwith %}
 {% endwith %}
