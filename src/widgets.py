@@ -325,6 +325,18 @@ class DynamicSelect(forms.widgets.Select):
     def set_language(self, language):
         self.__language = language
     
+    def __get_foreign(self, vurl, vform, vmodel, search):
+        html = "getForeignKeys(http,'{0}',options,{{".format(vurl)
+        comma = False
+        for field in self.autofill:
+            if comma:
+                html += ","
+            else:
+                comma = True
+            html += "'{0}':{1}.{0}".format(field, vform)
+        html += "}}, '{0}', {1}, {2}, {3});\"".format(vmodel, vmodel, search, self.autofill_deepness)
+        return html
+
     def render(self, name, value, attrs=None, choices=()):
         if not self.autofill_url:
             raise IOError("autofill_url not defined")
@@ -354,19 +366,12 @@ class DynamicSelect(forms.widgets.Select):
         if hasattr(self, "multiple") and self.multiple:
             html += ' multiple '
         if value:
-            html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{3}'}},{{'id':{1},'label':'{2}'}}]; $select.selected=options.{0}[1]\"".format(vmodel, value, escapejs(label), placeholder)
+            html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{3}'}},{{'id':{1},'label':'{2}'}}]; $select.selected=options.{0}[1];".format(vmodel, value, escapejs(label), placeholder)
+            html += u" option_default={}; options.{}=option_default['rows']".format(self.__get_foreign(vurl, vform, vmodel, "'*'"), vmodel)
         else:
             # init options for form modal
             html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{1}'}}]; \"".format(vmodel, placeholder)
-            html += u" ng-click=\"option_default=getForeignKeys(http,'{0}',options,{{".format(vurl)
-            comma = False
-            for field in self.autofill:
-                if comma:
-                    html += ","
-                else:
-                    comma = True
-                html += "'{0}':{1}.{0}".format(field, vform)
-            html += "}},'{0}',{1},'*',{2}); options.{0}=option_default['rows']\"".format(vmodel, vmodel, self.autofill_deepness)
+        html += u" ng-click=\"option_default={}; options.{}=option_default['rows']".format(self.__get_foreign(vurl, vform, vmodel, "'*'"), vmodel)
 
         html += " id=\"{0}\"".format(vid)
         html += " ng-model=\"$parent.{0}\"".format(vmodel)
@@ -381,15 +386,7 @@ class DynamicSelect(forms.widgets.Select):
         html += ' <ui-select-choices'
         html += "     style=\"{0}\"".format(vstyle)
         html += "     repeat=\"value.id as value in options.{0}\"".format(vmodel)
-        html += "     refresh=\"getForeignKeys(http,'{0}',options,{{".format(vurl)
-        comma = False
-        for field in self.autofill:
-            if comma:
-                html += ","
-            else:
-                comma = True
-            html += "'{0}':{1}.{0}".format(field, vform)
-        html += "}},'{0}',{1},$select.search,{2})\"".format(vmodel, vmodel, self.autofill_deepness)
+        html += "     refresh=\"{}\"".format(self.__get_foreign(vurl, vform, vmodel, "$select.search"))
         html += '     refresh-delay="0">'
         html += '     <div ng-bind-html="value.label| highlightSelect: $select.search"></div>'
         html += ' </ui-select-choices>'
