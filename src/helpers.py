@@ -223,7 +223,7 @@ def get_static(desired,user,lang,default,extension='html'):
         else:
             addon=""
         target="%s%s.%s" % (basepath,addon,extension)
-        if os.path.exists(os.path.join(settings.STATIC_ROOT, target)):
+        if hasattr(settings, "STATIC_ROOT") and os.path.exists(os.path.join(settings.STATIC_ROOT, target)):
             found=target
             break
     

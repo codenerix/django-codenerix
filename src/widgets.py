@@ -666,11 +666,14 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
 
 class WysiwygAngularRender(forms.widgets.HiddenInput):
     def render_wysiwyg(self, ngmodel, extraif="", force_editors=False, attrs=None):
+        # Compute hashkey
+        hashkey = attrs.get('id',str(random.randint(0,1000)))
         # Editors
         editors = {}
         editors['quill'] = _("NG Quill")
         editors['textangular'] = _("Text Angular")
         editors['raw'] = _("Source code")
+        editors['preview'] = _("Preview")
         editors_list = []
         for keyarg in editors.keys():
             editors_list.append("\"{0}\":{{\"key\":\"{0}\",\"name\":\"{1}\"}}".format(keyarg, editors[keyarg]))
@@ -695,20 +698,21 @@ class WysiwygAngularRender(forms.widgets.HiddenInput):
         attributes_ngquill = " ".join(attributes_ngquill)
         # Get normal field
         html = ""
-        html += "<div ng-init='editors={0}'></div>".format(editors_json)
+        html += "<div ng-init='editors_{1}={0}'></div>".format(editors_json, hashkey)
         # Render wysiwyg editor's selector
         if force_editors:
             ngshow = ""
         else:
             ngshow = " ng-show='block.type==\"string\"'>"
-        html += "<select ng-model='editor'{0}>".format(ngshow)
-        html += "<option ng-repeat=\"editor in editors\" value=\"{{editor.key}}\">{{editor.name}}</option>"
+        html += "<select ng-model='editor_{1}'{0}>".format(ngshow, hashkey)
+        html += "<option ng-repeat=\"subeditor in editors_{0}\" value=\"{{{{subeditor.key}}}}\">{{{{subeditor.name}}}}</option>".format(hashkey)
         html += "</select>"
         
         # Render wysiwyg editors
-        html += "<textarea ng-model=\"{0}\" ng-if='{1}editor==\"raw\"' class=\"form-control\" rows=\"10\"{2} {3}></textarea>".format(ngmodel, extraif, required, attributes)
-        html += "<ng-quill-editor ng-model=\"{0}\" ng-if='{1}editor==\"quill\"'{2} {3}></ng-quill-editor>".format(ngmodel, extraif, required, attributes_ngquill)
-        html += "<text-angular ng-model=\"{0}\" ng-if='{1}editor==\"textangular\"'{2} {3}></textangular>".format(ngmodel, extraif, required, attributes)
+        html += "<div ng-if='{1}editor_{4}==\"preview\"' class=\"form-control\" ng-bind-html=\"{0}\" {2} {3}></div>".format(ngmodel, extraif, required, attributes, hashkey)
+        html += "<textarea ng-model=\"{0}\" ng-if='{1}editor_{4}==\"raw\"' class=\"form-control\" rows=\"10\"{2} {3}></textarea>".format(ngmodel, extraif, required, attributes, hashkey)
+        html += "<ng-quill-editor ng-model=\"{0}\" ng-if='{1}editor_{4}==\"quill\"'{2} {3}></ng-quill-editor>".format(ngmodel, extraif, required, attributes_ngquill, hashkey)
+        html += "<text-angular ng-model=\"{0}\" ng-if='{1}editor_{4}==\"textangular\"'{2} {3}></textangular>".format(ngmodel, extraif, required, attributes, hashkey)
         html += "<textarea ng-model=\"{0}\" ng-if='{1} true' style='background-color:#fdd'{2} {3}></textarea>".format(ngmodel, extraif, required, attributes)
         
         return html
@@ -716,6 +720,8 @@ class WysiwygAngularRender(forms.widgets.HiddenInput):
 
 class WysiwygAngularInput(WysiwygAngularRender):
     def render(self, name, value, attrs=None):
+        # Compute hashkey
+        hashkey = attrs.get('id',str(random.randint(0,1000)))
         # Get model name
         vmodel = attrs.get('ng-model') #.replace("'",'"')
         init = attrs.get('ng-init', '')
@@ -723,7 +729,7 @@ class WysiwygAngularInput(WysiwygAngularRender):
         if value is None:
             value = ''
         # Render
-        html = "<div ng-init='editor=\"quill\"'>"
+        html = "<div ng-init='editor_{0}=\"quill\"'>".format(hashkey)
         html += u"<textarea name=\"{0}\" ng-model=\"{1}\" ng-show='false' ng-init=\"{3}\">{2}</textarea>".format(name, vmodel, value, init)
         html += self.render_wysiwyg(ngmodel=vmodel, force_editors=True, attrs=attrs)
         html += "</div>"
@@ -734,6 +740,9 @@ class WysiwygAngularInput(WysiwygAngularRender):
 
 class MultiBlockWysiwygInput(WysiwygAngularRender):
     def render(self, name, value, attrs=None):
+        # Compute hashkey
+        hashkey = attrs.get('id',str(random.randint(0,1000)))
+        
         # Get model name
         vmodel = attrs.get('ng-model').replace("'",'"')
         
@@ -742,7 +751,7 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
         html += u"<input type='hidden' name='{0}' ng-model='{1}'>".format(name, vmodel)
         
         # Render blocks with ANGULAR
-        html += "<div ng-repeat='block in {0}[\"__JSON_DATA__\"]' ng-init='editor=\"quill\"'>".format(vmodel)
+        html += "<div ng-repeat='block in {0}[\"__JSON_DATA__\"]' ng-init='editor_{1}=\"quill\"'>".format(vmodel, hashkey)
         html += self.render_wysiwyg(ngmodel='block.value', extraif="block.type==\"string\" && ")
         html += "</div>"
         
