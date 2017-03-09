@@ -709,7 +709,7 @@ class WysiwygAngularRender(forms.widgets.HiddenInput):
         html += "</select>"
         
         # Render wysiwyg editors
-        html += "<div ng-if='{1}editor_{4}==\"preview\"' class=\"form-control\" ng-bind-html=\"{0}\" {2} {3}></div>".format(ngmodel, extraif, required, attributes, hashkey)
+        html += "<div ng-if='{1}editor_{2}==\"preview\"' class=\"form-control\" ng-bind-html=\"{0}\"></div>".format(ngmodel, extraif, hashkey)
         html += "<textarea ng-model=\"{0}\" ng-if='{1}editor_{4}==\"raw\"' class=\"form-control\" rows=\"10\"{2} {3}></textarea>".format(ngmodel, extraif, required, attributes, hashkey)
         html += "<ng-quill-editor ng-model=\"{0}\" ng-if='{1}editor_{4}==\"quill\"'{2} {3}></ng-quill-editor>".format(ngmodel, extraif, required, attributes_ngquill, hashkey)
         html += "<text-angular ng-model=\"{0}\" ng-if='{1}editor_{4}==\"textangular\"'{2} {3}></textangular>".format(ngmodel, extraif, required, attributes, hashkey)
