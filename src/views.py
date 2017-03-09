@@ -56,6 +56,7 @@ from django.core.exceptions import ValidationError
 from django.core.cache import cache
 from django.utils import formats
 from django.http import QueryDict, HttpResponseBadRequest
+from django.utils.translation import get_language
 
 from django.conf import settings
 
@@ -526,7 +527,7 @@ class GenBase(object):
         self.profile=get_profile(self.user)
         
         # Get language
-        self.language = request.LANGUAGE_CODE
+        self.language = get_language()
 
         # Build extracontext
         if 'extra_context' not in self._attributes:
@@ -550,7 +551,7 @@ class GenBase(object):
             template_model_ext=self.template_model_ext
         else:
             template_model_ext='html'
-        templates=get_template(template_model,self.user,self.request.LANGUAGE_CODE,template_model_ext, raise_error=False)
+        templates=get_template(template_model,self.user,self.language,template_model_ext, raise_error=False)
         if type(templates)==list:
             templates.append("codenerix/{0}.html".format(self.get_template_names_key))
 
@@ -616,13 +617,13 @@ class GenBase(object):
                     # Analize data type
                     if type(value)==datetime.datetime:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                        value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
                     elif type(value)==datetime.date:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                        value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
                     elif type(value)==datetime.time:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                        value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                     else:
                         # Analize if is related with another field but it is not a reverse relationship
                         isrelated=(getattr(value,'all',None) is not None)
@@ -696,7 +697,7 @@ class GenBase(object):
                     
                     # Save static partial information
                     tabfinal['static_partial_row_path'] = static_partial_row_path
-                    tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.request.LANGUAGE_CODE, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
+                    tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
                     
                     # Save Internal ID
                     tabfinal['internal_id'] = internal_id
@@ -739,7 +740,7 @@ class GenBase(object):
             
             # Save static partial information
             tabfinal['static_partial_row_path'] = static_partial_row_path
-            tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.request.LANGUAGE_CODE, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
+            tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
             
             # Save Internal ID
             tabfinal['internal_id'] = internal_id
@@ -1057,13 +1058,13 @@ class GenList(GenBase, ListView):
             static_partial_row_path="{0}/{1}_rows.html".format(self._appname,"{0}s".format(self._modelname.lower()))
         else:
             static_partial_row_path=self.static_partial_row
-        self.extra_context['static_partial_row']=get_static(static_partial_row_path,self.user,self.request.LANGUAGE_CODE, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
+        self.extra_context['static_partial_row']=get_static(static_partial_row_path,self.user,self.language, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
         
         if 'static_filters_row' not in self._attributes:
             static_filters_row_path="{0}/{1}_filters.js".format(self._appname,"{0}s".format(self._modelname.lower()))
         else:
             static_filters_row_path=self.static_filters_row
-        self.extra_context['static_filters_row']=get_static(static_filters_row_path,self.user,self.request.LANGUAGE_CODE,'codenerix/js/rows.js','js')
+        self.extra_context['static_filters_row']=get_static(static_filters_row_path,self.user,self.language,'codenerix/js/rows.js','js')
         
         if 'field_delete' not in self._attributes:
             self.extra_context['field_delete'] = False
@@ -2059,7 +2060,7 @@ class GenList(GenBase, ListView):
             else:                                           template_base='base/base'
             if 'template_base_ext' in self._attributes:    template_base_ext=self.template_base_ext
             else:                                           template_base_ext='html'
-            context['template_base']=get_template(template_base,self.user,self.request.LANGUAGE_CODE,extension=template_base_ext)
+            context['template_base']=get_template(template_base,self.user,self.language,extension=template_base_ext)
         
         # Try to convert object_id to a numeric id
         object_id=kwargs.get('object_id',None)
@@ -2372,13 +2373,13 @@ class GenList(GenBase, ListView):
                     # Rewrite values if required
                     if type(value)==datetime.datetime:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                        value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
                     elif type(value)==datetime.date:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                        value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
                     elif type(value)==datetime.time:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                        value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                     # Save token
                     token[key]=value
                 
@@ -2416,13 +2417,13 @@ class GenList(GenBase, ListView):
                             value=self.bodybuilder(value.all(),rkval)
                         elif type(value)==datetime.datetime:
                             # Convert datetime to string
-                            value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                            value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
                         elif type(value)==datetime.date:
                             # Convert datetime to string
-                            value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                            value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
                         elif type(value)==datetime.time:
                             # Convert datetime to string
-                            value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                            value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                         elif related:
                             # If the object is related but nobody is taking care of it
                             values=[]
@@ -2781,13 +2782,13 @@ class GenModify(object):
                             # Rewrite inpvalues if required
                             if type(inpvalue)==datetime.datetime:
                                 # Convert datetime to string
-                                inpvalue=inpvalue.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                                inpvalue=inpvalue.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
                             elif type(inpvalue)==datetime.date:
                                 # Convert datetime to string
-                                inpvalue=inpvalue.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                                inpvalue=inpvalue.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
                             elif type(inpvalue)==datetime.time:
                                 # Convert datetime to string
-                                inpvalue=inpvalue.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.request.LANGUAGE_CODE)[0])
+                                inpvalue=inpvalue.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                             
                             if not json_details:
                                 fields[inp.html_name] = inpvalue
