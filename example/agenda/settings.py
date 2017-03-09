@@ -172,7 +172,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -291,4 +291,4 @@ TEMPLATES = [
 # Autoload for DEBUG system
 autourl = lambda URLPATTERNS: autourl_debug(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI)
 
-(INSTALLED_APPS, MIDDLEWARE_CLASSES) = autoload_debug(INSTALLED_APPS, MIDDLEWARE_CLASSES, DEBUG, SPAGHETTI, ROSETTA, ADMINSITE, DEBUG_TOOLBAR, DEBUG_PANEL, SNIPPET_SCREAM, GRAPH_MODELS)
+(INSTALLED_APPS, MIDDLEWARE) = autoload_debug(INSTALLED_APPS, MIDDLEWARE, DEBUG, SPAGHETTI, ROSETTA, ADMINSITE, DEBUG_TOOLBAR, DEBUG_PANEL, SNIPPET_SCREAM, GRAPH_MODELS)

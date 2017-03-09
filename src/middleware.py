@@ -25,11 +25,13 @@ from django.http import HttpResponsePermanentRedirect
 from django.conf import settings
 
 class SecureRequiredMiddleware(object):
-    def __init__(self):
+    def __init__(self, get_response=None):
+        self.get_response = get_response
         self.paths = getattr(settings, 'HTTPS_PATHS', getattr(settings, 'SECURE_REQUIRED_PATHS',('/',)))
         self.enabled = self.paths and getattr(settings, 'HTTPS_SUPPORT', True)
     
     def process_request(self, request):
+        
         if self.enabled and not request.is_secure():
             for path in self.paths:
                 full_path = request.get_full_path()
@@ -41,14 +43,43 @@ class SecureRequiredMiddleware(object):
                     request_url = request.build_absolute_uri(request.get_full_path())
                     secure_url = request_url.replace('http://', 'https://')
                     return HttpResponsePermanentRedirect(secure_url)
-        return None
+    
+    def __call__(self, request):
+        # Code to be executed for each request before the view (and later middleware) are called.
+        self.process_request(request)
+        
+        # Get response
+        response = self.get_response(request)
+        
+        # Code to be executed for each request/response after the view is called
+        # ... pass ...
+        
+        # Return response
+        return response
+
 
 class CurrentUserMiddleware(object):
     '''
     Let the system to have the username everywhere
     '''
+    def __init__(self, get_response=None):
+        self.get_response = get_response
+    
     def process_request(self, request):
         _user.value = request.user
+    
+    def __call__(self, request):
+        # Code to be executed for each request before the view (and later middleware) are called.
+        self.process_request(request)
+        
+        # Get response
+        response = self.get_response(request)
+        
+        # Code to be executed for each request/response after the view is called
+        # ... pass ...
+        
+        # Return response
+        return response
     
 def get_current_user():
     '''

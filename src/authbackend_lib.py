@@ -90,15 +90,32 @@ class LimitedAuthMiddleware(object):
     '''
     Check every request if the user should or shouldn't be inside the system
     
-    NOTE: install in your MIDDLEWARE_CLASSES setting after (order matters):
+    NOTE: install in your MIDDLEWARE setting after (order matters):
         'django.contrib.auth.middleware.AuthenticationMiddleware'
     '''
+    
+    def __init__(self, get_response=None):
+        self.get_response = get_response
     
     def process_request(self, request):
         # If the user is authenticated and shouldn't be
         if request.user.is_authenticated() and not check_auth(request.user):
             # Push it out from the system
             logout(request)
+    
+    def __call__(self, request):
+        
+        # Code to be executed for each request before the view (and later middleware) are called.
+        self.process_request(request)
+        
+        # Get response
+        response = self.get_response(request)
+        
+        # Code to be executed for each request/response after the view is called
+        # ... pass ...
+        
+        # Return response
+        return response
 
 
 class TokenAuth(ModelBackend):
@@ -215,7 +232,7 @@ class TokenAuthMiddleware(object):
     '''
     Check for every request if the user is not loged in, so we can log it in with a TOKEN
     
-    NOTE 1: install in your MIDDLEWARE_CLASSES setting after (order matters):
+    NOTE 1: install in your MIDDLEWARE setting after (order matters):
         'django.contrib.auth.middleware.AuthenticationMiddleware'
     
     NOTE 2: if you are using POST with HTTPS, Django will require to send Referer, to avoid
@@ -233,6 +250,9 @@ class TokenAuthMiddleware(object):
         They recommend in this post to use the decorator, but we didn't manage to make it work
         in the post() method inside our class-view. Probably this will work in the dispatch().
     '''
+    
+    def __init__(self, get_response=None):
+        self.get_response = get_response
     
     def process_request(self, request):
         # By default we are not in authtoken
@@ -260,4 +280,18 @@ class TokenAuthMiddleware(object):
                 else:
                     json_details = False
                 request.json_details = json_details
+    
+    def __call__(self, request):
+        
+        # Code to be executed for each request before the view (and later middleware) are called.
+        self.process_request(request)
+        
+        # Get response
+        response = self.get_response(request)
+        
+        # Code to be executed for each request/response after the view is called
+        # ... pass ...
+        
+        # Return response
+        return response
 

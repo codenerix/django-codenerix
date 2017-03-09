@@ -78,26 +78,35 @@ DEBUG_TOOLBAR_DEFAULT_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
 # Autoload
-def autoload(INSTALLED_APPS, MIDDLEWARE_CLASSES, DEBUG=False, SPAGHETTI=False, ROSETTA=False, ADMINSITE=False, DEBUG_TOOLBAR=False, DEBUG_PANEL=False, SNIPPET_SCREAM=False, GRAPH_MODELS=False, CODENERIX_DISABLE_LOG=False):
+def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=False, ADMINSITE=False, DEBUG_TOOLBAR=False, DEBUG_PANEL=False, SNIPPET_SCREAM=False, GRAPH_MODELS=False, CODENERIX_DISABLE_LOG=False):
+    EXTRA_MIDDLEWARES=[]
     if DEBUG and SPAGHETTI:
         INSTALLED_APPS += ('django_spaghetti',)
     if DEBUG and ROSETTA:
         INSTALLED_APPS+=('rosetta',)
     if DEBUG and ADMINSITE and 'django.contrib.admin' not in INSTALLED_APPS and not CODENERIX_DISABLE_LOG:
         INSTALLED_APPS+=('django.contrib.admin',)
-        MIDDLEWARE_CLASSES+=('django.contrib.messages.middleware.MessageMiddleware',)
+        EXTRA_MIDDLEWARES.append('django.contrib.messages.middleware.MessageMiddleware')
     if DEBUG and DEBUG_TOOLBAR:
         INSTALLED_APPS+=('debug_toolbar',)
         if DEBUG_PANEL:
             INSTALLED_APPS += ('debug_panel',)
-            MIDDLEWARE_CLASSES+=('debug_panel.middleware.DebugPanelMiddleware',)
+            EXTRA_MIDDLEWARES.append('debug_panel.middleware.DebugPanelMiddleware')
         else:
-            MIDDLEWARE_CLASSES+=('debug_toolbar.middleware.DebugToolbarMiddleware',)
+            EXTRA_MIDDLEWARES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
     if DEBUG and SNIPPET_SCREAM:
-        MIDDLEWARE_CLASSES+=('snippetscream.ProfileMiddleware',)
+        EXTRA_MIDDLEWARES.append('snippetscream.ProfileMiddleware')
     if DEBUG and GRAPH_MODELS:
         INSTALLED_APPS += ('django_extensions',)
-    return (INSTALLED_APPS, MIDDLEWARE_CLASSES)
+    
+    # Attach new middlewares
+    if type(MIDDLEWARE)==tuple:
+        MIDDLEWARE+=tuple(EXTRA_MIDDLEWARES)
+    else:
+        MIDDLEWARE+=list(EXTRA_MIDDLEWARES)
+    
+    # Return final results
+    return (INSTALLED_APPS, MIDDLEWARE)
 
 # Autourl
 def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI):
