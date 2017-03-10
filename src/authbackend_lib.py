@@ -39,33 +39,38 @@ def check_auth(user):
     - If the user has a Person and it is not "disabled": LOGIN GRANTED
     - Elsewhere: LOGIN DENIED
     '''
-    
+
     # Initialize authentication
     auth = None
     person = None
-    
+
     # Check if there is an user
     if user:
-        
+
         # It means that Django accepted the user and it is active
         if user.is_staff or user.is_superuser:
             # This is an administrator, let it in
             auth = user
         else:
             # It is a normal user, check if there is a person behind
-            person_related=getattr(user,"people",None)
-            
+            person_related = getattr(user, "people", None)
+
             # Check if this person has limited access or not
             if person_related:
                 # Must be only one
-                if person_related.count()==1:
-                    person=person_related.get()
-            elif getattr(user,'disabled',False) is not False:
+                if person_related.count() == 1:
+                    person = person_related.get()
+            elif getattr(user, 'disabled', False) is not False:
                 person = user
-            
-            if person and ( (person.disabled is None) or (person.disabled>timezone.now()) ):
-                # There is a person, no disabled found or the found one is fine to log in 
+
+            if person and ((person.disabled is None) or (person.disabled > timezone.now())):
+                # There is a person, no disabled found or the found one is fine to log in
                 auth = user
+
+            if auth is None:
+                person = getattr(user, "person", None)
+                if person is not None:
+                    auth = user
     
     # Return back the final decision
     return auth
@@ -76,11 +81,11 @@ def check_auth(user):
 #    Authentication system based on default Django's authentication system
 #    which extends the last one with check_auth() extra system limitations
 #    '''
-#    
+#
 #    def authenticate(self, username=None, password=None):
 #        # Launch default django authentication
 #        user = super(LimitedAuth, self).authenticate(username, password)
-#        
+#
 #        # Answer to the system
 #        answer = check_auth(user)
 #        return answer
@@ -89,31 +94,31 @@ def check_auth(user):
 class LimitedAuthMiddleware(object):
     '''
     Check every request if the user should or shouldn't be inside the system
-    
+
     NOTE: install in your MIDDLEWARE setting after (order matters):
         'django.contrib.auth.middleware.AuthenticationMiddleware'
     '''
-    
+
     def __init__(self, get_response=None):
         self.get_response = get_response
-    
+
     def process_request(self, request):
         # If the user is authenticated and shouldn't be
         if request.user.is_authenticated() and not check_auth(request.user):
             # Push it out from the system
             logout(request)
-    
+
     def __call__(self, request):
-        
+
         # Code to be executed for each request before the view (and later middleware) are called.
         self.process_request(request)
-        
+
         # Get response
         response = self.get_response(request)
-        
+
         # Code to be executed for each request/response after the view is called
         # ... pass ...
-        
+
         # Return response
         return response
 
@@ -122,14 +127,14 @@ class TokenAuth(ModelBackend):
     '''
     Authentication system based on a Token key
     '''
-    
+
     def authenticate(self, username=None, token=None, string=None):
         try:
             # Get the requested username
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             user = None
-        
+
         if user:
             # Get config
             config = {
@@ -144,7 +149,7 @@ class TokenAuth(ModelBackend):
             config_settings = getattr(settings,'AUTHENTICATION_TOKEN',{})
             for (key,value) in config_settings.items():
                 config[key]=value
-            
+
             # Get keys
             if config['key'] or config['master_unsigned'] or config['master_signed']:
                 if config['key'] and ( config['master_unsigned'] or config['master_signed'] ):
@@ -156,11 +161,11 @@ class TokenAuth(ModelBackend):
                         master = None
             else:
                 master = None
-            
+
             if config['user_unsigned'] or config['user_signed'] or config['otp_unsigned'] or config['otp_signed']:
                 if user.first_name:
                     user_key = user.first_name
-                    
+
                     if config['otp_unsigned'] or config['otp_signed']:
                         if not pyotp:
                             raise IOError,"PYOTP library not found, you can not use OTP signed/unsigned configuration"
@@ -183,11 +188,11 @@ class TokenAuth(ModelBackend):
             else:
                 user_key = None
                 otp = None
-            
+
             # Unsigned string
             if config['master_signed'] or config['user_signed'] or config['otp_signed']:
                 tosign=username+string
-            
+
             # Build the list of valid keys
             keys=[]
             if master:
@@ -211,19 +216,19 @@ class TokenAuth(ModelBackend):
                 if config['otp_signed']:                        # OTP KEY SIGNED
                     # keys.append("otp_signed")
                     keys.append(hashlib.sha1(tosign+otp).hexdigest())
-            
+
             # Key is valid
             if token in keys:
                 answer = user
             else:
                 # Not authenticated
                 answer = None
-            
+
         else:
-            
+
             # Username not found, not accepting the authentication request
             answer = None
-        
+
         # Return answer
         return answer
 
@@ -231,29 +236,29 @@ class TokenAuth(ModelBackend):
 class TokenAuthMiddleware(object):
     '''
     Check for every request if the user is not loged in, so we can log it in with a TOKEN
-    
+
     NOTE 1: install in your MIDDLEWARE setting after (order matters):
         'django.contrib.auth.middleware.AuthenticationMiddleware'
-    
+
     NOTE 2: if you are using POST with HTTPS, Django will require to send Referer, to avoid
         this problem you must add to the view of your url definition csrf_exempt(), as follows:
-        
+
         from django.views.decorators.csrf import csrf_exempt
         urlpatterns = patterns(
             # ...
-            # Will exclude `/api/v1/test` from CSRF 
+            # Will exclude `/api/v1/test` from CSRF
             url(r'^api/v1/test', csrf_exempt(TestApiHandler.as_view()))
             # ...
         )
-        
+
         Check: http://stackoverflow.com/questions/11374382/how-can-i-disable-djangos-csrf-protection-only-in-certain-cases
         They recommend in this post to use the decorator, but we didn't manage to make it work
         in the post() method inside our class-view. Probably this will work in the dispatch().
     '''
-    
+
     def __init__(self, get_response=None):
         self.get_response = get_response
-    
+
     def process_request(self, request):
         # By default we are not in authtoken
         request.authtoken=False
@@ -280,18 +285,17 @@ class TokenAuthMiddleware(object):
                 else:
                     json_details = False
                 request.json_details = json_details
-    
+
     def __call__(self, request):
-        
+
         # Code to be executed for each request before the view (and later middleware) are called.
         self.process_request(request)
-        
+
         # Get response
         response = self.get_response(request)
-        
+
         # Code to be executed for each request/response after the view is called
         # ... pass ...
-        
+
         # Return response
         return response
-
