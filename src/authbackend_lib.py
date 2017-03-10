@@ -53,25 +53,19 @@ def check_auth(user):
             auth = user
         else:
             # It is a normal user, check if there is a person behind
-            person_related = getattr(user, "people", None)
-
-            # Check if this person has limited access or not
-            if person_related:
-                # Must be only one
-                if person_related.count() == 1:
-                    person = person_related.get()
-            elif getattr(user, 'disabled', False) is not False:
-                person = user
+            person = getattr(user, "person", None)
+            if not person:
+                # Check if there is related one
+                person_related = getattr(user, "people", None)
+                if person_related:
+                    # Must be only one
+                    if person_related.count() == 1:
+                        person = person_related.get()
 
             if person and ((person.disabled is None) or (person.disabled > timezone.now())):
                 # There is a person, no disabled found or the found one is fine to log in
                 auth = user
 
-            if auth is None:
-                person = getattr(user, "person", None)
-                if person is not None:
-                    auth = user
-    
     # Return back the final decision
     return auth
 
