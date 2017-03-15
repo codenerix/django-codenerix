@@ -69,8 +69,10 @@ class CodenerixModel(models.Model):
         if answer is None:
             for related in self._meta.get_fields():
                 if 'on_delete' in related.__dict__ and related.on_delete == models.PROTECT:
-                    answer = _('Cannot delete item, relationship with %(model_name)s') % {'model_name': related.related_model._meta.verbose_name}
-                    break
+                    field = getattr(self, related.related_name, None)
+                    if field and field.exists():
+                        answer = _('Cannot delete item, relationship with %(model_name)s') % {'model_name': related.related_model._meta.verbose_name}
+                        break
         return answer
 
     def lock_delete(self, request=None):
