@@ -297,6 +297,23 @@ class TokenAuthMiddleware(object):
 
 
 class ActiveDirectoryGroupMembershipSSLBackend:
+    '''
+    Authorization backend for Active Directory in Django
+    
+    # Possible configuration parameters
+    # AD_SSL = True                             # Use SSL
+    # AD_CERT_FILE='/path/to/your/cert.txt'     # Path to SSL certificate
+    # AD_DEBUG_FILE='/tmp/ldap.debug'           # Path to DEBUG file (if none, Debugging will be disabled)
+    # AD_LDAP_PORT=9834                         # Port to use
+    # AD_DNS_NAME='CARMEN.CENTROLOGIC.COM'      # DNS nameserver if different thatn NT4 DOMAIN
+    AD_LOCK_UNAUTHORIZED=True                   # Unauthorized users in Active Directory should be locked in Django
+    AD_NT4_DOMAIN='CARMEN.CENTROLOGIC.COM'      # NT4 Domain name
+    AD_MAP_FIELDS= {                            # Fields to map:   left=Django   right=Active Directory
+            'email':        'mail',
+            'first_name':   'givenName',
+            'last_name':    'sn',
+        }
+    '''
     
     __debug = None
     
@@ -395,8 +412,24 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         
         if self.ldap_link(username, password, mode='LOGIN'):
             
-            # The user was validated
+            # The user was validated in Active Directory
             user = self.get_or_create_user(username,password)
+        
+        # Check if we didn't get a logged in user
+        if user:
+            # Make sure the user is active
+            user.is_active = True
+            user.save()
+        else:
+            
+            # User not authorized (lock it in Django)
+            if getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
+                u = User.objects.filter(username=username).first()
+                # Username found
+                if u:
+                    # Deactivate the user
+                    u.is_active=False
+                    u.save()
         
         # Return the final decision
         return user
@@ -517,18 +550,18 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         # Refresh the password
         user.set_password(password)
         
-        # Save the user until this point
-        user.save()
-        
-        # Validate user groups
+        # Validate the selected user and gotten information
         user = self.validate(user, info)
         if user:
             self.debug("User got validated!")
+            
+            # Autosave the user until this point
+            user.save()
+            
+            # Synchronize user
+            self.synchronize(user, info)
         else:
             self.debug("User didn't pass validation!")
-        
-        # Synchronize user
-        self.synchronize(user, info)
         
         # Finally return user
         return user
@@ -542,7 +575,10 @@ class ActiveDirectoryGroupMembershipSSLBackend:
     def validate(self, user, info):
         '''
         Dummy validate system, to be redeclared
+        User object here is not saved in the database, but it is ready to be saved
+        If the answer from this method is None, user will be denied to login in to the system!
         '''
+        self.debug("Validation process!")
         return user
     
     def synchronize(self, user, info):
@@ -550,6 +586,8 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         It tries to do a group synchronization if possible
         This methods should be redeclared by the developer
         '''
+        
+        self.debug("Synchronize!")
         
         # Remove all groups from this user
         user.groups.clear()
