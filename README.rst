@@ -28,6 +28,7 @@ Features
 * full control of permissions with added new permissions
 * integrated API system as standard
 * several authentication methods' including OTP (One Time Password)
+* ready for authentication with Microsoft Active Directory
 
 Ready for:
 ''''''''''
