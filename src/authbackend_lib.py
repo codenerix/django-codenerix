@@ -464,7 +464,8 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             info['groups']=groupsAD
             
             # Look for other tokens to get mapped
-            for (djfield, adfield) in enumerate(mapping):
+            for djfield in mapping.keys():
+                adfield = mapping[djfield]
                 if result.has_key(adfield):
                     info[djfield] = result[adfield][0]
                     self.debug("{}={}".format(adfield, info[djfield]))
@@ -495,16 +496,12 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            user = None
+            user = User(username=username)
         
-        if not user:
-            # Create the user
-            user = User(
-                    username=username,
-                    first_name=info.get('first_name',''),
-                    last_name=info.get('last_name',''),
-                    email=info.get('email',''),
-                    )
+        # Update user
+        user.first_name=info.get('first_name','')
+        user.last_name=info.get('last_name','')
+        user.email=info.get('email','')
         
         # Check if the user is in the Administrators groups
         is_admin = False
