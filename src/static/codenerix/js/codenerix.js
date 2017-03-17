@@ -546,7 +546,7 @@ function refresh($scope, $timeout, Register, callback, internal) {
                 // FIN: Decode base 64
                 var downloadLink = angular.element('<a></a>');
                 downloadLink.attr('href',window.URL.createObjectURL(blob));
-                downloadLink.attr('download', 'fileName.xlsx');
+                downloadLink.attr('download', $scope.tempdata.table.printer.filename);
                 downloadLink[0].click();
             }
             $scope.query.printer = null;
@@ -1664,12 +1664,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
 
     $scope.print_excel = function(){
         $scope.query.printer = 'xls';
-        console.log($scope);
-        console.log(Register);
-
-        refresh($scope, $timeout, Register, callback); 
-        console.log($scope.tempdata);
-        console.log($scope.tempdata.$promise.$$state.value);
+        refresh($scope, $timeout, Register, callback);
     };
     
     // Get details 
