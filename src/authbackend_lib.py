@@ -24,11 +24,12 @@ except ImportError:
     pyotp=None
 import hashlib
 import base64
+import ldap
 
 from django.utils import timezone
 from django.contrib.auth import logout
 from django.contrib.auth.backends import ModelBackend
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
 from django.conf import settings
 
@@ -293,3 +294,310 @@ class TokenAuthMiddleware(object):
 
         # Return response
         return response
+
+
+class ActiveDirectoryGroupMembershipSSLBackend:
+    '''
+    Authorization backend for Active Directory in Django
+    
+    # Possible configuration parameters
+    # AD_SSL = True                             # Use SSL
+    # AD_CERT_FILE='/path/to/your/cert.txt'     # Path to SSL certificate
+    # AD_DEBUG_FILE='/tmp/ldap.debug'           # Path to DEBUG file (if none, Debugging will be disabled)
+    # AD_LDAP_PORT=9834                         # Port to use
+    # AD_DNS_NAME='CARMEN.CENTROLOGIC.COM'      # DNS nameserver if different thatn NT4 DOMAIN
+    AD_LOCK_UNAUTHORIZED=True                   # Unauthorized users in Active Directory should be locked in Django
+    AD_NT4_DOMAIN='CARMEN.CENTROLOGIC.COM'      # NT4 Domain name
+    AD_MAP_FIELDS= {                            # Fields to map:   left=Django   right=Active Directory
+            'email':        'mail',
+            'first_name':   'givenName',
+            'last_name':    'sn',
+        }
+    '''
+    
+    __debug = None
+    
+    def debug(self, msg):
+        '''
+        Handle the debugging to a file
+        '''
+        # If debug is not disabled
+        if self.__debug is not False:
+            
+            # If never was set, try to set it up
+            if self.__debug is None:
+                
+                # Check what do we have inside settings
+                debug_filename = getattr(settings,"AD_DEBUG_FILE", None)
+                if debug_filename:
+                    # Open the debug file pointer
+                    self.__debug = open(settings.AD_DEBUG_FILE,'w')
+                else:
+                    # Disable debuging forever
+                    self.__debug = False
+            else:
+                # Debug the given message
+                self.__debug.write("{}\n".format(msg))
+    
+    def ldap_link(self, username, password, mode='LOGIN'):
+        # Prepare the answer
+        answer = None
+        
+        # If no password provided, we will not try to authenticate
+        if password:
+            
+            try:
+                
+                # Prepare ldap connection
+                nt4_domain = settings.AD_NT4_DOMAIN.upper()
+                dns_name = getattr(settings,"AD_DNS_NAME", nt4_domain).upper()
+                if getattr(settings, "AD_SSL", False):
+                    # Connect using SSL
+                    ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, settings.AD_CERT_FILE)
+                    ldap_url='ldaps://%s:%s' % (dns_name, getattr(settings, 'AD_LDAP_PORT', 636))
+                else:
+                    # Connect normaly
+                    ldap_url='ldap://%s:%s' % (dns_name, getattr(settings, 'AD_LDAP_PORT', 389))
+                if mode is 'SEARCH':
+                    ldap.set_option(ldap.OPT_REFERRALS,0) # DO NOT TURN THIS OFF OR SEARCH WON'T WORK!      
+                
+                # Initialize
+                self.debug('ldap.initialize :: url: {}'.format(ldap_url))
+                l = ldap.initialize(ldap_url)
+                
+                # Set protocol to v3
+                l.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
+                
+                # Build the login string
+                binddn = "%s@%s" % (username, nt4_domain)
+                
+                # Do the check out
+                self.debug('bind...')
+                if mode=='LOGIN':
+                    l.simple_bind_s(binddn, password)
+                    
+                    # Unbind automatically
+                    self.debug('unbind...')
+                    l.unbind_s()
+                    
+                    # Return that everything was fine
+                    answer = True
+                    
+                else:
+                    l.bind_s(binddn,password)
+                    
+                    # Prepare answer
+                    answer = l
+                
+            except ldap.INVALID_CREDENTIALS,e:
+                # The access for this user has been denied, Debug it if required
+                self.debug("Invalid credentials for user '{}' with error '{}'".format(username, e))
+            except ldap.SERVER_DOWN, e:
+                # The LDAP server is not accesible
+                self.debug("The LDAP server is not accesible: {}".format(e))
+            
+        else:
+            # The access for this user has been denied, Debug it if required
+            self.debug("No password provided for user '{}'".format(username))
+        
+        # Return the final result
+        return answer
+    
+    def authenticate(self,username=None,password=None):
+        '''
+        Authenticate the user agains LDAP
+        '''
+        
+        user = None
+        
+        if self.ldap_link(username, password, mode='LOGIN'):
+            
+            # The user was validated in Active Directory
+            user = self.get_or_create_user(username,password)
+        
+        # Check if we didn't get a logged in user
+        if user:
+            # Make sure the user is active
+            user.is_active = True
+            user.save()
+        else:
+            
+            # User not authorized (lock it in Django)
+            if getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
+                u = User.objects.filter(username=username).first()
+                # Username found
+                if u:
+                    # Deactivate the user
+                    u.is_active=False
+                    u.save()
+        
+        # Return the final decision
+        return user
+    
+    def get_ad_info(self, username, password):
+        
+        self.debug("get_ad_info for user '{}'".format(username))
+        
+        # Initialize the answer
+        info = {}
+        
+        # Get an already authenticated link connection to LDAP
+        link = self.ldap_link(username, password, mode='SEARCH')
+        
+        if link:
+            
+            # Prepare SEARCH fields
+            mapping = getattr(settings, 'AD_MAP_FIELDS', {})
+            # Build the search fields
+            search_fields = ['sAMAccountName','memberOf'] + mapping.values()
+            search_dns = getattr(settings, 'AD_NT4_DOMAIN', '').lower().split(".")
+            # Build the dn list
+            search_dnlist=[]
+            for token in search_dns:
+                search_dnlist.append("dc={}".format(token))
+            search_dn=",".join(search_dnlist)
+            
+            # Search for the user
+            self.debug('Search...')
+            result = link.search_ext_s(search_dn,ldap.SCOPE_SUBTREE,"sAMAccountName={}".format(username),search_fields)[0][1]
+            
+            # Validate that they are a member of review board group
+            memberships = result.get('memberOf', [])
+            
+            # Process all memberships found
+            groupsAD={}
+            for membership in memberships:
+                tokens = membership.split(",")
+                dcs = []
+                cn=None
+                
+                for token in tokens:
+                    (key,value) = token.split("=")
+                    if key=='CN':
+                        if not cn:
+                            cn=value
+                    elif key=='DC':
+                        dcs.append(value)
+                    else:
+                        raise IOError,"Unknown KEY '{}'".format(key)
+                
+                # Prepare the full domain name addess of the AD
+                dc = ".".join(dcs)
+                
+                # Make sure the key exists
+                if dc not in groupsAD:
+                    groupsAD[dc] = []
+                
+                # Add the new CN to the list
+                if cn not in groupsAD[dc]:
+                    groupsAD[dc].append(cn)
+            
+            # Prepare the answer
+            info={}
+            info['groups']=groupsAD
+            
+            # Look for other tokens to get mapped
+            for djfield in mapping.keys():
+                adfield = mapping[djfield]
+                if result.has_key(adfield):
+                    info[djfield] = result[adfield][0]
+                    self.debug("{}={}".format(adfield, info[djfield]))
+                else:
+                    self.debug("{}=-NONE-".format(adfield))
+            
+            # Unbind
+            self.debug('Unbind...')
+            link.unbind_s()
+            
+        else:
+            # No link gotten
+            self.debug("I didn't get a valid link to the LDAP server")
+        
+        # Return the final result
+        return info
+    
+    def get_or_create_user(self, username, password):
+        '''
+        Get or create the given user
+        '''
+        
+        # Get the groups for this user
+        info = self.get_ad_info(username, password)
+        self.debug("INFO found: {}".format(info))
+        
+        # Find the user
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            user = User(username=username)
+        
+        # Update user
+        user.first_name=info.get('first_name','')
+        user.last_name=info.get('last_name','')
+        user.email=info.get('email','')
+        
+        # Check if the user is in the Administrators groups
+        is_admin = False
+        for domain in info['groups']:
+            if 'Domain Admins' in info['groups'][domain]:
+                is_admin = True
+                break
+        
+        # Set the user permissions
+        user.is_staff = is_admin
+        user.is_superuser = is_admin
+        
+        # Refresh the password
+        user.set_password(password)
+        
+        # Validate the selected user and gotten information
+        user = self.validate(user, info)
+        if user:
+            self.debug("User got validated!")
+            
+            # Autosave the user until this point
+            user.save()
+            
+            # Synchronize user
+            self.synchronize(user, info)
+        else:
+            self.debug("User didn't pass validation!")
+        
+        # Finally return user
+        return user
+    
+    def get_user(self, user_id):
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return None
+    
+    def validate(self, user, info):
+        '''
+        Dummy validate system, to be redeclared
+        User object here is not saved in the database, but it is ready to be saved
+        If the answer from this method is None, user will be denied to login in to the system!
+        '''
+        self.debug("Validation process!")
+        return user
+    
+    def synchronize(self, user, info):
+        '''
+        It tries to do a group synchronization if possible
+        This methods should be redeclared by the developer
+        '''
+        
+        self.debug("Synchronize!")
+        
+        # Remove all groups from this user
+        user.groups.clear()
+        
+        # For all domains found for this user
+        for domain in info['groups']:
+            # For all groups he is
+            for groupname in info['groups'][domain]:
+                # Lookup for that group
+                group = Group.objects.filter(name=groupname).first()
+                if group:
+                    # If found, add the user to that group
+                    user.groups.add(group)
