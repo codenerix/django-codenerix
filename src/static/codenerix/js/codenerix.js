@@ -859,6 +859,7 @@ function dynamic_fields(scope) {
             angular.forEach(scope.valuegetforeingkey[input.$name].rows, (function (value2, key){
             
                 if (value2['id'] == input.$modelValue){
+                    scope.resetAutoComplete();
                     angular.forEach(value2, (function (value3, key){
                         if (key && key!="label" && key!="id" && key[0]!='$') {
                             var keysp = key.split(":")
@@ -874,6 +875,18 @@ function dynamic_fields(scope) {
                             if (scope[scope.form_name] != undefined && scope[scope.form_name][key] != undefined){
                                 scope[scope.form_name][key].$setViewValue(value3);
                                 scope[scope.form_name][key].$render();
+                            }
+
+                            if ('_clear_' in value2){
+                                angular.forEach(value2['_clear_'], (function(value3, key){
+                                    scope[value3] = '';
+                                }));
+                            }
+                            if ('_readonly_' in value2){
+                                scope.dynamicFieldsMemory.autocomplete.readonly = value2['_readonly_'];
+                                angular.forEach(scope.dynamicFieldsMemory.autocomplete.readonly, (function (key){
+                                    scope['readonly_'+key] = true;
+                                }));
                             }
                         }
                     }));

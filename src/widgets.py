@@ -178,40 +178,42 @@ class StaticSelect(forms.widgets.Select):
     
     def render(self, name, value, attrs=None, choices=()):
         # Initialization
-        required=self.attrs.get('ng-required','false')
-        vmodel=self.field_name
-        vid=attrs.get('id','id_{0}'.format(name))
-        vstyle=attrs.get('style','')
-        vform=self.form_name
+        required = self.attrs.get('ng-required', 'false')
+        vmodel = self.field_name
+        vid = attrs.get('id', 'id_{0}'.format(name))
+        vstyle = attrs.get('style', '')
+        ngreadonly = attrs.get('ng-readonly', '')
+        vform = self.form_name
         placeholder = escapejs(_('Select an option'))
-        is_multiple = hasattr(self,"multiple") and self.multiple
+        is_multiple = hasattr(self, "multiple") and self.multiple
         
         # Render
-        html =u"<input name='{0}' ng-required='{1}' ng-model='{0}' type='hidden'".format(vmodel,required)
+        html = u"<input name='{0}' ng-required='{1}' ng-model='{0}' type='hidden'".format(vmodel, required)
         valuejs = None
         if is_multiple:
             if value:
-                if type(value)==list:
+                if type(value) == list:
                     valuejs = json.dumps([int(x) for x in value])
                 else:
                     valuejs = json.dumps([int(value), ])
 
-                html+=" ng-init=\"{0}={1}\"".format(vmodel,valuejs)
+                html += " ng-init=\"{0}={1}\"".format(vmodel, valuejs)
             else:
-                html+=" ng-init=\"{0}=[]\"".format(vmodel)
+                html += " ng-init=\"{0}=[]\"".format(vmodel)
         elif value:
-            html+=" ng-init=\"{0}='{1}'\"".format(vmodel,value)
+            html += " ng-init=\"{0}='{1}'\"".format(vmodel, value)
 
-        html+=">"
-        html+='<ui-select'
+        html += ">"
+
+        html += '<ui-select ng-disabled="{}"'.format(ngreadonly)
 
         if is_multiple:
-            html+=' multiple '
+            html += ' multiple '
         # Build options
-        html+=u" ng-init=\"options.{0}=[".format(vmodel)
-        ini=None
+        html += u" ng-init=\"options.{0}=[".format(vmodel)
+        ini = None
         list_value = []
-        index=0
+        index = 0
 
         if is_multiple and not value:
             value=[]
