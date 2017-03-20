@@ -42,22 +42,23 @@ class Command(BaseCommand, Debugger):
     
     # Dependencies
     imports = [
+            ("bcrypt",                          "import bcrypt"),
             ("bson",                            "from bson import json_util"),
             ("django-angular==0.8.4",           "from djng.forms.angular_base import TupleErrorList"),
-            ("pycrypto==2.6.1",                 "from Crypto.Cipher import AES"),
             ("Crypto.Cipher",                   "from Crypto.Cipher import AES"),
-            ("bcrypt",                          "import bcrypt"),
             ("cryptography",                    "import cryptography"),
             ("dateutil",                        "from dateutil.tz import tzutc"),
-            ("python-dateutil",                 "import dateutil.parser"),
-            ("paypalrestsdk",                   "import paypalrestsdk"),
             ("django-multi-email-field==0.5",   "from multi_email_field.forms import MultiEmailField", "pip install git+https://github.com/fle/django-multi-email-field.git"),
             ("django-recaptcha",                "import captcha"),
             ("django-rosetta",                  "import rosetta"),
-            ("scipy",                           "import scipy"),
             ("jsonfield",                       "import jsonfield"),
             ("openpyxl==2.2.5",                 "import openpyxl"),
+            ("paypalrestsdk",                   "import paypalrestsdk"),
             ("Pillow",                          "import Image"),
+            ("pycrypto==2.6.1",                 "from Crypto.Cipher import AES"),
+            ("python-dateutil",                 "import dateutil.parser"),
+            ("python-ldap",                     "import ldap"),
+            ("scipy",                           "import scipy"),
             ("Unidecode",                       "from unidecode import unidecode"),
             ("xhtml2pdf",                       "import xhtml2pdf"),
             ]

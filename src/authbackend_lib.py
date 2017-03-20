@@ -340,8 +340,6 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 self.__debug.write("{}\n".format(msg))
     
     def ldap_link(self, username, password, mode='LOGIN'):
-        # Prepare the answer
-        answer = None
         
         # If no password provided, we will not try to authenticate
         if password:
@@ -392,13 +390,16 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             except ldap.INVALID_CREDENTIALS,e:
                 # The access for this user has been denied, Debug it if required
                 self.debug("Invalid credentials for user '{}' with error '{}'".format(username, e))
+                answer = False
             except ldap.SERVER_DOWN, e:
                 # The LDAP server is not accesible
                 self.debug("The LDAP server is not accesible: {}".format(e))
+                answer = None
             
         else:
             # The access for this user has been denied, Debug it if required
             self.debug("No password provided for user '{}'".format(username))
+            answer = False
         
         # Return the final result
         return answer
@@ -408,12 +409,15 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         Authenticate the user agains LDAP
         '''
         
-        user = None
+        # Check user in Active Directory (authorization == None if can not connect to Active Directory Server)
+        authorization = self.ldap_link(username, password, mode='LOGIN')
         
-        if self.ldap_link(username, password, mode='LOGIN'):
-            
+        if authorization:
             # The user was validated in Active Directory
             user = self.get_or_create_user(username,password)
+        else:
+            # Access denied
+            user = None
         
         # Check if we didn't get a logged in user
         if user:
@@ -422,8 +426,8 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             user.save()
         else:
             
-            # User not authorized (lock it in Django)
-            if getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
+            # If there was link to Active Directory and User is not authorized (lock it in Django)
+            if authorization is not None and getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
                 u = User.objects.filter(username=username).first()
                 # Username found
                 if u:
