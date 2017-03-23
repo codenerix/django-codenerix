@@ -120,6 +120,9 @@ class GenReCaptchaField(forms.CharField):
         loop over any options added and create the RecaptchaOptions
         JavaScript variables as specified in
         https://code.google.com/apis/recaptcha/docs/customization.html
+        
+        On compiled verstion of the library, don't forget to add before the codenerix.js scripts to add:
+        <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer></script>$
         """
         public_key = public_key if public_key else \
             settings.RECAPTCHA_PUBLIC_KEY
