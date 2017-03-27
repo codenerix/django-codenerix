@@ -38,7 +38,77 @@ from codenerix.middleware import get_current_user
 from codenerix.helpers import daterange_filter
 
 
-class CodenerixModel(models.Model):
+class CodenerixMetaType(dict):
+    """
+    Define type for CodenerixMeta of the instance NOT the class
+    Example:
+    m = CodenerixMetaType({'first_name': 'Eduardo'}, last_name='Pool', age=24, sports=['Soccer'])
+    """
+    def __init__(self, *args, **kwargs):
+        super(CodenerixMetaType, self).__init__(*args, **kwargs)
+        for arg in args:
+            if isinstance(arg, dict):
+                for k, v in arg.iteritems():
+                    self[k] = v
+
+        if kwargs:
+            for k, v in kwargs.iteritems():
+                self[k] = v
+
+    def __getattr__(self, attr):
+        return self.get(attr)
+
+    def __setattr__(self, key, value):
+        self.__setitem__(key, value)
+
+    def __setitem__(self, key, value):
+        super(CodenerixMetaType, self).__setitem__(key, value)
+        self.__dict__.update({key: value})
+
+    def __delattr__(self, item):
+        self.__delitem__(item)
+
+    def __delitem__(self, key):
+        super(CodenerixMetaType, self).__delitem__(key)
+        del self.__dict__[key]
+
+
+class CodenerixModelBase(models.Model):
+    class Meta:
+        abstract = True
+
+    # return method relation objects
+    def __getmro__(self):
+        return self.__class__.__mro__
+
+    # recolecta informacion de todas las clases que intervienen en la instancia
+    # collects information from all classes that intervene in the instance
+    def __init__(self, *args, **kwards):
+        self.CodenerixMeta = CodenerixMetaType()
+
+        mro = self.__getmro__()
+        for cl in reversed(mro):
+            if 'CodenerixMeta' in cl.__dict__.keys():
+                for key in cl.CodenerixMeta.__dict__.keys():
+                    if '__' != key[0:2]:
+                        value = getattr(cl.CodenerixMeta, key)
+                        if value:
+                            if key not in self.CodenerixMeta:
+                                self.CodenerixMeta[key] = value
+                            else:
+                                if type(value) == dict:
+                                    self.CodenerixMeta[key].update(value)
+                                elif type(value) == list:
+                                    if type(self.CodenerixMeta[key]) != list:
+                                        self.CodenerixMeta[key] = list(self.CodenerixMeta[key])
+                                    self.CodenerixMeta[key] += value
+                                elif type(self.CodenerixMeta[key]) == list:
+                                    self.CodenerixMeta[key] += list(value)
+
+        return super(CodenerixModelBase, self).__init__(*args, **kwards)
+
+
+class CodenerixModel(CodenerixModelBase):
     '''
     Special methods are
         __fields__: it is a list of fields
@@ -56,10 +126,9 @@ class CodenerixModel(models.Model):
     created = models.DateTimeField(_("Created"), editable=False, auto_now_add=True)
     updated = models.DateTimeField(_("Updated"), editable=False, auto_now=True)
     
-    def __limitQ__ (self,info):      return {}
-    def __searchQ__(self,info,text): return {}
-    def __searchF__(self,info):      return {}
-
+    def __limitQ__ (self, info):      return {}
+    def __searchQ__(self, info, text):return {}
+    def __searchF__(self, info):      return {}
 
     def lock_update(self, request=None):
         return None
@@ -85,30 +154,37 @@ class CodenerixModel(models.Model):
         else:
             return super(CodenerixModel, self).clean()
 
-#    __metaclass__ = CodenerixModelMeta
-
     class Meta:
         abstract = True
         default_permissions = ('add', 'change', 'delete', 'view', 'list')
 
-    class CodenerixMeta:
+    class CodenerixMeta(object):
         abstract = None
 
+    def __init__(self, *args, **kwards):
+        self.CodenerixMeta = CodenerixMetaType()
+        return super(CodenerixModel, self).__init__(*args, **kwards)
 
-class GenInterface(models.Model):
+
+class GenInterface(CodenerixModelBase):
     """
     Check force_methods options in CodenerixMeta class and it makes sure that the specified methods exists
     """
     class Meta:
         abstract = True
 
-    class CodenerixMeta:
+    class CodenerixMeta(object):
         """
         force_methods = {'alias': ('method_name', 'Description'), }
         """
         pass
-
+    
     def __init__(self, *args, **kwards):
+        self.CodenerixMeta = CodenerixMetaType()
+        result = super(GenInterface, self).__init__(*args, **kwards)
+
+        # revisamos que esten implementados los metodos indicados
+        # we checked that the indicated methods are implemented
         force_methods = getattr(self.CodenerixMeta, "force_methods", None)
         if force_methods:
             for alias in force_methods.keys():

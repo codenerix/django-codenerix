@@ -25,8 +25,7 @@ from django.db.models import Q
 from django.db import models
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext as _
-
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from codenerix.middleware import get_current_user
@@ -177,3 +176,65 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
         # Save changes
         self.user.save()
+
+    def refresh_permissions(self):
+        groups = []
+        permissions = []
+        # get groups
+        if hasattr(self, 'CodenerixMeta') and hasattr(self.CodenerixMeta, 'rol_groups'):
+            groups = self.CodenerixMeta.rol_groups
+
+        # get permissions of users
+        if hasattr(self, 'CodenerixMeta') and hasattr(self.CodenerixMeta, 'rol_permissions'):
+            permissions = self.CodenerixMeta.rol_permissions
+
+        # clear permisions
+        self.user.groups.clear()
+        self.user.user_permissions.clear()
+
+        # add groups
+        if groups:
+            groups = list(set(groups))
+            for groupname in groups:
+                group = Group.objects.filter(name=groupname).first()
+                if group is None:
+                    # add group if not exists
+                    group = Group(name=groupname)
+                    group.save()
+                self.user.groups.add(group)
+
+        # add permissions
+        if permissions:
+            permissions = list(set(permissions))
+            for permision in permissions:
+                self.user.user_permissions.add(Permission.objects.get(codename=permision))
+
+        return None
+
+
+class GenRole(object):
+    def save(self, *args, **kwards):
+        # only update permissions for new users
+        REFRESH_PERMISSIONS = not self.pk
+        result = super(GenRol, self).save(*args, **kwards)
+        if REFRESH_PERMISSIONS:
+            person = self.__CDNX_search_person_CDNX__()
+            if person:
+                person.refresh_permissions()
+        return result
+
+    def delete(self):
+        person = self.__CDNX_search_person_CDNX__()
+        result = super(GenRol, self).delete()
+        if person:
+            # update permissions
+            person.refresh_permissions()
+        return result
+
+    def __CDNX_search_person_CDNX__(self):
+        # search relation with GenPerson
+        person = None
+        for field in self._meta.related_objects:
+            if GenPerson in field.related_model.__mro__:
+                person = getattr(self, field.name)
+        return person
