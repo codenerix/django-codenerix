@@ -42,7 +42,7 @@ class Command(BaseCommand, Debugger):
         parser.add_argument('--noauto',
             action='store_true',
             dest='noauto',
-            default=True,
+            default=False,
             help='Tells the command not to find automatic solution for problems')
         
         # Named (optional) arguments
@@ -74,14 +74,15 @@ class Command(BaseCommand, Debugger):
         appname=settings.ROOT_URLCONF.split(".")[0]
         basedir=settings.BASE_DIR
         appdir = os.path.abspath("{}/{}".format(basedir,appname))
+        print appdir
         noauto=options['noauto']
         
         # Check user selection
         if not options['noguess']:
-            cmd = "ls -lR {} | grep www-data".format(basedir)
+            cmd = "ls -lR {} | grep www-data".format(appdir)
             status, output = commands.getstatusoutput(cmd)
             if status:
-                cmd = "ls -lR {} | grep www-data".format(basedir)
+                cmd = "ls -lR {} | grep www-data".format(appdir)
                 status, output = commands.getstatusoutput(cmd)
                 if status:
                     guess="suexec"
