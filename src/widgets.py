@@ -678,7 +678,7 @@ class WysiwygAngularRender(forms.widgets.HiddenInput):
         editors['preview'] = _("Preview")
         editors_list = []
         for keyarg in editors.keys():
-            editors_list.append("\"{0}\":{{\"key\":\"{0}\",\"name\":\"{1}\"}}".format(keyarg, editors[keyarg]))
+            editors_list.append("\"{0}\":{{\"key\":\"{0}\",\"name\":\"{1}\"}}".format(keyarg, smart_unicode(editors[keyarg])))
         editors_json = "{" + ",".join(editors_list) + "}"
         
         # Detect if this field is required
