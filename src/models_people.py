@@ -216,7 +216,7 @@ class GenRole(object):
     def save(self, *args, **kwards):
         # only update permissions for new users
         REFRESH_PERMISSIONS = not self.pk
-        result = super(GenRol, self).save(*args, **kwards)
+        result = super(GenRole, self).save(*args, **kwards)
         if REFRESH_PERMISSIONS:
             person = self.__CDNX_search_person_CDNX__()
             if person:
@@ -225,7 +225,7 @@ class GenRole(object):
 
     def delete(self):
         person = self.__CDNX_search_person_CDNX__()
-        result = super(GenRol, self).delete()
+        result = super(GenRole, self).delete()
         if person:
             # update permissions
             person.refresh_permissions()
