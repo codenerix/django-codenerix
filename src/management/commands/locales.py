@@ -33,14 +33,17 @@ class Command(BaseCommand, Debugger):
     
     def add_arguments(self, parser):
         # Set witch mode to use
-        parser.add_argument('mode',help="Mode used in the environment 'suexec', 'apache' or 'wwwdata'") 
+        parser.add_argument('--mode',
+            dest='mode',
+            default="suexec",
+            help="Mode used in the environment 'suexec', 'apache' or 'wwwdata'") 
         
         # Named (optional) arguments
-        parser.add_argument('--auto',
+        parser.add_argument('--noauto',
             action='store_true',
-            dest='auto',
-            default=False,
-            help='Allow the command find automatic solution for problems')
+            dest='noauto',
+            default=True,
+            help='Tells the command not to find automatic solution for problems')
         
         # Named (optional) arguments
         parser.add_argument('--noguess',
@@ -71,7 +74,7 @@ class Command(BaseCommand, Debugger):
         appname=settings.ROOT_URLCONF.split(".")[0]
         basedir=settings.BASE_DIR
         appdir = os.path.abspath("{}/{}".format(basedir,appname))
-        auto=options['auto']
+        noauto=options['noauto']
         
         # Check user selection
         if not options['noguess']:
@@ -92,8 +95,8 @@ class Command(BaseCommand, Debugger):
         
         # Show header
         self.debug("Creating locales for {}".format(appname),color='blue')
-        if auto:
-            self.debug("Autoconfig mode is ON",color='cyan')
+        if noauto:
+            self.debug("Autoconfig mode is OFF",color='yellow')
         
         # Get list of apps
         apps=[]
@@ -107,19 +110,19 @@ class Command(BaseCommand, Debugger):
         for app in ['']+apps:
             testpath = os.path.abspath("{}/{}/locale".format(appdir,app).replace("//","/"))
             if not os.path.exists(testpath):
-                if auto:
-                    self.debug("'locale' folder missing, creating {}/".format(testpath),color='purple')
-                    os.mkdir(testpath)
-                else:
+                if noauto:
                     ERROR=True
                     self.debug("'locale' folder missing at {}/".format(testpath),color='yellow')
+                else:
+                    self.debug("'locale' folder missing, creating {}/".format(testpath),color='purple')
+                    os.mkdir(testpath)
         
         if ERROR:
-            raise CommandError("Some error has happened, can not keep going! (use --auto to let CODENERIX find a solution)")
+            raise CommandError("Some error has happened, can not keep going! (avoid using --noauto to let CODENERIX find a solution)")
         
         # Check execution mode
         sudo=''
-        if mode=='apache' == mode=='wwwdata':
+        if mode=='apache' or mode=='wwwdata':
             status, output = commands.getstatusoutput("whoami")
             if status:
                 # Error in command
@@ -170,11 +173,11 @@ class Command(BaseCommand, Debugger):
         # Ready to go
         for (code,name) in settings.LANGUAGES:
             self.debug("Processing translations for {}...".format(name), color='cyan')
-            cmd="{}{}/manage.py makemessages -v0 -l {}".format(sudo,basedir,code)
+            cmd="{}{}/manage.py makemessages -v0 --symlinks -l {}".format(sudo,basedir,code)
             status, output = commands.getstatusoutput(cmd)
             if status: raise CommandError(output)
             
-            cmd="{}{}/manage.py makemessages -v0 -d djangojs -l {}".format(sudo,basedir,code)
+            cmd="{}{}/manage.py makemessages -v0 --symlinks -d djangojs -l {}".format(sudo,basedir,code)
             status, output = commands.getstatusoutput(cmd)
             if status: raise CommandError(output)
             
