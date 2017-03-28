@@ -754,7 +754,7 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
         
         # Render blocks with ANGULAR
         html += "<div ng-repeat='block in {0}[\"__JSON_DATA__\"]' ng-init='editor_{1}=\"quill\"'>".format(vmodel, hashkey)
-        html += self.render_wysiwyg(ngmodel='block.value', extraif="block.type==\"string\" && ")
+        html += self.render_wysiwyg(ngmodel='block.value', extraif="block.type==\"string\" && ", attrs=attrs)
         html += "</div>"
         
         # Return result
