@@ -2221,10 +2221,11 @@ class GenList(GenBase, ListView):
         # Add adapted columns
         a['columns']=[]
         for column in context['columns']:
-            # Repair the name
-            column['name']=gettext(column['name'])
-            # Save the column
-            a['columns'].append(column)
+            if column['name']:
+                # Repair the name
+                column['name']=gettext(column['name'])
+                # Save the column
+                a['columns'].append(column)
 
         # Remember ordering
         ordering={}
