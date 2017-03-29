@@ -98,7 +98,7 @@ class Command(BaseCommand, Debugger):
                             self.debug("OLDER".format(name),color='yellow', header=None, tail=None),
                             if helptext:
                                 self.debug(" - HELP FOR YOU: {}".format(helptext),color='white', header=None, tail=None),
-                            self.debug("",header=None)
+                            self.debug(" ",header=None)
                         else:
                             self.debug("OK".format(name),color='green', header=None)
                 else:
