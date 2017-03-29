@@ -49,7 +49,7 @@ class Command(BaseCommand, Debugger):
             ("cryptography",                    "import cryptography"),
             ("dateutil",                        "from dateutil.tz import tzutc"),
             ("django-multi-email-field==0.5",   "from multi_email_field.forms import MultiEmailField", "pip install git+https://github.com/fle/django-multi-email-field.git"),
-            ("django-recaptcha",                "import captcha"),
+            ("django-recaptcha",                "from captcha import client"),
             ("django-rosetta",                  "import rosetta"),
             ("jsonfield",                       "import jsonfield"),
             ("openpyxl==2.2.5",                 "import openpyxl"),
