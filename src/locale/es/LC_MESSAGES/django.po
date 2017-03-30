@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-03-28 14:33+0000\n"
-"PO-Revision-Date: 2017-03-28 13:53+0000\n"
+"PO-Revision-Date: 2017-03-28 16:13+0000\n"
 "Last-Translator: Juanmi Taboada <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -112,8 +112,8 @@ msgid ""
 "WARNING: No version set to this code, add VERSION contant to your "
 "configuration"
 msgstr ""
-"ATENCIÓN: No hay un número de versión configurada para este código, añade la "
-"constante VERSION a tu configuración"
+"ATENCIÓN: No hay un número de versión configurada para este código, añade la"
+" constante VERSION a tu configuración"
 
 #: codenerix/context.py:67
 msgid "WARNING: CODENERIX_CSS is not set in your configuration!!!"
@@ -266,7 +266,8 @@ msgstr "Actualizado"
 #: codenerix/models.py:143
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
-msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
+msgstr ""
+"No se puede borrar el elemento, existe una relación con %(model_name)s"
 
 #: codenerix/models.py:251 codenerix/views.py:439
 msgid "Add"
@@ -412,7 +413,7 @@ msgstr "No puedes borrarte a ti mismo"
 #: codenerix/templates/codenerix/add.html:26
 #: codenerix/templates/codenerix/addmodal.html:27
 msgid "Adding new"
-msgstr "Añadirn uevo"
+msgstr "Añadir nuevo"
 
 #: codenerix/templates/codenerix/add.html:30
 #: codenerix/templates/codenerix/add.html:31
@@ -536,8 +537,8 @@ msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
 msgstr ""
-"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
-"add_permission: detail, change y delete"
+"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para"
+" add_permission: detail, change y delete"
 
 #: codenerix/views.py:988
 msgid "Rows per page"
@@ -651,41 +652,39 @@ msgstr ""
 
 #: codenerix_reviews/forms.py:14 codenerix_reviews/forms.py:28
 msgid "Details"
-msgstr ""
+msgstr "Detalles"
 
 #: codenerix_reviews/models.py:17 codenerix_reviews/models.py:30
 msgid "Customer"
-msgstr ""
+msgstr "Cliente"
 
 #: codenerix_reviews/models.py:18 codenerix_reviews/models.py:31
 msgid "Product"
-msgstr ""
+msgstr "Producto"
 
 #: codenerix_reviews/models.py:19 codenerix_reviews/models.py:33
 msgid "Stars"
-msgstr ""
+msgstr "Estrellas"
 
 #: codenerix_reviews/models.py:20 codenerix_reviews/models.py:34
 #: codenerix_reviews/views.py:22 codenerix_reviews/views.py:72
-#, fuzzy
 #| msgid "Preview"
 msgid "Reviews"
-msgstr "Previsualización"
+msgstr "Revisiones"
 
 #: codenerix_reviews/models.py:21 codenerix_reviews/models.py:36
-#, fuzzy
 #| msgid "Invalid date"
 msgid "Validate"
-msgstr "Fecha inválida"
+msgstr "Validar"
 
 #: codenerix_reviews/models.py:23
 msgid "Language"
-msgstr ""
+msgstr "Idioma"
 
 #: codenerix_reviews/models.py:35
 msgid "Lang"
-msgstr ""
+msgstr "Idioma"
 
 #: codenerix_reviews/views.py:22 codenerix_reviews/views.py:72
 msgid "People"
-msgstr ""
+msgstr "Personas"
