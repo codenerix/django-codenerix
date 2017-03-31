@@ -40,7 +40,7 @@ function multi_dynamic_select_dict(arg, form){
 function del_item_sublist(id, msg, url, scope, $http){
     id = String(id);
     if (confirm(msg)){
-        
+
         $http.post( url, {}, {} )
         .success(function(answer, stat) {
             // Check the answer
@@ -65,7 +65,7 @@ function del_item_sublist(id, msg, url, scope, $http){
                 alert(cnf_debug_txt)
             }
         });
-            
+
         var functions = function(scope) {};
         var callback = function(scope) {
             scope.det_window.dismiss('cancel');
@@ -74,7 +74,7 @@ function del_item_sublist(id, msg, url, scope, $http){
     }
 }
 
-function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
+function openmodal($scope, $timeout, $uibModal, size, functions, callback, reopen) {
     var ngmodel=null;
     // Define the modal window
     $scope.build_modal = function (inline) {
@@ -85,7 +85,7 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
             $scope.inurl=$scope.ws;
             $scope.inhtml=null;
         }
-        
+
         var modalInstance = $uibModal.open({
             template: $scope.inhtml,
             templateUrl: $scope.inurl,
@@ -93,17 +93,27 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
                 // Save URL
                 $scope.url=ws;
                 $templateCache.remove(ws);
-                
+
                 // Set submit function
                 $scope.submit = function (form, next) {
                     // Submit the form
                     formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, null, ws, form, 'here', 'addmodal');
                 };
-                
+
+                $scope.submitAndNew = function (form, next) {
+                    // Submit the form
+                    formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, null, ws, form, 'here', 'addnewmodal', reopen);
+                };
+
+                $scope.submitAndNewModal = function (form, next) {
+                    // Submit the form
+                    formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, null, ws, form, 'here', 'addnewmodal', reopen);
+                };
+
                 $scope.msg = function(msg){
                     alert(msg);
                 }
-                
+
                 $scope.delete = function(msg,url) {
                     if (confirm(msg)) {
                         // Build url
@@ -134,11 +144,11 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
                         });
                      }
                 };
-                
+
                 // Set cancel function
                 $scope.cancel = function () { $uibModalInstance.dismiss('cancel'); };
-                
-                // Enable dynamic select 
+
+                // Enable dynamic select
                 $scope.http = $http;
                 dynamic_fields($scope);
                 angularmaterialchip($scope);
@@ -159,17 +169,17 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
                 ws:         function () { return $scope.ws;         },
             },
         });
-        
+
         modalInstance.build_modal=$scope.build_modal;
-        
+
         modalInstance.result.then(function (answer) {
             if (answer) {
-                
+
                 // Execute call back is requested
                 if (callback!=undefined) {
                     callback($scope);
                 }
-                
+
                 // Select the new created item
                 if (ngmodel) {
                     // Select the new option
@@ -198,7 +208,7 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
     scope.add = function (url) {
         // Base window
         $scope.ws=url+"/add";
-        
+
         // Base Window functions
         var functions = function(scope) {};
         var callback = function(scope) {
@@ -206,18 +216,18 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
             if (scope.base_window) {
                 scope.base_window.dismiss('cancel');
             }
-            
+
             // If base_reload specified
             if (scope.base_reload){
                 // Arguments are dinamically added
                 scope.base_reload[0].apply(this,scope.base_reload.slice(1));
             }
         };
-        
+
         // Start modal window
         openmodal($scope, $timeout, $uibModal, 'lg', functions, callback);
     };
-    
+
     scope.removefile = function(id, msg, id_parent) {
         if (confirm(msg)){
             if (typeof(id_parent)=="undefined"){
@@ -227,7 +237,7 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
                 var url = $scope.wsbase+"/"+id+"/delete";
                 $scope.ws= $scope.wsbase+id_parent;
             }
-            
+
             $http.post( url, {}, {} )
             .success(function(answer, stat) {
                 // Check the answer
@@ -265,7 +275,7 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
     scope.change_alternative = function(id, msg){
         if (confirm(msg)){
             var url = $scope.ws+"/"+id+"/changealternative";
-            
+
             $http.post( url, {}, {} )
             .success(function(answer, stat) {
                 // Check the answer
@@ -298,7 +308,7 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
 
         }
     }
-    
+
     // Get details
     scope.details = function(id) {
         // Base window
@@ -310,7 +320,7 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
             scope.edit = function(ar) {
                 // Base window
                 $scope.ws=$scope.initialws+"/edit";
-                
+
                 // Base Window functions
                 var functions = function(scope) {
                 };
@@ -318,8 +328,8 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
                     // Reload list window
                     if ($scope.base_window != undefined){
                         /*
-                        following line is going to be executed in the case this 
-                        manager is created in a modal window 
+                        following line is going to be executed in the case this
+                        manager is created in a modal window
                         */
                         scope.base_window.dismiss('cancel');
                     }
@@ -328,18 +338,18 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
                     scope.det_window.dismiss('cancel');
                     scope.det_reload[0](scope.det_reload[1]);
                 };
-                
+
                 // Start modal window
                 openmodal($scope, $timeout, $uibModal, 'lg', functions, callback);
             };
             scope.gotoback = function() {
                 $scope.det_window.dismiss('cancel');
             };
-            
+
             $scope.msg = function(msg){
                 alert(msg);
             }
-            
+
             scope.delete = function(msg) {
                 if (confirm(msg)) {
                     // Clear cache
@@ -353,8 +363,8 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
                             // Reload details window
                             if ($scope.base_window != undefined){
                                 /*
-                                following line is going to be executed in the case this 
-                                manager is created in a modal window 
+                                following line is going to be executed in the case this
+                                manager is created in a modal window
                                 */
                                 $scope.base_window.dismiss('cancel');
                             }
@@ -377,7 +387,7 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
                  }
             };
         };
-        
+
         // Prepare for refresh
         $scope.det_reload=[scope.details,id];
         $scope.det_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
@@ -395,13 +405,13 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
                 $scope.det_window.dismiss('cancel');
             };
         };
-        
+
         // Prepare for refresh
         $scope.det_reload=[scope.details,id];
         $scope.det_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
     };
 
-    // Get details 
+    // Get details
     scope.list_modal_detail = function(id, $event) {
         // Base window
         $scope.ws=$scope.wsbase+"modal";
@@ -430,7 +440,7 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
             scope.edit = function(ar) {
                 // Base window
                 $scope.ws=$scope.initialbase+"/edit";
-                
+
                 // Base Window functions
                 var functions = function(scope) {
                 };
@@ -438,8 +448,8 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
                     // Reload list window
                     if ($scope.base_window != undefined){
                         /*
-                        following line is going to be executed in the case this 
-                        manager is created in a modal window 
+                        following line is going to be executed in the case this
+                        manager is created in a modal window
                         */
                         scope.base_window.dismiss('cancel');
                     }
@@ -448,12 +458,12 @@ function modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope
                     scope.det_window.dismiss('cancel');
                     scope.det_reload[0](scope.det_reload[1]);
                 };
-                
+
                 // Start modal window
                 openmodal($scope, $timeout, $uibModal, 'lg', functions, callback);
             };
         };
-        
+
         // Prepare for refresh
         $scope.det_reload=[scope.details,id];
         $scope.det_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
@@ -511,7 +521,7 @@ function refresh($scope, $timeout, Register, callback, internal) {
                 $scope.query.filters[token.key]=value;
             });
         }
-        
+
         // Update ordering
         $scope.query.ordering=$scope.data.table.head.ordering;
     }
@@ -556,7 +566,7 @@ function refresh($scope, $timeout, Register, callback, internal) {
             if (callback!=undefined) {
                 callback();
             }
-            
+
             // Callback preinstalled in the scope
             if ((internal!==true) && ($scope.refresh_callback!=undefined)) {
                 $scope.refresh_callback();
@@ -567,7 +577,7 @@ function refresh($scope, $timeout, Register, callback, internal) {
     $scope.tempdata = Register.query({'json':$scope.query}, wrapper_callback);
 }
 
-function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, url, form, next, kind) {
+function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, url, form, next, kind, reopen) {
     // Build in data
     var in_data = { };
     var form_name = form.$name;
@@ -586,7 +596,7 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
         }
     });
 
-    /*  
+    /*
         2016-07-15
         Se quita porque los angular material chip no son elementos html por lo que no estan en el formulario
         2016-10-17
@@ -627,6 +637,13 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                 if (kind=='add') {
                     // Jump to the edit form
                     $state.go('formedit'+listid,{'pk':answer.pk});
+                } else if (kind == 'addnew') {
+                    $state.go($state.current, {}, {reload: true});
+                } else if (kind == 'addnewmodal') {
+                    $uibModalInstance.close(answer);
+                    if (reopen != undefined) {
+                        reopen();
+                    }
                 } else if ((kind=='addmodal') || (kind=='editmodal')) {
                     // Set the primary key and let it finish execution
                     $uibModalInstance.close(answer);
@@ -642,8 +659,8 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                         }
                     });
                     // Reset form status
-                    form.$pristine = true;
-                    form.$dirty = false;
+                    form.$pristine = false;
+                    form.$dirty = true;
                 }
                 // Reload page
                 $state.reload($state.current);
@@ -683,7 +700,7 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
     $scope.modelname=modelname;
     $scope.formobj=formobj;
     $scope.formname=formname;
-    
+
     // Build ws callback
     if (id) {
         $scope.ws="/"+appname+"/"+modelname+"/"+id+"/editmodal";
@@ -691,7 +708,7 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
         $scope.ws="/"+appname+"/"+modelname+"/addmodal";
     }
     $templateCache.remove($scope.ws);
-    
+
     // Define the modal window
     $scope.build_modal = function (inline) {
         if (inline) {
@@ -713,12 +730,20 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
                     var action="addmodal"
                     multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws);
                 }
-                
+
                 // Set submit function
                 $scope.submit = function (form, next) {
                     // Submit the form control
                     formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, ws, form, 'here', action);
                 };
+
+                $scope.submitAndNewModal = function (form, next) {
+                    // Submit the form
+                    formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, null, ws, form, 'here', 'addnewmodal', function () {
+                        inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, appname, modelname, formobj, formname, id, wsbaseurl, $timeout);
+                    });
+                };
+
                 // Set cancel function
                 $scope.cancel = function () { $uibModalInstance.dismiss('cancel'); };
             }],
@@ -729,7 +754,7 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
             },
         });
         modalInstance.build_modal=$scope.build_modal;
-        
+
         modalInstance.result.then(function (answer) {
             // Select the new created item
             if (answer) {
@@ -756,7 +781,7 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
                             options.push({'id': answer["__pk__"], 'label': answer["__str__"]});
                         }
                         /*
-                         * WORKING ON IT! 
+                         * WORKING ON IT!
                         console.log(answer['__pk__']);
                         console.log(options);
                         console.log(formobj[ngmodel]);
@@ -768,7 +793,7 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
                         formobj[ngmodel].$pristine = false;
                         formobj[ngmodel].$dirty = true;
                         */
-                        
+
                         if (set_view_value){
                             // Select the new option
                             formobj[ngmodel].$setViewValue(answer['__pk__']);
@@ -780,7 +805,7 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
                         formobj.$pristine = false;
                         formobj.$dirty = true;
                     }
-                    
+
                     //refresh info of fields associate by pk
                     if (wsbaseurl!=undefined){
                         var url = wsbaseurl + answer['__pk__'];
@@ -857,7 +882,7 @@ function dynamic_fields(scope) {
         // Process the selected item
         if (scope.valuegetforeingkey[input.$name] != undefined && 'rows' in scope.valuegetforeingkey[input.$name]){
             angular.forEach(scope.valuegetforeingkey[input.$name].rows, (function (value2, key){
-            
+
                 if (value2['id'] == input.$modelValue){
                     scope.resetAutoComplete();
                     angular.forEach(value2, (function (value3, key){
@@ -895,7 +920,7 @@ function dynamic_fields(scope) {
             }));
         }
     };
-    
+
     scope.multi_dynamic_select_dict = function(arg, formname){
         return multi_dynamic_select_dict(arg, formname);
     };
@@ -915,7 +940,7 @@ function dynamic_fields(scope) {
             });
             // Prepare URL
             var url = baseurl+search+'?filter='+angular.toJson(filter2)
-            
+
             // Send the request
             http.get(url,{},{})
             .success(function(answer, stat) {
@@ -932,7 +957,7 @@ function dynamic_fields(scope) {
                 }];
         }
     };
-    
+
     // Manage dynamic input working with md-autocomplete
     scope.dynamicFieldsMemory.autocomplete = {};
     scope.dynamicFieldsMemory.autocompletetmp = {};
@@ -959,7 +984,7 @@ function dynamic_fields(scope) {
             scope.dynamicFieldsMemory.autocomplete.readonly = [];
         }
     };
-    
+
     scope.getAutoComplete = function(http,baseurl,filter,search,deepness) {
         if ((search.length>=deepness) || (search=='*')) {
             var filter2 = {}
@@ -970,10 +995,10 @@ function dynamic_fields(scope) {
                     filter2[key] = value;
                 }
             });
-            
+
             // Prepare URL
             var url = baseurl+search+'?filter='+angular.toJson(filter2)
-            
+
             // Send the request
             return http.get(url,{},{})
                 .then(function(answer){
@@ -985,7 +1010,7 @@ function dynamic_fields(scope) {
                 });
         }
     };
-    
+
     // Set dynamic values that came from an autofield
     // Note: Only refresh input NOT OTHER TAG HTML (We believe that angular is not aware about the new DOM and that Django-Angular is only compiling the inputs so Angular is aware only about them)
     scope.autoFillFields = function ($item, $model, $label, $event) {
@@ -1045,9 +1070,9 @@ var codenerix_libraries = [
 function answer_rendered(element,$q) {
     var deferred = $q.defer(),
     intervalKey,
-    counter = 0, 
+    counter = 0,
     maxIterations = 50;
-    
+
     intervalKey = setInterval(function () {
         var jel = element[0].children.length;               // Javascript first usable row (second on the list)
         if (jel>2) {
@@ -1059,7 +1084,7 @@ function answer_rendered(element,$q) {
         }
         counter++;
     }, 100);
-    
+
     return deferred.promise;
 }
 
@@ -1081,7 +1106,7 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
         link: function(scope, element, attrs) {
             if (scope.data!=undefined && scope.data.meta!=undefined && scope.data.meta.vtable!=undefined && scope.data.meta.vtable) {
                 // console.log("Codenerix VTable: Load");
-                
+
                 // Initialize scope
                 // scope.query.page=1;
                 // scope.query.rowsperpage=1;
@@ -1096,7 +1121,7 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
                 scope.codenerix_vtable.top=0;
                 scope.codenerix_vtable.bottom=0;
                 scope.codenerix_vtable.last_scroll=(new Date).getTime();
-                
+
                 // Install refresh auto callback
                 scope.refresh_callback = function () {
                     if (scope.data!=undefined && scope.data.meta!=undefined && scope.data.meta.vtable!=undefined && scope.data.meta.vtable) {
@@ -1107,7 +1132,7 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
                     //    console.log("Codenerix VTable: Refresh detected but no VTABLE");
                     }
                 };
-                
+
                 // Remove all watchers on scroll event
                 scope.$on('$destroy', function () {
                     angular.element($window).off('scroll');
@@ -1124,30 +1149,30 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
                         scope.$apply();
                     }
                 });
-                
+
                 // Refresh VTable system
                 scope.codenerix_vtable.refresh = function (cache, callback) {
                     // console.log("Codenerix VTable: Refresh VTable");
-                    
+
                     // === FUTURE HELPERS === ================================================
                     // var row_position = jel.getBoundingClientRect().top; // Offset position to Screen Top
-                    
+
                     // === GEOMETRY DECISIONS === ============================================
                     // Get geometry and details
                     var jel = element[0].children[1];               // Javascript first usable row (second on the list)
                     var row_height = jel.scrollHeight;              // Row height
                     var row_total = scope.data.meta.row_total;      // Total rows in the last answer
                     var window_height = $window.innerHeight;        // Window height
-                    
+
                     // Multiplier for pagesize (1:default)
                     // - 1: many stops for caching, fast loading
                     // - 4: few stops for caching, long time loading
                     var page_size_multiplier = 1;
                     // Size of the window in number of rows
                     var rowsperpage = Math.ceil(window_height/row_height)*page_size_multiplier;
-                    
+
                     if (row_total>0) {
-                        
+
                         // Calculate geometry details
                         var cache = 4;                                  // Cache size is 4 (firstpage + 4 pages)
                         var scroll_height = row_total*row_height;       // Get scroll height
@@ -1159,17 +1184,17 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
                         var vpagelast = vpagefirst + cache;             // Last page to bring (firstpage + cache pages)
                         if (vpagefirst<1) { vpagefirst=1; }             // Protect first page not to be out of range
                         var vpagetotal = vpagelast - vpagefirst;        // Total pages to bring
-                        
+
                         // === DEBUG === =========================================================
                         // Prepare DEBUG message
                         // var msg ="Codenerix VTable: Debug"
                         // msg+="\n\tfirst: "+vpagefirst;
                         // msg+="\n\tbring: "+vpagetotal;
                         // msg+="\n\trows:  "+rowsperpage;
-                        
+
                         // Show DEBUG message
                         // console.log(msg);
-                        
+
                         // === MEMORY === ========================================================
                         if ((cache!==true)
                             || (vpagefirst!=scope.codenerix_vtable.vpagefirst)
@@ -1178,7 +1203,7 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
                             scope.codenerix_vtable.vpagefirst=vpagefirst;
                             scope.codenerix_vtable.pages_to_bring=vpagetotal;
                             scope.codenerix_vtable.rowsperpage=rowsperpage;
-                            
+
                             // === QUERY === =========================================================
                             // Set new query filters
                             scope.query.page = vpagefirst;
@@ -1201,7 +1226,7 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
                         }
                     }
                 };
-                
+
                 // Force refresh the table with the availabe information
                 $timeout(scope.codenerix_vtable.refresh, 0);
             }
@@ -1309,7 +1334,7 @@ function codenerix_builder(libraries, routes) {
      *      - Example: [ '-codenerixServices', 'newModule' ]
      *
      * routes: { dictionary of routes to add or remove from the routing system }
-     *         { 'state': [ 'url', 'template path', 'controller' ], 
+     *         { 'state': [ 'url', 'template path', 'controller' ],
      *           'state': null }
      *          Description:
      *              state: state name
@@ -1332,7 +1357,7 @@ function codenerix_builder(libraries, routes) {
      *      - If libraries is not set (it is undefined), libraries will become an empty list [] by default
      *      - If router not set (different than undefined), the routing system will be initialized and the default URL will be '/'
      */
-    
+
     // Check libraries
     if (libraries===undefined) {
         libraries=[];
@@ -1346,21 +1371,21 @@ function codenerix_builder(libraries, routes) {
             codenerix_addlib(name);
         }
     });
-    
+
     // Build the base module
     var module = angular.module('codenerixApp', codenerix_libraries)
-    
+
     // Default configuration
     .config(codenerix_config1)
     .config(codenerix_config2)
-    
+
     // Set Codenerix directives
     .directive(codenerix_directive_vtable[0], codenerix_directive_vtable[1])
     .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
-    
+
     // Set routing system
     .run(codenerix_run);
-    
+
     // Decide about routing
     if (routes!==null) {
         // Create the routing system
@@ -1370,7 +1395,7 @@ function codenerix_builder(libraries, routes) {
                 $urlRouterProvider.otherwise('/');
             }
         ]);
-        
+
         // Check if we should use default routes
         if (routes===undefined) {
             routes={}
@@ -1385,7 +1410,7 @@ function codenerix_builder(libraries, routes) {
             known.push(['formadd0',     '/add',     function(params) { return '/'+ws_entry_point+'/add'; },                 'FormAddCtrl']);
             known.push(['formedit0',    '/:pk/edit',function(params) { return '/'+ws_entry_point+'/'+params.pk+'/edit'; },  'FormEditCtrl']);
             known.push(['details0',     '/:pk',     function(params) { return '/'+ws_entry_point+'/'+params.pk; },          'DetailsCtrl']);
-            
+
             var tag='';
             var controller='';
             if (typeof(tabs_js)!='undefined') {
@@ -1403,7 +1428,7 @@ function codenerix_builder(libraries, routes) {
             }
             known.push(['details0.sublist', '/sublist/0/', '/static/codenerix/partials/list.html', 'SubListCtrl']);
         }
-        
+
         // Process known routes
         angular.forEach(known, function(name, key) {
             // Get configuration
@@ -1411,7 +1436,7 @@ function codenerix_builder(libraries, routes) {
             var url=name[1];
             var template=name[2];
             var ctrl=name[3];
-            
+
             // Process each route
             if (state in routes) {
                 if (routes[state]===null) {
@@ -1430,7 +1455,7 @@ function codenerix_builder(libraries, routes) {
                 // Remove the key from routes
                 delete routes[state];
             }
-            
+
             // Check if we have an state to process (the user maybe defined it as null, what means it wants to remove this state)
             if (state!==null) {
                 // Build the state dictionary
@@ -1438,7 +1463,7 @@ function codenerix_builder(libraries, routes) {
                 if (url!==null) {        state_dict['url']=url;              }
                 if (template!==null) {   state_dict['templateUrl']=template; }
                 if (ctrl!==null) {       state_dict['controller']=ctrl;      }
-                
+
                 // Attach the new state
                 module.config(['$stateProvider', '$urlRouterProvider',
                     function($stateProvider, $urlRouterProvider) {
@@ -1447,7 +1472,7 @@ function codenerix_builder(libraries, routes) {
                 ]);
             }
         });
-        
+
         // Process new routes
         angular.forEach(routes, function(config, state) {
             if (config!==null) {
@@ -1455,13 +1480,13 @@ function codenerix_builder(libraries, routes) {
                 var url = config[0];
                 var template = config[1];
                 var ctrl = config[2];
-                
+
                 // Build the state dictionary
                 var state_dict={};
                 if (url!==null) {        state_dict['url']=url;              }
                 if (template!==null) {   state_dict['templateUrl']=template; }
                 if (ctrl!==null) {       state_dict['controller']=ctrl;      }
-                
+
                 // Attach the new state
                 module.config(['$stateProvider', '$urlRouterProvider',
                     function($stateProvider, $urlRouterProvider) {
@@ -1471,10 +1496,10 @@ function codenerix_builder(libraries, routes) {
             }
         });
     }
-    
+
     // Add factory
     module.factory("ListMemory",function(){return {};});
-    
+
     // Return the just built module
     return module;
 }
@@ -1507,7 +1532,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         $scope.minute=null;
         $scope.second=null;
         $scope.context={};
-        
+
         // Prepare query
         $scope.query = {
             "listid":listid,
@@ -1535,7 +1560,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     dynamic_fields($scope);
     angularmaterialchip($scope);
     if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
-    
+
     // Memory
     if (l.mem==undefined) {
         l.mem={};
@@ -1547,7 +1572,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             $scope.$apply();
         }
     }
-    
+
     // Edit/detail link
     $scope.set_elementid = function(value, name) {
         if ($rootScope.elementid==value) {
@@ -1565,7 +1590,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             } else {
                 // Base window
                 $scope.ws=ws+"/addmodal";
-                
+
                 // Base Window functions
                 var functions = function(scope) {};
                 var callback = function(scope) {
@@ -1576,9 +1601,9 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     $state.go($state.current, {listid:scope.listid});
                     refresh(scope, $timeout, Register, undefined);
                 };
-                
+
                 // Start modal window
-                openmodal($scope, $timeout, $uibModal, 'lg', functions, callback);
+                openmodal($scope, $timeout, $uibModal, 'lg', functions, callback, $scope.addnew);
             }
         }
     };
@@ -1606,7 +1631,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                 } else {
                     $scope.ws=ws+"/"+pk+"/editmodal";
                 }
-                
+
                 // Base Window functions
                 var functions = function(scope) {};
                 var callback = function(scope) {
@@ -1617,9 +1642,9 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     $state.go($state.current, {listid:scope.listid});
                     refresh(scope, $timeout, Register, undefined);
                 };
-                
+
                 // Start modal window
-                openmodal($scope, $timeout, $uibModal, 'lg', functions, callback);
+                openmodal($scope, $timeout, $uibModal, 'lg', functions, callback, $scope.addnew);
             }
         }
     };
@@ -1679,16 +1704,16 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         $scope.query.printer = 'xls';
         refresh($scope, $timeout, Register, callback);
     };
-    
-    // Get details 
+
+    // Get details
     $scope.list_modal = function(id) {
         // Base window
         id = String(id);
         $scope.wsbase = ws+"/";
-        
+
         $scope.ws=$scope.wsbase+id+"/modal";
         $scope.initialbase = $scope.wsbase;
-        
+
         $scope.id_parent = null;
         //$scope.initialws = $scope.ws;
 
@@ -1700,7 +1725,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     $scope.id_parent = id_parent;
                 }
             }
-            
+
             // DEPRECATED: 2017-02-14
             scope.createrelationfile = function(){
                 var url = $scope.initialbase+$scope.id_parent+"/add"
@@ -1717,8 +1742,8 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                 if (confirm(msg)){
                     var url = $scope.wsbase+id_parent+"/"+id+"/delete";
                     $scope.ws= $scope.wsbase+id_parent+"/modal";
-                        
-                    
+
+
                     $http.post( url, {}, {} )
                     .success(function(answer, stat) {
                         // Check the answer
@@ -1743,7 +1768,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                             alert(cnf_debug_txt)
                         }
                     });
-                        
+
                     // Base Window functions
                     var functions = function(scope) {};
                     var callback = function(scope) {
@@ -1765,15 +1790,15 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                 }
                 // Base window
                 $scope.ws=$scope.initialbase+id_parent+"/"+id+"/edit";
-                
+
                 // Base Window functions
                 var functions = function(scope) {};
                 var callback = function(scope) {
                     // Reload list window
                     if ($scope.base_window != undefined){
                         /*
-                        following line is going to be executed in the case this 
-                        manager is created in a modal window 
+                        following line is going to be executed in the case this
+                        manager is created in a modal window
                         */
                         scope.base_window.dismiss('cancel');
                     }
@@ -1782,7 +1807,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     scope.det_window.dismiss('cancel');
                     scope.det_reload[0](scope.det_reload[1]);
                 };
-                
+
                 // Start modal window
                 openmodal($scope, $timeout, $uibModal, 'lg', functions, callback);
             };
@@ -1800,7 +1825,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                         $scope.det_window.dismiss('cancel');
                     };
                 };
-                
+
                 // Prepare for refresh
                 $scope.det_reload=[scope.details,id];
                 $scope.det_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
@@ -1819,7 +1844,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     scope.edit = function(ar) {
                         // Base window
                         $scope.ws=$scope.wsbase+$scope.id_parent+"/"+id+"/edit";
-                        
+
                         // Base Window functions
                         var functions = function(scope) {
                         };
@@ -1827,8 +1852,8 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                             // Reload list window
                             if ($scope.base_window != undefined){
                                 /*
-                                following line is going to be executed in the case this 
-                                manager is created in a modal window 
+                                following line is going to be executed in the case this
+                                manager is created in a modal window
                                 */
                                 scope.base_window.dismiss('cancel');
                             }
@@ -1837,12 +1862,12 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                             scope.det_window.dismiss('cancel');
                             scope.det_reload[0](scope.det_reload[1], scope.det_reload[2]);
                         };
-                        
+
                         // Start modal window
                         openmodal($scope, $timeout, $uibModal, 'lg', functions, callback);
                     };
                 };
-                
+
                 // Prepare for refresh
                 $scope.det_reload=[scope.details_view, id, $event];
                 $scope.det_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
@@ -1876,8 +1901,8 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         if (confirm(msg)){
             var url = $scope.wsbase+id+"/delete";
             //$scope.ws= $scope.wsbase+id_parent+"/modal";
-                
-            
+
+
             $http.post( url, {}, {} )
             .success(function(answer, stat) {
                 // Check the answer
@@ -1917,7 +1942,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     };
     // DEPRECATED: 2017-02-14
     $scope.relationship = function(id){
-        
+
         $scope.initialws = $scope.ws;
         // Base Window functions
         var functions = function(scope) {
@@ -1925,7 +1950,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                 $scope.det_window.dismiss('cancel');
             };
         };
-        
+
         // Prepare for refresh
         $scope.base_reload=[$scope.relationship, id];
         $scope.base_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
@@ -1939,7 +1964,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         // Base window
         $scope.ws=$scope.wsbase+id+"/view";
         $scope.initialbase = $scope.wsbase+id_parent+"/"+id;
-        
+
         $scope.initialws = $scope.ws;
         $scope.id_parent = id_parent;
         // Base Window functions
@@ -1951,7 +1976,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             scope.edit = function(ar) {
                 // Base window
                 $scope.ws=$scope.initialbase+"/edit";
-                
+
                 // Base Window functions
                 var functions = function(scope) {};
                 var callback = function(scope) {
@@ -1959,12 +1984,12 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     $scope.det_window.dismiss('cancel');
                     $scope.det_reload[0]($scope.det_reload[1]);
                 };
-                
+
                 // Start modal window
                 openmodal($scope, $timeout, $uibModal, 'lg', functions, callback);
             };
         };
-        
+
         // Prepare for refresh
         $scope.det_reload=[$scope.details_view, id, id_parent];
         $scope.det_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
@@ -1990,7 +2015,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                         max=absvalue;
                     }
                 });
-                
+
                 // If it is a new ordering element, set to max+1
                 if (actual==0) {
                     $scope.data.table.head.ordering[id]=max+1;
@@ -2038,41 +2063,55 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     refresh($scope,$timeout,Register, callback);
 };
 
-function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws) {
+function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws, reopen) {
     // Set our own url
-    var url = ws+"/add";
+    var url = ws;
+    if (!url.endsWith("/add") && !url.endsWith("/addmodal")) {
+        url = url + "/add"; // TODO: Check when the call is for a modal form
+    }
     $scope.options={};
-    
+
     // Remember http
     $scope.http=$http;
-    
+
     // Clear cache
     $templateCache.remove(url);
-    
+
     // Add datetimepicker function
     $scope.onTimeSet = function (newDate, oldDate) {
         console.log(newDate);
         console.log(oldDate);
     }
-    
+
     // Add linked element
     $scope.linked=function (ngmodel, appname, modelname, formobj, formname, id, wsbaseurl) {
         inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, appname, modelname, formobj, formname, id, wsbaseurl, $timeout);
     }
-    
+
     // Set dynamic foreign fields controller functions
     dynamic_fields($scope);
     angularmaterialchip($scope);
     if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
-    
+
     // Go to list
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
-    
+
     // Update this element
     $scope.submit = function(form, next) {
         formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'add');
+    };
+
+    $scope.submitAndNew = function(form, next) {
+        if (next == undefined)
+            next = "here";
+        formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'addnew', reopen);
+    };
+
+    $scope.submitAndNewModal = function (form, next) {
+        // Submit the form
+        formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, null, ws, form, 'here', 'addnewmodal', reopen);
     };
 
     var fields = [];
@@ -2089,7 +2128,7 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     };
 
     // DEPRECATED: 2017-02-14
-    // calc date arrival and duration 
+    // calc date arrival and duration
     // change duration
     $scope.changeDurationFlight = function() {
         var duration;
@@ -2116,20 +2155,20 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
 function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws) {
     // Set our own url
     var url = ws+"/"+$stateParams.pk;
-    
+
     // Clear cache
     $templateCache.remove(url);
-    
+
     // Check if autostate has been disabled by the caller
     if (typeof(tabs_js)!='undefined' && tabs_js.length != 0){
         $state.go('details0.sublist'+listid+'.rows');
     }
-    
+
     // Go to list
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
-    
+
     // Delete this element
     $scope.edit = function() {
         // Clear cache
@@ -2137,7 +2176,7 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
         // Go to edit state
         $state.go('formedit'+listid,{pk:$stateParams.pk});
     };
-    
+
     $scope.msg = function(msg){
         alert(msg);
     };
@@ -2176,23 +2215,23 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     // Set our own url
     var url = ws+"/"+$stateParams.pk+"/edit";
     $scope.options={};
-    
+
     // Rembmer http
     $scope.http=$http;
-    
+
     // Clear cache
     $templateCache.remove(url);
-    
+
     // Add linked element
     $scope.linked=function (ngmodel, appname, modelname, formobj, formname, id, wsbaseurl) {
         inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, appname, modelname,formobj, formname, id, wsbaseurl, $timeout);
     }
-    
+
     // Set dynamic foreign fields controller functions
     dynamic_fields($scope);
     angularmaterialchip($scope);
     if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
-    
+
     // Go to list
     $scope.gotoback = function() {
         // Clear cache
@@ -2201,7 +2240,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         $state.go('list'+listid);
         // $state.go('details'+listid,{pk:$stateParams.pk});
     };
-    
+
     // Go to details
     $scope.gotodetails = function() {
         // Clear cache
@@ -2209,7 +2248,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         // Go to list
         $state.go('details'+listid,{pk:$stateParams.pk});
     };
-    
+
     // Reload this form
     $scope.reload = function(msg) {
         if (confirm(msg)) {
@@ -2221,7 +2260,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     };
 
     // DEPRECATED: 2017-02-14
-    // calc date arrival and duration 
+    // calc date arrival and duration
     // change duration
     $scope.changeDurationFlight = function() {
         //changeDurationFlight($scope);
@@ -2257,7 +2296,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     $scope.changeActualDateFlight = function(){
         changeActualDateFlight($scope);
     };
-    
+
     $scope.msg = function(msg){
         alert(msg);
     }
@@ -2289,7 +2328,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
             });
          }
     };
-    
+
     // Update this element
     $scope.submit = function(form, next) {
         formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'edit');
@@ -2311,7 +2350,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
 
 
 // DEPRECATED: 2017-02-14
- // calc date arrival and duration 
+ // calc date arrival and duration
  // change duration
 function changeDurationFlightC($scope){
     if ($scope.FlightForm_status != flightForm_status_takeof){
@@ -2323,8 +2362,8 @@ function changeDurationFlightC($scope){
         if (typeof($scope.FlightForm)!="undefined" &&
             typeof($scope.FlightForm.FlightForm_departure_time)!="undefined" &&
             typeof($scope.FlightForm.FlightForm_departure_time_time)!="undefined" &&
-            $scope.FlightForm.FlightForm_departure_time != "" && 
-            $scope.FlightForm.FlightForm_departure_time_time != "" && 
+            $scope.FlightForm.FlightForm_departure_time != "" &&
+            $scope.FlightForm.FlightForm_departure_time_time != "" &&
             duration != "" && typeof(duration)!="undefined"){
                 var fecha = $scope.FlightForm.FlightForm_departure_time.split("-");
                 var hora_int = $scope.FlightForm.FlightForm_departure_time_time;
@@ -2347,7 +2386,7 @@ function changeDurationFlightC($scope){
         }
         else if (typeof($scope.DepartureForm)!="undefined" &&
             typeof($scope.DepartureForm.DepartureForm_date)!="undefined" &&
-            $scope.DepartureForm.DepartureForm_date != "" && 
+            $scope.DepartureForm.DepartureForm_date != "" &&
             duration != "" && typeof(duration)!="undefined"){
                 var fecha = $scope.DepartureForm.DepartureForm_date.split("-");
                 var hora_int = $scope.DepartureForm.DepartureForm_date_time;
@@ -2399,7 +2438,7 @@ function changeEstimatedDateFlight($scope){
 
                     div = $scope.ArrivalForm.ArrivalForm_date;
                     hora_int = $scope.ArrivalForm.ArrivalForm_date_time;
-                    
+
                     if (typeof(hora_int)!="undefined"){
                         fecha = div.split("-");
                         var hora = [];
@@ -2426,24 +2465,24 @@ function changeEstimatedDateFlight($scope){
 function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
 
     modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
-    
+
     $scope.reload = undefined;
     $scope.onClickTab = function (url) {
         $templateCache.remove(url);
         $scope.currentTab = url;
         $scope.ws=url;
         $scope.wsbase=url + "/";
-        
+
         modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
-        
+
         $scope.base_reload = [$scope.refreshTab,url];
     };
-    
+
     $scope.refreshTab = function(url){
         /*
-        function designed to make possible content tabs can be 
+        function designed to make possible content tabs can be
         refreshed. the refresh is made with the following tab change
-        simulation. but it does not work if $timeout is not used. it 
+        simulation. but it does not work if $timeout is not used. it
         could be due to a unknown angular behaviour.
         */
         $templateCache.remove(url);
@@ -2452,7 +2491,7 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
             $scope.currentTab = url;
         },1);
     };
-    
+
     $scope.addrecord = function(url){
         $scope.add(url);
     };
@@ -2463,7 +2502,7 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
         del_item_sublist(id, msg, url, $scope, $http);
         //$scope.add(url);
     };
-    
+
     // DEPRECATED: 2017-02-14
     $scope.createpdf = function(type){
 
@@ -2482,7 +2521,7 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
                 .success(function(answer, stat) {
                     // Check the answer
                     if (stat==200) {
-                            
+
                         // Everything OK, close the window
                         if (answer.result){
                             $("#alertclipboard_error").html('').hide();
@@ -2505,7 +2544,7 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
                                 $scope.$parent.refreshTab(reload1);
                             });
                             alert(answer.msg);
-                            
+
                         }else{
                             $("#alertclipboard_ok").html('').hide();
                             $("#alertclipboard_error").html(answer.msg).show();
@@ -2553,7 +2592,7 @@ function angularmaterialchip(scope){
     scope.amc_querySearch = querySearch;
     scope.amc_autocompleteDemoRequireMatch = true;
     scope.amc_transformChip = transformChip;
-    
+
     // options values
     scope.amc_items = {};
     // options seleted
