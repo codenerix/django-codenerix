@@ -49,7 +49,7 @@ class Command(BaseCommand, Debugger):
             ("cryptography",                    "import cryptography"),
             ("dateutil",                        "from dateutil.tz import tzutc"),
             ("django-multi-email-field==0.5",   "from multi_email_field.forms import MultiEmailField", "pip install git+https://github.com/fle/django-multi-email-field.git"),
-            ("django-recaptcha",                "import captcha"),
+            ("django-recaptcha",                "from captcha import client"),
             ("django-rosetta",                  "import rosetta"),
             ("jsonfield",                       "import jsonfield"),
             ("openpyxl==2.2.5",                 "import openpyxl"),
@@ -91,18 +91,23 @@ class Command(BaseCommand, Debugger):
                 error, output = commands.getstatusoutput("pip freeze | grep -e '^{}=' || echo 'EMPTY'".format(package))
                 if not error:
                     if output=='EMPTY':
-                        self.debug("OK",color='green', header=None, tail=None),
+                        self.debug("OK",color='green', header=None, tail=None)
                         self.debug(" (BUILT-IN)",color='purple', header=None)
+                    elif "error" in output.lower():
+                        self.debug("ERROR - OUTPUT WAS:\n".format(name),color='red', header=None, tail=None)
+                        if output.split("\n")[-1]=='EMPTY':
+                            output = "\n".join(output.split("\n")[0:-1])
+                        self.debug(output,color='white', header=None)
                     else:
                         if output<name:
-                            self.debug("OLDER".format(name),color='yellow', header=None, tail=None),
+                            self.debug("OLDER".format(name),color='yellow', header=None, tail=None)
                             if helptext:
-                                self.debug(" - HELP FOR YOU: {}".format(helptext),color='white', header=None, tail=None),
-                            self.debug("",header=None)
+                                self.debug(" - HELP FOR YOU: {}".format(helptext),color='white', header=None, tail=None)
+                            self.debug(" ",header=None)
                         else:
                             self.debug("OK".format(name),color='green', header=None)
                 else:
-                    self.debug("ERROR while looking for the package in PIP for '{}'".format(name),color='red'),
+                    self.debug("ERROR while looking for the package in PIP for '{}'".format(name),color='red')
                     self.debug(" -> Test: pip freeze | grep -e '^{}=' || echo 'EMPTY'".format(package),color='yellow')
                     self.debug("pip freeze | grep '{}' || echo 'EMPTY'".format(name))
                     self.error(error)
@@ -111,7 +116,7 @@ class Command(BaseCommand, Debugger):
                         self.debug("HELP FOR YOU: {}".format(helptext))
                     print
             else:
-                self.debug("MISSING or wrong version for '{}'".format(name),color='red'),
+                self.debug("MISSING or wrong version for '{}'".format(name),color='red')
                 self.debug(" -> Test: {}".format(command),color='yellow')
                 self.debug("python -c '{}'".format(command))
                 self.error(error)

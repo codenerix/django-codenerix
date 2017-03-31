@@ -1614,7 +1614,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     // Showing details
                     if ($scope.data.meta.show_modal) {
                         // Show in a modal window
-                        modal_manager($scope, $uibModal, $templateCache, $http, $scope);
+                        modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope);
                         $scope.details(pk);
                     } else {
                         // Show like always
@@ -1873,8 +1873,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                 $scope.det_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
                 $event.stopPropagation();
             };
-
-            modal_manager($scope, $uibModal, $templateCache, $http, $scope);
+            modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
 
             scope.addrecord = function(){
                 var url = $scope.initialbase+$scope.id_parent+"/addfile"
@@ -1962,7 +1961,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         id_parent = String(id_parent);
         $scope.wsbase = ws+"/";
         // Base window
-        $scope.ws=$scope.wsbase+id+"/view";
+        $scope.ws=$scope.wsbase+id+"/view/True";
         $scope.initialbase = $scope.wsbase+id_parent+"/"+id;
 
         $scope.initialws = $scope.ws;
