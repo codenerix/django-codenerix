@@ -75,15 +75,17 @@ class BaseForm(object):
     def get_errors(self):
         # Where to look for fields
         if 'list_errors' in dir(self):
-            list_errors=self.list_errors
+            list_errors = self.list_errors
         else:
-            list_errors=[element[5] for element in self.non_field_errors()[:-1]]
+            r = self.non_field_errors()
+            # list_errors = [element[5] for element in self.non_field_errors()[:-1]]
+            list_errors = [element[5] if len(element) >= 5 else [] for element in self.non_field_errors()[:-1]]
         return list_errors
 
     def __groups__(self):
         return []
     
-    def get_groups(self,gs=None,processed=[],initial=True):
+    def get_groups(self, gs=None, processed=[], initial=True):
         '''
         <--------------------------------------- 12 columns ------------------------------------> 
                     <--- 6 columns --->                           <--- 6 columns --->             
@@ -171,7 +173,7 @@ class BaseForm(object):
         
         # Check if language is set
         if not self.__language:
-            raise IOError,"ERROR: No language suplied!"
+            raise IOError("ERROR: No language suplied!")
         
         # Initialize the list
         if initial: processed=[]
@@ -258,17 +260,17 @@ class BaseForm(object):
                                     if key in labels:
                                         atr[key]=element[key]
                                     else:
-                                        raise IOError,"Unknown attribute '{0}' as field '{1}' in list of fields".format(key,field)
+                                        raise IOError("Unknown attribute '{0}' as field '{1}' in list of fields".format(key,field))
                             else:
                                 if not dictionary:
                                     if element is not None:
                                         atr[attributes[idx][0]]=element
                                 else:
-                                    raise IOError,"We already processed a dicionary element in this list of fields, you can not add anoother type of elements to it, you must keep going with dictionaries"
+                                    raise IOError("We already processed a dicionary element in this list of fields, you can not add anoother type of elements to it, you must keep going with dictionaries")
                     elif type(f)==str or type(f)==unicode:
                         field=f
                     else:
-                        raise IOError,"Uknown element type '{0}' inside group '{1}'".format(type(f),token['name'])
+                        raise IOError("Uknown element type '{0}' inside group '{1}'".format(type(f),token['name']))
                     
                     # Get the Django Field object
                     found=None
@@ -304,7 +306,7 @@ class BaseForm(object):
                                         # If autofill is True for this field set the DynamicSelect widget
                                         found.field.widget=DynamicInput(wattrs)
                                     else:
-                                        raise IOError,"Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(autokind)
+                                        raise IOError("Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(autokind))
 
                                     # Configure the field
                                     found.field.widget.is_required=wrequired
@@ -360,7 +362,7 @@ class BaseForm(object):
                         # Remember we have processed it
                         processed.append(found.__dict__[check_system])
                     else:
-                        raise IOError,"Unknown field '{0}' specified in group '{1}'".format(f,token['name'])
+                        raise IOError("Unknown field '{0}' specified in group '{1}'".format(f,token['name']))
             
             token['fields']=fields
             groups.append(token)
@@ -396,7 +398,7 @@ class BaseForm(object):
                                     # If autofill is True for this field set the DynamicSelect widget
                                     infield.field.widget=DynamicInput(wattrs)
                                 else:
-                                    raise IOError,"Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(autokind)
+                                    raise IOError("Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(autokind))
 
                                 # Configure the field
                                 infield.field.widget.is_required=wrequired

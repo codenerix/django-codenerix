@@ -159,7 +159,7 @@ def datewidget(i,langcode,kindtype='datetime'):
         final['icon']='time'
 
     else:
-        raise IOError,"Unknown kind '{0}' in filter 'datewidget'".format(kind)
+        raise IOError("Unknown kind '{0}' in filter 'datewidget'".format(kind))
 
     # Return result
     return final
@@ -190,7 +190,11 @@ def foreignkey(element, exceptions):
     function to determine if each select field needs a create button or not
     '''
     label = element.field.__dict__['label']
-    if (not label) or (unicode(label) in exceptions):
+    try:
+        label = unicode(label)
+    except NameError:
+        pass
+    if (not label) or (label in exceptions):
         return False
     else:
         return "_queryset" in element.field.__dict__
@@ -219,7 +223,7 @@ class ColumnCounter:
             self.__columns=0
             answer=True
         elif self.__columns>12:
-            raise IOError,"Columns max number of 12 reached, you requested to use a total of '{}'".format(self.__columns)
+            raise IOError("Columns max number of 12 reached, you requested to use a total of '{}'".format(self.__columns))
         else:
             answer=False
         # Add new columns

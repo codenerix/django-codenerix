@@ -21,10 +21,10 @@
 try:
     import pyotp
 except ImportError:
-    pyotp=None
+    pyotp = None
 import hashlib
 import base64
-import ldap
+# import ldap
 
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -32,6 +32,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
 from django.conf import settings
+
 
 def check_auth(user):
     '''
@@ -71,7 +72,7 @@ def check_auth(user):
     return auth
 
 
-#class LimitedAuth(ModelBackend):
+# class LimitedAuth(ModelBackend):
 #    '''
 #    Authentication system based on default Django's authentication system
 #    which extends the last one with check_auth() extra system limitations
@@ -133,25 +134,25 @@ class TokenAuth(ModelBackend):
         if user:
             # Get config
             config = {
-                       'key': None,
-           'master_unsigned': False,
-             'user_unsigned': False,
-              'otp_unsigned': False,
-             'master_signed': False,
-               'user_signed': False,
+                'key': None,
+                'master_unsigned': False,
+                'user_unsigned': False,
+                'otp_unsigned': False,
+                'master_signed': False,
+                'user_signed': False,
                 'otp_signed': False,
-                }
-            config_settings = getattr(settings,'AUTHENTICATION_TOKEN',{})
-            for (key,value) in config_settings.items():
-                config[key]=value
+            }
+            config_settings = getattr(settings, 'AUTHENTICATION_TOKEN', {})
+            for (key, value) in config_settings.items():
+                config[key] = value
 
             # Get keys
             if config['key'] or config['master_unsigned'] or config['master_signed']:
-                if config['key'] and ( config['master_unsigned'] or config['master_signed'] ):
+                if config['key'] and (config['master_unsigned'] or config['master_signed']):
                     master = config['key']
                 else:
                     if settings.DEBUG:
-                        raise IOError,"To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token"
+                        raise IOError("To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token")
                     else:
                         master = None
             else:
@@ -163,20 +164,20 @@ class TokenAuth(ModelBackend):
 
                     if config['otp_unsigned'] or config['otp_signed']:
                         if not pyotp:
-                            raise IOError,"PYOTP library not found, you can not use OTP signed/unsigned configuration"
+                            raise IOError("PYOTP library not found, you can not use OTP signed/unsigned configuration")
                         else:
                             try:
                                 otp = str(pyotp.TOTP(base64.b32encode(user_key)).now())
                             except TypeError:
                                 if settings.DEBUG:
-                                    raise IOError,"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='"
+                                    raise IOError("To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='")
                                 else:
                                     otp = None
                     else:
                         otp = None
                 else:
                     if settings.DEBUG:
-                        raise IOError,"To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)"
+                        raise IOError("To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)")
                     else:
                         user_key = None
                         otp = None
@@ -186,31 +187,31 @@ class TokenAuth(ModelBackend):
 
             # Unsigned string
             if config['master_signed'] or config['user_signed'] or config['otp_signed']:
-                tosign=username+string
+                tosign = username + string
 
             # Build the list of valid keys
-            keys=[]
+            keys = []
             if master:
                 if config['master_unsigned']:                   # MASTER KEY
                     # keys.append("master_unsigned")
                     keys.append(master)
                 if config['master_signed']:                     # MASTER KEY SIGNED
                     # keys.append("master_signed")
-                    keys.append(hashlib.sha1(tosign+master).hexdigest())
+                    keys.append(hashlib.sha1(tosign + master).hexdigest())
             if user_key:
                 if config['user_unsigned']:                     # USER KEY
                     # keys.append("user_unsigned")
                     keys.append(user_key)
                 if config['user_signed']:                       # USER KEY SIGNED
                     # keys.append("user_signed")
-                    keys.append(hashlib.sha1(tosign+user_key).hexdigest())
+                    keys.append(hashlib.sha1(tosign + user_key).hexdigest())
             if otp:
                 if config['otp_unsigned']:                      # OTP KEY
                     # keys.append("otp_unsigned")
                     keys.append(otp)
                 if config['otp_signed']:                        # OTP KEY SIGNED
                     # keys.append("otp_signed")
-                    keys.append(hashlib.sha1(tosign+otp).hexdigest())
+                    keys.append(hashlib.sha1(tosign + otp).hexdigest())
 
             # Key is valid
             if token in keys:
@@ -256,25 +257,25 @@ class TokenAuthMiddleware(object):
 
     def process_request(self, request):
         # By default we are not in authtoken
-        request.authtoken=False
+        request.authtoken = False
         # Get body
         body = request.body
         # Get token
-        token = request.GET.get("authtoken",request.POST.get("authtoken",""))
+        token = request.GET.get("authtoken", request.POST.get("authtoken", ""))
         # If the user is authenticated and shouldn't be
         if token:
-            username = request.GET.get("authuser",request.POST.get("authuser",None))
-            json = request.GET.get("json",request.POST.get("json", body))
+            username = request.GET.get("authuser", request.POST.get("authuser", None))
+            json = request.GET.get("json", request.POST.get("json", body))
             # Authenticate user
-            user = authenticate(username=username,token=token,string=json)
+            user = authenticate(username=username, token=token, string=json)
             if user:
                 # Set we are in authtoken
-                request.authtoken=True
+                request.authtoken = True
                 # Log user in
-                login(request,user)
+                login(request, user)
                 # Disable CSRF checks
                 setattr(request, '_dont_enforce_csrf_checks', True)
-                json_details = request.GET.get("authjson_details",request.POST.get("authjson_details",False))
+                json_details = request.GET.get("authjson_details", request.POST.get("authjson_details", False))
                 if json_details in ['true', '1', 't', True]:
                     json_details = True
                 else:
@@ -296,6 +297,22 @@ class TokenAuthMiddleware(object):
         return response
 
 
+class ActiveDirectoryGroupMembershipSSLBackend:
+    def authenticate(self, username=None, password=None):
+        user = User.objects.filter(username=username).first()
+        if user and user.check_password(password):
+            return user
+        else:
+            return None
+
+    def get_user(self, user_id):
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return None
+    
+    
+"""
 class ActiveDirectoryGroupMembershipSSLBackend:
     '''
     Authorization backend for Active Directory in Django
@@ -328,10 +345,10 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             if self.__debug is None:
                 
                 # Check what do we have inside settings
-                debug_filename = getattr(settings,"AD_DEBUG_FILE", None)
+                debug_filename = getattr(settings, "AD_DEBUG_FILE", None)
                 if debug_filename:
                     # Open the debug file pointer
-                    self.__debug = open(settings.AD_DEBUG_FILE,'w')
+                    self.__debug = open(settings.AD_DEBUG_FILE, 'w')
                 else:
                     # Disable debuging forever
                     self.__debug = False
@@ -348,16 +365,16 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 
                 # Prepare ldap connection
                 nt4_domain = settings.AD_NT4_DOMAIN.upper()
-                dns_name = getattr(settings,"AD_DNS_NAME", nt4_domain).upper()
+                dns_name = getattr(settings, "AD_DNS_NAME", nt4_domain).upper()
                 if getattr(settings, "AD_SSL", False):
                     # Connect using SSL
                     ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, settings.AD_CERT_FILE)
-                    ldap_url='ldaps://%s:%s' % (dns_name, getattr(settings, 'AD_LDAP_PORT', 636))
+                    ldap_url = 'ldaps://%s:%s' % (dns_name, getattr(settings, 'AD_LDAP_PORT', 636))
                 else:
                     # Connect normaly
-                    ldap_url='ldap://%s:%s' % (dns_name, getattr(settings, 'AD_LDAP_PORT', 389))
+                    ldap_url = 'ldap://%s:%s' % (dns_name, getattr(settings, 'AD_LDAP_PORT', 389))
                 if mode is 'SEARCH':
-                    ldap.set_option(ldap.OPT_REFERRALS,0) # DO NOT TURN THIS OFF OR SEARCH WON'T WORK!      
+                    ldap.set_option(ldap.OPT_REFERRALS, 0)  # DO NOT TURN THIS OFF OR SEARCH WON'T WORK!
                 
                 # Initialize
                 self.debug('ldap.initialize :: url: {}'.format(ldap_url))
@@ -371,7 +388,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 
                 # Do the check out
                 self.debug('bind...')
-                if mode=='LOGIN':
+                if mode == 'LOGIN':
                     l.simple_bind_s(binddn, password)
                     
                     # Unbind automatically
@@ -382,16 +399,16 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                     answer = True
                     
                 else:
-                    l.bind_s(binddn,password)
+                    l.bind_s(binddn, password)
                     
                     # Prepare answer
                     answer = l
                 
-            except ldap.INVALID_CREDENTIALS,e:
+            except ldap.INVALID_CREDENTIALS(e):
                 # The access for this user has been denied, Debug it if required
                 self.debug("Invalid credentials for user '{}' with error '{}'".format(username, e))
                 answer = False
-            except ldap.SERVER_DOWN, e:
+            except ldap.SERVER_DOWN(e):
                 # The LDAP server is not accesible
                 self.debug("The LDAP server is not accesible: {}".format(e))
                 answer = None
@@ -404,7 +421,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         # Return the final result
         return answer
     
-    def authenticate(self,username=None,password=None):
+    def authenticate(self, username=None, password=None):
         '''
         Authenticate the user agains LDAP
         '''
@@ -414,7 +431,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         
         if authorization:
             # The user was validated in Active Directory
-            user = self.get_or_create_user(username,password)
+            user = self.get_or_create_user(username, password)
         else:
             # Access denied
             user = None
@@ -432,7 +449,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 # Username found
                 if u:
                     # Deactivate the user
-                    u.is_active=False
+                    u.is_active = False
                     u.save()
         
         # Return the final decision
@@ -453,37 +470,37 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             # Prepare SEARCH fields
             mapping = getattr(settings, 'AD_MAP_FIELDS', {})
             # Build the search fields
-            search_fields = ['sAMAccountName','memberOf'] + mapping.values()
+            search_fields = ['sAMAccountName', 'memberOf'] + mapping.values()
             search_dns = getattr(settings, 'AD_NT4_DOMAIN', '').lower().split(".")
             # Build the dn list
-            search_dnlist=[]
+            search_dnlist = []
             for token in search_dns:
                 search_dnlist.append("dc={}".format(token))
-            search_dn=",".join(search_dnlist)
+            search_dn = ",".join(search_dnlist)
             
             # Search for the user
             self.debug('Search...')
-            result = link.search_ext_s(search_dn,ldap.SCOPE_SUBTREE,"sAMAccountName={}".format(username),search_fields)[0][1]
+            result = link.search_ext_s(search_dn, ldap.SCOPE_SUBTREE, "sAMAccountName={}".format(username), search_fields)[0][1]
             
             # Validate that they are a member of review board group
             memberships = result.get('memberOf', [])
             
             # Process all memberships found
-            groupsAD={}
+            groupsAD = {}
             for membership in memberships:
                 tokens = membership.split(",")
                 dcs = []
-                cn=None
+                cn = None
                 
                 for token in tokens:
-                    (key,value) = token.split("=")
-                    if key=='CN':
+                    (key, value) = token.split("=")
+                    if key == 'CN':
                         if not cn:
-                            cn=value
-                    elif key=='DC':
+                            cn = value
+                    elif key == 'DC':
                         dcs.append(value)
                     else:
-                        raise IOError,"Unknown KEY '{}'".format(key)
+                        raise IOError("Unknown KEY '{}'".format(key))
                 
                 # Prepare the full domain name addess of the AD
                 dc = ".".join(dcs)
@@ -497,8 +514,8 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                     groupsAD[dc].append(cn)
             
             # Prepare the answer
-            info={}
-            info['groups']=groupsAD
+            info = {}
+            info['groups'] = groupsAD
             
             # Look for other tokens to get mapped
             for djfield in mapping.keys():
@@ -536,9 +553,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             user = User(username=username)
         
         # Update user
-        user.first_name=info.get('first_name','')
-        user.last_name=info.get('last_name','')
-        user.email=info.get('email','')
+        user.first_name = info.get('first_name', '')
+        user.last_name = info.get('last_name', '')
+        user.email = info.get('email', '')
         
         # Check if the user is in the Administrators groups
         is_admin = False
@@ -605,3 +622,4 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 if group:
                     # If found, add the user to that group
                     user.groups.add(group)
+"""

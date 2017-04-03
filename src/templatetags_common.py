@@ -22,10 +22,10 @@ from django.utils.translation import ugettext as _
 from django.conf import settings
 
 def debugme(obj):
-        raise IOError,obj
+        raise IOError(obj)
 
 def debugmedict(obj):
-        raise IOError,obj.__dict__
+        raise IOError(obj.__dict__)
 
 def addedit(value):
     return (value=='add') or (value=='edit')
@@ -204,7 +204,7 @@ def codenerix(value, kind=None):
         elif kind == 'image':
             return u"<img ng-click='$event.stopPropagation();' src='{0}{1}'>".format(settings.MEDIA_URL, value);
         else:
-            raise Exception ("Django filter 'codenerix' got a wrong kind named '"+kind+"'")
+            raise Exception("Django filter 'codenerix' got a wrong kind named '"+kind+"'")
     
     return value
 

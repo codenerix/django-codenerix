@@ -29,7 +29,7 @@ from django.conf import settings
 from django.forms.utils import ValidationError
 from django.utils.translation import ugettext as _
 from django.forms.widgets import Textarea
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 
 from multi_email_field.forms import MultiEmailField as MultiEmailFormField
 from captcha import client
@@ -149,8 +149,8 @@ class GenReCaptchaField(forms.CharField):
     
     def clean(self, values):
         super(GenReCaptchaField, self).clean(values[0])
-        recaptcha_challenge_value = smart_unicode(values[0])
-        recaptcha_response_value = smart_unicode(values[1])
+        recaptcha_challenge_value = smart_text(values[0])
+        recaptcha_response_value = smart_text(values[1])
         
         if os.environ.get('RECAPTCHA_TESTING', None) == 'True' and recaptcha_response_value == 'PASSED':
             return values[0]

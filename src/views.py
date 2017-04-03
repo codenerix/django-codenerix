@@ -39,7 +39,7 @@ from django.views.generic import View
 from django.views.generic import ListView
 from django.forms.models import model_to_dict
 from django.utils.translation import ugettext as _ # Before it was , ugettext_lazy as __
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, get_object_or_404
@@ -69,100 +69,117 @@ from openpyxl import Workbook
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class
 from codenerix.templatetags.codenerix_lists import unlist
 
+
 def status(request, status, answer):
-    answerjson=urlsafe_base64_decode(answer)
-    status=status.lower()
-    if status=='accept':out=202     # Accepted
-    else:               out=501     # Not Implemented
-    return HttpResponse(answerjson,status=out)
+    answerjson = urlsafe_base64_decode(answer)
+    status = status.lower()
+    if status == 'accept':
+        out=202     # Accepted
+    else:
+        out=501     # Not Implemented
+    return HttpResponse(answerjson, status=out)
+
 
 # Get rightnow value
-def grv(struct,position):
+def grv(struct, position):
     '''
     This function helps to convert date information for showing proper filtering
     '''
-    if position=='year':
-        size=4
+    if position == 'year':
+        size = 4
     else:
-        size=2
+        size = 2
 
     if (struct[position][2]):
-        rightnow=str(struct[position][0]).zfill(size)
+        rightnow = str(struct[position][0]).zfill(size)
     else:
-        if position=='year':
-            rightnow='____'
+        if position == 'year':
+            rightnow = '____'
         else:
-            rightnow='__'
+            rightnow = '__'
     return rightnow
 
 
-def pages(paginator,current):
+def pages(paginator, current):
     # Get the range of pages
-    p=paginator.page_range
+    p = paginator.page_range
     # Get first and last
-    first=p[0]
-    last=p[-1]
-    total=(last-first)-2
-    if total==0:
-        total=1
-    holes=10
-    radio=3
+    first = p[0]
+    last = p[-1]
+    total = (last - first) - 2
+    if total == 0:
+        total = 1
+    holes = 10
+    radio = 3
 
     # Build center
-    ini=current-radio
-    end=current+radio+1
-    if ini<first: ini=first
-    if end>last: end=last
-    center=xrange(ini,end)
+    ini = current - radio
+    end = current + radio + 1
+    if ini < first:
+        ini = first
+    if end > last:
+        end = last
+    try:
+        center = xrange(ini, end)
+    except NameError:
+        center = range(ini, end)
 
     # Build the list of pages
-    pages=[]
+    pages = []
     # Add the firstpage
     pages.append(first)
 
     # Decide block size
-    ini_block=holes*current/total
-    end_block=holes-ini_block
+    ini_block = holes * current / total
+    end_block = holes - ini_block
     # Calculate grains
-    if ini_block>0:
-        ini_grain=float(ini-first)/ini_block
+    if ini_block > 0:
+        ini_grain = float(ini - first) / ini_block
     else:
-        ini_grain=0.0
-    if end_block>0:
-        end_grain=float(last-end)/end_block
+        ini_grain = 0.0
+    if end_block > 0:
+        end_grain = float(last - end) / end_block
     else:
-        end_grain=0.0
+        end_grain = 0.0
     # Fill blocks
-    page=first
-    ref=page
-    for i in xrange(0,ini_block):
+    page = first
+    ref = page
+    try:
+        range_border = xrange(0, ini_block)
+    except NameError:
+        range_border = range(0, int(ini_block))
+    for i in range_border:
         # Calculate if new grain will cross the border
-        if ref+ini_grain<ini:
-            ref+=ini_grain
-            newpage=int(round(ref))
-            if (newpage>page) and (newpage<ini):
-                page=newpage
+        if ref + ini_grain < ini:
+            ref += ini_grain
+            newpage = int(round(ref))
+            if (newpage > page) and (newpage < ini):
+                page = newpage
                 pages.append(page)
         else:
             break
     for page in center:
-        if (page>first) and (page<last):
+        if (page > first) and (page < last):
             pages.append(page)
 
-    ref=page
-    for i in xrange(0,end_block):
+    ref = page
+    try:
+        cross_border = xrange(0, end_block)
+    except NameError:
+        cross_border = range(0, int(end_block))
+    for i in cross_border:
         # Calculate if new grain will cross the border
-        if ref+end_grain<last:
-            ref+=end_grain
-            newpage=int(round(ref))
-            if (newpage>page) and (newpage<last):
-                page=newpage
+        if ref + end_grain < last:
+            ref += end_grain
+            newpage = int(round(ref))
+            if (newpage > page) and (newpage < last):
+                page = newpage
                 pages.append(page)
         else:
             break
 
     # Add the last page
-    if last!=page:
+    if last != page:
         pages.append(last)
 
     # Return the list of pages
@@ -219,42 +236,42 @@ class MODELINFO:
         l['profile_people_limit']=reduce(operator_or_,criterials)
         return l
     '''
-    def __init__(self,queryset,appname,modelname,viewname,request,user,profile,Mfields, MlimitQ, MsearchF, MsearchQ,listid,elementid,kwargs):
+    def __init__(self, queryset, appname, modelname, viewname, request, user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, kwargs):
         # Internal attributes
         soul = queryset.__dict__.get('model',None)
         if soul:
-            self.__soul=soul()
+            self.__soul = soul()
         else:
-            self.__soul=None
-        self.__appname=appname
-        self.__modelname=modelname
-        self.__viewname=viewname
-        self.__Mfields=Mfields
-        self.__MlimitQ=MlimitQ
-        self.__MsearchF=MsearchF
-        self.__MsearchQ=MsearchQ
+            self.__soul = None
+        self.__appname = appname
+        self.__modelname = modelname
+        self.__viewname = viewname
+        self.__Mfields = Mfields
+        self.__MlimitQ = MlimitQ
+        self.__MsearchF = MsearchF
+        self.__MsearchQ = MsearchQ
         # Public attributes
-        self.listid=listid
-        self.elementid=elementid
-        self.request=request
-        self.user=user
-        self.profile=profile
-        self.kwargs=kwargs
+        self.listid = listid
+        self.elementid = elementid
+        self.request = request
+        self.user = user
+        self.profile = profile
+        self.kwargs = kwargs
 
     def fields(self):
         if self.__Mfields:
-            f=self.__Mfields
+            f = self.__Mfields
         elif self.__soul:
-            f=getattr(self.__soul,'__fields__',None)
+            f = getattr(self.__soul, '__fields__', None)
         else:
-            f=None
+            f = None
         if callable(f):
             return f(self)
         else:
             if self.__Mfields:
-                e="View {1} inside app {0} has a __fields__ attribute which is not callable".format(self.__appname,self.__viewname)
+                e = "View {1} inside app {0} has a __fields__ attribute which is not callable".format(self.__appname, self.__viewname)
             else:
-                e="Model {1} inside app {0} is missing __fields__ method".format(self.__appname,self.__modelname)
+                e = "Model {1} inside app {0} is missing __fields__ method".format(self.__appname, self.__modelname)
             raise ImproperlyConfigured(e)
 
     def limitQ(self):
@@ -363,7 +380,13 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
             permission_group = []
 
         # Look for the key in cache
-        result = cache.get(hashlib.sha1(cache_key).hexdigest())
+        try:
+            # python 2.7
+            result = cache.get(hashlib.sha1(cache_key).hexdigest())
+        except TypeError:
+            # python 3.6
+            cache_key = bytes(cache_key, encoding='utf-8')
+            result = cache.get(hashlib.sha1(cache_key).hexdigest())
 
         # If I found it in cache
         if result is not None:
@@ -514,29 +537,29 @@ class GenBase(object):
         '''
 
         # Get the list of attributes and methods inside the class
-        info=model_inspect(self,attributes=True)
-        self._attributes=info['attributes']
+        info = model_inspect(self, attributes=True)
+        self._attributes = info['attributes']
         if 'appname' in self._attributes:
-            self._appname=self.appname
+            self._appname = self.appname
         else:
-            self._appname=info['appname']
+            self._appname = info['appname']
         if 'modelname' in self._attributes:
-            self._modelname=self.modelname
+            self._modelname = self.modelname
         else:
-            self._modelname=info['modelname']
+            self._modelname = info['modelname']
 
         # Get user information
         if 'user' not in self._attributes:
-            self.user=self.request.user
+            self.user = self.request.user
         # Get profile
-        self.profile=get_profile(self.user)
+        self.profile = get_profile(self.user)
 
         # Get language
         self.language = get_language()
 
         # Build extracontext
         if 'extra_context' not in self._attributes:
-            self.extra_context={}
+            self.extra_context = {}
 
         # Default value for no foreign key attribute
         if 'no_render_as_foreign' not in self.extra_context:
@@ -643,7 +666,8 @@ class GenBase(object):
                         elif callable(value):
                             # Build the list of arguments
                             args={}
-                            if 'request' in value.func_code.co_varnames:
+                            # if 'request' in value.func_code.co_varnames:
+                            if 'request' in value.__code__.co_varnames:
                                 args['request']=self.request
                             # Call the method
                             value=value(**args)
@@ -767,12 +791,12 @@ class GenBase(object):
 
     def get_object(self):
         # Autoindex
-        if self.action_permission=='detail':
-            cut_index=1
-        elif self.action_permission in ['change','delete']:
-            cut_index=2
+        if self.action_permission == 'detail':
+            cut_index = 1
+        elif self.action_permission in ['change', 'delete']:
+            cut_index = 2
         else:
-            raise IOError,_("You have used get_object accidentally, this function has been designed only for action_permission: detail, change and delete")
+            raise IOError(_("You have used get_object accidentally, this function has been designed only for action_permission: detail, change and delete"))
 
         # Get object
         pk = super(GenBase, self).get_object().pk
@@ -819,8 +843,12 @@ class GenBase(object):
                 modelname = info['modelname']
 
             # Get MODELINFO
-            Mfields=None; MlimitQ=None; MsearchF=None; MsearchQ=None
-            if '__limitQ__' in attributes: MlimitQ=myclass().__limitQ__
+            Mfields = None
+            MlimitQ = None
+            MsearchF = None
+            MsearchQ = None
+            if '__limitQ__' in attributes:
+                MlimitQ = myclass().__limitQ__
             MODELINF = MODELINFO(myclass, appname, modelname, myclass.__module__, self.request, self.user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
 
             # Filter on limits
@@ -1043,7 +1071,7 @@ class GenList(GenBase, ListView):
         deprecated=[('retrictions','2016061000')]
         for (depre,version) in deprecated:
             if depre in self._attributes:
-                raise IOError,"The attribute '{}' has been deprecated in version '{}' and it is not available anymore".format(version)
+                raise IOError("The attribute '{}' has been deprecated in version '{}' and it is not available anymore".format(version))
 
         # Build extracontext
         if 'extra_context' not in self._attributes:
@@ -1210,7 +1238,13 @@ class GenList(GenBase, ListView):
             # Get the value of the original filter
             value=filters_by_struct[key]
             # If there is something to filter, filter is not being changed and filter is known by the class
-            if (key in listfilters) and ((value>0) or (type(value) == list)):
+            try:
+                value = int(value)
+            except ValueError:
+                pass
+            except TypeError:
+                pass 
+            if (value and type(value) == int and key in listfilters) and ((value > 0) or (type(value) == list)):
                 # Add the filter to the queryset
                 rule=listfilters[key]
                 # Get type
@@ -1236,7 +1270,7 @@ class GenList(GenBase, ListView):
                     fv=value
                     queryset=queryset.filter(rule[1](fv))
                 else:
-                    raise IOError,"Wrong typekind '{0}' for filter '{1}'".format(typekind,key)
+                    raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind,key))
                 # Save it in the struct as a valid filter
                 filters_struct[key]=value
 
@@ -1317,7 +1351,7 @@ class GenList(GenBase, ListView):
                 else:
                     value=None
             else:
-                raise IOError,"Wrong typekind '{0}' for filter '{1}'".format(typekind,key)
+                raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind,key))
 
             # Build filtertuple
             filtertuple=(key,listfilters[key][0],typekind,argument,value)
@@ -1595,27 +1629,27 @@ class GenList(GenBase, ListView):
             self.__fields.append(value[0])
 
         # Auto build rules
-        self.__autorules=self.autorules()
+        self.__autorules = self.autorules()
 
         for order in order_by_struct:
-            name=order.keys()[0]
+            name = list(order.keys())[0]
             lbl = None
             # use __autofields for ordering by alias
             for field in self.__autorules:
                 if "{}:".format(name) in field:
-                    name=field.split(":")[0]
-                    lbl=field.split(":")[1]
+                    name = field.split(":")[0]
+                    lbl = field.split(":")[1]
                     break
-            direction=order[name]
+            direction = order[name]
 
             if lbl and not lbl.startswith('get_') and not lbl.endswith('_display'):
                 name = lbl
 
-            if direction=='asc':
+            if direction == 'asc':
                 order_by.append("%s" % (name))
-            elif direction=='desc':
+            elif direction == 'desc':
                 order_by.append("-%s" % (name))
-            position[name]=counter
+            position[name] = counter
             counter+=1
 
         if order_by:
@@ -1657,27 +1691,27 @@ class GenList(GenBase, ListView):
                 filter_column=None
 
             # Process ordering
-            ordering=[]
-            found=False
+            ordering = []
+            found = False
             for order in order_by_struct:
-                subname=order.keys()[0]
-                direction=order[subname]
-                if order_key==subname:
+                subname = list(order.keys())[0]
+                direction = order[subname]
+                if order_key == subname:
                     if direction == 'desc':
                         direction = ''
-                        sort_class='headerSortUp'
+                        sort_class = 'headerSortUp'
                     elif direction == 'asc':
                         direction = 'desc'
-                        sort_class='headerSortDown'
+                        sort_class = 'headerSortDown'
                     else:
-                        sort_class=''
+                        sort_class =''
                         direction = 'asc'
-                    found=True
+                    found = True
                 if direction == 'asc' or direction=='desc':
                     ordering.append({subname:direction})
             if not found:
                 ordering.append({order_key:'asc'})
-                sort_class=''
+                sort_class = ''
             # Save the ordering method
             sort[order_key]={}
             sort[order_key]['id']=name
@@ -1731,13 +1765,13 @@ class GenList(GenBase, ListView):
 
         # === Queryset optimization ===
         # Get autorules ordered
-        autorules_keys=self.__autorules.keys()
-        autorules_keys.sort()
+        autorules_keys = sorted(self.__autorules.keys())
+
         #
-        query_renamed={}
-        query_optimizer=[]
-        query_verifier=[]
-        query_select_related=[]
+        query_renamed = {}
+        query_optimizer = []
+        query_verifier = []
+        query_select_related = []
         fields_related_model = []
 
         for rule in autorules_keys:
@@ -1974,7 +2008,11 @@ class GenList(GenBase, ListView):
         # Add pagination
         regs=[]
         desired_page_number = page_number
-        for p in xrange(pages_to_bring):
+        try:
+            range_pages_to_bring = xrange(pages_to_bring)
+        except NameError:
+            range_pages_to_bring = range(pages_to_bring)
+        for p in range_pages_to_bring:
             try:
                 regs += paginator.page(desired_page_number)
                 desired_page_number+=1
@@ -1992,7 +2030,11 @@ class GenList(GenBase, ListView):
         # Fill pages
         if total_registers:
             context['pages']=pages(paginator,page_number)
-            for p in xrange(pages_to_bring-1):
+            try:
+                range_fill = xrange(pages_to_bring-1)
+            except NameError:
+                range_fill = range(pages_to_bring-1)
+            for p in range_fill:
                 page_number+=1
                 context['pages']+=pages(paginator,page_number)
         else:
@@ -2131,7 +2173,10 @@ class GenList(GenBase, ListView):
 
         a["gentranslate"]={}
         for key in gentranslate:
-            a["gentranslate"][key]=unicode(gentranslate[key])
+            try:
+                a["gentranslate"][key] = unicode(gentranslate[key])
+            except NameError:
+                a["gentranslate"][key] = gentranslate[key]
 
         if type(context['rowsperpage'])==int:
             a['rowsperpage']=context['rowsperpage']
@@ -2206,7 +2251,7 @@ class GenList(GenBase, ListView):
                 # Decide kind
                 token['value']=value
             else:
-                raise IOError,"Wrong typekind '{0}' for filter '{1}'".format(typekind,key)
+                raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind,key))
             # Save it
             if key in self.__fields:
                 a['subfiltersC'].append(token)
@@ -2233,28 +2278,28 @@ class GenList(GenBase, ListView):
                 a['columns'].append(column)
 
         # Remember ordering
-        ordering={}
-        weight=1
+        ordering = {}
+        weight = 1
         for orderer in context['ordering']:
             # Get info
-            key=orderer.keys()[0]
-            value=orderer[key]
+            key = list(orderer.keys())[0]
+            value = orderer[key]
             # Prepare value
-            if value=='asc':
-                newvalue=+weight
-                weight+=1
-            elif value=='desc':
-                newvalue=-weight
-                weight+=1
+            if value == 'asc':
+                newvalue =+ weight
+                weight += 1
+            elif value == 'desc':
+                newvalue =- weight
+                weight += 1
             else:
-                newvalue=0
+                newvalue = 0
             # Save
-            ordering[key]=newvalue
+            ordering[key] = newvalue
         # Save ordering
-        a['ordering']=ordering
+        a['ordering'] = ordering
 
         # Special row
-        a['datetimeQ']=context['datetimeQ']
+        a['datetimeQ'] = context['datetimeQ']
 
         a['extra_fields'] = {
             'field_check': context['field_check'],
@@ -2310,25 +2355,26 @@ class GenList(GenBase, ListView):
         # Add transformed ordering
         if ('ordering' in v) and (v['ordering']):
             # Convert to list
-            ordering=[]
+            ordering = []
             for key in v['ordering']:
-                ordering.append({key:v['ordering'][key]})
+                ordering.append({key: v['ordering'][key]})
 
             # Order the result from ordering
-            ordering=sorted(ordering,key=lambda x:abs(x.values()[0]))
+            # ordering = sorted(ordering, key=lambda x: abs(x.values()[0]))
+            ordering = sorted(ordering, key=lambda x: abs(list(x.values())[0]))
             # Save ordering
-            newget['ordering']=[]
+            newget['ordering'] = []
             for orderer in ordering:
-                key=orderer.keys()[0]
-                value=orderer[key]
-                if value>0:
-                    value='asc'
-                elif value<0:
-                    value='desc'
+                key = list(orderer.keys())[0]
+                value = orderer[key]
+                if value > 0:
+                    value = 'asc'
+                elif value < 0:
+                    value = 'desc'
                 else:
-                    value=None
+                    value = None
                 if value:
-                    newget['ordering'].append({key:value})
+                    newget['ordering'].append({key: value})
 
         # Get listid
         if 'listid' in v:
@@ -2432,31 +2478,31 @@ class GenList(GenBase, ListView):
                             value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                         elif related:
                             # If the object is related but nobody is taking care of it
-                            values=[]
+                            values = []
                             for v in value.all():
                                 # This is a recursive call to go through foreign keys
                                 if tail is None:
-                                    values.append(smart_unicode(v))
+                                    values.append(smart_text(v))
                                 else:
-                                    values.append(self.bodybuilder([v],{tail:rkval})[0][tail])
+                                    values.append(self.bodybuilder([v], {tail: rkval})[0][tail])
                             # Save the list in value
-                            value=values
+                            value = values
                         elif '__' in rk:
                             # This is a foreignkey, resolve with a recursive call to go through foreign keys
-                            value=self.bodybuilder([value],{tail:rkval})[0][tail]
+                            value = self.bodybuilder([value], {tail: rkval})[0][tail]
                         elif callable(value):
                             # Build the list of arguments
-                            args={}
-                            if 'request' in value.func_code.co_varnames:
-                                args['request']=self.request
+                            args = {}
+                            if 'request' in value.__code__.co_varnames:
+                                args['request'] = self.request
                             # Call the method
-                            value=value(**args)
+                            value = value(**args)
                         else:
                             # This is an attribute
-                            value=smart_unicode(value)
+                            value = smart_text(value)
 
                     # Save the value
-                    token[alias]=value
+                    token[alias] = value
 
             # Save token
             body.append(token)
@@ -2592,10 +2638,14 @@ class GenModify(object):
         # Check if this is an AJAX request
         if (request.is_ajax() or self.__json_worker) and request.body:
             request.POST = QueryDict('').copy()
-            post = json.loads(request.body)
+            body = request.body
+            if type(request.body) == bytes:
+                body = body.decode("utf-8")
+            post = json.loads(body)
             for key in post:
-                if type(post[key])==dict and '__JSON_DATA__' in post[key]:
-                    post[key]=json.dumps(post[key]['__JSON_DATA__'])
+                if type(post[key]) == dict and '__JSON_DATA__' in post[key]:
+                    post[key] = json.dumps(post[key]['__JSON_DATA__'])
+            
             request.POST.update(post)
 
         # Set class internal variables
@@ -2607,32 +2657,32 @@ class GenModify(object):
     def get_success_url(self):
         if self.object is None:
             # Built empty attr structure
-            attr={'__pk__':None, '__str__':'OK'}
+            attr = {'__pk__': None, '__str__': 'OK'}
         else:
             # Built the attr structure
-            attr={'__pk__':self.object.pk, '__str__':smart_unicode(self.object)}
+            attr = {'__pk__': self.object.pk, '__str__': smart_text(self.object)}
             # Fill attr with the rest of info
             for key in self.success_url_keys:
-                keysp=key.split(":")
-                if len(keysp)==1:
-                    key1=keysp[0]
-                    key2=keysp[0]
-                elif len(keysp)==2:
-                    key1=keysp[0]
-                    key2=keysp[1]
+                keysp = key.split(":")
+                if len(keysp) == 1:
+                    key1 = keysp[0]
+                    key2 = keysp[0]
+                elif len(keysp) == 2:
+                    key1 = keysp[0]
+                    key2 = keysp[1]
                 else:
                     raise TypeError("I found a key in success_url_attr neither with 1 or 2 elements, key is '{0}'".format(key))
-                attr[key1]=self.object.__dict__[key2]
+                attr[key1] = self.object.__dict__[key2]
             # Attach object
             if self.__authtoken:
 
                 # Get API field
                 if getattr(self, '__api__', None):
-                    api=self.__api__(self.request)
+                    api = self.__api__(self.request)
                 elif getattr(self, '__api__', None):
-                    api=self.object.__api__(self.request)
+                    api = self.object.__api__(self.request)
                 else:
-                    api=getattr(settings,'API_DEFAULT', None)
+                    api = getattr(settings, 'API_DEFAULT', None)
 
                 # Set the answer from the API
                 api_obj = self.get_object_api(api, self.object)
@@ -2641,7 +2691,7 @@ class GenModify(object):
                     attr['__obj__'] = api_obj
 
         # Set the pk in the success url
-        self.success_url.__dict__['_proxy____kw']['kwargs']['answer']=urlsafe_base64_encode(json.dumps(attr))
+        self.success_url.__dict__['_proxy____kw']['kwargs']['answer'] = urlsafe_base64_encode(str.encode(json.dumps(attr)))
         # Let the system decide next step
         return super(GenModify, self).get_success_url()
 
@@ -2651,34 +2701,34 @@ class GenModify(object):
 
         # Check showdetails
         if 'show_details' in self._attributes:
-            context['show_details']=self.show_details
+            context['show_details'] = self.show_details
         else:
-            context['show_details']=False
+            context['show_details'] = False
 
         # Check linkdelete
         if 'linkdelete' in self._attributes:
-            context['linkdelete']=self.linkdelete
+            context['linkdelete'] = self.linkdelete
         else:
             # Check for delete button
-            context['linkdelete']=True
+            context['linkdelete'] = True
 
         # Check linkback
         if 'linkback' in self._attributes:
-            context['linkback']=self.linkback
+            context['linkback'] = self.linkback
         else:
-            context['linkback']=True
+            context['linkback'] = True
 
         # Check hide_foreignkey_button
         if 'hide_foreignkey_button' in self._attributes:
-            context['hide_foreignkey_button']=self.hide_foreignkey_button
+            context['hide_foreignkey_button'] = self.hide_foreignkey_button
         else:
-            context['hide_foreignkey_button']=False
+            context['hide_foreignkey_button'] = False
 
         # Check hide internal_name
         if 'show_internal_name' in self._attributes:
-            context['show_internal_name']=self.show_internal_name
+            context['show_internal_name'] = self.show_internal_name
         else:
-            context['show_internal_name']=True
+            context['show_internal_name'] = True
 
         if self.object is None:
             context["cannot_update"] = None
@@ -2826,7 +2876,7 @@ class GenModify(object):
                                             # Messages for pristine status (validations from Django)
                                             errors.append(msg)
                                         else:
-                                            raise IOError,_("This shouldn't happen, state is not $dirty or $pristine")
+                                            raise IOError(_("This shouldn't happen, state is not $dirty or $pristine"))
                                 if errors: newfield['errors']=errors
                                 if notes: newfield['notes']=notes
 
@@ -2978,7 +3028,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
         else:
             try:
                 return super(GenDelete, self).delete(*args, **kwargs)
-            except ValidationError, e:
+            except ValidationError(e):
                 if self.__json_worker:
                     json_struct = {"error": e, "__pk__": obj.pk}
                     if self.__authtoken and api_obj is not None:
@@ -3079,7 +3129,7 @@ class GenDetail(GenBase, DetailView):
             #raise Exception(group)
             item={}
 
-            item["name"]=smart_unicode(group[0])
+            item["name"]=smart_text(group[0])
             item["col"]=group[1]
             item_elements = group[2:]
 
@@ -3115,7 +3165,8 @@ class GenDetail(GenBase, DetailView):
                     value=getattr(self.object, field, None)
 
                     if callable(value):
-                        if 'request' in value.func_code.co_varnames:
+                        # if 'request' in value.func_code.co_varnames:
+                        if 'request' in value.__code__.co_varnames:
                             args['request']=self.request
                             # Call the method
                         value=value(**args)
@@ -3319,31 +3370,35 @@ class GenForeignKey(GenBase, View):
         # Compile label and save it
         if not self.label_cached:
             # Replace language
-            self.label = self.label.replace("<LANGUAGE_CODE>",self.language)
+            self.label = self.label.replace("<LANGUAGE_CODE>", self.language)
             # Build regex
             regex = re.compile('{[a-zA-Z][_a-zA-Z0-9]*}')
             # Find format
-            f=regex.split(self.label)
-            k=regex.findall(self.label)
-            fmt=f[0]
-            keys=[]
+            f = regex.split(self.label)
+            k = regex.findall(self.label)
+            fmt = f[0]
+            keys = []
             for idx, key in enumerate(k):
-                fmt+="{{{0}}}{1}".format(idx,f[idx+1].replace('{','{{').replace('}','}}'))
-                keys.append(key.replace('{','').replace('}',''))
-            self.label_cached=(fmt,keys)
+                fmt += "{{{0}}}{1}".format(idx, f[idx + 1].replace('{', '{{').replace('}', '}}'))
+                keys.append(key.replace('{', '').replace('}', ''))
+            self.label_cached = (fmt, keys)
         else:
             fmt, keys = self.label_cached
 
         # Process label
-        args=[]
+        args = []
         for key in keys:
-            objd=obj
+            objd = obj
             for subkey in key.split("__"):
-                objd=getattr(objd,subkey,None)
+                objd = getattr(objd, subkey, None)
             args.append(objd)
 
         # Return final label
-        return fmt.decode('utf-8').format(*args)
+        # raise Exception(type(fmt), fmt, args)
+        try:
+            return fmt.decode('utf-8').format(*args)
+        except AttributeError:
+            return fmt.format(*args)
 
     def get_queryset(self):
         return self.model.objects

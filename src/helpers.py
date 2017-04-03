@@ -25,11 +25,14 @@ import random
 from dateutil.tz import tzutc
 import dateutil.parser
 import zipfile
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 from unidecode import unidecode
 
 # Django
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template as django_get_template
@@ -37,6 +40,7 @@ from django.shortcuts import render
 from django.conf import settings
 from django.views.generic.base import View
 from django.core.cache import cache
+
 
 def epochdate(timestamp):
     '''
@@ -48,28 +52,31 @@ def epochdate(timestamp):
     '''
     
     dt = datetime.fromtimestamp(float(timestamp)).timetuple()
-    fecha = "{0:d}-{1:02d}-{2:02d}".format(dt.tm_year, dt.tm_mon,dt.tm_mday)
-    hora = "{0:02d}:{1:02d}:{2:02d}".format(dt.tm_hour,dt.tm_min,dt.tm_sec)
+    fecha = "{0:d}-{1:02d}-{2:02d}".format(dt.tm_year, dt.tm_mon, dt.tm_mday)
+    hora = "{0:02d}:{1:02d}:{2:02d}".format(dt.tm_hour, dt.tm_min, dt.tm_sec)
     return (fecha, hora)
 
-def date2string(dtime,formt,default):
+
+def date2string(dtime, formt, default):
     if dtime:
-        if ('year' in dir(dtime)) and (dtime.year<1900):
+        if ('year' in dir(dtime)) and (dtime.year < 1900):
             return default
-        elif type(dtime)==unicode:
+        elif type(dtime) == unicode:
             return dtime
         else:
             return dtime.strftime(formt)
     else:
         return default
 
+
 def daterange_filter(value, variable):
-    startt=value['startDate'].split("T")[0]
-    endt=value['endDate'].split("T")[0]
-    start=datetime.strptime(startt,settings.DATETIME_RANGE_FORMAT[0])
-    end=datetime.strptime(endt,settings.DATETIME_RANGE_FORMAT[0])
-    result={'{0}__gte'.format(variable):start,'{0}__lte'.format(variable):end}
+    startt = value['startDate'].split("T")[0]
+    endt = value['endDate'].split("T")[0]
+    start = datetime.strptime(startt, settings.DATETIME_RANGE_FORMAT[0])
+    end = datetime.strptime(endt, settings.DATETIME_RANGE_FORMAT[0])
+    result = {'{0}__gte'.format(variable): start, '{0}__lte'.format(variable): end}
     return result
+
 
 def timezone_serialize(d, prettify=False):
     if d is None:
@@ -83,6 +90,7 @@ def timezone_serialize(d, prettify=False):
             result = d.isoformat() + "Z"
     return result
 
+
 def timezone_deserialize(string):
     if string is None:
         result = None
@@ -90,22 +98,36 @@ def timezone_deserialize(string):
         result = dateutil.parser.parse(string)
     return result
 
-def zeropad(number,width):
+
+def zeropad(number, width):
     return '{number:0{width}d}'.format(width=width, number=number)
 
+
 def monthname(value):
-    if   value==1:    return _("January")
-    elif value==2:    return _("February")
-    elif value==3:    return _("March")
-    elif value==4:    return _("April")
-    elif value==5:    return _("May")
-    elif value==6:    return _("June")
-    elif value==7:    return _("July")
-    elif value==8:    return _("August")
-    elif value==9:    return _("September")
-    elif value==10:    return _("Octuber")
-    elif value==11:    return _("November")
-    elif value==12:    return _("December")
+    if value == 1:
+        return _("January")
+    elif value == 2:
+        return _("February")
+    elif value == 3:
+        return _("March")
+    elif value == 4:
+        return _("April")
+    elif value == 5:
+        return _("May")
+    elif value == 6:
+        return _("June")
+    elif value == 7:
+        return _("July")
+    elif value == 8:
+        return _("August")
+    elif value == 9:
+        return _("September")
+    elif value == 10:
+        return _("Octuber")
+    elif value == 11:
+        return _("November")
+    elif value == 12:
+        return _("December")
     else:
         return None
 
@@ -113,7 +135,7 @@ def monthname(value):
 # Name unify
 def nameunify(name, url=False):
     # Make unicode
-    name = smart_unicode(name)
+    name = smart_text(name)
     
     # Get it on lower
     namelow = unidecode(name).lower()
@@ -144,26 +166,27 @@ def get_profile(user):
     
     if is_admin:
         # Administrator use root
-        profile="admin"
+        profile = "admin"
     else:
-        profile=None
+        profile = None
     
     # Return profile
     return profile
 
-def get_profiled_paths(path,user,lang,extension):
-    paths=[]
+
+def get_profiled_paths(path, user, lang, extension):
+    paths = []
     if user:
         # Check if it has admin rights admin
-        profile=get_profile(user)
+        profile = get_profile(user)
         
         # Define the base_path to use
-        paths.append("{0}.{1}".format(user.username,lang))
+        paths.append("{0}.{1}".format(user.username, lang))
         paths.append(user.username)
         if profile:
-            paths.append("{0}.{1}".format(profile,lang))
+            paths.append("{0}.{1}".format(profile, lang))
             paths.append(profile)
-        if profile!='admin':
+        if profile != 'admin':
             paths.append("user.{0}".format(lang))
             paths.append('user')
     
@@ -172,32 +195,33 @@ def get_profiled_paths(path,user,lang,extension):
     paths.append("")
     
     # Split path name
-    pathsp=path.split(".")
-    if pathsp[-1]==extension:
-        basepath=".".join(pathsp[:-1])
+    pathsp = path.split(".")
+    if pathsp[-1] == extension:
+        basepath = ".".join(pathsp[:-1])
     else:
-        basepath=path
+        basepath = path
     
     # Return paths and basepath
-    return (paths,basepath)
+    return (paths, basepath)
 
-def get_template(template,user,lang,extension='html', raise_error=True):
+
+def get_template(template, user, lang, extension='html', raise_error=True):
     # Get profiled paths
-    (templates,templatepath)=get_profiled_paths(template,user,lang,extension)
+    (templates, templatepath) = get_profiled_paths(template, user, lang, extension)
     
     # Check templates
-    test=[]
-    found=None
+    test = []
+    found = None
     for temp in templates:
         if len(temp):
-            addon=".%s" % (temp)
+            addon = ".%s" % (temp)
         else:
-            addon=""
-        target="%s%s.%s" % (templatepath,addon,extension)
+            addon = ""
+        target = "%s%s.%s" % (templatepath, addon, extension)
         test.append(target)
         try:
             django_get_template(target)
-            found=target
+            found = target
             break
         except TemplateDoesNotExist:
             pass
@@ -207,24 +231,25 @@ def get_template(template,user,lang,extension='html', raise_error=True):
         return found
     else:
         if raise_error:
-            raise IOError,"I couldn't find a valid template, I have tried: {}".format(test)
+            raise IOError("I couldn't find a valid template, I have tried: {}".format(test))
         else:
             return test
 
-def get_static(desired,user,lang,default,extension='html'):
+
+def get_static(desired, user, lang, default, extension='html'):
     # Get profiled paths
-    (paths,basepath)=get_profiled_paths(desired,user,lang,extension)
+    (paths, basepath) = get_profiled_paths(desired, user, lang, extension)
     
     # Check paths
-    found=None
+    found = None
     for temp in paths:
         if len(temp):
-            addon=".%s" % (temp)
+            addon = ".%s" % (temp)
         else:
-            addon=""
-        target="%s%s.%s" % (basepath,addon,extension)
+            addon = ""
+        target = "%s%s.%s" % (basepath, addon, extension)
         if hasattr(settings, "STATIC_ROOT") and settings.STATIC_ROOT and os.path.exists(os.path.join(settings.STATIC_ROOT, target)):
-            found=target
+            found = target
             break
     
     # Return target template
@@ -235,11 +260,13 @@ def get_static(desired,user,lang,default,extension='html'):
         # We didn't find any, return default one
         return default
 
-def direct_to_template(request,template):
-    template=get_template(template,request.user)
-    return render(request,template)
 
-def model_inspect(obj,attributes=False):
+def direct_to_template(request, template):
+    template = get_template(template, request.user)
+    return render(request, template)
+
+
+def model_inspect(obj, attributes=False):
         '''
         Analize itself looking for special information, right now it returns:
         - Application name
@@ -247,45 +274,47 @@ def model_inspect(obj,attributes=False):
         - Attributes (not returned by default)
         '''
         # Prepare the information object
-        info={}
-        
+        info = {}
         # Attributes dict & keys
         attributes_dict = dir(obj)
         
         # Get attributes list
-        if attributes: info['attributes']=attributes_dict
+        if attributes:
+            info['attributes'] = attributes_dict
         if hasattr(obj, '_meta'):
             info['verbose_name'] = getattr(obj._meta, 'verbose_name', None)
         else:
             info['verbose_name'] = None
         
         # Get info from the object
-        if 'model' in  attributes_dict and obj.model:
-            namesp=str(obj.model)
+        if 'model' in attributes_dict and obj.model:
+            namesp = str(obj.model)
         else:
-            namesp=str(obj.__class__)
-        namesp = namesp.replace("<class ","").replace(">","").replace("'","").split(".")
+            namesp = str(obj.__class__)
+
+        namesp = namesp.replace("<class ", "").replace(">", "").replace("'", "").split(".")
 
         # Remember information
-        info['appname']=namesp[-3]
-        info['modelname']=namesp[-1]
-    
+        info['appname'] = namesp[-3]
+        info['modelname'] = namesp[-1]
+
         # Return the info
         return info
 
+
 def upload_path(instance, filename):
     '''
-    This method is created to return the path to upload files. This path must be 
+    This method is created to return the path to upload files. This path must be
     different from any other to avoid problems.
     '''
     path_separator = "/"
     date_separator = "-"
     ext_separator = "."
     empty_string = ""
-    #get the model name
+    # get the model name
     model_name = model_inspect(instance)['modelname']
     
-    #get the string date
+    # get the string date
     date = datetime.now().strftime("%Y-%m-%d").split(date_separator)
     curr_day = date[2]
     curr_month = date[1]
@@ -295,18 +324,18 @@ def upload_path(instance, filename):
     filename = empty_string.join(split_filename[:-1])
     file_ext = split_filename[-1]
     
-    new_filename = empty_string.join([filename,str(random.random()).split(ext_separator)[1]])
-    new_filename = ext_separator.join([new_filename,file_ext])
-    string_path = path_separator.join([model_name, curr_year, curr_month,curr_day, 
-                                       new_filename])
-    #the path is built using the current date and the modelname
+    new_filename = empty_string.join([filename, str(random.random()).split(ext_separator)[1]])
+    new_filename = ext_separator.join([new_filename, file_ext])
+    string_path = path_separator.join([model_name, curr_year, curr_month, curr_day, new_filename])
+    # the path is built using the current date and the modelname
     return string_path
 
+
 def get_class(func):
-    if not getattr(func, 'func_closure', None):
+    if not getattr(func, '__closure__', None):
         return
 
-    for closure in func.func_closure:
+    for closure in func.__closure__:
         contents = closure.cell_contents
 
         if not contents:
@@ -343,61 +372,61 @@ class CodenerixEncoder(object):
         'hex36': 'ENWR6MV71JOQHADUGFCYZ25X3B4L0KPTSI98',
         'hex16': '54BEF80D1C96A732',
         'hexz17': 'Z0123456789ABCDEF',
-        }
+    }
     
     def list_encoders(self):
         return self.codenerix_numeric_dic.keys()
     
-    def numeric_encode(self,number,dic='hex36',length=None, cfill='A'):
+    def numeric_encode(self, number, dic='hex36', length=None, cfill='A'):
         
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
             dic = self.codenerix_numeric_dic[dic]
         
         # Find lenght
-        ldic=len(dic)
+        ldic = len(dic)
         
         # Initialize
-        string=""
-        div=ldic+1
+        string = ""
+        div = ldic + 1
         
         # Process number
-        while div>=ldic:
+        while div >= ldic:
             div = number / ldic
             mod = number % ldic
-            string+=dic[mod]
-            number=div
+            string += dic[mod]
+            number = div
         
         # If something left behind
         if div:
-            string+=dic[div]
+            string += dic[div]
         
         # Fill the string if requested
         if length:
-            string+=cfill*(length-len(string))
+            string += cfill * (length - len(string))
         
         # Return the reverse string
         return string[::-1]
     
-    def numeric_decode(self,string,dic='hex36'):
+    def numeric_decode(self, string, dic='hex36'):
         
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
             dic = self.codenerix_numeric_dic[dic]
         
         # For each character in the string
-        first=True
-        number=0
+        first = True
+        number = 0
         for c in string:
             
             # Not the first loop
             if not first:
-                number*=len(dic)
+                number *= len(dic)
             else:
-                first=False
+                first = False
             
             # Attach the character
-            number+=dic.index(c)
+            number += dic.index(c)
         
         # Return the final resulting number
         return number
@@ -422,8 +451,10 @@ class InMemoryZip(object):
             self.in_memory_zip.seek(0)
     
     def append(self, filename_in_zip, file_contents):
-        '''Appends a file with name filename_in_zip and contents of 
-        file_contents to the in-memory zip.'''
+        '''
+        Appends a file with name filename_in_zip and contents of
+        file_contents to the in-memory zip.
+        '''
         # Get a handle to the in-memory zip in append mode
         zf = zipfile.ZipFile(self.in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
         
@@ -433,7 +464,7 @@ class InMemoryZip(object):
         # Mark the files as having been created on Windows so that
         # Unix permissions are not inferred as 0000
         for zfile in zf.filelist:
-            zfile.create_system = 0        
+            zfile.create_system = 0
         
         return self
     
@@ -453,4 +484,3 @@ class InMemoryZip(object):
         f = file(filename, "w")
         f.write(self.read())
         f.close()
-
