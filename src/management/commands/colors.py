@@ -19,7 +19,16 @@
 # limitations under the License.
 
 import os
-import commands
+import sys
+
+# Find out if we are running python3
+python3=sys.version_info>=(3,)
+if python3:
+    from subprocess import getstatusoutput
+    pythoncmd="python3"
+else:
+    from commands import getstatusoutput
+    pythoncmd="python"
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
@@ -55,6 +64,6 @@ class Command(BaseCommand, Debugger):
             appname=settings.ROOT_URLCONF.split(".")[0]
             basedir=settings.BASE_DIR
             appdir = os.path.abspath("{}/{}".format(basedir,appname))
-            status, output = commands.getstatusoutput("find {}/ -type f -name '*.pyc' -delete".format(appdir))
+            status, output = getstatusoutput("find {}/ -type f -name '*.pyc' -delete".format(appdir))
             if status: raise CommandError(output)
 
