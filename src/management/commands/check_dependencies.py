@@ -18,11 +18,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import commands
+import subprocess
 
 from django.core.management.base import BaseCommand
 
 from codenerix.lib.debugger import Debugger
+
+import sys
+
+# Find out if we are running python3
+python3=sys.version_info>=(3,)
+if python3:
+    pythoncmd="python3"
+else:
+    pythoncmd="python"
 
 class Command(BaseCommand, Debugger):
     
@@ -54,14 +63,23 @@ class Command(BaseCommand, Debugger):
             ("jsonfield",                       "import jsonfield"),
             ("openpyxl==2.2.5",                 "import openpyxl"),
             ("paypalrestsdk",                   "import paypalrestsdk"),
-            ("Pillow",                          "import Image"),
+            ("Pillow",                          "import PIL"),
             ("pycrypto==2.6.1",                 "from Crypto.Cipher import AES"),
             ("python-dateutil",                 "import dateutil.parser"),
-            ("python-ldap",                     "import ldap"),
             ("scipy",                           "import scipy"),
             ("Unidecode",                       "from unidecode import unidecode"),
-            ("xhtml2pdf",                       "import xhtml2pdf"),
             ]
+    
+    if python3:
+        imports+=[
+            ("ldap3",                           "import ldap3"),
+            ("xhtml2pdf",                       "import xhtml2pdf", "git clone https://github.com/xhtml2pdf/xhtml2pdf - and python3 setup.py install - sudo apt-get remove python-setuptools - wget https://bootstrap.pypa.io/get-pip.py - sudo -H python get-pip.py - sudo -H pip install -U pip setuptools"),
+        ]
+    else:
+        imports+=[
+            ("python-ldap",                     "import ldap"),
+            ("xhtml2pdf",                       "import xhtml2pdf"),
+        ]
     
     # Show this when the user types help
     help = "Do a touch to the project"
@@ -84,11 +102,11 @@ class Command(BaseCommand, Debugger):
             else:
                 (name,command,helptext)=entry
             self.debug("    > {:32s} :: ".format(name),color='blue', tail=None),
-            error, output = commands.getstatusoutput("python -c '{}' 2>&1".format(command))
+            error, output = subprocess.getstatusoutput("{} -c '{}' 2>&1".format(pythoncmd,command))
             if not error:
                 # Library test passed, check version
                 package = name.split("=")[0]
-                error, output = commands.getstatusoutput("pip freeze | grep -e '^{}=' || echo 'EMPTY'".format(package))
+                error, output = subprocess.getstatusoutput("pip freeze | grep -e '^{}=' || echo 'EMPTY'".format(package))
                 if not error:
                     if output=='EMPTY':
                         self.debug("OK",color='green', header=None, tail=None)
@@ -118,7 +136,7 @@ class Command(BaseCommand, Debugger):
             else:
                 self.debug("MISSING or wrong version for '{}'".format(name),color='red')
                 self.debug(" -> Test: {}".format(command),color='yellow')
-                self.debug("python -c '{}'".format(command))
+                self.debug("{} -c '{}'".format(pythoncmd,command))
                 self.error(error)
                 self.debug("OUTPUT: {}".format(output))
                 self.debug("")
