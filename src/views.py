@@ -66,7 +66,7 @@ from django.utils.http import urlsafe_base64_decode
 # Export to Excel
 from openpyxl import Workbook
 
-from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class
+from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay
 from codenerix.templatetags.codenerix_lists import unlist
 
 
@@ -1324,12 +1324,12 @@ class GenList(GenBase, ListView):
                     value=0
                 # Set choice as the command's argument
                 argument=choice
-            elif typekind in ['multiselect','multidynamicselect']:
-                if typekind=='multiselect':
-                    typevalue=listfilters[key][3]
-                    choice=[]
+            elif typekind in ['multiselect', 'multidynamicselect']:
+                if typekind == 'multiselect':
+                    typevalue = listfilters[key][3]
+                    choice = []
                     for value in typevalue:
-                        choice.append({'id':value[0],'label':value[1]})
+                        choice.append({'id': value[0], 'label': value[1]})
                 else:
                     choice=list(listfilters[key][3:])
                     choice[1] = reverse_lazy(choice[1],kwargs={'search':'a'})[:-1]
@@ -1610,21 +1610,20 @@ class GenList(GenBase, ListView):
 
         # Ordering field autofill
         try:
-            order_get=jsondata.get('ordering',[])
-            if type(order_get)==list:
-                order_by_struct=order_get
+            order_get = jsondata.get('ordering', [])
+            if type(order_get) == list:
+                order_by_struct = order_get
             else:
-                order_by_struct=json.loads(str(order_get))
+                order_by_struct = json.loads(str(order_get))
         except Exception:
-            order_by_struct=[]
-        order_by=[]
-        position={}
-        counter=1
-
+            order_by_struct = []
+        order_by = []
+        position = {}
+        counter = 1
 
         # Build the columns structure and the fields list
-        context['columns']=[]
-        self.__fields=[]
+        context['columns'] = []
+        self.__fields = []
         for value in fields:
             self.__fields.append(value[0])
 
@@ -1646,44 +1645,44 @@ class GenList(GenBase, ListView):
                 name = lbl
 
             if direction == 'asc':
-                order_by.append("%s" % (name))
+                order_by.append("%s" % (remove_getdisplay(name)))
             elif direction == 'desc':
-                order_by.append("-%s" % (name))
+                order_by.append("-%s" % (remove_getdisplay(name)))
             position[name] = counter
-            counter+=1
+            counter += 1
 
         if order_by:
-            queryset=queryset.order_by(*order_by)
+            queryset = queryset.order_by(*order_by)
         else:
             if 'default_ordering' in self._attributes:
                 if type(self.default_ordering) == list:
-                    queryset=queryset.order_by(*self.default_ordering)
+                    queryset = queryset.order_by(*self.default_ordering)
                 else:
-                    queryset=queryset.order_by(self.default_ordering)
+                    queryset = queryset.order_by(self.default_ordering)
             else:
-                queryset=queryset.order_by("pk")
+                queryset = queryset.order_by("pk")
 
         # Ordering field autofill
-        sort={}
+        sort = {}
         for value in fields:
             # Get values
             if value[0]:
-                name=value[0].split(":")[0]
+                name = value[0].split(":")[0]
                 order_key = name
             else:
-                name=value[0]
+                name = value[0]
                 # not usable fields, example: fields.append((None, _('Selector'))) in airportslist
                 order_key = "#{}".format(hashlib.md5(value[1]).hexdigest())
 
-            publicname=value[1]
-            if len(value)>2:
-                size=value[2]
+            publicname = value[1]
+            if len(value) > 2:
+                size = value[2]
             else:
-                size=None
+                size = None
             if len(value)>3:
-                align=value[3]
+                align = value[3]
             else:
-                align=None
+                align = None
             # filter column
             if len(value)>4:
                 filter_column=value[4]
@@ -1707,49 +1706,50 @@ class GenList(GenBase, ListView):
                         sort_class =''
                         direction = 'asc'
                     found = True
-                if direction == 'asc' or direction=='desc':
-                    ordering.append({subname:direction})
+                if direction == 'asc' or direction == 'desc':
+                    ordering.append({subname: direction})
+
             if not found:
-                ordering.append({order_key:'asc'})
+                ordering.append({order_key: 'asc'})
                 sort_class = ''
             # Save the ordering method
-            sort[order_key]={}
-            sort[order_key]['id']=name
-            sort[order_key]['name']=publicname
-            sort[order_key]['align']=align
+            sort[order_key] = {}
+            sort[order_key]['id'] = name
+            sort[order_key]['name'] = publicname
+            sort[order_key]['align'] = align
             if filter_column:
-                sort[order_key]['filter']=filter_column
+                sort[order_key]['filter'] = filter_column
 
             if jsonquery is None:
-                sort[order_key]['size']=size
-                sort[order_key]['class']=sort_class
-                if order_key and order_key[0]!='*':
-                        sort[order_key]['ordering']=json.dumps(ordering).replace('"','\\"')
+                sort[order_key]['size'] = size
+                sort[order_key]['class'] = sort_class
+                if order_key and order_key[0] != '*':
+                        sort[order_key]['ordering'] = json.dumps(ordering).replace('"','\\"')
                 if order_key in position:
-                    sort[order_key]['position']=position[order_key]
+                    sort[order_key]['position'] = position[order_key]
 
         # Save ordering in the context
         if jsonquery is not None:
-            context['ordering']=order_by_struct
+            context['ordering'] = order_by_struct
 
         # Build the columns structure and the fields list
-        context['columns']=[]
+        context['columns'] = []
         for value in fields:
-            field=value[0]
+            field = value[0]
             if field:
                 context['columns'].append(sort[field.split(":")[0]])
             else:
                 field = "#{}".format(hashlib.md5(value[1]).hexdigest())
-                #selector
+                # selector
                 context['columns'].append(sort[field])
 
         # Auto build rules
-        #self.__autorules=self.autorules()
+        # self.__autorules = self.autorules()
 
         # Columns
-        self.__columns=['pk']
-        #self.__columns=['id']
-        self.__foreignkeys=[]
+        self.__columns = ['pk']
+        # self.__columns = ['id']
+        self.__foreignkeys = []
         for column in self.model._meta.fields:
             self.__columns.append(column.name)
             if column.is_relation:
@@ -1766,7 +1766,6 @@ class GenList(GenBase, ListView):
         # === Queryset optimization ===
         # Get autorules ordered
         autorules_keys = sorted(self.__autorules.keys())
-
         #
         query_renamed = {}
         query_optimizer = []
@@ -1779,18 +1778,18 @@ class GenList(GenBase, ListView):
             # name rule origin
             rule_org = rule
             # If rule is an alias
-            rulesp=rule.split(":")
-            if len(rulesp)==2:
-                (alias,rule)=rulesp
+            rulesp = rule.split(":")
+            if len(rulesp) == 2:
+                (alias, rule) = rulesp
             else:
-                alias=rule
+                alias = rule
 
             # If rule has a foreign key path (check first level attributes only, nfrule = no foreign rule)
-            nfrule=rule.split("__")
+            nfrule = rule.split("__")
             do_select_related = False
             model = self.model
-            if len(nfrule)>1:
-                ruletmp=[]
+            if len(nfrule) > 1:
+                ruletmp = []
                 field_related_model = []
                 for n in nfrule:
                     if model:
@@ -1818,8 +1817,6 @@ class GenList(GenBase, ListView):
                     if fi.name == nfrule[0] and fi.is_relation:
                         fields_related_model.append(nfrule[0])
 
-
-
             if do_select_related or rule in self.__foreignkeys:
                 # Compatibility with Django 1.10
                 if "__" in rule:
@@ -1837,13 +1834,14 @@ class GenList(GenBase, ListView):
                 # y se tuviera que parametrizarse de algun otro modo
                 ############################
 
-                #if nfrule not in self.__foreignkeys:
+                # if nfrule not in self.__foreignkeys:
                 if rule not in fields_related_model:
                     # Save verifier name
                     query_verifier.append(rule_org)
+                
                 # Save renamed field
-                if alias!=rule:
-                    query_renamed[alias]=F(rule)
+                if alias != rule:
+                    query_renamed[alias] = F(rule)
                     query_optimizer.append(alias)
                 else:
                     # Save final name
@@ -1857,10 +1855,10 @@ class GenList(GenBase, ListView):
                         query_optimizer.append(xnfrule)
 
             if not found:
-                query_renamed={}
-                query_optimizer=[]
-                query_verifier=[]
-                query_select_related=[]
+                query_renamed = {}
+                query_optimizer = []
+                query_verifier = []
+                query_select_related = []
                 break
 
         for rename in query_renamed.keys():
@@ -1873,21 +1871,19 @@ class GenList(GenBase, ListView):
                     msg = "Invalid alias. The alias '{}' is a related object from model '{}' inside app '{}'"
                 raise Exception(msg.format(rename, self._modelname, self._appname))
 
-
-
         if found and query_select_related:
-            queryset=queryset.select_related(*query_select_related)
+            queryset = queryset.select_related(*query_select_related)
         # If we got the query_optimizer to optimize everything, use it
         use_extra = False
         query_verifier.sort()
         autorules_keys.sort()
-        if found and query_verifier==autorules_keys:
+        if found and query_verifier == autorules_keys:
             use_extra = True
             if query_renamed:
-                #queryset=queryset.extra(select=query_renamed).values(*query_optimizer)
-                queryset=queryset.annotate(**query_renamed).values(*query_optimizer)
+                # queryset=queryset.extra(select=query_renamed).values(*query_optimizer)
+                queryset = queryset.annotate(**query_renamed).values(*query_optimizer)
             else:
-                queryset=queryset.values(*query_optimizer)
+                queryset = queryset.values(*query_optimizer)
         """
         raise Exception("FOUND: {} -- __foreignkeys: {} -- __columns: {} -- autorules_keys: {} -- \
             query_select_related: {} -- query_renamed: {} -- query_optimizer: {} | use_extra: {}| -- \
@@ -1903,14 +1899,13 @@ class GenList(GenBase, ListView):
             ))
         #"""
 
-
         # Check the total count of registers + rows per page
-        total_rows_per_page=jsondata.get('rowsperpage',self.default_rows_per_page)
-        pages_to_bring=jsondata.get('pages_to_bring',1)
+        total_rows_per_page = jsondata.get('rowsperpage', self.default_rows_per_page)
+        pages_to_bring = jsondata.get('pages_to_bring', 1)
         if total_rows_per_page == 'All' or 'printer' in context:
-            total_rows_per_page=queryset.count()
+            total_rows_per_page = queryset.count()
         paginator = Paginator(queryset, total_rows_per_page)
-        total_registers=paginator.count
+        total_registers = paginator.count
 
         # Rows per page
         if total_rows_per_page:
@@ -1921,10 +1916,10 @@ class GenList(GenBase, ListView):
         else:
             total_rows_per_page = self.default_rows_per_page
         if total_rows_per_page == 'All':
-            page_number=1
+            page_number = 1
             total_rows_per_page = total_registers
             total_rows_per_page_out = _('All')
-            total_pages=1
+            total_pages = 1
         else:
             total_rows_per_page = int(total_rows_per_page) # By default 10 rows per page
             total_rows_per_page_out = total_rows_per_page
@@ -1973,40 +1968,40 @@ class GenList(GenBase, ListView):
 
 
         # Save the pagination in the structure
-        context['rowsperpageallowed']=choice
-        context['rowsperpage']=total_rows_per_page_out
-        context['pages_to_bring']=pages_to_bring
-        context['pagenumber']=page_number
+        context['rowsperpageallowed'] = choice
+        context['rowsperpage'] = total_rows_per_page_out
+        context['pages_to_bring'] = pages_to_bring
+        context['pagenumber'] = page_number
 
         # Get the full number of registers and save it to context
-        context['total_registers']=total_registers
-        if total_rows_per_page=='All':
+        context['total_registers'] = total_registers
+        if total_rows_per_page == 'All':
             # Remove total_rows_per_page if is all
-            total_rows_per_page=None
-            context['page_before']=None
-            context['page_after']=None
-            context['start_register']=1
-            context['showing_registers']=total_registers
+            total_rows_per_page = None
+            context['page_before'] = None
+            context['page_after'] = None
+            context['start_register'] = 1
+            context['showing_registers'] = total_registers
         else:
             # Page before
-            if page_number<=1:
-                context['page_before']=None
+            if page_number <= 1:
+                context['page_before'] = None
             else:
-                context['page_before']=page_number-1
+                context['page_before'] = page_number-1
             # Page after
-            if page_number>=total_pages:
-                context['page_after']=None
+            if page_number >= total_pages:
+                context['page_after'] = None
             else:
-                context['page_after']=page_number+1
+                context['page_after'] = page_number+1
             # Starting on register number
-            context['start_register']=(page_number-1)*total_rows_per_page+1
-            context['showing_registers']=total_rows_per_page
+            context['start_register'] = (page_number-1)*total_rows_per_page+1
+            context['showing_registers'] = total_rows_per_page
 
         # Calculate end
-        context['end_register']=min(context['start_register']+context['showing_registers']-1,total_registers)
+        context['end_register'] = min(context['start_register']+context['showing_registers']-1,total_registers)
 
         # Add pagination
-        regs=[]
+        regs = []
         desired_page_number = page_number
         try:
             range_pages_to_bring = xrange(pages_to_bring)
@@ -2015,14 +2010,14 @@ class GenList(GenBase, ListView):
         for p in range_pages_to_bring:
             try:
                 regs += paginator.page(desired_page_number)
-                desired_page_number+=1
+                desired_page_number += 1
             except PageNotAnInteger:
                 # If page is not an integer, deliver first page.
                 regs += paginator.page(1)
-                desired_page_number=2
+                desired_page_number = 2
             except EmptyPage:
                 # If page is out of range (e.g. 9999), deliver last page of results.
-                if pages_to_bring==1:
+                if pages_to_bring == 1:
                     regs += paginator.page(paginator.num_pages)
                 # Leave bucle
                 break
@@ -2138,28 +2133,28 @@ class GenList(GenBase, ListView):
 
     def __jcontext_metadata(self,context):
         # Initialiaze
-        a={}
+        a = {}
 
         # Build get structure
-        a['getval']={}
+        a['getval'] = {}
         for key in context['getval']:
-            if key not in ['search','ordering','month','filters','page','pages_to_bring','rowsperpage','year','month','day','hour','minute','second','json', 'printer']:
-                a['getval']=context['getval'][key]
+            if key not in ['search', 'ordering', 'month', 'filters', 'page', 'pages_to_bring', 'rowsperpage', 'year', 'month', 'day', 'hour', 'minute', 'second', 'json', 'printer']:
+                a['getval'] = context['getval'][key]
 
         # Set data
-        a['username']=self.user.username
-        a['context']=self.client_context
-        a['url_media']=settings.MEDIA_URL
-        a['page']=context['pagenumber']
-        a['pages']=context['pages']
-        a['pages_to_bring']=context['pages_to_bring']
-        a['linkadd']=context['linkadd']
-        a['vtable']=context['vtable']
-        a['ngincludes']=context['ngincludes']
-        a['linkedit']=context['linkedit']
-        a['show_details']=context['show_details']
-        a['show_modal']=context['show_modal']
-        a['search_filter_button']=context['search_filter_button']
+        a['username'] = self.user.username
+        a['context'] = self.client_context
+        a['url_media'] = settings.MEDIA_URL
+        a['page'] = context['pagenumber']
+        a['pages'] = context['pages']
+        a['pages_to_bring'] = context['pages_to_bring']
+        a['linkadd'] = context['linkadd']
+        a['vtable'] = context['vtable']
+        a['ngincludes'] = context['ngincludes']
+        a['linkedit'] = context['linkedit']
+        a['show_details'] = context['show_details']
+        a['show_modal'] = context['show_modal']
+        a['search_filter_button'] = context['search_filter_button']
 
         if self.__authtoken:
             a['version'] = getattr(settings, "VERSION", None)
@@ -2388,7 +2383,7 @@ class GenList(GenBase, ListView):
             elementid=v['elementid']
         else:
             elementid=None
-        newget['elementid']=elementid
+        newget['elementid'] = elementid
 
         if 'printer' in v:
             printer = v['printer']
@@ -2401,11 +2396,11 @@ class GenList(GenBase, ListView):
 
     def autorules(self):
         # Start the process
-        a={}
-        a['pk']=None
+        a = {}
+        a['pk'] = None
         for f in self.__fields:
             if f is not None:
-                a[f]=None
+                a[f] = None
         return a
 
     def bodybuilder(self,object_list,rules):
@@ -2526,7 +2521,7 @@ class GenList(GenBase, ListView):
             # Check if the user filled table body, if not, we will do it now
             if (type(answer)==dict) and ('table' in answer) and ('body' in answer['table']) and (answer['table']['body'] is None):
                 # Call bodybuilder
-                answer['table']['body']=self.bodybuilder(context['object_list'],self.__autorules)
+                answer['table']['body'] = self.bodybuilder(context['object_list'], self.__autorules)
 
             if answer['meta']['printer']:
                 if answer['meta']['printer'] == 'xls':
