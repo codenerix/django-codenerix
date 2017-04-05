@@ -19,7 +19,16 @@
 # limitations under the License.
 
 import os
-import commands
+import sys
+
+# Find out if we are running python3
+python3=sys.version_info>=(3,)
+if python3:
+    from subprocess import getstatusoutput
+    pythoncmd="python3"
+else:
+    from commands import getstatusoutput
+    pythoncmd="python"
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
@@ -64,7 +73,7 @@ class Command(BaseCommand, Debugger):
             
             # Collect
             self.debug("Collecting...",color='blue')
-            status, output = commands.getstatusoutput("{}/manage collectstatic --noinput".format(appdir))
+            status, output = getstatusoutput("{}/manage collectstatic --noinput".format(appdir))
             if status: raise CommandError(output)
             for line in output.split("\n"):
                 if line[0:7]=="Copying":
@@ -89,7 +98,7 @@ class Command(BaseCommand, Debugger):
             
             # Clean
             self.debug("Cleaning...",color='blue')
-            status, output = commands.getstatusoutput("{}/manage clean".format(appdir))
+            status, output = getstatusoutput("{}/manage clean".format(appdir))
             if status: raise CommandError(output)
             
             # Touch
@@ -98,7 +107,7 @@ class Command(BaseCommand, Debugger):
             filenames.sort()
             for name in filenames:
                 if name[0:4]=='wsgi':
-                    status, output = commands.getstatusoutput("/usr/bin/touch {}/wsgi*.py".format(appdir))
+                    status, output = getstatusoutput("/usr/bin/touch {}/wsgi*.py".format(appdir))
                     if status: raise CommandError(output)
                     self.debug(" [{}]".format(name),color='cyan', header=False, tail=False)
             self.debug(" Done",color='green', header=False)

@@ -19,7 +19,16 @@
 # limitations under the License.
 
 import os
-import commands
+import sys
+
+# Find out if we are running python3
+python3=sys.version_info>=(3,)
+if python3:
+    from subprocess import getstatusoutput
+    pythoncmd="python3"
+else:
+    from commands import getstatusoutput
+    pythoncmd="python"
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
@@ -80,10 +89,10 @@ class Command(BaseCommand, Debugger):
         # Check user selection
         if not options['noguess']:
             cmd = "ls -lR {} | grep www-data".format(appdir)
-            status, output = commands.getstatusoutput(cmd)
+            status, output = getstatusoutput(cmd)
             if status:
                 cmd = "ls -lR {} | grep www-data".format(appdir)
-                status, output = commands.getstatusoutput(cmd)
+                status, output = getstatusoutput(cmd)
                 if status:
                     guess="suexec"
                 else:
@@ -124,7 +133,7 @@ class Command(BaseCommand, Debugger):
         # Check execution mode
         sudo=''
         if mode=='apache' or mode=='wwwdata':
-            status, output = commands.getstatusoutput("whoami")
+            status, output = getstatusoutput("whoami")
             if status:
                 # Error in command
                 self.error("Error while executing 'whoami' command")
@@ -134,7 +143,7 @@ class Command(BaseCommand, Debugger):
                 self.debug("Detected we are 'www-data' user",color='purple')
             else:
                 # No permissions try to become root using sudo
-                status, output = commands.getstatusoutput("sudo whoami")
+                status, output = getstatusoutput("sudo whoami")
                 if status:
                     # Error in command
                     self.error("Error while executing 'sudo whoami' command")
@@ -165,7 +174,7 @@ class Command(BaseCommand, Debugger):
                     if os.path.exists(testpath):
                         self.debug("    > Removing {}".format(testpath),color="red")
                         cmd = "{}rm -R {}/*".format(sudo,testpath)
-                        status, output = commands.getstatusoutput(cmd)
+                        status, output = getstatusoutput(cmd)
                         if status: raise CommandError(output)
             else:
                 raise CommandError("You requested to clean all 'locale' folders but you answered NO to the previous question, can not keep going!")
@@ -175,11 +184,11 @@ class Command(BaseCommand, Debugger):
         for (code,name) in settings.LANGUAGES:
             self.debug("Processing translations for {}...".format(name), color='cyan')
             cmd="{}{}/manage.py makemessages -v0 --symlinks -l {}".format(sudo,basedir,code)
-            status, output = commands.getstatusoutput(cmd)
+            status, output = getstatusoutput(cmd)
             if status: raise CommandError(output)
             
             cmd="{}{}/manage.py makemessages -v0 --symlinks -d djangojs -l {}".format(sudo,basedir,code)
-            status, output = commands.getstatusoutput(cmd)
+            status, output = getstatusoutput(cmd)
             if status: raise CommandError(output)
             
         
@@ -195,6 +204,6 @@ class Command(BaseCommand, Debugger):
             for app in ['']+apps:
                 testpath = os.path.abspath("{}/{}/locale".format(appdir,app).replace("//","/"))
                 cmd="sudo chown {}.{} {}/* -R".format(user,user,testpath)
-                status, output = commands.getstatusoutput(cmd)
+                status, output = getstatusoutput(cmd)
                 if status: raise CommandError(output)
 

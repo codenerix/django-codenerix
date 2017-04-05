@@ -18,19 +18,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import subprocess
+import sys
 
 from django.core.management.base import BaseCommand
 
 from codenerix.lib.debugger import Debugger
 
-import sys
-
 # Find out if we are running python3
 python3=sys.version_info>=(3,)
 if python3:
+    from subprocess import getstatusoutput
     pythoncmd="python3"
 else:
+    from commands import getstatusoutput
     pythoncmd="python"
 
 class Command(BaseCommand, Debugger):
@@ -102,11 +102,11 @@ class Command(BaseCommand, Debugger):
             else:
                 (name,command,helptext)=entry
             self.debug("    > {:32s} :: ".format(name),color='blue', tail=None),
-            error, output = subprocess.getstatusoutput("{} -c '{}' 2>&1".format(pythoncmd,command))
+            error, output = getstatusoutput("{} -c '{}' 2>&1".format(pythoncmd,command))
             if not error:
                 # Library test passed, check version
                 package = name.split("=")[0]
-                error, output = subprocess.getstatusoutput("pip freeze | grep -e '^{}=' || echo 'EMPTY'".format(package))
+                error, output = getstatusoutput("pip freeze | grep -e '^{}=' || echo 'EMPTY'".format(package))
                 if not error:
                     if output=='EMPTY':
                         self.debug("OK",color='green', header=None, tail=None)

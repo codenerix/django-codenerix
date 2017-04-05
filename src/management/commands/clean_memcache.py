@@ -18,7 +18,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import commands
+import sys
+
+# Find out if we are running python3
+python3=sys.version_info>=(3,)
+if python3:
+    from subprocess import getstatusoutput
+    pythoncmd="python3"
+else:
+    from commands import getstatusoutput
+    pythoncmd="python"
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -36,6 +45,6 @@ class Command(BaseCommand, Debugger):
         self.set_debug()
         
         # Get environment
-        status, output = commands.getstatusoutput("echo 'flush_all' | nc localhost 11211")
+        status, output = getstatusoutput("echo 'flush_all' | nc localhost 11211")
         if status: raise CommandError(output)
 
