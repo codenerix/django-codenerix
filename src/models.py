@@ -212,6 +212,12 @@ def codenerixmodel_delete_pre(sender, instance, **kwargs):
 if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
     from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 
+    TYPE_ACTION = (
+        (ADDITION, _("Add")),
+        (CHANGE, _("Change")),
+        (DELETION, _("Delete")),
+    )
+
     class Log(models.Model):
         '''
         Control the possible log
@@ -221,7 +227,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         content_type = models.ForeignKey(ContentType, blank=True, null=True)
         object_id = models.TextField('Object id', blank=True, null=True)
         object_repr = models.CharField('Object repr', max_length=200)
-        action_flag = models.PositiveSmallIntegerField('Action')
+        action_flag = models.PositiveSmallIntegerField(_("Action"), choices=TYPE_ACTION)
         change_json = models.TextField('Json', blank=True, null=False)
         change_txt = models.TextField('Txt', blank=True, null=False)
         
@@ -267,7 +273,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             fields = []
             fields.append(('action_time', _('Date')))
             fields.append(('user__username', _('User')))
-            fields.append(('action:action_flag', _('Action')))
+            fields.append(('get_action_flag_display', _('Action')))
             # fields.append(('content_type__name', _('APP Name')))
             fields.append(('content_type', _('APP Name')))
             fields.append(('content_type__app_label', _('APP Label')))
@@ -298,7 +304,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         def __searchF__(self, info):
             tf = {}
             tf['action_time'] = (_('Date'), lambda x: Q(**daterange_filter(x, 'action_time')), 'daterange')
-            tf['action'] = (_('Action'), lambda x: Q(action_flag=x), [(ADDITION, _('Addition')), (CHANGE, _('Change')), (DELETION, _('Deletion'))])
+            tf['get_action_flag_display'] = (_('Action'), lambda x: Q(action_flag=x), list(TYPE_ACTION))
             tf['object_id'] = (_('ID'), lambda x: Q(object_id=x), 'input')
             tf['user__username'] = (_('User'), lambda x: Q(user__username__icontains=x), 'input')
             tf['content_type__app_label'] = (_('APP Label'), lambda x: Q(content_type__app_label__icontains=x), 'input')

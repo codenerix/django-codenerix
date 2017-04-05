@@ -1295,35 +1295,35 @@ class GenList(GenBase, ListView):
         context['filters_get']=filters_get
 
         # Get the list of filters allowed by this class
-        filters=[]
+        filters = []
         for key in listfilters:
-            typekind=listfilters[key][2]
-            if type(typekind)==list:
+            typekind = listfilters[key][2]
+            if type(typekind) == list:
                 # Compatibility: set typekind and fv in the old fassion
-                choice=[_('All')]
+                choice = [_('All')]
                 for value in typekind:
                     choice.append(value[1])
 
                 # Decide the choosen field
                 if key in filters_struct.keys():
-                    value=int(filters_struct[key])
+                    value = int(filters_struct[key])
                 else:
-                    value=0
-                typekind='select'
-                argument=choice
-            elif typekind=='select':
-                typevalue=listfilters[key][3]
-                choice=[_('All')]
+                    value = 0
+                typekind = 'select'
+                argument = choice
+            elif typekind == 'select':
+                typevalue = listfilters[key][3]
+                choice = [_('All')]
                 for value in typevalue:
                     choice.append(value[1])
 
                 # Decide the choosen field
                 if key in filters_struct.keys():
-                    value=int(filters_struct[key])
+                    value = int(filters_struct[key])
                 else:
-                    value=0
+                    value = 0
                 # Set choice as the command's argument
-                argument=choice
+                argument = choice
             elif typekind in ['multiselect', 'multidynamicselect']:
                 if typekind == 'multiselect':
                     typevalue = listfilters[key][3]
@@ -1331,30 +1331,30 @@ class GenList(GenBase, ListView):
                     for value in typevalue:
                         choice.append({'id': value[0], 'label': value[1]})
                 else:
-                    choice=list(listfilters[key][3:])
-                    choice[1] = reverse_lazy(choice[1],kwargs={'search':'a'})[:-1]
+                    choice = list(listfilters[key][3:])
+                    choice[1] = reverse_lazy(choice[1], kwargs={'search': 'a'})[:-1]
 
                 # Decide the choosen field
                 if key in filters_struct.keys():
-                    value=filters_struct[key]
+                    value = filters_struct[key]
                 else:
-                    value=[]
+                    value = []
 
                 # Set choice as the command's argument
-                argument=choice
-            elif typekind in ['daterange','input']:
+                argument = choice
+            elif typekind in ['daterange', 'input']:
                 # Commands withouth arguments
-                argument=None
+                argument = None
                 # Get the selected value
                 if key in filters_struct.keys():
-                    value=filters_struct[key]
+                    value = filters_struct[key]
                 else:
-                    value=None
+                    value = None
             else:
-                raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind,key))
+                raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind, key))
 
             # Build filtertuple
-            filtertuple=(key,listfilters[key][0],typekind,argument,value)
+            filtertuple = (key, listfilters[key][0], typekind, argument, value)
             # Save this filter in the corresponding list
             filters.append(filtertuple)
 
@@ -2447,12 +2447,12 @@ class GenList(GenBase, ListView):
                     # Get actual value
                     rksp=rk.split("__")
                     head=rksp[0]
-                    if len(rksp)>1:
-                        tail="__".join(rksp[1:])
+                    if len(rksp) > 1:
+                        tail = "__".join(rksp[1:])
                     else:
-                        tail=None
-                    #value=getattr(o,head,None)  # 2016.02.24 Quitamos None para que aparezca la exception
-                    value=getattr(o,head)
+                        tail = None
+                    # value=getattr(o,head,None)  # 2016.02.24 Quitamos None para que aparezca la exception
+                    value = getattr(o, head)
 
                     # If value is None, return None
                     if value is not None:
@@ -2590,7 +2590,7 @@ class GenList(GenBase, ListView):
 
 
 class GenListModal(GenList):
-    get_template_names_key='listmodal'
+    get_template_names_key = 'listmodal'
     show_internal_name = False
     title = None
 
@@ -2600,6 +2600,7 @@ class GenListModal(GenList):
         if 'title' in self._attributes:
             context["title"] = self.title
         return context
+
 
 class GenModify(object):
     '''
@@ -2627,8 +2628,8 @@ class GenModify(object):
         '''
 
         # Check if this is a webservice request
-        self.__json_worker = (bool( getattr( self.request, "authtoken", False ) )) or (self.json is True)
-        self.__authtoken = (bool( getattr( self.request, "authtoken", False ) ))
+        self.__json_worker = (bool(getattr(self.request, "authtoken", False))) or (self.json is True)
+        self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
 
         # Check if this is an AJAX request
         if (request.is_ajax() or self.__json_worker) and request.body:
@@ -3351,15 +3352,16 @@ class GenForeignKey(GenBase, View):
             VALUE: actual value from the linked field
         if you get a filter company:3 means your search must filter the results to all that belongs to company:3
     '''
-    label_cached=None
+
+    label_cached = None
     action_permission = 'list'
+
     def dispatch(self, request, **kwargs):
         # Set class internal variables
         self._setup(request)
 
         # Call the base implementation
         return super(GenForeignKey, self).dispatch(request, **kwargs)
-
 
     def build_label(self, obj):
         # Compile label and save it
@@ -3400,21 +3402,21 @@ class GenForeignKey(GenBase, View):
 
     def get_label(self, pk):
         # Get queryset
-        qs=self.get_queryset()
+        qs = self.get_queryset()
         # Locate the object
-        obj=qs.get(pk=pk)
+        obj = qs.get(pk=pk)
         # Return the label
         return self.build_label(obj)
 
     def get_choices(self, choices=[]):
         qs = self.get_queryset()
         if choices:
-            if type(choices[0]==dict):
+            if type(choices[0] == dict):
                 choices = [x["id"] for x in choices]
-            qs=qs.filter(pk__in=choices)
-        answer=[]
+            qs = qs.filter(pk__in=choices)
+        answer = []
         for e in qs.all():
-            answer.append({'id':e.pk,'label':self.build_label(e)})
+            answer.append({'id': e.pk, 'label': self.build_label(e)})
         return answer
 
     def custom_choice(self, obj, info):
