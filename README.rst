@@ -58,6 +58,8 @@ Demo
 
 You can have a look to our `demo online <http://demo.codenerix.com>`_.
 
+You can find some working examples in GITHUB at `django-codenerix-examples project <https://github.com/centrologic/django-codenerix-examples>`_.
+
 ***********
 Quick start
 ***********
@@ -80,7 +82,9 @@ We have tried to write the most accurate documentation about this project so you
 with `CODENERIX <http://www.codenerix.com/>`_. Nevertheless we are human, and we make mistakes, so please contact with us if
 you find any mistake or you have doubts about the explanations.
 
-You can get access to the documentation at `CODENERIX Documentation <http://doc.codenerix.com>`_.
+You can get access to online documentation at `CODENERIX Documentation <http://doc.codenerix.com>`_.
+
+You can find all documentation in GITHUB at `django-codenerix-documentation project <https://github.com/centrologic/django-codenerix-documentation>`_.
 
 
 ******************
