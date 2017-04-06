@@ -31,7 +31,9 @@ limitations under the License.
         <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
     {% endif %}
     <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty" value="add">{% trans "Save" %}</button>
+    <label  class="sr-only"  for="submit_save_add_another">{% trans "Save and New" %}</label>
+    <button id="submit_save_add_another" ng-click="submitAndNew({{form.form_name}},'here')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save and New" %}</button>
 {% endblock %}
 
 {% block buttons_bottom %}
@@ -40,5 +42,7 @@ limitations under the License.
         <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
     {% endif %}
     <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty" value="add">{% trans "Save" %}</button>
+    <label  class="sr-only"  for="submit_save_add_another">{% trans "Save and New" %}</label>
+    <button id="submit_save_add_another" ng-click="submitAndNew({{form.form_name}},'here')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save and New" %}</button>
 {% endblock %}
