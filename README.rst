@@ -29,6 +29,7 @@ Features
 * integrated API system as standard
 * several authentication methods' including OTP (One Time Password)
 * ready for authentication with Microsoft Active Directory
+* compatible with Python 2.7 and Python >= 3.4
 
 Ready for:
 ''''''''''
