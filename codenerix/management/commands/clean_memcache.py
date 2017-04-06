@@ -18,16 +18,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-
-# Find out if we are running python3
-python3=sys.version_info>=(3,)
-if python3:
+try:
     from subprocess import getstatusoutput
     pythoncmd="python3"
-else:
+except:
     from commands import getstatusoutput
-    pythoncmd="python"
+    pythoncmd="python2"
 
 from django.core.management.base import BaseCommand, CommandError
 

@@ -497,7 +497,7 @@ class GenBase(object):
     @method_decorator(login_required)
     def dispatch_auth(self, *args, **kwargs):
         # Check if user is_admin is required
-        if ('must_be_superuser' in self._attributes) and self.must_be_superuser:
+        if hasattr(self, 'must_be_superuser') and self.must_be_superuser:
             if not self.request.user.is_superuser:
                 return redirect('not_authorized')
 
@@ -508,15 +508,8 @@ class GenBase(object):
         return super(GenBase, self).dispatch(*args, **kwargs)
 
     def auth_permission(self, action_permission):
-        if 'permission' in self._attributes:
-            permission = self.permission
-        else:
-            permission = None
-
-        if 'permission_group' in self._attributes:
-            permission_group = self.permission_group
-        else:
-            permission_group = None
+        permission = getattr(self, 'permission', None)
+        permission_group = getattr(self, 'permission_group', None)
 
         model_name = getattr(self.model, "_meta", None) and getattr(self.model._meta, "model_name")
         if not model_name:
@@ -536,20 +529,13 @@ class GenBase(object):
         Entry point for this class, here we decide basic stuff
         '''
 
-        # Get the list of attributes and methods inside the class
-        info = model_inspect(self, attributes=True)
-        self._attributes = info['attributes']
-        if 'appname' in self._attributes:
-            self._appname = self.appname
-        else:
-            self._appname = info['appname']
-        if 'modelname' in self._attributes:
-            self._modelname = self.modelname
-        else:
-            self._modelname = info['modelname']
+        # Get details from self
+        info = model_inspect(self)
+        self._appname = getattr(self, 'appname', info['appname'])
+        self._modelname = getattr(self, 'modelname', info['modelname'])
 
         # Get user information
-        if 'user' not in self._attributes:
+        if not hasattr(self, 'user'):
             self.user = self.request.user
         # Get profile
         self.profile = get_profile(self.user)
@@ -558,7 +544,7 @@ class GenBase(object):
         self.language = get_language()
 
         # Build extracontext
-        if 'extra_context' not in self._attributes:
+        if not hasattr(self, 'extra_context'):
             self.extra_context = {}
 
         # Default value for no foreign key attribute
@@ -571,14 +557,8 @@ class GenBase(object):
         '''
 
         # Get user template
-        if 'template_model' in self._attributes:
-            template_model=self.template_model
-        else:
-            template_model="{0}/{1}_{2}".format(self._appname.lower(),self._modelname.lower(),self.get_template_names_key)
-        if 'template_model_ext' in self._attributes:
-            template_model_ext=self.template_model_ext
-        else:
-            template_model_ext='html'
+        template_model = getattr(self, 'template_model', "{0}/{1}_{2}".format(self._appname.lower(),self._modelname.lower(),self.get_template_names_key))
+        template_model_ext = getattr( self, 'template_model_ext', 'html')
         templates=get_template(template_model,self.user,self.language,template_model_ext, raise_error=False)
         if type(templates)==list:
             templates.append("codenerix/{0}.html".format(self.get_template_names_key))
@@ -595,11 +575,11 @@ class GenBase(object):
         context = super(GenBase, self).get_context_data(**kwargs)
 
         # Update general context with the stuff we already calculated
-        if 'html_head' in self._attributes:
+        if hasattr(self, 'html_head'):
             context['html_head'] = self.html_head(self.object)
 
         # Add translation system
-        if 'gentrans' in self._attributes:
+        if hasattr(self, 'gentrans'):
             context['gentranslate'] = self.gentrans.copy()
             context['gentranslate'].update(self.gentranslate)
         else:
@@ -830,24 +810,17 @@ class GenBase(object):
         distinct = False
         if not error:
             # Configure class
-            info = model_inspect(myclass, attributes=True)
-            attributes = info['attributes']
+            info = model_inspect(myclass)
             profile = get_profile(self.user)
-            if 'appname' in attributes:
-                appname = myclass.appname
-            else:
-                appname = info['appname']
-            if 'modelname' in attributes:
-                modelname = myclass.modelname
-            else:
-                modelname = info['modelname']
+            appname = getattr(myclass, 'appname', info['appname'])
+            modelname = getattr(myclass, 'modelname', info['modelname'])
 
             # Get MODELINFO
             Mfields = None
             MlimitQ = None
             MsearchF = None
             MsearchQ = None
-            if '__limitQ__' in attributes:
+            if hasattr(myclass, '__limitQ__'):
                 MlimitQ = myclass().__limitQ__
             MODELINF = MODELINFO(myclass, appname, modelname, myclass.__module__, self.request, self.user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
 
@@ -871,7 +844,7 @@ class GenBase(object):
             if qobjects:
                 queryset = queryset.filter(qobjects)
 
-        if 'annotations' in self._attributes:
+        if hasattr(self, 'annotations'):
             queryset = queryset.annotate(**self.annotations)
 
         if distinct:
@@ -1070,54 +1043,37 @@ class GenList(GenBase, ListView):
         # Deprecations
         deprecated=[('retrictions','2016061000')]
         for (depre,version) in deprecated:
-            if depre in self._attributes:
+            if hasattr(self, depre):
                 raise IOError("The attribute '{}' has been deprecated in version '{}' and it is not available anymore".format(version))
 
         # Build extracontext
-        if 'extra_context' not in self._attributes:
+        if not hasattr(self, 'extra_context'):
             self.extra_context={}
-        if 'client_context' not in self._attributes:
+        if not hasattr(self, 'client_context'):
             self.client_context={}
         # Attach user to the extra_context
         self.extra_context['user']=self.user
 
         # Attach WS entry point and STATIC entry point
-        if 'ws_entry_point' not in self._attributes:
-            self.extra_context['ws_entry_point']="{0}/{1}".format(self._appname,"{0}s".format(self._modelname.lower()))
-        else:
-            self.extra_context['ws_entry_point']=self.ws_entry_point
-
-        if 'static_partial_row' not in self._attributes:
-            static_partial_row_path="{0}/{1}_rows.html".format(self._appname,"{0}s".format(self._modelname.lower()))
-        else:
-            static_partial_row_path=self.static_partial_row
+        self.extra_context['ws_entry_point']=getattr(self,"ws_entry_point", "{0}/{1}".format(self._appname,"{0}s".format(self._modelname.lower())))
+        static_partial_row_path=getattr(self, 'static_partial_row', "{0}/{1}_rows.html".format(self._appname,"{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_row']=get_static(static_partial_row_path,self.user,self.language, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
 
-        if 'static_filters_row' not in self._attributes:
-            static_filters_row_path="{0}/{1}_filters.js".format(self._appname,"{0}s".format(self._modelname.lower()))
-        else:
-            static_filters_row_path=self.static_filters_row
+        static_filters_row_path=getattr(self, 'static_filters_row', "{0}/{1}_filters.js".format(self._appname,"{0}s".format(self._modelname.lower())))
         self.extra_context['static_filters_row']=get_static(static_filters_row_path,self.user,self.language,'codenerix/js/rows.js','js')
 
-        if 'field_delete' not in self._attributes:
-            self.extra_context['field_delete'] = False
-        else:
-            self.extra_context['field_delete'] = self.field_delete
-
-        if 'field_check' not in self._attributes:
-            self.extra_context['field_check'] = None
-        else:
-            self.extra_context['field_check'] = self.field_check
+        self.extra_context['field_delete'] = getattr(self, 'field_delete', False)
+        self.extra_context['field_check'] = getattr(self, 'field_check', None)
 
         # Default value for extends_base
-        if 'extends_base' in self._attributes:
+        if hasattr(self, 'extends_base'):
             self.extra_context['extends_base'] = self.extends_base
         elif hasattr(self, 'extends_base'):
             self.extra_context['extends_base'] = self.extends_base
 
         # Get if this is a template only answer
         self.__authtoken = (bool( getattr( self.request, "authtoken", False ) ))
-        self.__json_worker=('json_builder' in self._attributes) or self.__authtoken or (self.json is True)
+        self.__json_worker=(hasattr(self, 'json_builder')) or self.__authtoken or (self.json is True)
         if self.__json_worker:
             # Check if the request has some json query, if not, just render the template
             if self.request.GET.get('json',self.request.POST.get('json',None)) is None:
@@ -1145,10 +1101,10 @@ class GenList(GenBase, ListView):
 
         # Optional tweak methods
         Mfields=None; MlimitQ=None; MsearchF=None; MsearchQ=None
-        if '__fields__' in self._attributes: Mfields=self.__fields__
-        if '__limitQ__' in self._attributes: MlimitQ=self.__limitQ__
-        if '__searchF__' in self._attributes: MsearchF=self.__searchF__
-        if '__searchQ__' in self._attributes: MsearchQ=self.__searchQ__
+        if hasattr(self, '__fields__'):     Mfields=self.__fields__
+        if hasattr(self, '__limitQ__'):     MlimitQ=self.__limitQ__
+        if hasattr(self, '__searchF__'):    MsearchF=self.__searchF__
+        if hasattr(self, '__searchQ__'):    MsearchQ=self.__searchQ__
 
         self._viewname=self.__module__
 
@@ -1176,10 +1132,7 @@ class GenList(GenBase, ListView):
         context['filters_obj']={}
 
         # Get field list
-        if 'fields' in self._attributes:
-            fields=self.fields
-        else:
-            fields=MODELINF.fields()
+        fields = getattr(self, 'fields', MODELINF.fields())
 
         # Save GET values
         context['get']=[]
@@ -1214,7 +1167,7 @@ class GenList(GenBase, ListView):
         if qobjects:
             queryset=queryset.filter(qobjects)
 
-        if 'annotations' in self._attributes:
+        if hasattr(self, 'annotations'):
             queryset=queryset.annotate(**self.annotations)
 
         if distinct:
@@ -1654,7 +1607,7 @@ class GenList(GenBase, ListView):
         if order_by:
             queryset = queryset.order_by(*order_by)
         else:
-            if 'default_ordering' in self._attributes:
+            if hasattr(self, 'default_ordering'):
                 if type(self.default_ordering) == list:
                     queryset = queryset.order_by(*self.default_ordering)
                 else:
@@ -1847,7 +1800,7 @@ class GenList(GenBase, ListView):
                     # Save final name
                     query_optimizer.append(rule)
 
-            if 'annotations' in self._attributes:
+            if hasattr(self, 'annotations'):
                 for xnfrule in self.annotations.keys():
                     found = True
                     if xnfrule not in query_verifier:
@@ -2053,55 +2006,32 @@ class GenList(GenBase, ListView):
         context['profile']=self.profile
 
         # Check vtable
-        if 'vtable' in self._attributes:
-            context['vtable']=self.vtable
-        else:
-            context["vtable"] = False
+        context['vtable']=getattr(self,'vtable', False)
 
         # Check ngincludes
-        if 'ngincludes' in self._attributes:
-            context['ngincludes']=self.ngincludes
-        else:
-            context["ngincludes"] = {}
+        context['ngincludes']=getattr(self,'ngincludes', {})
         if 'table' not in context['ngincludes'].keys():
             context['ngincludes']['table']="/static/codenerix/partials/table.html"
 
         # Check linkadd
-        if 'linkadd' in self._attributes:
-            context['linkadd']=self.linkadd
-        else:
-            context["linkadd"] = (self.auth_permission('add') or getattr(self,'public',False))
+        context['linkadd']=getattr(self,'linkadd', self.auth_permission('add') or getattr(self,'public',False))
 
         # Check linkedit
-        if 'linkedit' in self._attributes:
-            context['linkedit']=self.linkedit
-        else:
-            context["linkedit"] = (self.auth_permission('change') or getattr(self,'public',False))
+        context['linkedit']=getattr(self, 'linkedit', self.auth_permission('change') or getattr(self,'public',False))
 
         # Check showdetails
-        if 'show_details' in self._attributes:
-            context['show_details']=self.show_details
-        else:
-            context["show_details"] = False
+        context['show_details']=getattr(self, 'show_details', False)
 
         # Check showmodal
-        if 'show_modal' in self._attributes:
-            context['show_modal']=self.show_modal
-        else:
-            context['show_modal']=False
+        context['show_modal']=getattr(self, 'show_modal', False)
 
         # Set search filter button
-        if 'search_filter_button' in self._attributes:
-            context['search_filter_button'] = self.search_filter_button
-        else:
-            context['search_filter_button'] = False
+        context['search_filter_button'] = getattr(self, 'search_filter_button', False)
 
         # Get base template
         if not self.__json_worker:
-            if 'template_base' in self._attributes:        template_base=self.template_base
-            else:                                           template_base='base/base'
-            if 'template_base_ext' in self._attributes:    template_base_ext=self.template_base_ext
-            else:                                           template_base_ext='html'
+            template_base=getattr(self,'template_base', 'base/base')
+            template_base_ext=getattr(self, 'template_base_ext', 'html')
             context['template_base']=get_template(template_base,self.user,self.language,extension=template_base_ext)
 
         # Try to convert object_id to a numeric id
@@ -2160,7 +2090,7 @@ class GenList(GenBase, ListView):
             a['version'] = getattr(settings, "VERSION", None)
             a['version_api'] = getattr(settings, "VERSION_API", None)
 
-        if 'gentrans' in self._attributes:
+        if hasattr(self, 'gentrans'):
             gentranslate=self.gentrans.copy()
             gentranslate.update(self.gentranslate)
         else:
@@ -2512,7 +2442,7 @@ class GenList(GenBase, ListView):
             json_context=self.get_context_json(context)
 
             # Build the new answer
-            if 'json_builder' in self._attributes:
+            if hasattr(self, 'json_builder'):
                 answer=self.json_builder(json_context,context)
             else:
                 # User doesn't want to change anything in our answer
@@ -2597,7 +2527,7 @@ class GenListModal(GenList):
     def get_context_data(self, **kwargs):
         context = super(GenListModal, self).get_context_data(**kwargs)
 
-        if 'title' in self._attributes:
+        if hasattr(self, 'title'):
             context["title"] = self.title
         return context
 
@@ -2696,35 +2626,19 @@ class GenModify(object):
         context = super(GenModify, self).get_context_data(**kwargs)
 
         # Check showdetails
-        if 'show_details' in self._attributes:
-            context['show_details'] = self.show_details
-        else:
-            context['show_details'] = False
+        context['show_details'] = getattr(self, 'show_details', False)
 
         # Check linkdelete
-        if 'linkdelete' in self._attributes:
-            context['linkdelete'] = self.linkdelete
-        else:
-            # Check for delete button
-            context['linkdelete'] = True
+        context['linkdelete'] = getattr(self, 'linkdelete', True)
 
         # Check linkback
-        if 'linkback' in self._attributes:
-            context['linkback'] = self.linkback
-        else:
-            context['linkback'] = True
+        context['linkback'] = getattr(self, 'linkback', True)
 
         # Check hide_foreignkey_button
-        if 'hide_foreignkey_button' in self._attributes:
-            context['hide_foreignkey_button'] = self.hide_foreignkey_button
-        else:
-            context['hide_foreignkey_button'] = False
+        context['hide_foreignkey_button'] = getattr(self, 'hide_foreignkey_button', False)
 
         # Check hide internal_name
-        if 'show_internal_name' in self._attributes:
-            context['show_internal_name'] = self.show_internal_name
-        else:
-            context['show_internal_name'] = True
+        context['show_internal_name'] = getattr(self, 'show_internal_name', True)
 
         if self.object is None:
             context["cannot_update"] = None
@@ -2744,7 +2658,7 @@ class GenModify(object):
         # Update context
         context.update(self.extra_context)
 
-        if 'form_ngcontroller' in self._attributes:
+        if hasattr(self, 'form_ngcontroller'):
             context['form'].set_attribute('ngcontroller', self.form_ngcontroller)
 
         # Return context
@@ -3024,7 +2938,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
         else:
             try:
                 return super(GenDelete, self).delete(*args, **kwargs)
-            except ValidationError(e):
+            except ValidationError as e:
                 if self.__json_worker:
                     json_struct = {"error": e, "__pk__": obj.pk}
                     if self.__authtoken and api_obj is not None:
@@ -3197,22 +3111,13 @@ class GenDetail(GenBase, DetailView):
         self.extra_context['tabs_autorender'] = self.get_tabs_autorender()
 
         # Check linkedit
-        if 'linkedit' in self._attributes:
-            context['linkedit']=self.linkedit
-        else:
-            context['linkedit']=True
+        context['linkedit']=getattr(self, 'linkedit', True)
 
         # Check linkdelete
-        if 'linkdelete' in self._attributes:
-            context['linkdelete']=self.linkdelete
-        else:
-            context['linkdelete']=True
+        context['linkdelete']=getattr(self, 'linkdelete', True)
 
         # Check linkback
-        if 'linkback' in self._attributes:
-            context['linkback']=self.linkback
-        else:
-            context['linkback']=True
+        context['linkback']=getattr(self, 'linkback', True)
 
         # Check lock delete
         try:
@@ -3256,22 +3161,13 @@ class GenDetail(GenBase, DetailView):
             meta['version_api'] = getattr(settings, "VERSION_API", None)
 
         # Check linkedit
-        if 'linkedit' in self._attributes:
-            meta['linkedit']=self.linkedit
-        else:
-            meta['linkedit']=True
+        meta['linkedit']=getattr(self, 'linkedit', True)
 
         # Check linkdelete
-        if 'linkdelete' in self._attributes:
-            meta['linkdelete']=self.linkdelete
-        else:
-            meta['linkdelete']=True
+        meta['linkdelete']=getattr(self, 'linkdelete', True)
 
         # Check linkback
-        if 'linkback' in self._attributes:
-            meta['linkback']=self.linkback
-        else:
-            meta['linkback']=True
+        meta['linkback']=getattr(self, 'linkback', True)
 
         # Check lock delete
         try:

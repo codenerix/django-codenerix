@@ -34,12 +34,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate, login
 from django.conf import settings
 
-PYTHON3=sys.version_info>=(3,)
-if PYTHON3:
-    import ldap3
-    from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
-else:
-    import ldap
+import ldap3
+from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
 
 def check_auth(user):
     '''
@@ -345,110 +341,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                     self.__debug = False
             
             if self.__debug:
-                # Decide header
-                if PYTHON3:
-                    header = 'py3'
-                else:
-                    header = 'py2'
                 # Debug the given message
-                self.__debug.write("{} :: {}\n".format(header, msg))
+                self.__debug.write("{}\n".format(msg))
                 self.__debug.flush()
-    
-    def ldap2_link(self, ldap_url, use_ssl, nt4_domain, dns_name, username, password, mode):
-        self.debug('ldap.initialize :: url: {}'.format(ldap_url))
-        
-        # Prepare ldap connection
-        try:
-            
-            # Connect using SSL
-            if use_ssl:
-                certfile = settings.AD_CERT_FILE
-                self.debug('ldap.ssl :: Activated - Cert file: {}'.format(certfile))
-                ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, certfile)
-            
-            # Set options for SEARCH mode
-            if mode is 'SEARCH':
-                ldap.set_option(ldap.OPT_REFERRALS, 0)  # DO NOT TURN THIS OFF OR SEARCH WON'T WORK!
-            
-            # Initialize
-            l = ldap.initialize(ldap_url)
-            
-            # Set protocol to v3
-            l.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
-            
-            # Build the login string
-            binddn = "%s@%s" % (username, nt4_domain)
-            
-            # Do the check out
-            self.debug('bind...')
-            if mode == 'LOGIN':
-                l.simple_bind_s(binddn, password)
-                
-                # Unbind automatically
-                self.debug('unbind...')
-                l.unbind_s()
-                
-                # Return that everything was fine
-                answer = True
-                
-            else:
-                l.bind_s(binddn, password)
-                
-                # Prepare answer
-                answer = l
-            
-        except ldap.INVALID_CREDENTIALS as e:
-            # The access for this user has been denied, Debug it if required
-            self.debug("Invalid credentials for user '{}' with error '{}'".format(username, e))
-            answer = False
-        except ldap.SERVER_DOWN as e:
-            # The LDAP server is not accesible
-            self.debug("The LDAP server is not accesible: {}".format(e))
-            answer = None
-        
-        # Return the final result
-        return answer
-    
-    def ldap3_link(self, ldap_url, use_ssl, nt4_domain, dns_name, username, password, mode):
-        
-        # Debug
-        self.debug('ldap.initialize :: url: {}'.format(ldap_url))
-        
-        # Prepare library
-        ser = {}
-        ser['allowed_referral_hosts'] = [("*", True)]
-        con = {}
-        con['user'] = "{}\{}".format(nt4_domain,username)
-        con['password'] = password
-        con['raise_exceptions'] = True
-        con['authentication'] = ldap3.NTLM
-        if use_ssl:
-            certfile = settings.AD_CERT_FILE
-            self.debug('ldap.ssl :: Activated - Cert file: {}'.format(certfile))
-            con['auto_bind']  = ldap3.AUTO_BIND_TLS_BEFORE_BIND
-            ser['use_ssl'] = True
-            ser['tls'] = ldap3.Tls(validate=ssl.CERT_REQUIRED, version=ssl.PROTOCOL_TLSv1)
-        else:
-            con['auto_bind'] = ldap3.AUTO_BIND_NO_TLS
-        try:
-            server = ldap3.Server(ldap_url, **ser)
-            self.debug('ldap.server :: {}'.format(server))
-            answer = ldap3.Connection(server, **con)
-            self.debug('ldap.connection :: {}'.format(answer))
-            #answer.open()
-            #answer.bind()
-            self.debug('ldap.connected :: Authorized')
-        except LDAPSocketOpenError as e:
-            # The access for this user has been denied, Debug it if required
-            self.debug("LDAP connect failed for url '{}' with error '{}'".format(ldap_url, e))
-            answer = False
-        except LDAPException as e:
-            # The access for this user has been denied, Debug it if required
-            self.debug("LDAP connect failed for user '{}' with error '{}'".format(username, e))
-            answer = False
-        
-        # Return the final result
-        return answer
     
     def ldap_link(self, username, password, mode='LOGIN'):
         
@@ -468,10 +363,42 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             port = getattr(settings, 'AD_LDAP_PORT', default_port)
             ldap_url = '{}://{}:{}'.format(proto, dns_name, port)
             
-            if PYTHON3:
-                answer = self.ldap3_link(ldap_url, use_ssl, nt4_domain, dns_name, username, password, mode)
+            answer = self.ldap3_link(ldap_url, use_ssl, nt4_domain, dns_name, username, password, mode)
+            # Debug
+            self.debug('ldap.initialize :: url: {}'.format(ldap_url))
+            
+            # Prepare library
+            ser = {}
+            ser['allowed_referral_hosts'] = [("*", True)]
+            con = {}
+            con['user'] = "{}\{}".format(nt4_domain,username)
+            con['password'] = password
+            con['raise_exceptions'] = True
+            con['authentication'] = ldap3.NTLM
+            if use_ssl:
+                certfile = settings.AD_CERT_FILE
+                self.debug('ldap.ssl :: Activated - Cert file: {}'.format(certfile))
+                con['auto_bind']  = ldap3.AUTO_BIND_TLS_BEFORE_BIND
+                ser['use_ssl'] = True
+                ser['tls'] = ldap3.Tls(validate=ssl.CERT_REQUIRED, version=ssl.PROTOCOL_TLSv1)
             else:
-                answer = self.ldap2_link(ldap_url, use_ssl, nt4_domain, dns_name, username, password, mode)
+                con['auto_bind'] = ldap3.AUTO_BIND_NO_TLS
+            try:
+                server = ldap3.Server(ldap_url, **ser)
+                self.debug('ldap.server :: {}'.format(server))
+                answer = ldap3.Connection(server, **con)
+                self.debug('ldap.connection :: {}'.format(answer))
+                #answer.open()
+                #answer.bind()
+                self.debug('ldap.connected :: Authorized')
+            except LDAPSocketOpenError as e:
+                # The access for this user has been denied, Debug it if required
+                self.debug("LDAP connect failed for url '{}' with error '{}'".format(ldap_url, e))
+                answer = False
+            except LDAPException as e:
+                # The access for this user has been denied, Debug it if required
+                self.debug("LDAP connect failed for user '{}' with error '{}'".format(username, e))
+                answer = False
             
         else:
             # The access for this user has been denied, Debug it if required
@@ -540,39 +467,35 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             
             # Search for the user
             self.debug('Search "{}"'.format(search_dn))
-            if PYTHON3:
-                # Search in LDAP
-                link.search(
-                    search_base=search_dn,
-                    # search_filter='(&(objectclass=person)(uid=admin))',
-                    search_filter='(sAMAccountName={})'.format(username),
-                    search_scope=ldap3.SUBTREE,
-                    # attributes=ldap3.ALL_ATTRIBUTES,
-                    attributes=search_fields,
-                    get_operational_attributes=True,
-                    size_limit=1,
-                )
+            # Search in LDAP
+            link.search(
+                search_base=search_dn,
+                # search_filter='(&(objectclass=person)(uid=admin))',
+                search_filter='(sAMAccountName={})'.format(username),
+                search_scope=ldap3.SUBTREE,
+                # attributes=ldap3.ALL_ATTRIBUTES,
+                attributes=search_fields,
+                get_operational_attributes=True,
+                size_limit=1,
+            )
+            
+            # Get all results
+            results = link.entries
+            
+            # Make sure we found only one result
+            if len(results) == 1:
                 
-                # Get all results
-                results = link.entries
+                # Get answer
+                result = results[0].__dict__
                 
-                # Make sure we found only one result
-                if len(results) == 1:
-                    
-                    # Get answer
-                    result = results[0].__dict__
-                    
-                elif len(results)>1:
-                    # Found serveral results
-                    self.debug("I found several results for your LDAP query")
-                    memberships = []
-                else:
-                    # Not found
-                    self.debug("I didn't find any matching result for your LDAP query")
-                    memberships = []
+            elif len(results)>1:
+                # Found serveral results
+                self.debug("I found several results for your LDAP query")
+                memberships = []
             else:
-                # Search in LDAP
-                result = link.search_ext_s(search_dn, ldap.SCOPE_SUBTREE, "sAMAccountName={}".format(username), search_fields)[0][1]
+                # Not found
+                self.debug("I didn't find any matching result for your LDAP query")
+                memberships = []
             
             # Validate that they are a member of review board group
             memberships = result.get('memberOf', [])
@@ -613,18 +536,10 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             for djfield in mapping.keys():
                 adfield = mapping[djfield]
                 if adfield in result:
-                    if PYTHON3:
-                        info[djfield] = result[adfield]
-                    else:
-                        info[djfield] = result[adfield][0]
+                    info[djfield] = result[adfield]
                     self.debug("{}={}".format(adfield, info[djfield]))
                 else:
                     self.debug("{}=-NONE-".format(adfield))
-            
-            # Unbind
-            if not PYTHON3:
-                self.debug('Unbind...')
-                link.unbind_s()
             
         else:
             # No link gotten

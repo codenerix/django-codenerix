@@ -266,28 +266,21 @@ def direct_to_template(request, template):
     return render(request, template)
 
 
-def model_inspect(obj, attributes=False):
+def model_inspect(obj):
         '''
         Analize itself looking for special information, right now it returns:
         - Application name
         - Model name
-        - Attributes (not returned by default)
         '''
         # Prepare the information object
         info = {}
-        # Attributes dict & keys
-        attributes_dict = dir(obj)
-        
-        # Get attributes list
-        if attributes:
-            info['attributes'] = attributes_dict
         if hasattr(obj, '_meta'):
             info['verbose_name'] = getattr(obj._meta, 'verbose_name', None)
         else:
             info['verbose_name'] = None
         
         # Get info from the object
-        if 'model' in attributes_dict and obj.model:
+        if hasattr(obj, 'model') and obj.model:
             namesp = str(obj.model)
         else:
             namesp = str(obj.__class__)

@@ -18,20 +18,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-
 from django.core.management.base import BaseCommand
 
 from codenerix.lib.debugger import Debugger
 
-# Find out if we are running python3
-python3=sys.version_info>=(3,)
-if python3:
+try:
     from subprocess import getstatusoutput
     pythoncmd="python3"
-else:
+except:
     from commands import getstatusoutput
-    pythoncmd="python"
+    pythoncmd="python2"
 
 class Command(BaseCommand, Debugger):
     
@@ -61,6 +57,7 @@ class Command(BaseCommand, Debugger):
             ("django-recaptcha",                "from captcha import client"),
             ("django-rosetta",                  "import rosetta"),
             ("jsonfield",                       "import jsonfield"),
+            ("ldap3",                           "import ldap3"),
             ("openpyxl==2.2.5",                 "import openpyxl"),
             ("paypalrestsdk",                   "import paypalrestsdk"),
             ("Pillow",                          "import PIL"),
@@ -68,18 +65,8 @@ class Command(BaseCommand, Debugger):
             ("python-dateutil",                 "import dateutil.parser"),
             ("scipy",                           "import scipy"),
             ("Unidecode",                       "from unidecode import unidecode"),
+            ("xhtml2pdf",                       "import xhtml2pdf", "git clone https://github.com/xhtml2pdf/xhtml2pdf - and, python2 setup.py install or python3 setup.py install - sudo apt-get remove python-setuptools - wget https://bootstrap.pypa.io/get-pip.py - sudo -H python get-pip.py - sudo -H pip install -U pip setuptools"),
             ]
-    
-    if python3:
-        imports+=[
-            ("ldap3",                           "import ldap3"),
-            ("xhtml2pdf",                       "import xhtml2pdf", "git clone https://github.com/xhtml2pdf/xhtml2pdf - and python3 setup.py install - sudo apt-get remove python-setuptools - wget https://bootstrap.pypa.io/get-pip.py - sudo -H python get-pip.py - sudo -H pip install -U pip setuptools"),
-        ]
-    else:
-        imports+=[
-            ("python-ldap",                     "import ldap"),
-            ("xhtml2pdf",                       "import xhtml2pdf"),
-        ]
     
     # Show this when the user types help
     help = "Do a touch to the project"
