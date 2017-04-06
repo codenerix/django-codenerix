@@ -84,7 +84,7 @@ you find any mistake or you have doubts about the explanations.
 
 You can get access to online documentation at `CODENERIX Documentation <http://doc.codenerix.com>`_.
 
-You can find all documentation in GITHUB at `django-codenerix-documentation project <https://github.com/centrologic/django-codenerix-documentation>`_ project.
+You can find all documentation in GITHUB at `django-codenerix-documentation <https://github.com/centrologic/django-codenerix-documentation>`_ project.
 
 
 ******************
