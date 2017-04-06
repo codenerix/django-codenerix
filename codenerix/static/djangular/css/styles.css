@@ -1,0 +1,28 @@
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+	display: none !important;
+}
+
+form .ng-invalid-bound.ng-pristine, form .ng-invalid.ng-dirty {
+	border-color: #e9322d;
+}
+form .ng-invalid-bound.ng-pristine:focus, form .ng-invalid.ng-dirty:focus {
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px #ce8483;
+}
+
+ul.djng-form-errors, ul.djng-field-errors {
+	display: inline-block;
+	list-style-type: none;
+	margin: 5px 0 0 0;
+	padding: 0;
+}
+ul.djng-form-errors li, ul.djng-field-errors li {
+	color: #e9322d;
+}
+ul.djng-field-errors li.invalid:before {
+	content: "\2716";
+	margin-right: 10px;
+}
+ul.djng-field-errors li.valid:before {
+	color: #00c900;
+	content: "\2714";
+}

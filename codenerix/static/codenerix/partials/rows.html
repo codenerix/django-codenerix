@@ -1,0 +1,39 @@
+<!--
+
+django-codenerix
+
+Copyright 2017 Centrologic Computational Logistic Center S.L.
+
+Project URL : http://www.codenerix.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-->
+<td class="text-center" ng-click="$event.stopPropagation()" ng-show="data.table.head.extra_fields.field_check!=None">
+   <input type="checkbox" name="checkline" value="{{ row.pk }}" ng-checked="CDNX_checkline_head" ng-model="CDNX_checkline[row.pk]" />
+</td>
+
+<td ng-repeat="column in data.table.head.columns" ng-switch="isList(row[column.id])">
+    <ul ng-switch-when="true" ng-init="key=getKey(column.id)">
+        <li ng-repeat="info in row[column.id]">{{info}}</li>
+    </ul>
+    <span ng-switch-when="false">
+        <span ng-bind-html='row[column.id]|codenerix:column.filter'>
+            {{row[column.id]|codenerix:column.filter}}
+        </span>
+    </span>
+</td>
+
+<td class="text-center" ng-click="$event.stopPropagation()" ng-show="data.table.head.extra_fields.field_delete">
+    <i ng-click="removerecord(row.pk, 'Delete items?');$event.stopPropagation()" class="glyphicon glyphicon-trash pointer"></i>
+</td>

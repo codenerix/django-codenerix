@@ -1,0 +1,76 @@
+{% extends "codenerix/form.html" %}
+{% load i18n %}
+{% comment %}
+
+django-codenerix
+
+Copyright 2017 Centrologic Computational Logistic Center S.L.
+
+Project URL : http://www.codenerix.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+{% endcomment %}
+
+{% block form_head %}
+    <div class="modal-header">
+        <h3 class="modal-title text-center">{% trans "Editing" %} {{form.get_name}}</h3>
+    </div>
+    <div class="row clearfix">
+    <div class="modal-body">
+        <div class="col-sm-12 col-md-12">
+            {% if form.errors %}
+                <div class="non-field-errors text-center">
+                    <alert type="danger">
+                        {% for err in form.errors.delay %}
+                            <p>{{ err|safe }}</p>
+                        {% endfor %}
+                    </alert>
+                </div>
+            {% else %}
+                {% if cannot_update %}
+                    <div class="non-field-errors text-center">
+                        <alert type="danger">
+                           *{{ cannot_update }}
+                        </alert>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+{% endblock %}
+{% block form_action %}{% endblock %}
+
+{% block buttons_top %}{% endblock %}
+{% block buttons_bottom %}{% endblock %}
+
+{% block form_bottom %}
+    </div>
+    </div>
+    <div class="modal-footer">
+        {% if linkdelete %}
+            {% if cannot_delete %}
+                <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
+                <button id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+            {% else %}
+                <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
+                <button id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+            {% endif %}
+        {% endif %}
+        {% if not cannot_update %}
+            <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
+            <button id="submit_save" ng-click="submit({{form.form_name}})" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+        {% endif %}
+        <label  class="sr-only"  for="cancel">{% trans "Cancel" %}</label>
+        <button class="btn btn-sm btn-danger" ng-click="cancel()">Cancel</button>
+    </div>
+{% endblock %}

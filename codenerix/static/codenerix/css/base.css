@@ -1,0 +1,425 @@
+/*
+ *
+ * django-codenerix
+ *
+ * Copyright 2017 Centrologic Computational Logistic Center S.L.
+ *
+ * Project URL : http://www.codenerix.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+#footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  /* EDITOR: Set the fixed height of the footer here, total height */
+  height: 50px;
+  background-color: #f2f2f2;
+  z-index: 99;
+}
+
+/* Dropdowns open on hover
+-------------------------------------------------- */
+@media only screen and (min-width : 768px) {
+    /* Make Navigation Toggle on Desktop Hover */
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+}
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+body > .container {
+  /* EDITOR: total height */
+  padding: 50px 15px 0;
+}
+.container .text-muted {
+  /* EDITORS: margin is counted 2 times, margin-top, margin-bottom*/
+  margin: 15px 0;
+}
+
+#footer > .container {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+code {
+  font-size: 80%;
+}
+
+
+/* Other common styles
+-------------------------------------------------- */
+.loading {
+    cursor:wait;
+}
+
+#loading-bar-spinner {
+    top: 30%;
+    left: 50%;
+    margin-left:-80px;
+}
+
+
+.bubblingG {
+    text-align: center;
+    width:160px;
+    height:100px;
+}
+.bubblingG span {
+    display: inline-block;
+    vertical-align: middle;
+    width: 10px;
+    height: 10px;
+    margin: 51px auto;
+    background: #000000;
+    -moz-border-radius: 100px;
+    -moz-animation: bubblingG 1.3s infinite alternate;
+    -webkit-border-radius: 100px;
+    -webkit-animation: bubblingG 1.3s infinite alternate;
+    -ms-border-radius: 100px;
+    -ms-animation: bubblingG 1.3s infinite alternate;
+    -o-border-radius: 100px;
+    -o-animation: bubblingG 1.3s infinite alternate;
+    border-radius: 100px;
+    animation: bubblingG 1.3s infinite alternate;
+}
+#bubblingG_1 {
+    -moz-animation-delay: 0s;
+    -webkit-animation-delay: 0s;
+    -ms-animation-delay: 0s;
+    -o-animation-delay: 0s;
+    animation-delay: 0s;
+}
+#bubblingG_2 {
+    -moz-animation-delay: 0.39s;
+    -webkit-animation-delay: 0.39s;
+    -ms-animation-delay: 0.39s;
+    -o-animation-delay: 0.39s;
+    animation-delay: 0.39s;
+}
+#bubblingG_3 {
+    -moz-animation-delay: 0.78s;
+    -webkit-animation-delay: 0.78s;
+    -ms-animation-delay: 0.78s;
+    -o-animation-delay: 0.78s;
+    animation-delay: 0.78s;
+}
+@-moz-keyframes bubblingG {
+    0% {
+        width: 10px;
+        height: 10px;
+        background-color:#000000;
+        -moz-transform: translateY(0);
+    }
+    100% {
+        width: 50px;
+        height: 50px;
+        background-color:#FFFFFF;
+        -moz-transform: translateY(-46px);
+    }
+}
+@-webkit-keyframes bubblingG {
+    0% {
+        width: 10px;
+        height: 10px;
+        background-color:#000000;
+        -webkit-transform: translateY(0);
+    }
+    100% {
+        width: 50px;
+        height: 50px;
+        background-color:#FFFFFF;
+        -webkit-transform: translateY(-46px);
+    }
+}
+@-ms-keyframes bubblingG {
+    0% {
+        width: 10px;
+        height: 10px;
+        background-color:#000000;
+        -ms-transform: translateY(0);
+    }
+    100% {
+        width: 50px;
+        height: 50px;
+        background-color:#FFFFFF;
+        -ms-transform: translateY(-46px);
+    }
+}
+@-o-keyframes bubblingG {
+    0% {
+        width: 10px;
+        height: 10px;
+        background-color:#000000;
+        -o-transform: translateY(0);
+    }
+    100% {
+        width: 50px;
+        height: 50px;
+        background-color:#FFFFFF;
+        -o-transform: translateY(-46px);
+    }
+}
+@keyframes bubblingG {
+    0% {
+        width: 10px;
+        height: 10px;
+        background-color:#000000;
+        transform: translateY(0);
+    }
+    
+    100% {
+        width: 50px;
+        height: 50px;
+        background-color:#FFFFFF;
+        transform: translateY(-46px);
+    }
+}
+
+.breadcrumb {
+    margin-bottom:0px;
+    background-color: #F8F8F8;
+    padding-top:6px;
+    padding-bottom:0px;
+}
+
+.breadcrumb_miniblock {
+    padding-top:14px;
+}
+
+.breadcrumb > .start:before {
+    color: #000;
+    content: "[ ";
+    padding: 0 5px;
+}
+.breadcrumb > .end:after {
+    color: #000;
+    content: " ]";
+    padding: 0 5px;
+}
+
+.breadcrumb a span {color: #184A78!important;}
+
+.bread {
+    padding-left:0px;
+    padding-right:0px;
+}
+
+.bread > .normalelementname {
+    margin-top:7px !important;
+}
+.bread > .elementname {
+    margin-top:14px;
+}
+
+.bread > .elementname:before {
+    color: #000;
+    content: "=> ";
+    padding: 0 5px;
+}
+.bread > .elementname:after {
+    color: #000;
+    content: " ";
+    padding: 0 5px;
+}
+
+.select2-container {
+    height:30px !important;
+    padding:0px !important;
+}
+
+.select2-choice {
+    border: 0px !important;
+    border-radius: 0px !important;
+    height: 28px !important;
+}
+
+.select2-arrow {
+    border-radius: 0px !important;
+}
+
+.select2-drop {
+    border-color: -moz-use-text-color #aaa #aaa;
+}
+
+.select2_nofk > .select2-choice {
+    border-radius: 4px !important;
+}
+
+.select2_nofk > .select2-choice > .select2-arrow {
+    border-radius: 0 4px 4px 0;
+}
+
+.select_add a {
+    color: #555;
+}
+
+.select_add:hover, .select_add:focus, .select_add:active, .select_add:active.open {
+    color:#5BC0DE;
+    background-color: #555;
+    cursor:pointer;
+}
+
+input.ng-invalid.ng-pristine,
+form div.select2-container.ng-invalid.ng-pristine, form[novalidate] div.select2-container.ng-invalid {
+    border-color: #e9322d;
+}
+
+.active .badge-white {
+    background-color: #fff;
+    color: #015a84;
+}
+
+.notifyjs-bootstrap_id-base {
+    cursor:pointer;
+    font-size: 10px;
+}
+
+.multiform_top {
+    margin-top: 0px !important;
+    margin-bottom: -45px;
+}
+
+
+.bliking {
+    animation: blinker 0.7s cubic-bezier(.9, 0, 1, 1) infinite alternate;  
+}
+@keyframes blinker {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.connection-error-mini {
+    padding: 9px 10px;
+}
+
+.popover {
+    color:#000000;
+}
+
+.pointer {
+    cursor:pointer;
+}
+
+.recortar_texto{
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 260px;
+    overflow:hidden; 
+}
+
+
+/* color blue */
+.pagination > .active > a, 
+.pagination > .active > span, 
+.pagination > .active > a:hover, 
+.pagination > .active > span:hover, 
+.pagination > .active > a:focus, 
+.pagination > .active > span:focus,
+.btn-primary{
+    background-color: #015a84;
+    border-color: #015a84;
+}
+
+.pagination > li > a, 
+.pagination > li > span,
+a
+{
+    color: #015a84;
+}
+
+
+
+/* para quitar el borde rojo de los dynamicselect */
+form .ng-invalid-bound.ng-pristine, form .ng-invalid.ng-dirty{
+    border-color: auto;
+    border-width: 0px;
+}
+
+
+.ta-editor {
+    min-height: 300px;
+    height: auto;
+    overflow: auto;
+    font-family: inherit;
+    font-size: 100%;
+}
+
+.ui-select-multiple{
+    min-width: 75px;
+    height: 30px !important;
+}
+
+
+
+ul.djng-field-errors li.invalid{
+    font-size: 0px;
+    cursor: help;
+}
+ul.djng-field-errors li.invalid::before{
+    font-size: 14px !important;
+}
+ul.djng-field-errors li.invalid:hover{
+    font-size: 14px !important;
+    background-color:#FFFFFF;
+}
+
+
+.codenerix_invalid >input, 
+.codenerix_invalid >div {
+    border: 1px solid #f00;
+    border-radius: 4px;
+    padding-top: 1px;
+}
+.codenerix_invalid > .ui-select-container.ui-select-bootstrap.dropdown{
+    padding-bottom: 1px;
+}
+
+
+.input-group .form-control:last-child, 
+.input-group-addon:last-child, 
+.input-group-btn:last-child > .btn, 
+.input-group-btn:last-child > .btn-group > .btn, 
+.input-group-btn:last-child > .dropdown-toggle, 
+.input-group-btn:first-child > .btn:not(:first-child), 
+.input-group-btn:first-child > .btn-group:not(:first-child) > .btn{
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+}
+
+.input-group-addon.select_add{
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    height: 34px;
+    position: relative;
+    top: -1px;
+}
+
+.md-chips ._md-chip-input-container{
+    width: 40%;
+}
+
+.md-chips:not(.md-readonly){
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+}

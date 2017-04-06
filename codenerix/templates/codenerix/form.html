@@ -1,0 +1,566 @@
+{% load i18n %}
+{% load codenerix_lists %}
+{% load codenerix_common %}
+{% comment %}
+
+django-codenerix
+
+Copyright 2017 Centrologic Computational Logistic Center S.L.
+
+Project URL : http://www.codenerix.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+{% endcomment %}
+
+{{html_head}}
+
+{% block form_head %}{% endblock %}
+{% with langcode=LANGUAGE_CODE|default:"en" %}
+{% with formlist=forms|getforms:form|langforms:langcode %}
+{% verbatim %}
+<script type="text/ng-template" id="info">
+    <div>
+        <div class="triangle" style="display:none"></div>
+        <div class="ns-popover-tooltip">
+            {{text}}
+        </div>
+    </div>
+</script>
+{% endverbatim %}
+<form
+    name="{{form.form_name}}"
+    data-custom-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" 
+    class="form-horizontal"
+    role="form"
+    autocomplete="off"
+    ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'">
+    <div 
+    {% if form.attributes.ngcontroller %}
+    ng-controller="{{ form.attributes.ngcontroller }}"
+    {% endif %}
+    >
+        {% block extra_form_top%}{% endblock %}
+        <input type="text" id="id_elementid" name="elementid" ng-model="elementid" ng-value="elementid" style="display:none" />
+        <input type="text" id="__pk__" name="__pk__" ng-model="__pk__" ng-value="{{object.pk}}" value="{{object.pk}}" style="display:none" />
+        {% if show_internal_name and formlist|len <= 1 %}
+            <div class="col-sm-12 col-md-12 internal-name">
+                <h4>{% block form_action %}{% trans "Editing" %}{% endblock %} {{form.get_name}}</h4>
+            </div>
+        {% endif %}
+        
+        {# BUTTONS at the top #}
+        <div class="col-sm-12 col-md-12 internal-buttons-top {%if formlist|len > 1 %} multiform_top{%endif%}">
+            <div class="form-group text-center">
+                {% block buttons_top %}
+                {% if not cannot_update %}
+                    <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
+                    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+                    <label  class="sr-only"  for="submit_savehere">{% trans "Save here" %}</label>
+                    <button id="submit_savehere" ng-click="submit({{form.form_name}},'here')" class="btn green btn-sm" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
+                    <label  class="sr-only"  for="submit_reload">{% trans "Reload" %}</label>
+                    <button id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
+                {% endif %}
+                {% if linkback %}
+                    {% if show_details %}
+                        <label  class="sr-only"  for="submit_details">{% trans "Go back" %}</label>
+                        <button id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                    {% else %}
+                        <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
+                        <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                    {% endif %}
+                {% endif %}
+                {% if linkdelete %}
+                    {% if cannot_delete %}
+                        <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
+                        <button id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    {% else %}
+                        <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
+                        <button id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    {% endif %}
+                {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+
+        {% for formobj in formlist %}
+            {% if formlist|len > 1 and formobj != form and forloop.counter0 == open_tabs %}
+                {# If this form has several forms, work with tabs #}
+                <div><uib-tabset>
+            {% endif %}
+            {% if formlist|len > 1 and formobj != form %}
+                <uib-tab>
+                    <uib-tab-heading>
+                        {{formobj.get_name}}
+                        {% if formobj.errors %}
+                        <i class="text-danger glyphicon glyphicon-warning-sign"></i>
+                        {% endif %}
+                    </uib-tab-heading>
+            {% endif %}
+            {% if forloop.counter0 == position_form_default %}
+            <br />
+            <br />
+            <br />
+            <br />
+            {% endif %}
+
+            <div class="col-sm-12 col-md-12">
+                {% if formobj.get_errors %}
+                    <br />
+                    <br />
+                    <br />
+                    <div class="non-field-errors text-center">
+                        <div class="alert alert-danger">
+                            {% for err in formobj.get_errors %}
+                                <p>{{ err|safe }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    {% if formobj.errors %}
+                        <div class="non-field-errors text-center">
+                            <div class="alert alert-danger">
+                            {% for err in formobj.errors.items %}
+                                <p>{{err.1|safe}}</p>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if cannot_update %}
+                        <div class="non-field-errors text-center">
+                            <div class="alert alert-warning">
+                               * {{ cannot_update }}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            {% with column_counter0=1|column_counter %}
+                {% for group in formobj.get_groups %}
+                    {% if column_counter0|add_columns:group.columns %}
+                        <div class="row"></div>
+                    {% endif %}
+                    <div class="col-sm-12 col-md-{{group.columns}}">
+                        {% if group.name %}
+                        <div class="panel panel-default">
+                            <div class="panel-heading"{{group|headstyle}}><strong>{{group.name}}</strong></div>
+                            {% if group.html_helper_pre %}
+                                <div class="alert alert-info">
+                                {{group.html_helper_pre|safe}}
+                                </div>
+                            {% endif %}
+                            <div class="panel-body">
+                        {% endif %}
+                            <div class="form-group">
+                                {% with column_counter1=1|column_counter %}
+                                    {% for field in group.fields %}
+                                        {% with input=field.input %}
+                                            {% if input %}
+                                                {% if column_counter1|add_columns:field.columns %}
+                                                    </div><div class="form-group">
+                                                {% endif %}
+                                                {% if not input.field.label %}
+                                                    <div ng-class="{{form.form_name|invalidator:input}}">
+                                                        {{input}}
+                                                    </div>
+                                                {% else %}
+                                                {# IF INPUT: INI ============================================================================= {{{1 #}
+                                                {% with zi=forloop.revcounter|stringformat:"s" %}
+                                                {% with zindex="style=z-index:"|add:zi %}
+                                                {% with attrs=input|widgetize|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:field.extra|lockattr:cannot_update %}
+                                                <div class="col-sm-{{field.columns}}" ng-class="{{form.form_name|invalidator:input}}" {{field.extra_div|join_list:" "}}>
+                                                    {# FIELD: INI {{{2 #}
+
+                                                    {% if field.html_helper_pre %}
+                                                        {{field.html_helper_pre|safe}}
+                                                    {% endif %}
+                                                    <label for="{{input.id_for_label}}"{{field|headstyle}}>
+                                                    {# === INPUT INLINE WITH LABEL #}
+                                                    {% if field.inline %}
+                                                        {{input.errors|unlist|safe}}
+                                                        {% if cannot_update %}
+                                                            {{input|setattrs:attrs|safe}}
+                                                        {% else %}
+                                                            {% if input|foreignkey:no_render_as_foreign %}
+                                                                {# INPUT IS FOREIGN KEY: INI {{{3 #}
+                                                                {% if hide_foreignkey_button %}
+                                                                    {{input|setattrs:attrs|safe}}
+                                                                {% else %}
+                                                                    <div class="input-group input-group-sm">
+                                                                        {{input|setattrs:attrs|safe}}
+                                                                        <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
+                                                                            <div class="glyphicon glyphicon-plus-sign" ng-hide="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
+                                                                            <div class="glyphicon glyphicon-pencil" ng-show="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endif %}
+                                                                {# INPUT IS FOREIGN KEY: END }}}3 #}
+                                                            {% else %}
+                                                                {% if input|istype:"datetime" %}
+                                                                    {# INPUT IS DATETIME:INI {{{3 #}
+                                                                    {% with dateinfo=input|datewidget:langcode %}
+                                                                    <div class="dropdown">
+                                                                        <div id="date_{{input.html_name}}" class="input-group date">
+                                                                            {{input|setattrs:attrs|safe}}
+                                                                            <span class="input-group-addon"><i class="glyphicon glyphicon-{{dateinfo.icon}}"></i></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <script type="text/javascript">
+                                                                        {# Documentation: http://www.malot.fr/bootstrap-datetimepicker/ #}
+                                                                        $("#date_{{input.html_name}}").datetimepicker({
+                                                                            format: "{{dateinfo.format}}",
+                                                                            autoclose: true,
+                                                                            language:"{{LANGUAGE_CODE|default:"en"}}",
+                                                                            todayBtn: true,
+                                                                            weekStart:1,
+                                                                            todayHighlight:true,
+                                                                            pickerPosition:'bottom-left',
+                                                                            keyboardNavigation:false,
+                                                                            startView:{{dateinfo.startview}},
+                                                                            minView:{{dateinfo.minview}},
+                                                                            maxView:{{dateinfo.maxview}},
+                                                                            minuteStep: 15,
+                                                                        });
+                                                                    </script> 
+                                                                    {% endwith %}
+                                                                    {# INPUT IS DATETIME: END }}}3 #}
+                                                                {% else %}
+                                                                    {% if input|istype:"color" %}
+                                                                        {# INPUT IS COLOR: INI {{{3 #}
+                                                                        <div class="input-group">
+                                                                            {% with attrs=attrs|addattr:"colorpicker" %}
+                                                                                {{input|setattrs:attrs|safe}}
+                                                                            {% endwith %}
+                                                                            <span class="input-group-addon" ng-model="{{input|ngmodel}}" colorpicker style="width:50%;background-color:{%verbatim%}{{color}}{%endverbatim%}"></span>
+                                                                        </div>
+                                                                        {# INPUT IS COLOR: END }}}3 #}
+                                                                    {% else %}
+                                                                        {# NORMAL INPUT: INI {{{3 #}
+                                                                            {{input|setattrs:attrs|safe}}
+                                                                        {# NORMAL INPUT: END }}}3 #}
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        {# FIELD: END }}}2 #}
+                                                    {% endif %}
+                                                    {# === END INPUT INLINE WITH LABEL #}
+                                                    {%if field.label%}{{field.label}}{%else%}&nbsp;{%endif%}
+                                                    {%if input.help_text %}
+                                                        <label class="glyphicon glyphicon-question-sign" 
+                                                            ng-init="text='{{field.input.help_text}}'"
+                                                            ns-popover
+                                                            ns-popover-template="info"
+                                                            ns-popover-theme="ns-popover-tooltip-theme"
+                                                            ns-popover-trigger="mouseenter"
+                                                            ns-popover-placement="right"
+                                                            ns-popover-timeout="0"></label>
+                                                    {% endif %}
+                                                    </label>
+                                                    {% if not field.inline %}
+                                                        {{input.errors|unlist|safe}}
+                                                        {% if cannot_update %}
+                                                            {{input|setattrs:attrs|safe}}
+                                                        {% else %}
+                                                            {% if input|foreignkey:no_render_as_foreign %}
+                                                                {# INPUT IS FOREIGN KEY: INI {{{3 #}
+                                                                {% if hide_foreignkey_button %}
+                                                                    {{input|setattrs:attrs|safe}}
+                                                                {% else %}
+                                                                    <div class="input-group input-group-sm">
+                                                                        {{input|setattrs:attrs|safe}}
+                                                                        <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
+                                                                            <div class="glyphicon glyphicon-plus-sign" ng-hide="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
+                                                                            <div class="glyphicon glyphicon-pencil" ng-show="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endif %}
+                                                                {# INPUT IS FOREIGN KEY: END }}}3 #}
+                                                            {% else %}
+                                                                {% if input|istype:"datetime" %}
+                                                                    {# INPUT IS DATETIME:INI {{{3 #}
+                                                                    {% with dateinfo=input|datewidget:langcode %}
+                                                                    <div class="dropdown">
+                                                                        <div id="date_{{input.html_name}}" class="input-group date">
+                                                                            {{input|setattrs:attrs|safe}}
+                                                                            <span class="input-group-addon"><i class="glyphicon glyphicon-{{dateinfo.icon}}"></i></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <script type="text/javascript">
+                                                                        {# Documentation: http://www.malot.fr/bootstrap-datetimepicker/ #}
+                                                                        $("#date_{{input.html_name}}").datetimepicker({
+                                                                            format: "{{dateinfo.format}}",
+                                                                            autoclose: true,
+                                                                            language:"{{LANGUAGE_CODE|default:"en"}}",
+                                                                            todayBtn: true,
+                                                                            weekStart:1,
+                                                                            todayHighlight:true,
+                                                                            pickerPosition:'bottom-left',
+                                                                            keyboardNavigation:false,
+                                                                            startView:{{dateinfo.startview}},
+                                                                            minView:{{dateinfo.minview}},
+                                                                            maxView:{{dateinfo.maxview}},
+                                                                            minuteStep: 15,
+                                                                        });
+                                                                    </script> 
+                                                                    {% endwith %}
+                                                                    {# INPUT IS DATETIME: END }}}3 #}
+                                                                {% else %}
+                                                                    {% if input|istype:"color" %}
+                                                                        {# INPUT IS COLOR: INI {{{3 #}
+                                                                        <div class="input-group">
+                                                                            {% with attrs=attrs|addattr:"colorpicker" %}
+                                                                                {{input|setattrs:attrs|safe}}
+                                                                            {% endwith %}
+                                                                            <span class="input-group-addon" ng-model="{{input|ngmodel}}" colorpicker style="width:50%;background-color:{%verbatim%}{{color}}{%endverbatim%}"></span>
+                                                                        </div>
+                                                                        {# INPUT IS COLOR: END }}}3 #}
+                                                                    {% else %}
+                                                                        {# NORMAL INPUT: INI {{{3 #}
+                                                                            {{input|setattrs:attrs|safe}}
+                                                                        {# NORMAL INPUT: END }}}3 #}
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        {# FIELD: END }}}2 #}
+                                                    {% endif %}
+                                                    {% if field.html_helper_post %}
+                                                        {{field.html_helper_post|safe}}
+                                                    {% endif %}
+                                                    {# FIELD: END }}}2 #}
+                                                </div>
+                                                {% endwith %}
+                                                {% endwith %}
+                                                {% endwith %}
+                                                {# IF INPUT: END ============================================================================= }}} 1#}
+                                                {% endif %}
+                                            {% else %}
+                                                {# IF NOT INPUT: INI ========================================================================= {{{1 #}
+                                                </div>
+                                                <div class="col-sm-12 col-md-{{field.columns}}">
+
+                                                    {% if field.html_helper_pre %}
+                                                        {{field.html_helper_pre|safe}}
+                                                    {% endif %}
+
+                                                    {% if field.name %}
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-heading"{{field|headstyle}}><strong>{{field.name}}</strong></div>
+                                                        <div class="panel-body">
+                                                    {% endif %}
+                                                        <div class="form-group">
+                                                            {% with column_counter2=1|column_counter %}
+                                                                {% for subfield in field.fields %}
+                                                                    {% with input=subfield.input %}
+                                                                        {% if column_counter2|add_columns:subfield.columns %}
+                                                                            </div><div class="form-group">
+                                                                        {% endif %}
+                                                                        {% if not input.field.label %}
+                                                                            <div ng-class="{{form.form_name|invalidator:input}}">
+                                                                                {{input}}
+                                                                            </div>
+                                                                        {% else %}
+                                                                            {# INPUT PROCESSOR: INI {{{2 #}
+                                                                            {% with zi=forloop.revcounter|stringformat:"s" %}
+                                                                            {% with zindex="style=z-index:"|add:zi %}
+{% with attrs=input|widgetize|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:subfield.extra|lockattr:cannot_update %}
+                                                                            <div class="col-sm-{{subfield.columns}}" ng-class="{{form.form_name|invalidator:input}}">
+                                                                                {# FIELD: INI {{{3 #}
+                                                                                <label for="{{input.id_for_label}}"{{field|headstyle}}>{%if subfield.label%}{{subfield.label}}{%else%}&nbsp;{%endif%}
+                                                                                {%if input.help_text %}
+                                                                                    <label class="glyphicon glyphicon-question-sign" 
+                                                                                        ng-init="text='{{field.input.help_text}}'"
+                                                                                        ns-popover
+                                                                                        ns-popover-template="info"
+                                                                                        ns-popover-theme="ns-popover-tooltip-theme"
+                                                                                        ns-popover-trigger="mouseenter"
+                                                                                        ns-popover-placement="right"
+                                                                                        ns-popover-timeout="0"></label>
+                                                                                {% endif %}
+                                                                                </label>
+                                                                                {{input.errors|unlist|safe}}
+
+                                                                                {% if cannot_update %}
+                                                                                    {{input|setattrs:attrs|safe}}
+                                                                                {% else %}
+                                                                                    {% if input|foreignkey:no_render_as_foreign %}
+                                                                                        {# INPUT IS FOREIGN KEY: INI {{{4 #}
+                                                                                        {% if hide_foreignkey_button %}
+                                                                                            {{input|setattrs:attrs|safe}}
+                                                                                        {% else %}
+                                                                                            <div class="input-group input-group-sm">
+                                                                                                {{input|setattrs:attrs|safe}}
+                                                                                                <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
+                                                                                                    <div class="glyphicon glyphicon-plus-sign" ng-hide="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
+                                                                                                    <div class="glyphicon glyphicon-pencil" ng-show="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        {% endif %}
+                                                                                        {# INPUT IS FOREIGN KEY: INI }}}4 #}
+                                                                                    {% else %}
+                                                                                        {% if input|istype:"datetime" %}
+                                                                                            {# INPUT IS DATETIME:INI {{{4 #}
+                                                                                            {% with dateinfo=input|datewidget:langcode %}
+                                                                                            <div class="dropdown">
+                                                                                                <div id="date_{{input.html_name}}" class="input-group date">
+                                                                                                    {{input|setattrs:attrs|safe}}
+                                                                                                    <span class="input-group-addon"><i class="glyphicon glyphicon-{{dateinfo.icon}}"></i></span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <script type="text/javascript">
+                                                                                                {# Documentation: http://www.malot.fr/bootstrap-datetimepicker/ #}
+                                                                                                $("#date_{{input.html_name}}").datetimepicker({
+                                                                                                    format: "{{dateinfo.format}}",
+                                                                                                    autoclose: true,
+                                                                                                    language:"{{LANGUAGE_CODE|default:"en"}}",
+                                                                                                    todayBtn: true,
+                                                                                                    weekStart:1,
+                                                                                                    todayHighlight:true,
+                                                                                                    pickerPosition:'bottom-left',
+                                                                                                    keyboardNavigation:false,
+                                                                                                    startView:{{dateinfo.startview}},
+                                                                                                    minView:{{dateinfo.minview}},
+                                                                                                    maxView:{{dateinfo.maxview}},
+                                                                                                    minuteStep: 15,
+                                                                                                });
+                                                                                            </script> 
+                                                                                            {% endwith %}
+                                                                                            {# INPUT IS DATETIME: END }}}4 #}
+                                                                                        {% else %}
+                                                                                            {% if input|istype:"color" %}
+                                                                                                {# INPUT IS COLOR: INI {{{4 #}
+                                                                                                <div class="input-group">
+                                                                                                    {% with attrs=attrs|addattr:"colorpicker" %}
+                                                                                                        {{input|setattrs:attrs|safe}}
+                                                                                                    {% endwith %}
+                                                                                                    <span class="input-group-addon" ng-model="{{input|ngmodel}}" colorpicker style="width:50%;background-color:{%verbatim%}{{color}}{%endverbatim%}"></span>
+                                                                                                </div>
+                                                                                                {# INPUT IS COLOR: END }}}4 #}
+                                                                                            {% else %}
+                                                                                                {# NORMAL INPUT: INI {{{4 #}
+                                                                                                {{input|setattrs:attrs|safe}}
+                                                                                                {# NORMAL INPUT: END }}}4 #}
+                                                                                            {% endif %}
+                                                                                        {% endif %}
+                                                                                    {% endif %}
+                                                                                {% endif %}
+                                                                                {# FIELD: END }}}3 #}
+                                                                            </div>
+                                                                            {# INPUT PROCESSOR: END }}}2 #}
+                                                                            {% endwith %}
+                                                                            {% endwith %}
+                                                                            {% endwith %}
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                {% endfor %}
+                                                            {% endwith %}
+                                                        </div>
+                                                    {% if field.name %}
+                                                        </div>
+
+                                                    {% if field.html_helper_post %}
+                                                        {{field.html_helper_post|safe}}
+                                                    {% endif %}
+                                                    </div>
+                                                    {% endif %}
+                                                {# IF NOT INPUT: END ========================================================================= }}}1 #}
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                        {% if group.name %}
+                            </div>
+                        {% if group.html_helper_pre %}
+                            <div class="panel-footer">
+                            {{group.html_helper_pre|safe}}
+                            </div>
+                        {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+            
+
+            <div class="col-sm-12 col-md-12">
+                {% if formobj.get_errors %}
+                    <div class="non-field-errors text-center">
+                        <div class="alert alert-danger">
+                            {% for err in formobj.get_errors %}
+                                <p>{{ err|safe }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+
+                    {% if cannot_update %}
+                        <div class="non-field-errors text-center">
+                            <div class="alert alert-warning">
+                               * {{ cannot_update }}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            {% if formlist|len > 1 and formobj != form %}
+                </uib-tab>
+            {% endif %}
+            {% if formlist|len > 1 and formobj != form and forloop.counter == formlist|len %}
+            </uib-tabset></div>
+            {% endif %}
+        {% endfor %}
+        
+        {# BUTTONS at the bottom #}
+        <div class="col-sm-12 col-md-12 internal-buttons-botton {%if formlist|len > 1 %} multiform_top{%endif%}">
+            <div class="form-group text-center">
+                {% block buttons_bottom %}
+                {% if not cannot_update %}
+                    <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
+                    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+                    <label  class="sr-only"  for="submit_savehere">{% trans "Save here" %}</label>
+                    <button id="submit_savehere" ng-click="submit({{form.form_name}},'here')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
+                    <label  class="sr-only"  for="submit_reload">{% trans "Reload" %}</label>
+                    <button id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
+                {% endif %}
+                {% if linkback %}
+                    {% if show_details %}
+                        <label  class="sr-only"  for="submit_details">{% trans "Go back" %}</label>
+                        <button id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                    {% else %}
+                        <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
+                        <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                    {% endif %}
+                {% endif %}
+                {% if linkdelete %}
+                    {% if cannot_delete %}
+                        <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
+                        <button id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    {% else %}
+                        <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
+                        <button id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    {% endif %}
+                {% endif %}
+                {% endblock %}
+            </div>
+        </div>
+        {% block extra_form_bottom%}{% endblock %}
+</div>        
+</form>
+{% endwith %}
+{% endwith %}
+{% block form_bottom %}{% endblock %}
+
