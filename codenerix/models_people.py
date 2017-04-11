@@ -236,5 +236,5 @@ class GenRole(object):
         person = None
         for field in self._meta.related_objects:
             if GenPerson in field.related_model.__mro__:
-                person = getattr(self, field.name)
+                person = getattr(self, field.name, None)
         return person
