@@ -518,7 +518,7 @@ class FileAngularInput(forms.widgets.FileInput):
                 ext="dat"
 
             # Prepare temporal file in memory
-            f = StringIO.StringIO()
+            f = StringIO()
             f.write(base64.b64decode(field[u'base64']))
             f.name="{0}.{1}".format(hexname,ext)
             f.original_name=field['filename']
