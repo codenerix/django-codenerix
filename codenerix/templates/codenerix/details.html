@@ -118,9 +118,14 @@ limitations under the License.
                     </div>
                 </div>
             {% else %}
-                
-                <label>{{item.name}}:</label>{{item.value|nicenull|TrueFalse|safe}}<br>
-                
+                <div class="col-sm-12 col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <label>{{item.name}}:</label>
+                            {{item.value|nicenull|TrueFalse|safe}}
+                        </div>
+                    </div>
+                </div>
             {% endif %}
         {% endfor %}
     {% endblock %}
