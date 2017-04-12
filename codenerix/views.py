@@ -1893,31 +1893,32 @@ class GenList(GenBase, ListView):
                     page_number=total_pages
 
         # Build the list of page counters allowed
-        choice=[]
-        c=self.default_rows_per_page
-        chk=1
+        choice = {}
+        c = self.default_rows_per_page
+        chk = 1
         while total_registers>=c:
-            choice.append(c)
-            if chk==1:
+            choice[c] = c
+            if chk == 1:
                 # From 5 to 10
-                c=c*2
+                c = c * 2
                 # Next level
-                chk=2
-            elif chk==2:
+                chk = 2
+            elif chk == 2:
                 # From 10 to 25 (10*2+10/2)
-                c=c*2+c/2
+                c = c * 2 + c / 2
                 # Next level
-                chk=3
-            elif chk==3:
+                chk = 3
+            elif chk == 3:
                 # From 25 to 50
-                c*=2
-                chk=1
+                c *= 2
+                chk = 1
             # Don't give a too long choice
-            if c>2000: break
+            if c > 2000:
+                break
 
         # Add all choice in any case
         if settings.ALL_PAGESALLOWED:
-            choice.append(_('All'))
+            choice['All'] = _('All')
 
 
         # Save the pagination in the structure
@@ -2061,7 +2062,7 @@ class GenList(GenBase, ListView):
         # Return new context
         return context
 
-    def __jcontext_metadata(self,context):
+    def __jcontext_metadata(self, context):
         # Initialiaze
         a = {}
 
@@ -2091,38 +2092,39 @@ class GenList(GenBase, ListView):
             a['version_api'] = getattr(settings, "VERSION_API", None)
 
         if hasattr(self, 'gentrans'):
-            gentranslate=self.gentrans.copy()
+            gentranslate = self.gentrans.copy()
             gentranslate.update(self.gentranslate)
         else:
-            gentranslate=self.gentranslate
+            gentranslate = self.gentranslate
 
-        a["gentranslate"]={}
+        a["gentranslate"] = {}
         for key in gentranslate:
             try:
                 a["gentranslate"][key] = unicode(gentranslate[key])
             except NameError:
                 a["gentranslate"][key] = gentranslate[key]
 
-        if type(context['rowsperpage'])==int:
-            a['rowsperpage']=context['rowsperpage']
+        if type(context['rowsperpage']) == int:
+            a['rowsperpage'] = context['rowsperpage']
         else:
-            a['rowsperpage']=gettext(context['rowsperpage'])
-        a['rowsperpageallowed']=context['rowsperpageallowed']
-        a['row_total']=context['total_registers']
+            a['rowsperpage'] = gettext(context['rowsperpage'])
+        a['rowsperpageallowed'] = context['rowsperpageallowed']
+        a['row_total'] = context['total_registers']
         if a['row_total']:
-            a['row_first']=context['start_register']
-            a['row_last']=context['end_register']
+            a['row_first'] = context['start_register']
+            a['row_last'] = context['end_register']
 
         # Adapter
         if settings.ALL_PAGESALLOWED:
-            a['rowsperpageallowed'][-1]=gettext(a['rowsperpageallowed'][-1])
+            translate_key = a['rowsperpageallowed'].keys()[-1]
+            a['rowsperpageallowed'][translate_key] = a['rowsperpageallowed'][translate_key]
 
         if 'printer' in context['getval']:
             a['printer'] = context['getval']['printer']
         # Return answer
         return a
 
-    def __jcontext_filter(self,context):
+    def __jcontext_filter(self, context):
         # Initialiaze
         a={}
 

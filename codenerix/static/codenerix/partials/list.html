@@ -27,15 +27,15 @@ limitations under the License.
                     ng-mouseover="pagination_flag=true"
                     ng-mouseleave="pagination_flag=false"
                     ng-init="pagination_flag=false">
-                    <div class="pull-right" ng-if="!data.meta.vtable && data.meta.row_total && data.meta.rowsperpageallowed.length"><!-- ROWS {{{1 -->
+                    <div class="pull-right" ng-if="!data.meta.vtable && data.meta.row_total && data.meta.rowsperpageallowed"><!-- ROWS {{{1 -->
                         <div class='center-block'>
                             <ul class="pagination pagination-sm">
                                 <li><a href="#" popover-placement="top" popover="{{data.meta.gentranslate.RowsPerPage}}" popover-trigger="mouseenter"><span class="glyphicon glyphicon-th-list"></span></a></li>
                                 <li class="choice"
-                                    ng-repeat='rowsperpage in data.meta.rowsperpageallowed'
+                                    ng-repeat='(rowsperpage, label) in data.meta.rowsperpageallowed'
                                     ng-class="{active:rowsperpage==data.meta.rowsperpage || data.meta.rowsperpageallowed.length==1}"
                                     ng-click="rows_change(rowsperpage)"
-                                    ng-hide="(!pagination_flag) && (rowsperpage!=data.meta.rowsperpage) && (data.meta.rowsperpageallowed.length!=1)"><a>{{rowsperpage}}</a></li>
+                                    ng-hide="(!pagination_flag) && (rowsperpage!=data.meta.rowsperpage) && (data.meta.rowsperpageallowed.length!=1)"><a>{{label}}</a></li>
                                 <li class="choice" ng-hide="(pagination_flag) || (data.meta.rowsperpageallowed.length==1)"><a>...</a></li>
                             </ul>
                         </div>
