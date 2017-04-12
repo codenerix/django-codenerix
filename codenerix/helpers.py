@@ -138,7 +138,7 @@ def nameunify(name, url=False):
     name = smart_text(name)
     
     # Get it on lower
-    namelow = unidecode(name).lower()
+    namelow = unidecode(name).lower().strip(' \t\n\r')
     
     # Define valid characters
     allowed_characters = 'abcdefghijklmnopqrstuvwxyz0123456789_-'
@@ -153,6 +153,8 @@ def nameunify(name, url=False):
         if c in allowed_characters:
             result += c
     
+    if result[-1] in ("-", "_"):
+        result = nameunify(result[0:-1], url)
     # Return the cleaned result
     return result
 
