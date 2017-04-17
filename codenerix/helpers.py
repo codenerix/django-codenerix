@@ -490,15 +490,3 @@ def remove_getdisplay(field_name):
     if str_ini == field_name[0:len(str_ini)] and str_end == field_name[(-1) * len(str_end):]:
         field_name = field_name[len(str_ini):(-1) * len(str_end)]
     return field_name
-
-
-def get_language(request=None):
-    lang = None
-    if request:
-        for x in settings.LANGUAGES:
-            if x[0] == request.LANGUAGE_CODE:
-                lang = request.LANGUAGE_CODE
-
-    if lang is None:
-        lang = settings.LANGUAGES[0][0]
-    return lang.lower()
