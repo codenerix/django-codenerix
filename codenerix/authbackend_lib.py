@@ -362,9 +362,6 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 proto = 'ldap'
             port = getattr(settings, 'AD_LDAP_PORT', default_port)
             ldap_url = '{}://{}:{}'.format(proto, dns_name, port)
-            
-            answer = self.ldap3_link(ldap_url, use_ssl, nt4_domain, dns_name, username, password, mode)
-            # Debug
             self.debug('ldap.initialize :: url: {}'.format(ldap_url))
             
             # Prepare library
