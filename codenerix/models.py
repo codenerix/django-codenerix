@@ -353,7 +353,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             # comparison attributes
             # for key in self._meta.get_fields():
             aux = None
-            list_fields = self._meta.get_fields()
+            list_fields = [x.name for x in self._meta.get_fields()]
             for ffield in self._meta.get_fields():
                 key = ffield.name
                 # exclude manytomany
