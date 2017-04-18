@@ -381,8 +381,10 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             else:
                 con['auto_bind'] = ldap3.AUTO_BIND_NO_TLS
             try:
+                #self.debug('ldap.server params :: {}'.format(ser))
                 server = ldap3.Server(ldap_url, **ser)
                 self.debug('ldap.server :: {}'.format(server))
+                #self.debug('ldap.connection params :: {}'.format(con))
                 answer = ldap3.Connection(server, **con)
                 self.debug('ldap.connection :: {}'.format(answer))
                 #answer.open()
@@ -390,11 +392,11 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 self.debug('ldap.connected :: Authorized')
             except LDAPSocketOpenError as e:
                 # The access for this user has been denied, Debug it if required
-                self.debug("LDAP connect failed for url '{}' with error '{}'".format(ldap_url, e))
+                self.debug("LDAP connect failed 'SocketOpenError' for url '{}' with error '{}'".format(ldap_url, e))
                 answer = False
             except LDAPException as e:
                 # The access for this user has been denied, Debug it if required
-                self.debug("LDAP connect failed for user '{}' with error '{}'".format(username, e))
+                self.debug("LDAP connect failed 'LDAPException' for user '{}' with error '{}'".format(username, e))
                 answer = False
             
         else:
