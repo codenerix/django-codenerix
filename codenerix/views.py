@@ -1196,36 +1196,39 @@ class GenList(GenBase, ListView):
             except ValueError:
                 pass
             except TypeError:
-                pass 
+                pass
             if (value and type(value) == int and key in listfilters) and ((value > 0) or (type(value) == list)):
                 # Add the filter to the queryset
-                rule=listfilters[key]
+                rule = listfilters[key]
                 # Get type
-                typekind=rule[2]
+                typekind = rule[2]
                 if type(typekind) == list:
                     # Compatibility: set typekind and fv in the old fassion
-                    fv=typekind[value-1][0]
-                    queryset=queryset.filter(rule[1](fv))
-                    typekind='select'
+                    fv = typekind[value - 1][0]
+                    queryset = queryset.filter(rule[1](fv))
+                    typekind = 'select'
                 elif typekind == 'select':
                     # Get selected value from rule
-                    fv=rule[3][value-1][0]
-                    queryset=queryset.filter(rule[1](fv))
-                elif typekind in ['multiselect','multidynamicselect']:
+                    fv = rule[3][value - 1][0]
+                    queryset = queryset.filter(rule[1](fv))
+                elif typekind in ['multiselect', 'multidynamicselect']:
                     # Get selected values from rule
                     if len(value):
-                        qobjects=Q(rule[1](value[0]))
+                        qobjects = Q(rule[1](value[0]))
                         for fvt in value[1:]:
-                            qobjects|=Q(rule[1](fvt))
-                        queryset=queryset.filter(qobjects)
+                            qobjects |= Q(rule[1](fvt))
+                        queryset = queryset.filter(qobjects)
                 elif typekind in ['daterange', 'input']:
                     # No arguments
-                    fv=value
-                    queryset=queryset.filter(rule[1](fv))
+                    fv = value
+                    queryset = queryset.filter(rule[1](fv))
+                elif typekind in ['checkbox', ]:
+                    fv = value
+                    queryset = queryset.filter(rule[1](fv))
                 else:
-                    raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind,key))
+                    raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind, key))
                 # Save it in the struct as a valid filter
-                filters_struct[key]=value
+                filters_struct[key] = value
 
         # Rewrite filters_json updated
         filters_json=json.dumps(filters_struct)
@@ -1296,6 +1299,14 @@ class GenList(GenBase, ListView):
                 # Set choice as the command's argument
                 argument = choice
             elif typekind in ['daterange', 'input']:
+                # Commands withouth arguments
+                argument = None
+                # Get the selected value
+                if key in filters_struct.keys():
+                    value = filters_struct[key]
+                else:
+                    value = None
+            elif typekind in ['checkbox']:
                 # Commands withouth arguments
                 argument = None
                 # Get the selected value
@@ -2174,7 +2185,7 @@ class GenList(GenBase, ListView):
                 clss = get_class(func)
                 token['choices'] = clss().get_choices(value)
 
-            elif typekind in ['daterange', 'input']:
+            elif typekind in ['daterange', 'input', 'checkbox']:
                 # Decide kind
                 token['value']=value
             else:
