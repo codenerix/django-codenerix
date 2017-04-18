@@ -2127,7 +2127,7 @@ class GenList(GenBase, ListView):
 
         # Adapter
         if settings.ALL_PAGESALLOWED:
-            translate_key = a['rowsperpageallowed'].keys()[-1]
+            translate_key = list(a['rowsperpageallowed'].keys())[-1]
             a['rowsperpageallowed'][translate_key] = a['rowsperpageallowed'][translate_key]
 
         if 'printer' in context['getval']:

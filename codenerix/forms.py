@@ -57,14 +57,14 @@ class BaseForm(object):
     
     def clean_color(self):
         color = self.cleaned_data["color"]
-        if len(color)!=0:
+        if len(color) != 0:
             valores_validos = "#0123456789abcdefABCDEF"
             r = True
             for l in color:
                 if l not in valores_validos:
                     r = False
                     break
-            if not r or color[0] != "#" or not (len(color)==4 or len(color)==7):
+            if not r or color[0] != "#" or not (len(color) == 4 or len(color) == 7):
                 self._errors["color"] = [_("Invalid color")]
                 return color
             else:
@@ -79,7 +79,10 @@ class BaseForm(object):
         else:
             r = self.non_field_errors()
             # list_errors = [element[5] for element in self.non_field_errors()[:-1]]
-            list_errors = [element[5] if len(element) >= 5 else [] for element in self.non_field_errors()[:-1]]
+            list_errors = []
+            for element in self.non_field_errors()[:-1]:
+                if len(element) >= 5:
+                    list_errors.append(element[5])
         return list_errors
 
     def __groups__(self):
