@@ -207,7 +207,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         if permissions:
             permissions = list(set(permissions))
             for permision in permissions:
-                self.user.user_permissions.add(Permission.objects.get(codename=permision))
+                self.user.user_permissions.add(Permission.objects.filter(codename=permision).first())
 
         return None
 
