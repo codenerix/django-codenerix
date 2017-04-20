@@ -345,7 +345,11 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
         # Checking authorization, initialize auth
         auth = False
 
-        # Set specific permisison
+        # Rename action_permission for special case (detail -> view)
+        if action_permission == 'detail':
+            action_permission = 'view'
+
+        # Set specific permission
         specific_permission = "{}_{}".format(action_permission, model_name)
         app_specific_permission = "{}.{}_{}".format(appname, action_permission, model_name)
 
