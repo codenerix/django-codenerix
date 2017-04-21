@@ -67,9 +67,9 @@ Quickstart
 
 1. Install your Linux (we checked it out on Debian 8.7)
 
-2. Make sure you have installed the required packages to work with GIT and Python::
+2. Make sure you have installed the required packages to work with GIT and Python (zlib1g-dev, libjpeg-dev, python-dev, python3-dev are required by Pillow library)::
 
-    apt-get install git python-pip python3-pip
+    apt-get install git python-pip python3-pip zlib1g-dev libjpeg-dev python-dev python3-dev
 
 3. Clone the `CODENERIX Examples <https://github.com/centrologic/django-codenerix-examples>`_ project::
 
