@@ -1,6 +1,8 @@
 import os
 from setuptools import setup
 
+import codenerix
+
 #from setuptools.command.install import install
 #class CustomInstallCommand(install):
 #    """Customized setuptools install command - prints a friendly greeting."""
@@ -17,7 +19,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-codenerix',
-    version="1.0.2",
+    version=codenerix.__version__,
     packages=['codenerix'],
     include_package_data=True,
     zip_safe=False,
@@ -51,7 +53,7 @@ setup(
     install_requires = [
         "pymongo",
         "django-angular",
-        "python-dateutil"
+        "python-dateutil",
         "django-recaptcha>=1.2.1,<1.3",
         "django-rosetta",
         "jsonfield",
@@ -59,6 +61,7 @@ setup(
         "Pillow",
         "Unidecode",
         "xhtml2pdf",
+        "html5lib==1.0b8", # Default version 0.99999999 is broken with error 'from html5lib import treebuilders, inputstream' => 'ImportError: cannot import name inputstream' (1.0b10 also fails)
         "Django>=1.10.6,<1.11",
         "django-multi-email-field",
         "ldap3",

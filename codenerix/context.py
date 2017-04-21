@@ -22,7 +22,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 
-from codenerix.version import CODENERIX_VERSION
+from codenerix import CODENERIX_VERSION
 
 def codenerix( request ):
     '''
