@@ -1,0 +1,9 @@
+include MANIFEST.in
+include LICENSE
+include README.rst
+exclude *.pyc
+recursive-include codenerix/static *
+recursive-include codenerix/templates *
+recursive-include codenerix/templatetags *
+recursive-include codenerix/migrations *
+recursive-include codenerix/locale *

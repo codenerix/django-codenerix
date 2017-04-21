@@ -55,7 +55,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.core.exceptions import ValidationError
 from django.core.cache import cache
 from django.utils import formats
-from django.http import QueryDict, HttpResponseBadRequest
+from django.http import QueryDict
 from django.utils.translation import get_language
 
 from django.conf import settings
@@ -67,7 +67,7 @@ from django.utils.http import urlsafe_base64_decode
 from openpyxl import Workbook
 
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay
-from codenerix.templatetags.codenerix_lists import unlist
+from codenerix.templatetags_lists import unlist
 
 
 def status(request, status, answer):

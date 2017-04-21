@@ -11,8 +11,3 @@ class Migration(migrations.Migration):
         ('codenerix', '0010_corporateimage'),
     ]
 
-    operations = [
-        migrations.DeleteModel(
-            name='CorporateImage',
-        ),
-    ]
