@@ -75,7 +75,7 @@ Quickstart
 
     git clone https://github.com/centrologic/django-codenerix-examples
 
-4. Go to the desired folder (we will go to agenda)::
+4. Go to the desired folder (we will go to **agenda**)::
 
     cd django-codenerix-examples/agenda/
 
