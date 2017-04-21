@@ -1242,6 +1242,7 @@ var codenerix_config1=['cfpLoadingBarProvider', function(cfpLoadingBarProvider) 
 
 var codenerix_config2 = ['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    $httpProvider.defaults.headers.common['X-REST'] = '0';
 }];
 
 // Add a new library to codenerix_libraries if it doesn't exists yet
