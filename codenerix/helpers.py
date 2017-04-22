@@ -387,7 +387,7 @@ class CodenerixEncoder(object):
         
         # Process number
         while div >= ldic:
-            div = number / ldic
+            div = int( number / ldic )
             mod = number % ldic
             string += dic[mod]
             number = div
