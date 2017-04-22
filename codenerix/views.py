@@ -130,7 +130,7 @@ def pages(paginator, current):
     pages.append(first)
 
     # Decide block size
-    ini_block = holes * current / total
+    ini_block = int( holes * current / total )
     end_block = holes - ini_block
     # Calculate grains
     if ini_block > 0:
@@ -1891,7 +1891,7 @@ class GenList(GenBase, ListView):
         else:
             total_rows_per_page = int(total_rows_per_page) # By default 10 rows per page
             total_rows_per_page_out = total_rows_per_page
-            total_pages=total_registers/total_rows_per_page
+            total_pages=int(total_registers/total_rows_per_page)
             if total_registers%total_rows_per_page:
                 total_pages+=1
             page_number=jsondata.get('page',1)                  # If no page specified use first page
@@ -1920,7 +1920,7 @@ class GenList(GenBase, ListView):
                 chk = 2
             elif chk == 2:
                 # From 10 to 25 (10*2+10/2)
-                c = c * 2 + c / 2
+                c = c * 2 + int( c / 2 )
                 # Next level
                 chk = 3
             elif chk == 3:

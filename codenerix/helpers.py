@@ -379,11 +379,23 @@ class CodenerixEncoder(object):
     def list_encoders(self):
         return self.codenerix_numeric_dic.keys()
     
-    def numeric_encode(self, number, dic='hex36', length=None, cfill='A'):
+    def numeric_encode(self, number, dic='hex36', length=None, cfill=None):
         
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
             dic = self.codenerix_numeric_dic[dic]
+        
+        # Integrity check to dic
+        nr=""
+        for c in dic:
+            if c not in nr:
+                nr+=c
+            else:
+                raise IOError(_("ERROR: dic has repeated elements"))
+        
+        # If no cfill
+        if cfill is None:
+            cfill = dic[0]
         
         # Find lenght
         ldic = len(dic)
