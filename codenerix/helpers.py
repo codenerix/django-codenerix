@@ -364,6 +364,13 @@ def clean_memcache_item(key, item):
 class CodenerixEncoder(object):
     
     codenerix_numeric_dic = {
+        # Basic dicts
+        'num': '0123456789',
+        'alpha': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'alphanc': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'alphanum': '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'alphanumnc': '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        # Original dicts
         'hex36': 'ENWR6MV71JOQHADUGFCYZ25X3B4L0KPTSI98',
         'hex16': '54BEF80D1C96A732',
         'hexz17': 'Z0123456789ABCDEF',
