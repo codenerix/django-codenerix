@@ -3346,6 +3346,7 @@ class GenForeignKey(GenBase, View):
         search = kwargs.get('search', '')
         filterstxt = self.request.GET.get('filter', '{}')
         filters = json.loads(filterstxt)
+        self.filters = filters
 
         # Empty search string if all where requested
         if search == '*':
