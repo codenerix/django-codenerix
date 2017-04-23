@@ -184,6 +184,9 @@ class StaticSelect(forms.widgets.Select):
     def render(self, name, value, attrs=None, choices=()):
         # Initialization
         required = self.attrs.get('ng-required', 'false')
+        change = self.attrs.get('ng-change', 'undefined').replace('"', "'").replace("'","\\'")
+        if change!="undefined":
+            change = "'{}'".format(change)
         vmodel = self.field_name
         vid = attrs.get('id', 'id_{0}'.format(name))
         vstyle = attrs.get('style', '')
@@ -265,13 +268,13 @@ class StaticSelect(forms.widgets.Select):
         html += u" id=\"{0}\"".format(vid)
         html += u" ng-model=\"$parent.{0}\"".format(vmodel)
         if is_multiple:
-            html += u" on-select=\"selectedOptionSelect({0}.{1},'{2}')\"".format(vform, vmodel, valuejs)
+            html += u" on-select=\"selectedOptionSelect({0}.{1},'{2}',{3})\"".format(vform, vmodel, valuejs, change)
         else:
             if value is None:
                 value = "null"
             else:
                 value = "'{}'".format(value)
-            html += u" on-select=\"selectedOptionSelect({0}.{1},{2})\"".format(vform, vmodel, value)
+            html += u" on-select=\"selectedOptionSelect({0}.{1},{2},{3})\"".format(vform, vmodel, value,change)
         html += u' theme="bootstrap"'
         html += u' ng-disabled="disabled"'
         html += u' reset-search-input="false"'
@@ -350,6 +353,9 @@ class DynamicSelect(forms.widgets.Select):
             raise IOError("autofill_url not defined")
         # Initialization
         required = self.attrs.get('ng-required', 'false')
+        change = self.attrs.get('ng-change', 'undefined').replace('"', "'").replace("'","\\'")
+        if change!="undefined":
+            change = "'{}'".format(change)
         vmodel = self.field_name
         vid = attrs.get('id', 'id_{0}'.format(name))
         vstyle = attrs.get('style', '')
@@ -367,6 +373,7 @@ class DynamicSelect(forms.widgets.Select):
 
         # Render
         html = u"<input name='{0}' ng-required='{1}' ng-model='{0}' id='{0}' type='hidden'".format(vmodel, required)
+        # Set initial value
         if value:
             html += u" ng-init=\"{0}={1}\"".format(vmodel, value, vform)
         html += ">"
@@ -383,7 +390,7 @@ class DynamicSelect(forms.widgets.Select):
 
         html += u" id=\"{0}\"".format(vid)
         html += u" ng-model=\"$parent.{0}\"".format(vmodel)
-        html += u" on-select=\"selectedOptionSelect({0}.{1},{2})\"".format(vform, vmodel, value)
+        html += u" on-select=\"selectedOptionSelect({0}.{1},{2},{3})\"".format(vform, vmodel, value, change)
         html += ' theme="bootstrap"'
         html += ' ng-disabled="disabled"'
         html += ' reset-search-input="false"'
