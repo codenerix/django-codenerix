@@ -466,19 +466,31 @@ class GenBase(object):
     json = False
     search_filter_button = False
 
-    # translate by META
+    # Translations
     gentranslate = {
         'Add': _("Add"),
         'Edit': _("Edit"),
         'Cancel': _("Cancel"),
         'Search': _("Search"),
+        'RowsPerPage': _("Rows per page"),
+        'PageNumber': _("Page number"),
+        'registers': _("registers"),
         'CleanFilters': _("Clean filters"),
         'PrintExcel': _("Print Excel"),
+        'Date': _("Date"),
+        'Year': _("Year"),
+        'Month': _("Month"),
+        'Day': _("Day"),
+        'Time': _("Time"),
+        'Hour': _("Hour"),
+        'Minute': _("Minute"),
+        'Second': _("Second"),
         'Change': _("Change"),
         'Delete': _("Delete"),
         'View': _("View"),
         'Download': _("Download"),
-    }
+        }
+
 
     # Default tabs information
     tabs = []
@@ -992,23 +1004,6 @@ class GenList(GenBase, ListView):
         # Answer the new context
         return answer
     '''
-
-    # Translations for list
-    gentranslate = {
-            'RowsPerPage': _("Rows per page"),
-            'PageNumber': _("Page number"),
-            'registers': _("registers"),
-            'CleanFilters': _("Clean filters"),
-            'PrintExcel': _("Print Excel"),
-            'Date': _("Date"),
-            'Year': _("Year"),
-            'Month': _("Month"),
-            'Day': _("Day"),
-            'Time': _("Time"),
-            'Hour': _("Hour"),
-            'Minute': _("Minute"),
-            'Second': _("Second"),
-            }
 
     # Default values
     json=True

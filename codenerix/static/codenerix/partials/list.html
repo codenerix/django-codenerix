@@ -30,7 +30,7 @@ limitations under the License.
                     <div class="pull-right" ng-if="!data.meta.vtable && data.meta.row_total && data.meta.rowsperpageallowed"><!-- ROWS {{{1 -->
                         <div class='center-block'>
                             <ul class="pagination pagination-sm">
-                                <li><a href="#" popover-placement="top" popover="{{data.meta.gentranslate.RowsPerPage}}" popover-trigger="mouseenter"><span class="glyphicon glyphicon-th-list"></span></a></li>
+                                <li><a href="#" popover-placement="top" uib-popover="{{data.meta.gentranslate.RowsPerPage}}" popover-trigger="mouseenter"><span class="glyphicon glyphicon-th-list"></span></a></li>
                                 <li class="choice"
                                     ng-repeat='(rowsperpage, label) in data.meta.rowsperpageallowed'
                                     ng-class="{active:rowsperpage==data.meta.rowsperpage || data.meta.rowsperpageallowed.length==1}"
@@ -43,7 +43,7 @@ limitations under the License.
                     <div class="pull-right" ng-if="!data.meta.vtable && data.meta.pages"><!-- PAGINATION {{{1-->
                         <div class='center-block'>
                             <ul class="pagination pagination-sm">
-                                <li><a href="#" popover-placement="top" popover="{{data.meta.gentranslate.PageNumber}}" popover-trigger="mouseenter"><span class="glyphicon glyphicon-list-alt"></span></a></li>
+                                <li><a href="#" popover-placement="top" uib-popover="{{data.meta.gentranslate.PageNumber}}" popover-trigger="mouseenter"><span class="glyphicon glyphicon-list-alt"></span></a></li>
                                 <li class="choice"
                                     ng-repeat="page in data.meta.pages"
                                     ng-class="{active:page==data.meta.page}"
@@ -64,7 +64,7 @@ limitations under the License.
                 <div class="panel-body listfilters">
                     <div class="pull-left" ng-if='data.meta.linkadd'><!-- ADD {{{1 -->
                         <div class="input-group input-group-sm">
-                            <button type="button" class="btn btn-primary btn-sm btn-add" popover-placement="top" popover="{{data.meta.gentranslate.Add}}" popover-trigger="mouseenter" ng-click="addnew()">
+                            <button type="button" class="btn btn-primary btn-sm btn-add" popover-placement="top" uib-popover="{{data.meta.gentranslate.Add}}" popover-trigger="mouseenter" ng-click="addnew()">
                                 <span class="glyphicon glyphicon-plus"></span>
                                 {{data.meta.gentranslate.Add}}
                             </button>
@@ -74,7 +74,7 @@ limitations under the License.
                         <form name="search" data-custom-submit="refresh()" role="form">
                             <div class="input-group input-group-sm">
                                 <input type="text" class="form-control input-sm" ng-model="data.filter.search">
-                                <span class="input-group-btn" popover-placement="top" popover="{{data.meta.gentranslate.Search}}" popover-trigger="mouseenter">
+                                <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.Search}}" popover-trigger="mouseenter">
                                     <button type="submit" class="btn btn-default btn-sm" ng-click="refresh()">
                                         <span class="glyphicon glyphicon-search"></span>
                                     </button>
@@ -82,12 +82,12 @@ limitations under the License.
                                         <span class="fa fa-sliders" ng-class="{'fa-inverse':data.meta.search_filter_button}"></span>
                                     </button>
                                 </span>
-                                <span class="input-group-btn" popover-placement="top" popover="{{data.meta.gentranslate.CleanFilters}}" popover-trigger="mouseenter">
+                                <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.CleanFilters}}" popover-trigger="mouseenter">
                                     <button class="btn btn-default btn-sm" ng-class="{'btn-default':!data.meta.search_filter_button,'btn-info':data.meta.search_filter_button}" ng-click="reset_filter()">
                                         <span class="fa fa-refresh"></span>
                                     </button>
                                 </span>
-                                <span class="input-group-btn" popover-placement="top" popover="{{data.meta.gentranslate.PrintExcel}}" popover-trigger="mouseenter">
+                                <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.PrintExcel}}" popover-trigger="mouseenter">
                                     <button class="btn btn-default btn-sm" ng-class="{'btn-default':!data.meta.search_filter_button,'btn-info':data.meta.search_filter_button}" ng-click="print_excel()">
                                         <span class="fa fa-file-excel-o"></span>
                                     </button>
@@ -102,18 +102,18 @@ limitations under the License.
                     </div>
                     <div class="pull-left" ng-if="data.filter.date"><!-- DATE {{{1-->
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-default btn-sm" popover-placement="top" popover="{{data.meta.gentranslate.Date}}" popover-trigger="mouseenter" type="button" ng-click="date_change('year')"><span class="glyphicon glyphicon-calendar"></span></button>
-                            <button class="btn btn-default btn-sm" popover-placement="top" popover="{{data.meta.gentranslate.Year}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.year" ng-click="date_change('year')">{{data.filter.date.rightnow.year}}</button>
-                            <button class="btn btn-default btn-sm" popover-placement="top" popover="{{data.meta.gentranslate.Month}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.month" ng-click="date_change('month')">{{data.filter.date.rightnow.month}}</button>
-                            <button class="btn btn-default btn-sm" popover-placement="top" popover="{{data.meta.gentranslate.Day}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.day" ng-click="date_change('day')">{{data.filter.date.rightnow.day}}</button>
-                            <button class="btn btn-default btn-info btn-xs" popover-placement="top" popover="{{data.filter.date.deepname}}" popover-trigger="mouseenter" type="button" ng-repeat="token in data.filter.date.data" ng-click="date_select(data.filter.date.deepness,token)" ng-if="data.filter.date.deepness && data.filter.date.data.length && !data.filter.date.rightnow.day">{{token}}</button>
+                            <button class="btn btn-default btn-sm" popover-placement="top" uib-popover="{{data.meta.gentranslate.Date}}" popover-trigger="mouseenter" type="button" ng-click="date_change('year')"><span class="glyphicon glyphicon-calendar"></span></button>
+                            <button class="btn btn-default btn-sm" popover-placement="top" uib-popover="{{data.meta.gentranslate.Year}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.year" ng-click="date_change('year')">{{data.filter.date.rightnow.year}}</button>
+                            <button class="btn btn-default btn-sm" popover-placement="top" uib-popover="{{data.meta.gentranslate.Month}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.month" ng-click="date_change('month')">{{data.filter.date.rightnow.month}}</button>
+                            <button class="btn btn-default btn-sm" popover-placement="top" uib-popover="{{data.meta.gentranslate.Day}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.day" ng-click="date_change('day')">{{data.filter.date.rightnow.day}}</button>
+                            <button class="btn btn-default btn-info btn-xs" popover-placement="top" uib-popover="{{data.filter.date.deepname}}" popover-trigger="mouseenter" type="button" ng-repeat="token in data.filter.date.data" ng-click="date_select(data.filter.date.deepness,token)" ng-if="data.filter.date.deepness && data.filter.date.data.length && !data.filter.date.rightnow.day">{{token}}</button>
                         </div>
                         <div class="btn-group btn-group-sm" ng-if="data.filter.date.rightnow.day">
-                            <button class="btn btn-default btn-sm" popover-placement="top" popover="{{data.meta.gentranslate.Time}}" popover-trigger="mouseenter" type="button" ng-click="date_change('hour')"><span class="glyphicon glyphicon-time"></span></button>
-                            <button class="btn btn-default btn-sm" popover-placement="top" popover="{{data.meta.gentranslate.Hour}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.hour" ng-click="date_change('hour')">{{data.filter.date.rightnow.hour}}</button>
-                            <button class="btn btn-default btn-sm" popover-placement="top" popover="{{data.meta.gentranslate.Minute}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.minute" ng-click="date_change('minute')">{{data.filter.date.rightnow.minute}}</button>
-                            <button class="btn btn-default btn-sm" popover-placement="top" popover="{{data.meta.gentranslate.Second}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.second" ng-click="date_change('second')">{{data.filter.date.rightnow.second}}</button>
-                            <button class="btn btn-default btn-info btn-xs" popover-placement="top" popover="{{data.filter.date.deepname}}" popover-trigger="mouseenter" type="button" ng-repeat="token in data.filter.date.data" ng-click="date_select(data.filter.date.deepness,token)" ng-if="data.filter.date.deepness && data.filter.date.data.length">{{token}}</button>
+                            <button class="btn btn-default btn-sm" popover-placement="top" uib-popover="{{data.meta.gentranslate.Time}}" popover-trigger="mouseenter" type="button" ng-click="date_change('hour')"><span class="glyphicon glyphicon-time"></span></button>
+                            <button class="btn btn-default btn-sm" popover-placement="top" uib-popover="{{data.meta.gentranslate.Hour}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.hour" ng-click="date_change('hour')">{{data.filter.date.rightnow.hour}}</button>
+                            <button class="btn btn-default btn-sm" popover-placement="top" uib-popover="{{data.meta.gentranslate.Minute}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.minute" ng-click="date_change('minute')">{{data.filter.date.rightnow.minute}}</button>
+                            <button class="btn btn-default btn-sm" popover-placement="top" uib-popover="{{data.meta.gentranslate.Second}}" popover-trigger="mouseenter" type="button" ng-if="data.filter.date.rightnow.second" ng-click="date_change('second')">{{data.filter.date.rightnow.second}}</button>
+                            <button class="btn btn-default btn-info btn-xs" popover-placement="top" uib-popover="{{data.filter.date.deepname}}" popover-trigger="mouseenter" type="button" ng-repeat="token in data.filter.date.data" ng-click="date_select(data.filter.date.deepness,token)" ng-if="data.filter.date.deepness && data.filter.date.data.length">{{token}}</button>
                         </div>
                     <!--}}}1--></div>
                 </div>
@@ -123,7 +123,7 @@ limitations under the License.
                     <div class="pull-left column" ng-repeat="filter in data.filter.subfilters"><!-- FILTERS {{{1 -->
                         <form name="search" data-custom-submit="refresh()" role="form">
                             <div class="input-group input-group-sm">
-                                <div ng-if="filter.kind!='checkbox'" class="input-group-addon"><span class="glyphicon glyphicon-eye-open" popover-placement="top" popover="{{filter.name}}" popover-trigger="mouseenter"></span></div>
+                                <div ng-if="filter.kind!='checkbox'" class="input-group-addon"><span class="glyphicon glyphicon-eye-open" popover-placement="top" uib-popover="{{filter.name}}" popover-trigger="mouseenter"></span></div>
                                 <input name='filter.choosen' ng-model='filter.choosen' type='hidden'>
                                 <ui-select multiple ng-model="$parent.filter.choosen" theme="bootstrap"
                                     on-select="saveSelected(options['filter.choosendyn'], filter.choosen);selectedOptionSelect(search,filter.choice);"
@@ -207,7 +207,7 @@ limitations under the License.
                     <div class="pull-right" ng-if="!data.meta.vtable && data.meta.row_total && data.meta.rowsperpageallowed.length"><!-- ROWS {{{1 -->
                         <div class='center-block'>
                             <ul class="pagination pagination-sm">
-                                <li><a href="#" popover-placement="top" popover="{{data.meta.gentranslate.RowsPerPage}}" popover-trigger="mouseenter"><span class="glyphicon glyphicon-th-list"></span></a></li>
+                                <li><a href="#" popover-placement="top" uib-popover="{{data.meta.gentranslate.RowsPerPage}}" popover-trigger="mouseenter"><span class="glyphicon glyphicon-th-list"></span></a></li>
                                 <li class="choice"
                                     ng-repeat='rowsperpage in data.meta.rowsperpageallowed'
                                     ng-class="{active:rowsperpage==data.meta.rowsperpage || data.meta.rowsperpageallowed.length==1}"
@@ -220,7 +220,7 @@ limitations under the License.
                     <div class="pull-right" ng-if="!data.meta.vtable && data.meta.pages"><!-- PAGINATION {{{1-->
                         <div class='center-block'>
                             <ul class="pagination pagination-sm">
-                                <li><a href="#" popover-placement="top" popover="N&uacute;mero de p&aacute;gina" popover-trigger="mouseenter"><span class="glyphicon glyphicon-list-alt"></span></a></li>
+                                <li><a href="#" popover-placement="top" uib-popover="N&uacute;mero de p&aacute;gina" popover-trigger="mouseenter"><span class="glyphicon glyphicon-list-alt"></span></a></li>
                                 <li class="choice"
                                     ng-repeat="page in data.meta.pages"
                                     ng-class="{active:page==data.meta.page}"
