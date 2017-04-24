@@ -1,6 +1,8 @@
 import os
 from setuptools import setup
 
+import codenerix
+
 #from setuptools.command.install import install
 #class CustomInstallCommand(install):
 #    """Customized setuptools install command - prints a friendly greeting."""
@@ -17,8 +19,8 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-codenerix',
-    version="20170406007",
-    packages=["codenerix"],
+    version=codenerix.__version__,
+    packages=['codenerix'],
     include_package_data=True,
     zip_safe=False,
     license='Apache License Version 2.0',
@@ -33,6 +35,8 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 1.8',
+        'Framework :: Django :: 1.9',
+        'Framework :: Django :: 1.10',
         'Intended Audience :: Developers',
         'License :: Other/Proprietary License',
         'Operating System :: OS Independent',
@@ -47,25 +51,20 @@ setup(
     ],
     # cmdclass={ 'install': CustomInstallCommand, },
     install_requires = [
-        "pymongo==3.4.0",
-        "django-angular==0.8.4",
-        "bcrypt==3.1.3",
-        "cryptography==1.7.2",
-        "python-dateutil==2.6.0",
-        "paypalrestsdk==1.12.0",
-        "django-recaptcha==1.2.1",
-        "django-rosetta==0.7.6",
-        "scipy==0.14.0",
-        "jsonfield==1.0.3",
-        "openpyxl==2.2.5",
-        "Pillow==2.6.1",
-        "Unidecode==0.4.20",
-        "xhtml2pdf==0.0.6",
-        "Django==1.10.6",
-        "mysqlclient==1.3.6",
-        ],
-    dependency_links = [
-        "git+https://github.com/fle/django-multi-email-field.git#egg=django-multi-email-field",
+        "pymongo",
+        "django-angular",
+        "python-dateutil",
+        "django-recaptcha>=1.2.1,<1.3",
+        "django-rosetta",
+        "jsonfield",
+        "openpyxl",
+        "Pillow",
+        "Unidecode",
+        "xhtml2pdf",
+        "html5lib==1.0b8", # Default version 0.99999999 is broken with error 'from html5lib import treebuilders, inputstream' => 'ImportError: cannot import name inputstream' (1.0b10 also fails)
+        "Django>=1.10.6,<1.11",
+        "django-multi-email-field",
+        "ldap3",
         ],
 )
 

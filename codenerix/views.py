@@ -55,7 +55,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.core.exceptions import ValidationError
 from django.core.cache import cache
 from django.utils import formats
-from django.http import QueryDict, HttpResponseBadRequest
+from django.http import QueryDict
 from django.utils.translation import get_language
 
 from django.conf import settings
@@ -67,7 +67,7 @@ from django.utils.http import urlsafe_base64_decode
 from openpyxl import Workbook
 
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay
-from codenerix.templatetags.codenerix_lists import unlist
+from codenerix.templatetags_lists import unlist
 
 
 def status(request, status, answer):
@@ -130,7 +130,7 @@ def pages(paginator, current):
     pages.append(first)
 
     # Decide block size
-    ini_block = holes * current / total
+    ini_block = int( holes * current / total )
     end_block = holes - ini_block
     # Calculate grains
     if ini_block > 0:
@@ -345,7 +345,11 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
         # Checking authorization, initialize auth
         auth = False
 
-        # Set specific permisison
+        # Rename action_permission for special case (detail -> view)
+        if action_permission == 'detail':
+            action_permission = 'view'
+
+        # Set specific permission
         specific_permission = "{}_{}".format(action_permission, model_name)
         app_specific_permission = "{}.{}_{}".format(appname, action_permission, model_name)
 
@@ -462,19 +466,31 @@ class GenBase(object):
     json = False
     search_filter_button = False
 
-    # translate by META
+    # Translations
     gentranslate = {
         'Add': _("Add"),
         'Edit': _("Edit"),
         'Cancel': _("Cancel"),
         'Search': _("Search"),
+        'RowsPerPage': _("Rows per page"),
+        'PageNumber': _("Page number"),
+        'registers': _("registers"),
         'CleanFilters': _("Clean filters"),
         'PrintExcel': _("Print Excel"),
+        'Date': _("Date"),
+        'Year': _("Year"),
+        'Month': _("Month"),
+        'Day': _("Day"),
+        'Time': _("Time"),
+        'Hour': _("Hour"),
+        'Minute': _("Minute"),
+        'Second': _("Second"),
         'Change': _("Change"),
         'Delete': _("Delete"),
         'View': _("View"),
         'Download': _("Download"),
-    }
+        }
+
 
     # Default tabs information
     tabs = []
@@ -988,23 +1004,6 @@ class GenList(GenBase, ListView):
         # Answer the new context
         return answer
     '''
-
-    # Translations for list
-    gentranslate = {
-            'RowsPerPage': _("Rows per page"),
-            'PageNumber': _("Page number"),
-            'registers': _("registers"),
-            'CleanFilters': _("Clean filters"),
-            'PrintExcel': _("Print Excel"),
-            'Date': _("Date"),
-            'Year': _("Year"),
-            'Month': _("Month"),
-            'Day': _("Day"),
-            'Time': _("Time"),
-            'Hour': _("Hour"),
-            'Minute': _("Minute"),
-            'Second': _("Second"),
-            }
 
     # Default values
     json=True
@@ -1887,7 +1886,7 @@ class GenList(GenBase, ListView):
         else:
             total_rows_per_page = int(total_rows_per_page) # By default 10 rows per page
             total_rows_per_page_out = total_rows_per_page
-            total_pages=total_registers/total_rows_per_page
+            total_pages=int(total_registers/total_rows_per_page)
             if total_registers%total_rows_per_page:
                 total_pages+=1
             page_number=jsondata.get('page',1)                  # If no page specified use first page
@@ -1916,7 +1915,7 @@ class GenList(GenBase, ListView):
                 chk = 2
             elif chk == 2:
                 # From 10 to 25 (10*2+10/2)
-                c = c * 2 + c / 2
+                c = c * 2 + int( c / 2 )
                 # Next level
                 chk = 3
             elif chk == 3:
@@ -3342,6 +3341,7 @@ class GenForeignKey(GenBase, View):
         search = kwargs.get('search', '')
         filterstxt = self.request.GET.get('filter', '{}')
         filters = json.loads(filterstxt)
+        self.filters = filters
 
         # Empty search string if all where requested
         if search == '*':

@@ -364,6 +364,13 @@ def clean_memcache_item(key, item):
 class CodenerixEncoder(object):
     
     codenerix_numeric_dic = {
+        # Basic dicts
+        'num': '0123456789',
+        'alpha': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'alphanc': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'alphanum': '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'alphanumnc': '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        # Original dicts
         'hex36': 'ENWR6MV71JOQHADUGFCYZ25X3B4L0KPTSI98',
         'hex16': '54BEF80D1C96A732',
         'hexz17': 'Z0123456789ABCDEF',
@@ -372,11 +379,23 @@ class CodenerixEncoder(object):
     def list_encoders(self):
         return self.codenerix_numeric_dic.keys()
     
-    def numeric_encode(self, number, dic='hex36', length=None, cfill='A'):
+    def numeric_encode(self, number, dic='hex36', length=None, cfill=None):
         
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
             dic = self.codenerix_numeric_dic[dic]
+        
+        # Integrity check to dic
+        nr=""
+        for c in dic:
+            if c not in nr:
+                nr+=c
+            else:
+                raise IOError(_("ERROR: dic has repeated elements"))
+        
+        # If no cfill
+        if cfill is None:
+            cfill = dic[0]
         
         # Find lenght
         ldic = len(dic)
@@ -387,7 +406,7 @@ class CodenerixEncoder(object):
         
         # Process number
         while div >= ldic:
-            div = number / ldic
+            div = int( number / ldic )
             mod = number % ldic
             string += dic[mod]
             number = div

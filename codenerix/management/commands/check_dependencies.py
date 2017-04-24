@@ -47,11 +47,11 @@ class Command(BaseCommand, Debugger):
     
     # Dependencies
     imports = [
-            ("bcrypt",                          "import bcrypt"),
+            #("bcrypt",                          "import bcrypt"),
             ("bson",                            "from bson import json_util"),
             ("django-angular==0.8.4",           "from djng.forms.angular_base import TupleErrorList"),
-            ("Crypto.Cipher",                   "from Crypto.Cipher import AES"),
-            ("cryptography",                    "import cryptography"),
+            #("Crypto.Cipher",                   "from Crypto.Cipher import AES"),
+            #("cryptography",                    "import cryptography"),
             ("dateutil",                        "from dateutil.tz import tzutc"),
             ("django-multi-email-field==0.5",   "from multi_email_field.forms import MultiEmailField", "pip install git+https://github.com/fle/django-multi-email-field.git"),
             ("django-recaptcha",                "from captcha import client"),
@@ -59,11 +59,11 @@ class Command(BaseCommand, Debugger):
             ("jsonfield",                       "import jsonfield"),
             ("ldap3",                           "import ldap3"),
             ("openpyxl==2.2.5",                 "import openpyxl"),
-            ("paypalrestsdk",                   "import paypalrestsdk"),
+            #("paypalrestsdk",                   "import paypalrestsdk"),
             ("Pillow",                          "import PIL"),
-            ("pycrypto==2.6.1",                 "from Crypto.Cipher import AES"),
+            #("pycrypto==2.6.1",                 "from Crypto.Cipher import AES"),
             ("python-dateutil",                 "import dateutil.parser"),
-            ("scipy",                           "import scipy"),
+            #("scipy",                           "import scipy"),
             ("Unidecode",                       "from unidecode import unidecode"),
             ("xhtml2pdf",                       "import xhtml2pdf", "git clone https://github.com/xhtml2pdf/xhtml2pdf - and, python2 setup.py install or python3 setup.py install - sudo apt-get remove python-setuptools - wget https://bootstrap.pypa.io/get-pip.py - sudo -H python get-pip.py - sudo -H pip install -U pip setuptools"),
             ]

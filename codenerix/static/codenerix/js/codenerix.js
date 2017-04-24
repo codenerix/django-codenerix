@@ -846,7 +846,7 @@ function dynamic_fields(scope) {
         return false;
     };
     // Control how the selected ui-select field works with pristine/dirty states
-    scope.selectedOptionSelect = function(input, value) {
+    scope.selectedOptionSelect = function(input, value, ngchange) {
         if (!input.$dirty) {
             input.$dirty=input.$viewValue!=value;
         }
@@ -856,37 +856,69 @@ function dynamic_fields(scope) {
         input.$setViewValue(input.$modelValue);
         // Process the selected item
         if (scope.valuegetforeingkey[input.$name] != undefined && 'rows' in scope.valuegetforeingkey[input.$name]){
+            
+            // Function to process new value set
+            var set_new = function(scope, key, answer, value) {
+                // Set new value
+                if (scope[scope.form_name] != undefined && scope[scope.form_name][key] != undefined){
+                    var element = scope[scope.form_name][key];
+                    element.$setViewValue(value);
+                    element.$render();
+                    if (ngchange!==undefined) {
+                        // Evaluate the expresion
+                        scope.$eval(ngchange);
+                    }
+                }
+
+                if ('_clear_' in answer){
+                    angular.forEach(answer['_clear_'], (function(v, key){
+                        scope[v] = '';
+                    }));
+                }
+                if ('_readonly_' in answer){
+                    scope.dynamicFieldsMemory.autocomplete.readonly = answer['_readonly_'];
+                    angular.forEach(scope.dynamicFieldsMemory.autocomplete.readonly, (function (key){
+                        scope['readonly_'+key] = true;
+                    }));
+                }
+            }
+            
+            // For each field
             angular.forEach(scope.valuegetforeingkey[input.$name].rows, (function (value2, key){
             
                 if (value2['id'] == input.$modelValue){
                     scope.resetAutoComplete();
                     angular.forEach(value2, (function (value3, key){
+                        var async = true;
                         if (key && key!="label" && key!="id" && key[0]!='$') {
                             var keysp = key.split(":")
-                            if ((keysp.length>=2) && (keysp[1]=='__JSON_DATA__')) {
+                            if (keysp.length>=2) {
                                 key = keysp[0];
-                                try {
-                                    value3={'__JSON_DATA__':angular.fromJson(value3)};
-                                } catch(e) {
-                                    console.log("ERROR: "+e);
+                                var kind = keysp[1];
+                                if (kind=='__JSON_DATA__') {
+                                    try {
+                                        value3={'__JSON_DATA__':angular.fromJson(value3)};
+                                    } catch(e) {
+                                        console.log("ERROR: "+e);
+                                    }
+                                } else if (kind=='__SCOPE_CALL__') {
+                                    value3 = scope.$eval(value3);
+                                } else if (kind=='__SERVICE_CALL__') {
+                                    async = false;
+                                    jQuery.ajax({
+                                         url: value3,
+                                         success: function (answer) {
+                                            value3 = answer['value'];
+                                            // Set new value
+                                            set_new(scope, key, value2, value3);
+                                         },
+                                         async: false
+                                    });
                                 }
                             }
                             // Set new value
-                            if (scope[scope.form_name] != undefined && scope[scope.form_name][key] != undefined){
-                                scope[scope.form_name][key].$setViewValue(value3);
-                                scope[scope.form_name][key].$render();
-                            }
-
-                            if ('_clear_' in value2){
-                                angular.forEach(value2['_clear_'], (function(value3, key){
-                                    scope[value3] = '';
-                                }));
-                            }
-                            if ('_readonly_' in value2){
-                                scope.dynamicFieldsMemory.autocomplete.readonly = value2['_readonly_'];
-                                angular.forEach(scope.dynamicFieldsMemory.autocomplete.readonly, (function (key){
-                                    scope['readonly_'+key] = true;
-                                }));
+                            if (async) {
+                                set_new(scope, key, value2, value3);
                             }
                         }
                     }));
