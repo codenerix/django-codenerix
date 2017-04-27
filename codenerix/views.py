@@ -818,8 +818,11 @@ class GenBase(object):
                 mylistclss = get_class(resolved_url.func)
                 mykwargs = resolved_url.kwargs
 
-                # Set class info
-                myclass = mylistclss
+                if issubclass(mylistclss, GenList):
+                    # Set class info
+                    myclass = mylistclss
+                else:
+                    error = True
             else:
                 error = True
 
