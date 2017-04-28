@@ -22,7 +22,7 @@ from bson import json_util
 import json
 from django.db import models
 from django.apps import apps
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.db.models import Q
 from django.core.exceptions import ValidationError

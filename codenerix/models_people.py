@@ -21,9 +21,11 @@
 import operator
 import base64
 import hashlib
+from functools import reduce
+
 from django.db.models import Q
 from django.db import models
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
@@ -51,14 +53,14 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
     def __unicode__(self):
         if self.name and self.surname:
-            output = '%s %s' % (smart_unicode(self.name), smart_unicode(self.surname))
+            output = '%s %s' % (smart_text(self.name), smart_text(self.surname))
         elif self.name:
             output = self.name
         elif self.surname:
             output = self.surname
         else:
             output = "%s*" % (self.user)
-        return smart_unicode(output)
+        return smart_text(output)
 
     def __fields__(self, info):
         fields = []
