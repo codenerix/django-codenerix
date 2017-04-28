@@ -27,8 +27,7 @@ setup(
     description='Codenerix it is a framework that goes on top of Django so it makes easier development and building of ERPs.',
     long_description=README,
     url='https://github.com/centrologic/django-codenerix',
-    author='Juan Miguel Taboada Godoy',
-    author_email='juanmi@centrologic.com',
+    author=', '.join(codenerix.__authors__),
     keywords=['django', 'codenerix', 'management','erp','crm'],
     platforms=['OS Independent'],
     classifiers=[
