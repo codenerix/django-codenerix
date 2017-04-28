@@ -54,7 +54,7 @@ class SSLEmailBackend(EmailBackend):
                 self.connection.esmtp_features['auth'] = 'PLAIN LOGIN'
                 self.connection.login(self.username, self.password)
             return True
-        except:
+        except smtplib.SMTPException:
             if not self.fail_silently:
                 raise
 
