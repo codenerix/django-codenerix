@@ -22,7 +22,7 @@ from bson import json_util
 import json
 from django.db import models
 from django.apps import apps
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.db.models import Q
 from django.core.exceptions import ValidationError
@@ -385,7 +385,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                     attrs[key] = field
                             
                             if hasattr(ffield, "verbose_name"):
-                                attrs_txt[ffield.verbose_name] = force_text(field_txt, errors='replace')
+                                if type(ffield.verbose_name) in [unicode, str]:
+                                    attrs_txt[ffield.verbose_name] = force_text(field_txt, errors='replace')
+                                else:
+                                    attrs_txt[str(ffield.verbose_name)] = force_text(field_txt, errors='replace')
                         
             log = Log()
             log.user_id = user_id
