@@ -115,6 +115,34 @@ http://www.centrologic.com/contacto/
     :target: http://www.centrologic.com
     :alt: Centrologic is supported mainly by Centrologic Computational Logistic Center
 
+***
+FAQ
+***
+
+* sudo apt-get install libmysqlclient-dev, when::
+
+    EnvironmentError: mysql_config not found, 
+
+* sudo apt-get install apache2-dev, when::
+
+    RuntimeError: The 'apxs' command appears not to be installed or is not executable. Please check the list of prerequisites in the documentation for this package and install any missing Apache httpd server packages.
+
+* sudo apt-get install python-dev, when::
+    
+    _mysql.c:40:20: fatal error: Python.h: No such file or directory
+    #include "Python.h"
+                       ^
+    compilation terminated.
+    error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
+
+* sudo apt-get install libssl-dev, when::
+
+    build/temp.linux-x86_64-2.7/_openssl.c:434:30: fatal error: openssl/opensslv.h: No such file or directory
+    #include <openssl/opensslv.h>
+                                 ^
+    compilation terminated.
+    error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
+
 *******
 Credits
 *******
