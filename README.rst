@@ -12,7 +12,7 @@ Open source enterprise business management system built on top of Django + Angul
 Features
 ********
 
-* is just Django with steroids
+* it is just steroids for Django
 * designed to build new django applications or to get integrated with existing ones
 * easy to use methods for writing filters, granular control to limit results
 * control what your users see on your software in just one line
