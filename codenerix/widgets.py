@@ -728,8 +728,8 @@ class WysiwygAngularRender(forms.widgets.HiddenInput):
         html += u"<div ng-if='{1}editor_{2}==\"preview\"' class=\"form-control\" ng-bind-html=\"{0}\"></div>".format(ngmodel, extraif, hashkey)
         html += u"<textarea ng-model=\"{0}\" ng-if='{1}editor_{4}==\"raw\"' class=\"form-control\" rows=\"10\"{2} {3}></textarea>".format(ngmodel, extraif, required, attributes, hashkey)
         html += u"<ng-quill-editor ng-model=\"{0}\" ng-if='{1}editor_{4}==\"quill\"'{2} {3}></ng-quill-editor>".format(ngmodel, extraif, required, attributes_ngquill, hashkey)
-        html += u"<text-angular ng-model=\"{0}\" ng-if='{1}editor_{4}==\"textangular\"'{2} {3}></textangular>".format(ngmodel, extraif, required, attributes, hashkey)
-        html += u"<textarea ng-model=\"{0}\" ng-if='{1} true' style='background-color:#fdd'{2} {3}></textarea>".format(ngmodel, extraif, required, attributes)
+        html += u"<text-angular ng-model=\"{0}\" ng-if='{1}editor_{4}==\"textangular\"'{2} {3}></text-angular>".format(ngmodel, extraif, required, attributes, hashkey)
+        html += u"<textarea ng-model=\"{0}\" ng-if='{1}editor' style='background-color:#fdd'{2} {3}></textarea>".format(ngmodel, extraif, required, attributes)
 
         return html
 

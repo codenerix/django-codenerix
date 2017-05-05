@@ -281,8 +281,15 @@ code {
 }
 
 input.ng-invalid.ng-pristine,
+textarea.ng-invalid.ng-pristine,
+text-angular.ng-invalid.ng-pristine div.ta-editor,
+ng-quill-editor.ng-invalid.ng-pristine div.ql-container,
 form div.select2-container.ng-invalid.ng-pristine, form[novalidate] div.select2-container.ng-invalid {
     border-color: #e9322d;
+}
+
+ng-quill-editor.ng-invalid.ng-pristine div.ql-container{
+    border-top: 1px solid #e9322d !important;
 }
 
 .active .badge-white {
