@@ -337,11 +337,17 @@ class MODELINFO:
                 return {}
 
 
-def gen_auth_permission(user, action_permission, model_name, appname, permission=None, permission_group=None):
+def gen_auth_permission(user, action_permission, model_name, appname, permission=None, permission_group=None, explained=False):
     # Check if the GENPERMISSIONS settings is shutting down the PERMISSION system control from CODENERIX
     if hasattr(settings, 'GENPERMISSIONS') and not settings.GENPERMISSIONS:
-        return True
+        if not explained:
+            return True
+        else:
+            return (True, None)
     else:
+        # Initialize reason
+        reason = _("No reason found...sorry! :-m") # <--- HERE HERE HERE
+
         # Checking authorization, initialize auth
         auth = False
 
@@ -388,7 +394,7 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
             # python 2.7
             result = cache.get(hashlib.sha1(cache_key).hexdigest())
         except TypeError:
-            # python 3.6
+            # python 3.x
             cache_key = bytes(cache_key, encoding='utf-8')
             result = cache.get(hashlib.sha1(cache_key).hexdigest())
 
@@ -396,6 +402,7 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
         if result is not None:
             # Get result from cache
             auth = result
+            reason = "Found in cache!"
         else:
 
             # Check if some authorization system was set
@@ -440,12 +447,16 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
                             # If already authorized, leave the bucle
                             if auth:
                                 break
+                    
+                    if not auth:
+                        reason = "Not authorized for: permissions: {} - permission group: {}".format(",".join(permission), ",".join(permission_group))
 
             else:
                 # If no other permission details was set in the class, use standar checks
                 if user.has_perm(specific_permission) or user.has_perm(app_specific_permission):
                     auth = True
                 else:
+                    
                     for group in user.groups.all():
                         if group.permissions.filter(codename=specific_permission).exists():
                             auth = True
@@ -453,12 +464,18 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
                         elif group.permissions.filter(codename=app_specific_permission).exists():
                             auth = True
                             break
+                    
+                    if not auth:
+                        reason = "Not authorized for {} or {}".format(specific_permission, app_specific_permission)
 
             # Set cache
             getattr(cache, "set")(cache_key, auth)
 
     # Return result
-    return auth
+    if not explained:
+        return auth
+    else:
+        return (auth, reason)
 
 
 class GenBase(object):
@@ -516,18 +533,21 @@ class GenBase(object):
         if hasattr(self, 'must_be_superuser') and self.must_be_superuser:
             if not self.request.user.is_superuser:
                 redir = redirect('not_authorized')
-                redir['NotAuthorizedReason']=_("The view/model definition requires, that this user must be a superuser")
+                if getattr(settings, 'DEBUG', False):
+                    redir['NotAuthorizedReason']=_("The view/model definition requires, that this user must be a superuser")
                 return redir
 
-        if not self.auth_permission(self.action_permission):
+        (authorized, reason) = self.auth_permission(self.action_permission, explained=True)
+        if not authorized:
             redir = redirect('not_authorized')
-            redir['NotAuthorizedReason']=_("This user doesn't have permission for '{}'".format(self.action_permission))
+            if getattr(settings, 'DEBUG', False):
+                redir['NotAuthorizedReason']=reason
             return redir
 
         # Keep going with dispatch
         return super(GenBase, self).dispatch(*args, **kwargs)
 
-    def auth_permission(self, action_permission):
+    def auth_permission(self, action_permission, explained=False):
         permission = getattr(self, 'permission', None)
         permission_group = getattr(self, 'permission_group', None)
 
@@ -535,14 +555,19 @@ class GenBase(object):
         if not model_name:
             raise IOError("Couldn't find a model_name inside your model, did you provided a model or some other class? - Type of your object is '{}'".format(self.model.__module__))
 
-        return gen_auth_permission(
+        (authorized, reason) = gen_auth_permission(
             self.request.user,
             action_permission,
             model_name,
             self._appname,
             permission,
-            permission_group
+            permission_group,
+            explained=True
         )
+        if not explained:
+            return authorized
+        else:
+            return (authorized, reason)
 
     def _setup(self, request):
         '''
