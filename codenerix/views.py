@@ -515,10 +515,14 @@ class GenBase(object):
         # Check if user is_admin is required
         if hasattr(self, 'must_be_superuser') and self.must_be_superuser:
             if not self.request.user.is_superuser:
-                return redirect('not_authorized')
+                redir = redirect('not_authorized')
+                redir['NotAuthorizedReason']=_("The view/model definition requires, that this user must be a superuser")
+                return redir
 
         if not self.auth_permission(self.action_permission):
-            return redirect('not_authorized')
+            redir = redirect('not_authorized')
+            redir['NotAuthorizedReason']=_("This user doesn't have permission for '{}'".format(self.action_permission))
+            return redir
 
         # Keep going with dispatch
         return super(GenBase, self).dispatch(*args, **kwargs)
