@@ -1228,7 +1228,7 @@ class GenList(GenBase, ListView):
                 pass
             except TypeError:
                 pass
-            if (value and type(value) == int and key in listfilters) and ((value > 0) or (type(value) == list)):
+            if (value and type(value) == int and key in listfilters) or ((value > 0) or (type(value) == list)):
                 # Add the filter to the queryset
                 rule = listfilters[key]
                 # Get type
