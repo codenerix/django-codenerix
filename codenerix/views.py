@@ -346,7 +346,7 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
             return (True, None)
     else:
         # Initialize reason
-        reason = _("No reason found...sorry! :-m") # <--- HERE HERE HERE
+        reason = ''
 
         # Checking authorization, initialize auth
         auth = False
@@ -392,17 +392,19 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
         # Look for the key in cache
         try:
             # python 2.7
-            result = cache.get(hashlib.sha1(cache_key).hexdigest())
+            hash_key = hashlib.sha1(cache_key).hexdigest()
+            result = cache.get(hash_key)
         except TypeError:
             # python 3.x
             cache_key = bytes(cache_key, encoding='utf-8')
-            result = cache.get(hashlib.sha1(cache_key).hexdigest())
+            hash_key = hashlib.sha1(cache_key).hexdigest()
+            result = cache.get(hash_key)
 
         # If I found it in cache
         if result is not None:
             # Get result from cache
             auth = result
-            reason = "Found in cache!"
+            reason = "Found in cache! (KEY:{} - HASH:{})".format(cache_key, hash_key)
         else:
 
             # Check if some authorization system was set
@@ -475,6 +477,8 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
     if not explained:
         return auth
     else:
+        if not reason:
+            reason = "-"
         return (auth, reason)
 
 
