@@ -761,13 +761,15 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
 
         # Get model name
         vmodel = attrs.get('ng-model').replace("'",'"')
-
         # Get normal field
         html = "<div ng-init='{0}={{}}; {0}[\"__JSON_DATA__\"]={1}'></div>".format(vmodel, value)
         html += u"<input type='hidden' name='{0}' ng-model='{1}'>".format(name, vmodel)
 
         # Render blocks with ANGULAR
-        html += "<div ng-repeat='block in {0}[\"__JSON_DATA__\"]' ng-init='editor_{1}=\"quill\"'>".format(vmodel, hashkey)
+        html += "<div ng-repeat='(key, block) in {0}[\"__JSON_DATA__\"]' ng-init='editor_{1}=\"quill\"'>".format(vmodel, hashkey)
+        html += '<label>{{key}}</label>'
+        
+        html += '<div ng-show="block.deleted"><p class="text-danger">{}</p></div>'.format(_("Field deleted in the template"))
         html += self.render_wysiwyg(ngmodel='block.value', extraif="block.type==\"string\" && ", attrs=attrs)
         html += "</div>"
 
