@@ -767,7 +767,7 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
 
         # Render blocks with ANGULAR
         html += "<div ng-repeat='(key, block) in {0}[\"__JSON_DATA__\"]' ng-init='editor_{1}=\"quill\"'>".format(vmodel, hashkey)
-        html += '<label for="id_StaticPageTextFormES_tiles">{{key}}</label>'
+        html += '<label>{{key}}</label>'
         
         html += '<div ng-show="block.deleted"><p class="text-danger">{}</p></div>'.format(_("Field deleted in the template"))
         html += self.render_wysiwyg(ngmodel='block.value', extraif="block.type==\"string\" && ", attrs=attrs)
