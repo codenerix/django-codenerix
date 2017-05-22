@@ -196,6 +196,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
         # add groups
         if groups:
+            groups_is_dict = type(groups) is dict
             groups = list(set(groups))
             for groupname in groups:
                 group = Group.objects.filter(name=groupname).first()
@@ -204,6 +205,12 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                     group = Group(name=groupname)
                     group.save()
                 self.user.groups.add(group)
+                
+                # Add permissions to the group
+                if groups_is_dict:
+                    for permname in groups[groupname]:
+                        perm = Permission.objects.get(name=permname)
+                        group.permissions.add(perm)
 
         # add permissions
         if permissions:
