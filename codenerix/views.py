@@ -1232,23 +1232,29 @@ class GenList(GenBase, ListView):
                 pass
             except TypeError:
                 pass
-            if (value and type(value) == int and key in listfilters) or ((value > 0) or (type(value) == list)):
+
+            # ORIG if (key in listfilters) and ((value>0) or (type(value) == list)):
+            # V1 if (value and type(value) == int and key in listfilters) and ((value > 0) or (type(value) == list)):
+            # V2 if (value and type(value) == int and key in listfilters) or ((value > 0) or (type(value) == list)):
+            if value and key in listfilters:
                 # Add the filter to the queryset
                 rule = listfilters[key]
                 # Get type
                 typekind = rule[2]
                 if type(typekind) == list:
                     # Compatibility: set typekind and fv in the old fassion
-                    fv = typekind[value - 1][0]
-                    queryset = queryset.filter(rule[1](fv))
-                    typekind = 'select'
+                    if type(value) == int:
+                        fv = typekind[value - 1][0]
+                        queryset = queryset.filter(rule[1](fv))
+                        typekind = 'select'
                 elif typekind == 'select':
                     # Get selected value from rule
-                    fv = rule[3][value - 1][0]
-                    queryset = queryset.filter(rule[1](fv))
+                    if type(value) == int:
+                        fv = rule[3][value - 1][0]
+                        queryset = queryset.filter(rule[1](fv))
                 elif typekind in ['multiselect', 'multidynamicselect']:
                     # Get selected values from rule
-                    if len(value):
+                    if type(value) in (list, tuple) and len(value):
                         qobjects = Q(rule[1](value[0]))
                         for fvt in value[1:]:
                             qobjects |= Q(rule[1](fvt))
@@ -3102,12 +3108,12 @@ class GenDetail(GenBase, DetailView):
                 else:
                     filter_field = None
                     # Check if it is a list
-                    if type(item_element)==list:
+                    if type(item_element) == list:
                         # if it is a list, that means that can be found the
-                        #corresponding values for colums and any other
+                        # corresponding values for colums and any other
                         field = item_element[0]
-                        #take into account that field caption can be passed as
-                        #third list element
+                        # take into account that field caption can be passed as
+                        # third list element
                         if len(item_element) >= 3 and item_element[2]:
                             verbose_names[field] = _(item_element[2])
                         if len(item_element) >= 9:
@@ -3117,23 +3123,27 @@ class GenDetail(GenBase, DetailView):
                         field = item_element
 
                     if field not in verbose_names:
-                        verbose_names[field]=_(field.title())
+                        if 'get_' in field and '_display' in field:
+                            label_field = field.replace('get_', '').replace('_display', '')
+                        else:
+                            label_field = field
+                        verbose_names[field] = _(label_field.title())
 
-                    args={}
-                    value=getattr(self.object, field, None)
+                    args = {}
+                    value = getattr(self.object, field, None)
 
                     if callable(value):
                         # if 'request' in value.func_code.co_varnames:
                         if 'request' in value.__code__.co_varnames:
-                            args['request']=self.request
+                            args['request'] = self.request
                             # Call the method
-                        value=value(**args)
+                        value = value(**args)
 
                     sublist.append({
-                        "name":_(verbose_names[field]),
-                        "value":value,
-                        "filter":filter_field,
-                                })
+                        "name": _(verbose_names[field]),
+                        "value": value,
+                        "filter": filter_field,
+                    })
                     gr_object_content.append(field)
 
                 # Increment index
