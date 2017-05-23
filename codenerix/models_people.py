@@ -180,45 +180,95 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         self.user.save()
 
     def refresh_permissions(self):
-        groups = []
-        permissions = []
-        # get groups
-        if hasattr(self, 'CodenerixMeta') and hasattr(self.CodenerixMeta, 'rol_groups'):
-            groups = self.CodenerixMeta.rol_groups
-
-        # get permissions of users
-        if hasattr(self, 'CodenerixMeta') and hasattr(self.CodenerixMeta, 'rol_permissions'):
-            permissions = self.CodenerixMeta.rol_permissions
-
-        # clear permisions
+        
+        # Clear groups and permisions for this user
         self.user.groups.clear()
         self.user.user_permissions.clear()
-
-        # add groups
-        if groups:
-            groups_is_dict = type(groups) is dict
-            groups = list(set(groups))
-            for groupname in groups:
+        
+        # Collect all groups and unique permissions for this user relationships
+        groups=[]
+        permissions=[]
+        for x in self._meta.get_fields():
+            model = x.related_model
+            
+            # Only check roles
+            if model and issubclass(model, GenRole):
+                # Get the link
+                link = getattr(self, x.name, None)
+                
+                # Check if the linked class has CodenerixMeta
+                if link and hasattr(link, 'CodenerixMeta'):
+                    
+                    # Get groups and permissions from that class
+                    groups += list(getattr(link.CodenerixMeta, 'rol_groups', None) or {})
+                    permissions += list(getattr(link.CodenerixMeta, 'rol_permission', None) or [])
+        
+        # Add groups
+        for groupname in set(groups):
+            group = Group.objects.filter(name=groupname).first()
+            if group is None:
+                # Group not found, remake permissions for all groups with roles
+                # GenPerson.group_permissions(type(self))
+                GenPerson.group_permissions(type(self))
+                # Check again
                 group = Group.objects.filter(name=groupname).first()
                 if group is None:
-                    # add group if not exists
-                    group = Group(name=groupname)
-                    group.save()
-                self.user.groups.add(group)
+                    raise IOError("Group '{} not found in the system. I have tried to remake groups but this group is not defined as a Role and it doesn't belong to the system either".format(groupname))
+            
+            # Add the user to this group
+            self.user.groups.add(group)
+        
+        # Add permissions
+        for permissionname in set(permissions):
+            permission = Permission.objects.filter(name=permissionname).first()
+            if permission is None:
+                raise IOError("Permission '{} not found in the system".format(permissionname))
+            
+            # Add the permission to this user
+            self.user.user_permissions.add(permission)
+    
+    def group_permissions(clss):
+        
+        # Clear groups and permisions for this user
+        groups={}
+        for x in clss._meta.get_fields():
+            model = x.related_model
+            
+            # Check if it is a role
+            if model and issubclass(model, GenRole):
                 
-                # Add permissions to the group
-                if groups_is_dict:
-                    for permname in groups[groupname]:
-                        perm = Permission.objects.get(name=permname)
-                        group.permissions.add(perm)
-
-        # add permissions
-        if permissions:
-            permissions = list(set(permissions))
-            for permision in permissions:
-                self.user.user_permissions.add(Permission.objects.filter(codename=permision).first())
-
-        return None
+                # Check if the class has CodenerixMeta
+                if hasattr(model, 'CodenerixMeta'):
+                    
+                    # Get groups and permissions
+                    groups = getattr(model.CodenerixMeta, 'rol_groups', [])
+                    
+                    # Add groups
+                    if groups:
+                        groups_is_dict = type(groups) is dict
+                        groupslist = list(set(groups))
+                        for groupname in groupslist:
+                            
+                            # Check permissions just in case something is wrong
+                            perms = []
+                            if groups_is_dict:
+                                for permname in groups[groupname]:
+                                    perm = Permission.objects.filter(name=permname).first()
+                                    if perm is None:
+                                        raise IOError("Permission '{}' not found!".format(permname))
+                                    else:
+                                        perms.append(perm)
+                            
+                            # Get group
+                            group = Group.objects.filter(name=groupname).first()
+                            if group is None:
+                                # Add group if doesn't exists
+                                group = Group(name=groupname)
+                                group.save()
+                            
+                            # Add permissions to the group
+                            for perm in perms:
+                                group.permissions.add(perm)
 
 
 class GenRole(object):
