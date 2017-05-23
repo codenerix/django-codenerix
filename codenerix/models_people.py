@@ -186,8 +186,8 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         self.user.user_permissions.clear()
         
         # Collect all groups and unique permissions for this user relationships
-        groups=[]
-        permissions=[]
+        groups = []
+        permissions = []
         for x in self._meta.get_fields():
             model = x.related_model
             
@@ -208,7 +208,6 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             group = Group.objects.filter(name=groupname).first()
             if group is None:
                 # Group not found, remake permissions for all groups with roles
-                # GenPerson.group_permissions(type(self))
                 GenPerson.group_permissions(type(self))
                 # Check again
                 group = Group.objects.filter(name=groupname).first()
@@ -227,10 +226,11 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             # Add the permission to this user
             self.user.user_permissions.add(permission)
     
+    @staticmethod
     def group_permissions(clss):
         
         # Clear groups and permisions for this user
-        groups={}
+        groups = {}
         for x in clss._meta.get_fields():
             model = x.related_model
             
@@ -253,9 +253,9 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                             perms = []
                             if groups_is_dict:
                                 for permname in groups[groupname]:
-                                    perm = Permission.objects.filter(name=permname).first()
+                                    perm = Permission.objects.filter(codename=permname).first()
                                     if perm is None:
-                                        raise IOError("Permission '{}' not found!".format(permname))
+                                        raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname))
                                     else:
                                         perms.append(perm)
                             
@@ -293,7 +293,9 @@ class GenRole(object):
     def __CDNX_search_person_CDNX__(self):
         # search relation with GenPerson
         person = None
-        for field in self._meta.related_objects:
-            if GenPerson in field.related_model.__mro__:
-                person = getattr(self, field.name, None)
+        for field in self._meta.get_fields():
+            model = field.related_model
+            if model and issubclass(model, GenPerson):
+                person = getattr(self, field.name)
+                break
         return person
