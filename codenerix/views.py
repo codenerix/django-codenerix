@@ -365,7 +365,7 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
         #   1_flights_pilot_add_list_pilotslist_planes
         # NO DOESN'T HAVE PERMS:
         #   1_flights_pilot_add
-        cache_key = "{}_{}_{}_{}_".format(user.pk, appname, model_name, action_permission)
+        cache_key = "{}_{}_{}_{}_{}_".format(hashlib.sha1(settings.SECRET_KEY).hexdigest(), user.pk, appname, model_name, action_permission)
         if permission:
             if type(permission) == str:
                 cache_key += "".join(permission)
