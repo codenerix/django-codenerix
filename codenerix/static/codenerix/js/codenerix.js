@@ -872,7 +872,8 @@ function dynamic_fields(scope) {
 
                 if ('_clear_' in answer){
                     angular.forEach(answer['_clear_'], (function(v, key){
-                        scope[v] = '';
+                        scope[scope.form_name][v].$setViewValue('');
+                        scope[scope.form_name][v].$render();
                     }));
                 }
                 if ('_readonly_' in answer){
