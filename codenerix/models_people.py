@@ -222,7 +222,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             
             # Add permissions
             for permissionname in set(permissions):
-                permission = Permission.objects.filter(name=permissionname).first()
+                permission = Permission.objects.filter(codename=permissionname).first()
                 if permission is None:
                     raise IOError("Permission '{}' not found in the system".format(permissionname))
                 
