@@ -24,6 +24,7 @@ from django.contrib.auth.models import User
 
 from codenerix.lib.debugger import Debugger
 
+
 class Command(BaseCommand, Debugger):
 
     # Show this when the user types help
@@ -40,7 +41,7 @@ class Command(BaseCommand, Debugger):
         person = None
         for user in User.objects.all():
             self.debug("    > {} ".format(user.username), color='cyan', tail=None)
-            if user.person:
+            if hasattr(user, 'person') and user.person:
                 self.debug("OK".format(user.username), color='green', header=None)
                 user.person.refresh_permissions()
                 person = user.person
@@ -54,5 +55,3 @@ class Command(BaseCommand, Debugger):
             self.debug("DONE", color='green', header=None)
         else:
             self.debug("Can not refresh group permissions because I didn't find a user with a Person", color='red')
-
-
