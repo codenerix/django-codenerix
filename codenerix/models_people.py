@@ -181,50 +181,56 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
     def refresh_permissions(self):
         
-        # Clear groups and permisions for this user
-        self.user.groups.clear()
-        self.user.user_permissions.clear()
+        # Check we have a user to work with
+        if self.user:
         
-        # Collect all groups and unique permissions for this user relationships
-        groups = []
-        permissions = []
-        for x in self._meta.get_fields():
-            model = x.related_model
+            # Clear groups and permisions for this user
+            self.user.groups.clear()
+            self.user.user_permissions.clear()
             
-            # Only check roles
-            if model and issubclass(model, GenRole):
-                # Get the link
-                link = getattr(self, x.name, None)
+            # Collect all groups and unique permissions for this user relationships
+            groups = []
+            permissions = []
+            for x in self._meta.get_fields():
+                model = x.related_model
                 
-                # Check if the linked class has CodenerixMeta
-                if link and hasattr(link, 'CodenerixMeta'):
+                # Only check roles
+                if model and issubclass(model, GenRole):
+                    # Get the link
+                    link = getattr(self, x.name, None)
                     
-                    # Get groups and permissions from that class
-                    groups += list(getattr(link.CodenerixMeta, 'rol_groups', None) or {})
-                    permissions += list(getattr(link.CodenerixMeta, 'rol_permission', None) or [])
-        
-        # Add groups
-        for groupname in set(groups):
-            group = Group.objects.filter(name=groupname).first()
-            if group is None:
-                # Group not found, remake permissions for all groups with roles
-                GenPerson.group_permissions(type(self))
-                # Check again
+                    # Check if the linked class has CodenerixMeta
+                    if link and hasattr(link, 'CodenerixMeta'):
+                        
+                        # Get groups and permissions from that class
+                        groups += list(getattr(link.CodenerixMeta, 'rol_groups', None) or {})
+                        permissions += list(getattr(link.CodenerixMeta, 'rol_permission', None) or [])
+            
+            # Add groups
+            for groupname in set(groups):
                 group = Group.objects.filter(name=groupname).first()
                 if group is None:
-                    raise IOError("Group '{} not found in the system. I have tried to remake groups but this group is not defined as a Role and it doesn't belong to the system either".format(groupname))
+                    # Group not found, remake permissions for all groups with roles
+                    GenPerson.group_permissions(type(self))
+                    # Check again
+                    group = Group.objects.filter(name=groupname).first()
+                    if group is None:
+                        raise IOError("Group '{} not found in the system. I have tried to remake groups but this group is not defined as a Role and it doesn't belong to the system either".format(groupname))
+                
+                # Add the user to this group
+                self.user.groups.add(group)
             
-            # Add the user to this group
-            self.user.groups.add(group)
-        
-        # Add permissions
-        for permissionname in set(permissions):
-            permission = Permission.objects.filter(name=permissionname).first()
-            if permission is None:
-                raise IOError("Permission '{} not found in the system".format(permissionname))
+            # Add permissions
+            for permissionname in set(permissions):
+                permission = Permission.objects.filter(name=permissionname).first()
+                if permission is None:
+                    raise IOError("Permission '{} not found in the system".format(permissionname))
+                
+                # Add the permission to this user
+                self.user.user_permissions.add(permission)
             
-            # Add the permission to this user
-            self.user.user_permissions.add(permission)
+        else:
+            raise IOError("You can not refresh permissions for a Person wich doesn't have an associated user")
     
     @staticmethod
     def group_permissions(clss):
