@@ -224,7 +224,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             for permissionname in set(permissions):
                 permission = Permission.objects.filter(name=permissionname).first()
                 if permission is None:
-                    raise IOError("Permission '{} not found in the system".format(permissionname))
+                    raise IOError("Permission '{}' not found in the system".format(permissionname))
                 
                 # Add the permission to this user
                 self.user.user_permissions.add(permission)
@@ -235,8 +235,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     @staticmethod
     def group_permissions(clss):
         
-        # Clear groups and permisions for this user
-        groups = {}
+        groupsresult = {}
         for x in clss._meta.get_fields():
             model = x.related_model
             
@@ -265,16 +264,26 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                                     else:
                                         perms.append(perm)
                             
-                            # Get group
-                            group = Group.objects.filter(name=groupname).first()
-                            if group is None:
-                                # Add group if doesn't exists
-                                group = Group(name=groupname)
-                                group.save()
-                            
-                            # Add permissions to the group
-                            for perm in perms:
-                                group.permissions.add(perm)
+                            # Remember perms for this group
+                            if groupname not in groupsresult:
+                                groupsresult[groupname]=[]
+                            groupsresult[groupname]+=perms
+        
+        # Set permissions for all groups
+        for groupname in groupsresult:
+            # Get group
+            group = Group.objects.filter(name=groupname).first()
+            if group is None:
+                # Add group if doesn't exists
+                group = Group(name=groupname)
+                group.save()
+            else:
+                # Remove all permissions for this group
+                group.permissions.clean()
+            
+            # Add permissions to the group
+            for perm in groupsresult[groupname]:
+                group.permissions.add(perm)
 
 
 class GenRole(object):
