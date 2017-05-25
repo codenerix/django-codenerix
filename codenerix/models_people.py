@@ -204,7 +204,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                         
                         # Get groups and permissions from that class
                         groups += list(getattr(link.CodenerixMeta, 'rol_groups', None) or {})
-                        permissions += list(getattr(link.CodenerixMeta, 'rol_permission', None) or [])
+                        permissions += list(getattr(link.CodenerixMeta, 'rol_permissions', None) or [])
             
             # Add groups
             for groupname in set(groups):
