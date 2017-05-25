@@ -279,7 +279,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                 group.save()
             else:
                 # Remove all permissions for this group
-                group.permissions.clean()
+                group.permissions.clear()
             
             # Add permissions to the group
             for perm in groupsresult[groupname]:
