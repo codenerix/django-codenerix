@@ -493,6 +493,7 @@ class GenBase(object):
         'Edit': _("Edit"),
         'Cancel': _("Cancel"),
         'Search': _("Search"),
+        'Filters': _("Filters"),
         'RowsPerPage': _("Rows per page"),
         'PageNumber': _("Page number"),
         'registers': _("registers"),

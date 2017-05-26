@@ -78,6 +78,8 @@ limitations under the License.
                                     <button type="submit" class="btn btn-default btn-sm" ng-click="refresh()">
                                         <span class="glyphicon glyphicon-search"></span>
                                     </button>
+                                </span>
+                                <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.Filters}}" popover-trigger="mouseenter">
                                     <button class="btn btn-default btn-sm" ng-class="{'btn-default':!data.meta.search_filter_button,'btn-info':data.meta.search_filter_button}" ng-click="data.meta.search_filter_button=!data.meta.search_filter_button">
                                         <span class="fa fa-sliders" ng-class="{'fa-inverse':data.meta.search_filter_button}"></span>
                                     </button>
