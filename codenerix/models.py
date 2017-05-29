@@ -385,7 +385,11 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                     attrs[key] = field
                             
                             if hasattr(ffield, "verbose_name"):
-                                if type(ffield.verbose_name) in [unicode, str]:
+                                try:
+                                    string_checks = [unicode, str]
+                                except:
+                                    string_checks = [str]
+                                if type(ffield.verbose_name) in string_checks:
                                     attrs_txt[ffield.verbose_name] = force_text(field_txt, errors='replace')
                                 else:
                                     attrs_txt[str(ffield.verbose_name)] = force_text(field_txt, errors='replace')
