@@ -956,6 +956,7 @@ class GenList(GenBase, ListView):
         show_modal = True                           # With 'True' it will push the system to render the result in a modal window
         vtable = False                              # With 'True' it will use one-page-only lists with scroll detection for autoloading rows
         ngincludes = {'name':'path_to_partial'}     # Keep trace for ngincludes extra partials
+        export_excel = True                         # Export to excel the list
 
         ws_entry_point                              # Set ws_entry_point variable to a fixed value
         static_partial_row                          # Set static_partial_row to a fixed value
@@ -2062,10 +2063,13 @@ class GenList(GenBase, ListView):
         # Check vtable
         context['vtable']=getattr(self,'vtable', False)
 
+        # Export to excel
+        context['export_excel'] = getattr(self, 'export_excel', True)
+
         # Check ngincludes
         context['ngincludes']=getattr(self,'ngincludes', {})
         if 'table' not in context['ngincludes'].keys():
-            context['ngincludes']['table']="/static/codenerix/partials/table.html"
+            context['ngincludes']['table']="{}codenerix/partials/table.html".format(settings.STATIC_URL)
 
         # Check linkadd
         context['linkadd']=getattr(self,'linkadd', self.auth_permission('add') or getattr(self,'public',False))
@@ -2134,6 +2138,7 @@ class GenList(GenBase, ListView):
         a['pages_to_bring'] = context['pages_to_bring']
         a['linkadd'] = context['linkadd']
         a['vtable'] = context['vtable']
+        a['export_excel'] = context['export_excel']
         a['ngincludes'] = context['ngincludes']
         a['linkedit'] = context['linkedit']
         a['show_details'] = context['show_details']
