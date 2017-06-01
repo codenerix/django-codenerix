@@ -251,7 +251,7 @@ def get_static(desired, user, lang, default, extension='html'):
             addon = ""
         target = "%s%s.%s" % (basepath, addon, extension)
         if hasattr(settings, "STATIC_ROOT") and settings.STATIC_ROOT and os.path.exists(os.path.join(settings.STATIC_ROOT, target)):
-            found = target
+            found = os.path.join(settings.STATIC_URL, target)
             break
     
     # Return target template
