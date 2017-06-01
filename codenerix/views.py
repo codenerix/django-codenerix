@@ -518,6 +518,7 @@ class GenBase(object):
     tabs = []
 
     # Constants
+    BASE_URL = getattr(settings, 'BASE_URL', '')
     DEFAULT_STATIC_PARTIAL_ROWS = 'codenerix/partials/rows.html'
 
     def dispatch(self, *args, **kwargs):
@@ -755,8 +756,13 @@ class GenBase(object):
                         static_partial_row_path=tab['static_partial_row']
 
                     # Save static partial information
-                    tabfinal['static_partial_row_path'] = settings.STATIC_URL+static_partial_row_path
-                    tabfinal['static_partial_row'] = settings.STATIC_URL+get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
+                    old = self.BASE_URL + static_partial_row_path
+                    new = settings.STATIC_URL + static_partial_row_path
+                    tabfinal['static_partial_row_path'] = new
+
+                    old = self.BASE_URL + get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html')
+                    new = settings.STATIC_URL + get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html')
+                    tabfinal['static_partial_row'] = old
 
                     # Save Internal ID
                     tabfinal['internal_id'] = internal_id
@@ -798,8 +804,14 @@ class GenBase(object):
                 static_partial_row_path=tab['static_partial_row']
 
             # Save static partial information
-            tabfinal['static_partial_row_path'] = settings.STATIC_URL+static_partial_row_path
-            tabfinal['static_partial_row'] = settings.STATIC_URL+get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
+            old = self.BASE_URL + static_partial_row_path
+            new = settings.STATIC_URL + static_partial_row_path
+            tabfinal['static_partial_row_path'] = new
+ 
+            old = self.BASE_URL + get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html')
+            new = settings.STATIC_URL + get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html')
+            tabfinal['static_partial_row'] = old
+            # raise Exception(old, new)
 
             # Save Internal ID
             tabfinal['internal_id'] = internal_id
@@ -1092,12 +1104,19 @@ class GenList(GenBase, ListView):
         self.extra_context['user']=self.user
 
         # Attach WS entry point and STATIC entry point
-        self.extra_context['ws_entry_point']=settings.STATIC_URL+getattr(self,"ws_entry_point", "{0}/{1}".format(self._appname,"{0}s".format(self._modelname.lower())))
-        static_partial_row_path=getattr(self, 'static_partial_row', "{0}/{1}_rows.html".format(self._appname,"{0}s".format(self._modelname.lower())))
-        self.extra_context['static_partial_row']=get_static(static_partial_row_path,self.user,self.language, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
+        old = self.BASE_URL + getattr(self, "ws_entry_point", "{0}/{1}".format(self._appname, "{0}s".format(self._modelname.lower())))
+        new = settings.STATIC_URL + getattr(self, "ws_entry_point", "{0}/{1}".format(self._appname, "{0}s".format(self._modelname.lower())))
+        self.extra_context['ws_entry_point'] = old
 
-        static_filters_row_path=getattr(self, 'static_filters_row', "{0}/{1}_filters.js".format(self._appname,"{0}s".format(self._modelname.lower())))
-        self.extra_context['static_filters_row']=get_static(static_filters_row_path,self.user,self.language,'codenerix/js/rows.js','js')
+        static_partial_row_path = getattr(self, 'static_partial_row', "{0}/{1}_rows.html".format(self._appname, "{0}s".format(self._modelname.lower())))
+        old = self.BASE_URL + get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html')
+        new = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html')
+        self.extra_context['static_partial_row'] = old
+
+        static_filters_row_path = getattr(self, 'static_filters_row', "{0}/{1}_filters.js".format(self._appname, "{0}s".format(self._modelname.lower())))
+        old = self.BASE_URL + get_static(static_filters_row_path, self.user, self.language, 'codenerix/js/rows.js', 'js')
+        new = get_static(static_filters_row_path, self.user, self.language, 'codenerix/js/rows.js', 'js')
+        self.extra_context['static_filters_row'] = new
 
         self.extra_context['field_delete'] = getattr(self, 'field_delete', False)
         self.extra_context['field_check'] = getattr(self, 'field_check', None)
