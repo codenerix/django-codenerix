@@ -160,7 +160,7 @@ class Command(BaseCommand, Debugger):
             key=''
             while key not in ['n','y']:
                 self.debug("All 'locale' folders are going to be removed, are you sure? (y|n) ",tail=False, color="red")
-                key=raw_input().lower()
+                key=input().lower()
                 self.debug("", header=False)
             
             # Remove all locale folders
