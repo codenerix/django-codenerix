@@ -518,7 +518,8 @@ class GenBase(object):
     tabs = []
 
     # Constants
-    DEFAULT_STATIC_PARTIAL_ROWS = 'codenerix/partials/rows.html'
+    BASE_URL = getattr(settings, 'BASE_URL', '')
+    DEFAULT_STATIC_PARTIAL_ROWS = '{}codenerix/partials/rows.html'.format(BASE_URL)
 
     def dispatch(self, *args, **kwargs):
         # Save arguments in the environment
@@ -750,7 +751,7 @@ class GenBase(object):
                     # Get static partial row information
                     if 'static_partial_row' not in tab:
                         tabdetailinfo = model_inspect(tabdetailsclss)
-                        static_partial_row_path="{0}/{1}_rows.html".format(tabdetailinfo['appname'],"{0}s".format(tabdetailinfo['modelname'].lower()))
+                        static_partial_row_path="{0}{1}/{2}_rows.html".format(self.BASE_URL,tabdetailinfo['appname'],"{0}s".format(tabdetailinfo['modelname'].lower()))
                     else:
                         static_partial_row_path=tab['static_partial_row']
 
@@ -793,7 +794,7 @@ class GenBase(object):
             # Get static partial row information
             if 'static_partial_row' not in tab:
                 tabdetailinfo = model_inspect(tabdetailsclss)
-                static_partial_row_path="{0}/{1}_rows.html".format(tabdetailinfo['appname'],"{0}s".format(tabdetailinfo['modelname'].lower()))
+                static_partial_row_path="{0}{1}/{2}_rows.html".format(self.BASE_URL,tabdetailinfo['appname'],"{0}s".format(tabdetailinfo['modelname'].lower()))
             else:
                 static_partial_row_path=tab['static_partial_row']
 
@@ -1092,12 +1093,12 @@ class GenList(GenBase, ListView):
         self.extra_context['user']=self.user
 
         # Attach WS entry point and STATIC entry point
-        self.extra_context['ws_entry_point']=getattr(self,"ws_entry_point", "{0}/{1}".format(self._appname,"{0}s".format(self._modelname.lower())))
-        static_partial_row_path=getattr(self, 'static_partial_row', "{0}/{1}_rows.html".format(self._appname,"{0}s".format(self._modelname.lower())))
+        self.extra_context['ws_entry_point']=getattr(self,"ws_entry_point", "{0}{1}/{2}".format(self.BASE_URL, self._appname,"{0}s".format(self._modelname.lower())))
+        static_partial_row_path=getattr(self, 'static_partial_row', "{0}{1}/{2}_rows.html".format(self.BASE_URL, self._appname,"{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_row']=get_static(static_partial_row_path,self.user,self.language, self.DEFAULT_STATIC_PARTIAL_ROWS,'html')
 
-        static_filters_row_path=getattr(self, 'static_filters_row', "{0}/{1}_filters.js".format(self._appname,"{0}s".format(self._modelname.lower())))
-        self.extra_context['static_filters_row']=get_static(static_filters_row_path,self.user,self.language,'codenerix/js/rows.js','js')
+        static_filters_row_path=getattr(self, 'static_filters_row', "{0}{1}/{2}_filters.js".format(self.BASE_URL, self._appname,"{0}s".format(self._modelname.lower())))
+        self.extra_context['static_filters_row']=get_static(static_filters_row_path,self.user,self.language,'{0}codenerix/js/rows.js'.format(self.BASE_URL),'js')
 
         self.extra_context['field_delete'] = getattr(self, 'field_delete', False)
         self.extra_context['field_check'] = getattr(self, 'field_check', None)
