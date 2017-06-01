@@ -157,10 +157,13 @@ class Command(BaseCommand, Debugger):
         if options['clean']:
             
             # Ask the user if would really like to remove all locale folders
-            key=''
-            while key not in ['n','y']:
-                self.debug("All 'locale' folders are going to be removed, are you sure? (y|n) ",tail=False, color="red")
-                key=input().lower()
+            key = ''
+            while key not in ['n', 'y']:
+                self.debug("All 'locale' folders are going to be removed, are you sure? (y|n) ", tail=False, color="red")
+                try:
+                    key = raw_input().lower()
+                except NameError:
+                    key = input().lower()
                 self.debug("", header=False)
             
             # Remove all locale folders
