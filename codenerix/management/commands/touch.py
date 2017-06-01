@@ -113,7 +113,9 @@ class Command(BaseCommand, Debugger):
                 # Ask the user if would really like to remove all locale folders
                 self.debug("Hit a ENTER when ready to go or Q to exit (ENTER|q) ",tail=False, color="purple")
                 try:
-                    key=input().lower()
+                    key = raw_input().lower()
+                except NameError:
+                    key = input().lower()
                 except KeyboardInterrupt:
                     self.debug(" ",header=False)
                     key='q'
