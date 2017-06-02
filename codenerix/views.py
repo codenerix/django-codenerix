@@ -35,6 +35,7 @@ import string
 import random
 
 # Django
+from django.db import models
 from django.views.generic import View
 from django.views.generic import ListView
 from django.forms.models import model_to_dict
@@ -66,7 +67,7 @@ from django.utils.http import urlsafe_base64_decode
 # Export to Excel
 from openpyxl import Workbook
 
-from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay
+from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter
 from codenerix.templatetags_lists import unlist
 
 
@@ -1160,6 +1161,24 @@ class GenList(GenBase, ListView):
         # Call the base implementation
         return super(GenList, self).dispatch(*args, **kwargs)
 
+    def autoSearchF(self, MODELINF):
+        fields_show = [x[0] for x in MODELINF.fields()]
+        fields = {}
+        for field in self.model._meta.get_fields():
+            if field.name in fields_show:
+                if type(field) in [models.CharField, models.TextField]:
+                    if field.choices:
+                        fields[field.name] = (field.name, lambda x, fieldname=field.name: Q(**{'{}'.format(fieldname): x}), list(field.choices))
+                    else:
+                        fields[field.name] = (field.verbose_name, lambda x, fieldname=field.name: Q(**{'{}__icontains'.format(fieldname): x}), 'input')
+                elif type(field) in [models.BooleanField, ]:
+                    fields[field.name] = (field.verbose_name, lambda x, fieldname=field.name: Q(**{'{}'.format(fieldname): x}), [(True, _('Yes')), (False, _('No'))])
+                elif type(field) in [models.DateField, models.DateTimeField, ]:
+                    fields[field.name] = (field.verbose_name, lambda x, fieldname=field.name: Q(**daterange_filter(x, fieldname)), 'daterange')
+                elif type(field) in [models.IntegerField, models.SmallIntegerField, models.FloatField, ]:
+                    fields[field.name] = (field.verbose_name, lambda x, fieldname=field.name: Q(**{'{}'.format(fieldname): x}), 'input')
+        return fields
+
     def get_queryset(self):
         # Call the base implementation
         queryset=super(GenList, self).get_queryset()
@@ -1247,8 +1266,11 @@ class GenList(GenBase, ListView):
                 filters_by_struct=json.loads(str(filters_get))
         except Exception:
             filters_by_struct=[]
+
+        # 
+        listfilters = self.autoSearchF(MODELINF)
         # List of filters from the model
-        listfilters=MODELINF.searchF()
+        listfilters.update(MODELINF.searchF())
 
         # Process the search
         filters_struct={}
