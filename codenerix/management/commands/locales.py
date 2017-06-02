@@ -80,7 +80,7 @@ class Command(BaseCommand, Debugger):
         appname=settings.ROOT_URLCONF.split(".")[0]
         basedir=settings.BASE_DIR
         appdir = os.path.abspath("{}/{}".format(basedir,appname))
-        print appdir
+        print(appdir)
         noauto=options['noauto']
         
         # Check user selection
