@@ -38,7 +38,7 @@ import random
 from django.views.generic import View
 from django.views.generic import ListView
 from django.forms.models import model_to_dict
-from django.utils.translation import ugettext as _ # Before it was , ugettext_lazy as __
+from django.utils.translation import ugettext as _  # Before it was , ugettext_lazy as __
 from django.utils.encoding import smart_text
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -60,7 +60,7 @@ from django.utils.translation import get_language
 
 from django.conf import settings
 
-from django.db.models import Q, F
+from django.db.models import Q, F, FieldDoesNotExist
 from django.utils.http import urlsafe_base64_decode
 
 # Export to Excel
@@ -3148,11 +3148,18 @@ class GenDetail(GenBase, DetailView):
                         field = item_element
 
                     if field not in verbose_names:
-                        if 'get_' in field and '_display' in field:
-                            label_field = field.replace('get_', '').replace('_display', '')
+                        if field.startswith('get_') and field.endswith('_display'):
+                            label_field = remove_getdisplay(field)
+                            if self.model:
+                                try:
+                                    verbose_names[field] = self.model._meta.get_field(label_field).verbose_name
+                                except FieldDoesNotExist:
+                                    verbose_names[field] = _(label_field)
+                            else:
+                                verbose_names[field] = _(label_field)
                         else:
                             label_field = field
-                        verbose_names[field] = _(label_field.title())
+                            verbose_names[field] = _(label_field)
 
                     args = {}
                     value = getattr(self.object, field, None)
