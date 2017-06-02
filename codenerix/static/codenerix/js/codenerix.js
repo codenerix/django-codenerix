@@ -862,7 +862,15 @@ function dynamic_fields(scope) {
                 // Set new value
                 if (scope[scope.form_name] != undefined && scope[scope.form_name][key] != undefined){
                     var element = scope[scope.form_name][key];
-                    element.$setViewValue(value);
+                    if (typeof(value) == "object"){
+                        var info = [];
+                        info['id']= value[0];
+                        info['label']= value[1];
+                        scope.options[key].push(info);
+                        element.$setViewValue(value[0]);
+                    }else{
+                        element.$setViewValue(value);
+                    }
                     element.$render();
                     if (ngchange!==undefined) {
                         // Evaluate the expresion
