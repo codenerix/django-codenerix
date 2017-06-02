@@ -560,7 +560,6 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
         else:
             label = True
 
-
         if self.is_required:
             attrs.update({
                 "required": "required"
@@ -569,14 +568,19 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
             "class": "form-control ng-valid ng-pristine"
         })
 
-        value_date = ''#str(datetime.today().date())
-        value_time = ''#'0000'
+        value_date = ''  # str(datetime.today().date())
+        value_time = ''  # '0000'
 
-        if value and value!="":
-            if type(value)==datetime:
+        try:
+            list_type = [str, unicode, ]
+        except NameError:
+            list_type = [str, ]
+
+        if value and value != "":
+            if type(value) == datetime:
                 value_date = value.date()
                 value_time = '{0:02d}{1:02d}'.format(value.time().hour, value.time().minute)
-            elif type(value) in [str, unicode]:
+            elif type(value) in list_type:
                 # 2015-06-03 00:00 or 2015-06-03 00:00:00
                 try:
                     ###########################################################################
@@ -585,9 +589,9 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
                     #          system. It should checked how is being used in                 #
                     #          method value_from_datadict() from this same class              #
                     ###########################################################################
-                    if len(value)==16:
+                    if len(value) == 16:
                         aux = datetime.strptime(value, "%Y-%m-%d %H:%M")
-                    elif len(value)==19:
+                    elif len(value) == 19:
                         aux = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
                     else:
                         aux = None

@@ -256,6 +256,9 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         def __unicode__(self):
             return self.show(view='txt')
 
+        def __str__(self):
+            return self.__unicode__()
+
         def action(self):
             # Find the action
             if self.action_flag == ADDITION:
@@ -387,7 +390,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                             if hasattr(ffield, "verbose_name"):
                                 try:
                                     string_checks = [unicode, str]
-                                except:
+                                except NameError:
                                     string_checks = [str]
                                 if type(ffield.verbose_name) in string_checks:
                                     attrs_txt[ffield.verbose_name] = force_text(field_txt, errors='replace')

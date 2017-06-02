@@ -62,6 +62,9 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             output = "%s*" % (self.user)
         return smart_text(output)
 
+    def __str__(self):
+        return self.__unicode__()
+    
     def __fields__(self, info):
         fields = []
         fields.append(('user__username', _('User')))

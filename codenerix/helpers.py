@@ -58,10 +58,15 @@ def epochdate(timestamp):
 
 
 def date2string(dtime, formt, default):
+    try:
+        list_type = [str, unicode, ]
+    except NameError:
+        list_type = [str, ]
+
     if dtime:
         if ('year' in dir(dtime)) and (dtime.year < 1900):
             return default
-        elif type(dtime) == unicode:
+        elif type(dtime) in list_type:
             return dtime
         else:
             return dtime.strftime(formt)

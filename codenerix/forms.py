@@ -243,10 +243,14 @@ class BaseForm(object):
                     # Recursive
                     fields+=self.get_groups([list(f)],processed,False)
                 else:
+                    try:
+                        list_type = [str, unicode, ]
+                    except NameError:
+                        list_type = [str, ]
                     # Check if it is a list
-                    if type(f)==list:
+                    if type(f) == list:
                         # This is a field with attributes, get the name
-                        field=f[0]
+                        field = f[0]
                         
                         if html_helper and token['name'] in html_helper and 'items' in html_helper[token['name']] and field in html_helper[token['name']]['items']:
                             if 'pre' in html_helper[token['name']]['items'][field]:
@@ -255,25 +259,25 @@ class BaseForm(object):
                                 atr["html_helper_post"] = html_helper[token['name']]['items'][field]['post']
                         
                         # Process each attribute (if any)
-                        dictionary=False
-                        for idx,element in enumerate(f[1:]):
-                            if type(element)==dict:
-                                dictionary=True
+                        dictionary = False
+                        for idx, element in enumerate(f[1:]):
+                            if type(element) == dict:
+                                dictionary = True
                                 for key in element.keys():
                                     if key in labels:
-                                        atr[key]=element[key]
+                                        atr[key] = element[key]
                                     else:
-                                        raise IOError("Unknown attribute '{0}' as field '{1}' in list of fields".format(key,field))
+                                        raise IOError("Unknown attribute '{0}' as field '{1}' in list of fields".format(key, field))
                             else:
                                 if not dictionary:
                                     if element is not None:
-                                        atr[attributes[idx][0]]=element
+                                        atr[attributes[idx][0]] = element
                                 else:
                                     raise IOError("We already processed a dicionary element in this list of fields, you can not add anoother type of elements to it, you must keep going with dictionaries")
-                    elif type(f)==str or type(f)==unicode:
-                        field=f
+                    elif type(f) in list_type:
+                        field = f
                     else:
-                        raise IOError("Uknown element type '{0}' inside group '{1}'".format(type(f),token['name']))
+                        raise IOError("Uknown element type '{0}' inside group '{1}'".format(type(f), token['name']))
                     
                     # Get the Django Field object
                     found=None
