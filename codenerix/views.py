@@ -365,7 +365,16 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
         #   1_flights_pilot_add_list_pilotslist_planes
         # NO DOESN'T HAVE PERMS:
         #   1_flights_pilot_add
-        cache_key = "{}_{}_{}_{}_{}_".format(hashlib.sha1(settings.SECRET_KEY).hexdigest(), user.pk, appname, model_name, action_permission)
+        try:
+            # python 2.7
+            hash_key = hashlib.sha1(settings.SECRET_KEY).hexdigest()
+        except TypeError:
+            # python 3.x
+            secret_key = bytes(settings.SECRET_KEY, encoding='utf-8')
+            hash_key = hashlib.sha1(secret_key).hexdigest()
+        
+        cache_key = "{}_{}_{}_{}_{}_".format(hash_key, user.pk, appname, model_name, action_permission)
+        
         if permission:
             if type(permission) == str:
                 cache_key += "".join(permission)
@@ -1698,7 +1707,14 @@ class GenList(GenBase, ListView):
             else:
                 name = value[0]
                 # not usable fields, example: fields.append((None, _('Selector'))) in airportslist
-                order_key = "#{}".format(hashlib.md5(value[1]).hexdigest())
+                try:
+                    # python 2.7
+                    hash_key = hashlib.md5(value[1]).hexdigest()
+                except TypeError:
+                    # python 3.x
+                    info_key = bytes(value[1], encoding='utf-8')
+                    hash_key = hashlib.md5(info_key).hexdigest()
+                order_key = "#{}".format(hash_key)
 
             publicname = value[1]
             if len(value) > 2:
@@ -1765,7 +1781,14 @@ class GenList(GenBase, ListView):
             if field:
                 context['columns'].append(sort[field.split(":")[0]])
             else:
-                field = "#{}".format(hashlib.md5(value[1]).hexdigest())
+                try:
+                    # python 2.7
+                    hash_key = hashlib.md5(value[1]).hexdigest()
+                except TypeError:
+                    # python 3.x
+                    info_key = bytes(value[1], encoding='utf-8')
+                    hash_key = hashlib.md5(info_key).hexdigest()
+                field = "#{}".format(hash_key)
                 # selector
                 context['columns'].append(sort[field])
 

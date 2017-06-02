@@ -199,21 +199,42 @@ class TokenAuth(ModelBackend):
                     keys.append(master)
                 if config['master_signed']:                     # MASTER KEY SIGNED
                     # keys.append("master_signed")
-                    keys.append(hashlib.sha1(tosign + master).hexdigest())
+                    try:
+                        # python 2.7
+                        key_encode = hashlib.sha1(tosign + master).hexdigest()
+                    except TypeError:
+                        # python 3.x
+                        key_temp = bytes(tosign + master, encoding='utf-8')
+                        key_encode = hashlib.sha1(key_temp).hexdigest()
+                    keys.append(key_encode)
             if user_key:
                 if config['user_unsigned']:                     # USER KEY
                     # keys.append("user_unsigned")
                     keys.append(user_key)
                 if config['user_signed']:                       # USER KEY SIGNED
                     # keys.append("user_signed")
-                    keys.append(hashlib.sha1(tosign + user_key).hexdigest())
+                    try:
+                        # python 2.7
+                        key_encode = hashlib.sha1(tosign + user_key).hexdigest()
+                    except TypeError:
+                        # python 3.x
+                        key_temp = bytes(tosign + user_key, encoding='utf-8')
+                        key_encode = hashlib.sha1(key_temp).hexdigest()
+                    keys.append(key_encode)
             if otp:
                 if config['otp_unsigned']:                      # OTP KEY
                     # keys.append("otp_unsigned")
                     keys.append(otp)
                 if config['otp_signed']:                        # OTP KEY SIGNED
                     # keys.append("otp_signed")
-                    keys.append(hashlib.sha1(tosign + otp).hexdigest())
+                    try:
+                        # python 2.7
+                        key_encode = hashlib.sha1(tosign + otp).hexdigest()
+                    except TypeError:
+                        # python 3.x
+                        key_temp = bytes(tosign + otp, encoding='utf-8')
+                        key_encode = hashlib.sha1(key_temp).hexdigest()
+                    keys.append(key_encode)
 
             # Key is valid
             if token in keys:

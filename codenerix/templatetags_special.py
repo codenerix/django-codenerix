@@ -28,23 +28,34 @@ from PIL import Image, ImageDraw, ImageFont
 from os import path
 import hashlib
 
-def txt2img(text,FontSize=14,bg="#ffffff",fg="#000000",font="FreeMono.ttf"):
-    font_dir = settings.MEDIA_ROOT+"/txt2img/"   # Set the directory to store the images
-    img_name_temp = text+"-"+bg.strip("#")+"-"+fg.strip("#")+"-"+str(FontSize) # Remove hashes
-    img_name="%s.jpg" % (hashlib.md5(img_name_temp).hexdigest())
-    if path.exists(font_dir+img_name): # Make sure img doesn't exist already
+
+def txt2img(text, FontSize=14, bg="#ffffff", fg="#000000", font="FreeMono.ttf"):
+    font_dir = settings.MEDIA_ROOT + "/txt2img/"   # Set the directory to store the images
+    img_name_temp = text + "-" + bg.strip("#") + "-" + fg.strip("#") + "-" + str(FontSize)   # Remove hashes
+    try:
+        # python 2.7
+        img_name_encode = hashlib.md5(img_name_temp).hexdigest()
+    except TypeError:
+        # python 3.x
+        img_name_temp = bytes(img_name_temp, encoding='utf-8')
+        img_name_encode = hashlib.md5(img_name_temp).hexdigest()
+
+    img_name = "%s.jpg" % (img_name_encode)
+    
+    if path.exists(font_dir + img_name):   # Make sure img doesn't exist already
         pass
-    else:   
+    else:
         font_size = FontSize
-        fnt = ImageFont.truetype(font_dir+font, font_size)
-        w, h= fnt.getsize(text)
+        fnt = ImageFont.truetype(font_dir + font, font_size)
+        w, h = fnt.getsize(text)
         img = Image.new('RGBA', (w, h), bg)
         draw = ImageDraw.Draw(img)
-        draw.fontmode = "0" 
-        draw.text((0,0), text, font=fnt, fill=fg)
-        img.save(font_dir+img_name,"JPEG",quality=100)  
-    imgtag = '<img src="'+settings.MEDIA_URL+'txt2img/'+img_name+'" alt="'+text+'" />'
+        draw.fontmode = "0"
+        draw.text((0, 0), text, font=fnt, fill=fg)
+        img.save(font_dir + img_name, "JPEG", quality=100)
+    imgtag = '<img src="' + settings.MEDIA_URL + 'txt2img/' + img_name + '" alt="' + text + '" />'
     return imgtag
+
 
 def ifusergroup(parser, token):
     """ Check to see if the currently logged in user belongs to a specific

@@ -480,7 +480,7 @@ class DynamicInput(forms.widgets.Input):
 class FileAngularInput(forms.widgets.FileInput):
     def render(self, name, value, attrs=None):
         if not attrs:
-            attrs={}
+            attrs = {}
         if value is not None:
             attrs.update({
                 "value": value
@@ -490,7 +490,7 @@ class FileAngularInput(forms.widgets.FileInput):
                 "required": "required"
             })
         attrs.update({
-            "valid-file":"valid-file",
+            "valid-file": "valid-file",
             "base-sixty-four-input": "base-sixty-four-input"
         })
 
@@ -501,7 +501,7 @@ class FileAngularInput(forms.widgets.FileInput):
                 image = u'<img src="{0}{1}" style="max-height:75px; max-width:150px;" />'.format(settings.MEDIA_URL, value)
                 link = u'<a href="{0}{1}" target="_blank">{2}</a>'.format(settings.MEDIA_URL, value, image)
 
-                html ='<div class="row">'
+                html = '<div class="row">'
                 html += '   <div class="col-md-6">{}</div>'.format(button)
                 html += '   <div class="col-md-6">{}</div>'.format(link)
                 html += '</div>'
@@ -519,20 +519,28 @@ class FileAngularInput(forms.widgets.FileInput):
 
         if isinstance(field, dict):
             # Prepare filename
-            hexname = hashlib.sha1("{0}{1}".format(field['filename'].encode('ascii', 'ignore'),random.random())).hexdigest()
+            temp_hexname = "{0}{1}".format(field['filename'].encode('ascii', 'ignore'), random.random())
+            try:
+                # python 2.7
+                hexname = hashlib.sha1(temp_hexname).hexdigest()
+            except TypeError:
+                # python 3.x
+                temp_hexname = bytes(temp_hexname, encoding='utf-8')
+                hexname = hashlib.sha1(temp_hexname).hexdigest()
+
             ext = field['filename'].split(".")[-1]
             if not ext:
-                ext="dat"
+                ext = "dat"
 
             # Prepare temporal file in memory
             f = StringIO()
             f.write(base64.b64decode(field[u'base64']))
-            f.name="{0}.{1}".format(hexname,ext)
-            f.original_name=field['filename']
+            f.name = "{0}.{1}".format(hexname, ext)
+            f.original_name = field['filename']
             f.seek(0)
 
             # Add the files to FILES
-            files[name]= File(f)
+            files[name] = File(f)
 
             # Let Django do its work
             return super(FileAngularInput, self).value_from_datadict(data, files, name)
