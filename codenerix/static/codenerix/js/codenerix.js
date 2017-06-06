@@ -1348,7 +1348,6 @@ if (typeof(get_static)=="undefined") {
         } else {
             var result = "/static/"+path;
         }
-        console.log("get_static("+path+"): "+result);
         return result;
     };
 }

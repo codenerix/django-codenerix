@@ -529,7 +529,7 @@ class GenBase(object):
 
     # Constants
     BASE_URL = getattr(settings, 'BASE_URL', '')
-    DEFAULT_STATIC_PARTIAL_ROWS = 'codenerix/partials/rows.html'
+    DEFAULT_STATIC_PARTIAL_ROWS = os.path.join(settings.STATIC_URL, 'codenerix/partials/rows.html')
 
     def dispatch(self, *args, **kwargs):
         # Save arguments in the environment
