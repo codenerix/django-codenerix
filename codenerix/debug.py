@@ -125,8 +125,8 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     
     CODENERIX_CSS_DEBUG=' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.css" rel="stylesheet"> \
-    <link href="/static/djangular/css/styles.css" rel="stylesheet"> \
-    <link href="/static/djangular/css/bootstrap3.css" rel="stylesheet"> \
+    <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
+    <link href="{STATIC_URL}djangular/css/bootstrap3.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-bootstrap-colorpicker/css/colorpicker.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-daterangepicker/daterangepicker-bs3.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-ui/select.css" rel="stylesheet"> \
@@ -143,8 +143,8 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     '
     CODENERIX_CSS_MIN=' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"> \
-    <link href="/static/djangular/css/styles.css" rel="stylesheet"> \
-    <link href="/static/djangular/css/bootstrap3.css" rel="stylesheet"> \
+    <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
+    <link href="{STATIC_URL}djangular/css/bootstrap3.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-bootstrap-colorpicker/css/colorpicker.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-daterangepicker/daterangepicker-bs3.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-ui/select.min.css" rel="stylesheet"> \
@@ -176,7 +176,7 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular/angular-sanitize.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular/angular-touch.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-material/angular-material.js"></script> \
-    <script type="text/javascript" src="/static/djangular/js/django-angular.js"></script> \
+    <script type="text/javascript" src="{STATIC_URL}djangular/js/django-angular.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-loading-bar/loading-bar.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script> \
 \
@@ -218,7 +218,7 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular/angular-sanitize.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular/angular-touch.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-material/angular-material.min.js"></script> \
-    <script type="text/javascript" src="/static/djangular/js/django-angular.min.js"></script> \
+    <script type="text/javascript" src="{STATIC_URL}djangular/js/django-angular.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-loading-bar/loading-bar.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script> <!-- .min.js FAILS! --> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js"></script> \

@@ -1340,6 +1340,19 @@ function scroll_refresh(scope, new_last_scroll) {
     }
 }
 
+// Define get_static if no other method exists
+if (typeof(get_static)=="undefined") {
+    var get_static = function (path) {
+        if (typeof(static_url)!="undefined") {
+            var result =static_url+path;
+        } else {
+            var result = "/static/"+path;
+        }
+        console.log("get_static("+path+"): "+result);
+        return result;
+    };
+}
+
 function codenerix_builder(libraries, routes) {
     /*
      * libraries:
@@ -1418,9 +1431,9 @@ function codenerix_builder(libraries, routes) {
         }
         // Build known
         var known=Array();
-        known.push(['list0',            '/',        '/static/codenerix/partials/list.html',                                   'ListCtrl']);
+        known.push(['list0',            '/',        get_static('codenerix/partials/list.html'),                                   'ListCtrl']);
         if (typeof(static_partial_row)!='undefined') {
-            known.push(['list0.rows',   null,       '/static/'+static_partial_row,                                          null]);
+            known.push(['list0.rows',   null,       static_partial_row,                                          null]);
         }
         if (typeof(ws_entry_point)!='undefined') {
             known.push(['formadd0',     '/add',     function(params) { return '/'+ws_entry_point+'/add'; },                 'FormAddCtrl']);
@@ -1436,13 +1449,13 @@ function codenerix_builder(libraries, routes) {
                     } else {
                         controller='SubListStaticCtrl';
                     }
-                    known.push(['details0.sublist'+tab.internal_id+'', '/sublist'+tab.internal_id+'/:listid/', '/static/codenerix/partials/list.html', controller]);
+                    known.push(['details0.sublist'+tab.internal_id+'', '/sublist'+tab.internal_id+'/:listid/', get_static('codenerix/partials/list.html'), controller]);
                     if (typeof(tab.static_partial_row)!="undefined"){
-                        known.push(['details0.sublist'+tab.internal_id+'.rows', null, '/static/'+tab.static_partial_row, null]);
+                        known.push(['details0.sublist'+tab.internal_id+'.rows', null, tab.static_partial_row, null]);
                     }
                 });
             }
-            known.push(['details0.sublist', '/sublist/0/', '/static/codenerix/partials/list.html', 'SubListCtrl']);
+            known.push(['details0.sublist', '/sublist/0/', get_static('codenerix/partials/list.html'), 'SubListCtrl']);
         }
         
         // Process known routes

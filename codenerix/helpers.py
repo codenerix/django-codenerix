@@ -243,7 +243,7 @@ def get_template(template, user, lang, extension='html', raise_error=True):
             return test
 
 
-def get_static(desired, user, lang, default, extension='html'):
+def get_static(desired, user, lang, default, extension='html', relative=False):
     # Get profiled paths
     (paths, basepath) = get_profiled_paths(desired, user, lang, extension)
     
@@ -256,8 +256,10 @@ def get_static(desired, user, lang, default, extension='html'):
             addon = ""
         target = "%s%s.%s" % (basepath, addon, extension)
         if hasattr(settings, "STATIC_ROOT") and settings.STATIC_ROOT and os.path.exists(os.path.join(settings.STATIC_ROOT, target)):
-            # found = os.path.join(settings.STATIC_URL, target)
-            found = target
+            if relative:
+                found = os.path.join(settings.STATIC_URL, target)
+            else:
+                found = target
             break
     
     # Return target template
