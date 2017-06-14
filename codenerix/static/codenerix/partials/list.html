@@ -85,12 +85,12 @@ limitations under the License.
                                     </button>
                                 </span>
                                 <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.CleanFilters}}" popover-trigger="mouseenter">
-                                    <button class="btn btn-default btn-sm" ng-class="{'btn-default':!data.meta.search_filter_button,'btn-info':data.meta.search_filter_button}" ng-click="reset_filter()">
+                                    <button class="btn btn-default btn-sm" ng-click="reset_filter()">
                                         <span class="fa fa-refresh"></span>
                                     </button>
                                 </span>
                                 <span ng-if="data.meta.export_excel" class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.PrintExcel}}" popover-trigger="mouseenter">
-                                    <button class="btn btn-default btn-sm" ng-class="{'btn-default':!data.meta.search_filter_button,'btn-info':data.meta.search_filter_button}" ng-click="print_excel()">
+                                    <button class="btn btn-default btn-sm" ng-click="print_excel()">
                                         <span class="fa fa-file-excel-o"></span>
                                     </button>
                                 </span>
