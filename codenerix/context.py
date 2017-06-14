@@ -24,27 +24,22 @@ from django.utils.safestring import mark_safe
 
 from codenerix import __version__
 
-def codenerix( request ):
+
+def codenerix(request):
     '''
     Codenerix CONTEXT
     '''
-    # Find environment
-    if getattr(settings,'CODENERIXSOURCE',False):
-        environment="SRC"
-    else:
-        environment=""
-    
     # Get values
-    DEBUG = getattr(settings,'DEBUG', False)
-    VERSION = getattr(settings,'VERSION',_('WARNING: No version set to this code, add VERSION contant to your configuration'))
+    DEBUG = getattr(settings, 'DEBUG', False)
+    VERSION = getattr(settings, 'VERSION', _('WARNING: No version set to this code, add VERSION contant to your configuration'))
     
     # Set environment
     return {
-            'DEBUG': DEBUG,
-            'VERSION': VERSION,
-            'CODENERIX_VERSION': __version__,
-            'CODENERIX_ENVIRONMENT': environment,
-            }
+        'DEBUG': DEBUG,
+        'VERSION': VERSION,
+        'CODENERIX_VERSION': __version__,
+    }
+
 
 def codenerix_js( request ):
     cnf = {}

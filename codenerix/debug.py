@@ -77,9 +77,16 @@ def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI):
         URLPATTERNS += [url(r'^plate/', include('django_spaghetti.urls'))]
     return URLPATTERNS
 
+
 # Codenerix STATIC
-def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
-    locales = '        \
+def codenerix_statics(DEBUG, STATIC_URL="/static/"):
+
+    # Backward compatibility for older configurations (CODENERIXSOURCE is deprecated from now!)
+    if STATIC_URL is bool:
+        DEBUG = STATIC_URL
+        STATIC_URL = "/static/"
+
+    locales = '\
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ar.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.bg.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ca.js"></script> \
@@ -123,7 +130,7 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-TW.js"></script> '
     
-    CODENERIX_CSS_DEBUG=' \
+    CODENERIX_CSS_DEBUG = ' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/bootstrap3.css" rel="stylesheet"> \
@@ -141,7 +148,7 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/lib/textAngular/textAngular.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     '
-    CODENERIX_CSS_MIN=' \
+    CODENERIX_CSS_MIN = ' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/bootstrap3.css" rel="stylesheet"> \
@@ -159,7 +166,7 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/lib/textAngular/textAngular.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     '
-    CODENERIX_JS_DEBUG=' \
+    CODENERIX_JS_DEBUG = ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-dropdowns-functions.js"></script> \
@@ -200,8 +207,8 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/textAngular/textAngular.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-quill/quill.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-quill/ng-quill.js"></script> \
-    '+locales
-    CODENERIX_JS_MIN=' \
+    ' + locales
+    CODENERIX_JS_MIN = ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-dropdowns-functions.js"></script> \
@@ -241,20 +248,16 @@ def codenerix_statics(CODENERIXSOURCE, DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/textAngular/textAngular.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-quill/quill.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-quill/ng-quill.min.js"></script> \
-    '+locales
-    if CODENERIXSOURCE:
-        # Load CODENERIX CSS
-        if DEBUG:
-            CODENERIX_CSS=CODENERIX_CSS_DEBUG
-        else:
-            CODENERIX_CSS=CODENERIX_CSS_MIN
-        # Load CODENERIX JS
-        if DEBUG:
-            CODENERIX_JS=CODENERIX_JS_DEBUG
-        else:
-            CODENERIX_JS=CODENERIX_JS_MIN
+    ' + locales
+    
+    # Load CODENERIX CSS
+    if DEBUG:
+        CODENERIX_CSS = CODENERIX_CSS_DEBUG
     else:
-        CODENERIX_CSS='<link href="{STATIC_URL}codenerix/codenerix.css" rel="stylesheet">'
-        CODENERIX_JS ='<script type="text/javascript" src="{STATIC_URL}codenerix/codenerix.js">'
-        CODENERIX_JS+='</script><script type="text/javascript" src="{STATIC_URL}codenerix/codenerix.extra.js"></script>'
+        CODENERIX_CSS = CODENERIX_CSS_MIN
+    # Load CODENERIX JS
+    if DEBUG:
+        CODENERIX_JS = CODENERIX_JS_DEBUG
+    else:
+        CODENERIX_JS = CODENERIX_JS_MIN
     return (CODENERIX_CSS.format(STATIC_URL=STATIC_URL), CODENERIX_JS.format(STATIC_URL=STATIC_URL))
