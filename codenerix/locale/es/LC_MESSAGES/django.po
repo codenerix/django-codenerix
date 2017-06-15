@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-15 17:05+0000\n"
+"POT-Creation-Date: 2017-06-15 19:18+0200\n"
 "PO-Revision-Date: 2017-06-15 17:07+0000\n"
 "Last-Translator:   <jsoler@centrologic.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -112,8 +112,8 @@ msgid ""
 "WARNING: No version set to this code, add VERSION contant to your "
 "configuration"
 msgstr ""
-"ATENCIÓN: No hay un número de versión configurada para este código, añade la"
-" constante VERSION a tu configuración"
+"ATENCIÓN: No hay un número de versión configurada para este código, añade la "
+"constante VERSION a tu configuración"
 
 #: codenerix/context.py:62
 msgid "WARNING: CODENERIX_CSS is not set in your configuration!!!"
@@ -270,8 +270,7 @@ msgstr "Actualizado"
 #: codenerix/models.py:147
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
-msgstr ""
-"No se puede borrar el elemento, existe una relación con %(model_name)s"
+msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
 
 #: codenerix/models.py:216 codenerix/models.py:265 codenerix/views.py:502
 msgid "Add"
@@ -457,7 +456,6 @@ msgstr "Guardar"
 #: codenerix/templates/codenerix/form.html:72
 #: codenerix/templates/codenerix/form.html:538
 #: codenerix/templates/codenerix/form.html:539
-#| msgid "Save here"
 msgid "Save & new"
 msgstr "Guardar y nuevo"
 
@@ -596,8 +594,8 @@ msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
 msgstr ""
-"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para"
-" add_permission: detail, change y delete"
+"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
+"add_permission: detail, change y delete"
 
 #: codenerix/views.py:1335 codenerix/views.py:1348 codenerix/views.py:1975
 #: codenerix/views.py:2022

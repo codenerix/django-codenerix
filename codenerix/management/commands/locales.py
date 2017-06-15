@@ -183,11 +183,11 @@ class Command(BaseCommand, Debugger):
         # Ready to go
         for (code,name) in settings.LANGUAGES:
             self.debug("Processing translations for {}...".format(name), color='cyan')
-            cmd="{}{}/manage.py makemessages -v0 --symlinks --exclude env -l {}".format(sudo,basedir,code)
+            cmd="{}{}/manage.py makemessages -v0 --symlinks --ignore env -l {}".format(sudo,basedir,code) # --exclude is not working in some computers
             status, output = getstatusoutput(cmd)
             if status: raise CommandError(output)
             
-            cmd="{}{}/manage.py makemessages -v0 --symlinks --exclude env -d djangojs -l {}".format(sudo,basedir,code)
+            cmd="{}{}/manage.py makemessages -v0 --symlinks --ignore env -d djangojs -l {}".format(sudo,basedir,code) # --exclude is not working in some computers
             status, output = getstatusoutput(cmd)
             if status: raise CommandError(output)
             
