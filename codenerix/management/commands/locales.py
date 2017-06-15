@@ -184,12 +184,10 @@ class Command(BaseCommand, Debugger):
         for (code,name) in settings.LANGUAGES:
             self.debug("Processing translations for {}...".format(name), color='cyan')
             cmd="{}{}/manage.py makemessages -v0 --symlinks --exclude env -l {}".format(sudo,basedir,code)
-            print cmd
             status, output = getstatusoutput(cmd)
             if status: raise CommandError(output)
             
             cmd="{}{}/manage.py makemessages -v0 --symlinks --exclude env -d djangojs -l {}".format(sudo,basedir,code)
-            print cmd
             status, output = getstatusoutput(cmd)
             if status: raise CommandError(output)
             
