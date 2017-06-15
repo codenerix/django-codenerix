@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-14 17:12+0200\n"
+"POT-Creation-Date: 2017-06-15 18:53+0200\n"
 "PO-Revision-Date: 2017-06-14 17:15+0000\n"
 "Last-Translator: Juan Soler <jsoler@centrologic.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -107,123 +107,123 @@ msgstr "Pie cúbico"
 msgid "Cubic yard"
 msgstr "Yarda cúbica"
 
-#: codenerix/context.py:39
+#: codenerix/context.py:34
 msgid ""
 "WARNING: No version set to this code, add VERSION contant to your "
 "configuration"
 msgstr ""
-"ATENCIÓN: No hay un número de versión configurada para este código, añade la"
-" constante VERSION a tu configuración"
+"ATENCIÓN: No hay un número de versión configurada para este código, añade la "
+"constante VERSION a tu configuración"
 
-#: codenerix/context.py:67
+#: codenerix/context.py:62
 msgid "WARNING: CODENERIX_CSS is not set in your configuration!!!"
 msgstr "ATENCIÓN: CODENERIX_CSS no está presente en tu configuración!!!"
 
-#: codenerix/context.py:68
+#: codenerix/context.py:63
 msgid "WARNING: CODENERIX_JS is not set in your configuration!!!"
 msgstr "ATENCIÓN: CODENERIX_JS no está presente en tu configuración!!!"
 
-#: codenerix/context.py:74
+#: codenerix/context.py:69
 msgid " WARNING: DATERANGEPICKER_OPTIONS is not set in your configuration!!! "
 msgstr ""
 "ATENCIÓN: DATERANGEPICKER_OPTIONS no está presente en tu configuración!!!"
 
-#: codenerix/context.py:76
+#: codenerix/context.py:71
 msgid " WARNING: DATETIME_RANGE_FORMAT is not set in your configuration!!! "
 msgstr ""
 "ATENCIÓN: DATETIME_RANGE_FORMAT no está presente en tu configuración!!!"
 
-#: codenerix/context.py:82
+#: codenerix/context.py:77
 msgid "From"
 msgstr "Desde"
 
-#: codenerix/context.py:83
+#: codenerix/context.py:78
 msgid "To"
 msgstr "Para"
 
-#: codenerix/context.py:84
+#: codenerix/context.py:79
 msgid "Apply"
 msgstr "Aplicar"
 
-#: codenerix/context.py:85 codenerix/templates/codenerix/addmodal.html:43
+#: codenerix/context.py:80 codenerix/templates/codenerix/addmodal.html:43
 #: codenerix/templates/codenerix/addmodal.html:44
 #: codenerix/templates/codenerix/formmodal.html:73 codenerix/views.py:504
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: codenerix/context.py:86
+#: codenerix/context.py:81
 msgid "Su"
 msgstr "Do"
 
-#: codenerix/context.py:87
+#: codenerix/context.py:82
 msgid "Mo"
 msgstr "Lu"
 
-#: codenerix/context.py:88
+#: codenerix/context.py:83
 msgid "Tu"
 msgstr "Ma"
 
-#: codenerix/context.py:89
+#: codenerix/context.py:84
 msgid "We"
 msgstr "Mi"
 
-#: codenerix/context.py:90
+#: codenerix/context.py:85
 msgid "Th"
 msgstr "Ju"
 
-#: codenerix/context.py:91
+#: codenerix/context.py:86
 msgid "Fr"
 msgstr "Vi"
 
-#: codenerix/context.py:92
+#: codenerix/context.py:87
 msgid "Sa"
 msgstr "Sa"
 
-#: codenerix/context.py:93 codenerix/helpers.py:113
+#: codenerix/context.py:88 codenerix/helpers.py:113
 msgid "January"
 msgstr "Enero"
 
-#: codenerix/context.py:94 codenerix/helpers.py:115
+#: codenerix/context.py:89 codenerix/helpers.py:115
 msgid "February"
 msgstr "Febrero"
 
-#: codenerix/context.py:95 codenerix/helpers.py:117
+#: codenerix/context.py:90 codenerix/helpers.py:117
 msgid "March"
 msgstr "Marzo"
 
-#: codenerix/context.py:96 codenerix/helpers.py:119
+#: codenerix/context.py:91 codenerix/helpers.py:119
 msgid "April"
 msgstr "Abril"
 
-#: codenerix/context.py:97 codenerix/helpers.py:121
+#: codenerix/context.py:92 codenerix/helpers.py:121
 msgid "May"
 msgstr "Mayo"
 
-#: codenerix/context.py:98 codenerix/helpers.py:123
+#: codenerix/context.py:93 codenerix/helpers.py:123
 msgid "June"
 msgstr "Junio"
 
-#: codenerix/context.py:99 codenerix/helpers.py:125
+#: codenerix/context.py:94 codenerix/helpers.py:125
 msgid "July"
 msgstr "Julio"
 
-#: codenerix/context.py:100 codenerix/helpers.py:127
+#: codenerix/context.py:95 codenerix/helpers.py:127
 msgid "August"
 msgstr "Agosto"
 
-#: codenerix/context.py:101 codenerix/helpers.py:129
+#: codenerix/context.py:96 codenerix/helpers.py:129
 msgid "September"
 msgstr "Septiembre"
 
-#: codenerix/context.py:102
+#: codenerix/context.py:97
 msgid "October"
 msgstr "Octubre"
 
-#: codenerix/context.py:103 codenerix/helpers.py:133
+#: codenerix/context.py:98 codenerix/helpers.py:133
 msgid "November"
 msgstr "Noviembre"
 
-#: codenerix/context.py:104 codenerix/helpers.py:135
+#: codenerix/context.py:99 codenerix/helpers.py:135
 msgid "December"
 msgstr "Diciembre"
 
@@ -270,8 +270,7 @@ msgstr "Actualizado"
 #: codenerix/models.py:147
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
-msgstr ""
-"No se puede borrar el elemento, existe una relación con %(model_name)s"
+msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
 
 #: codenerix/models.py:216 codenerix/models.py:265 codenerix/views.py:502
 msgid "Add"
@@ -290,14 +289,14 @@ msgstr "Cambiar"
 #: codenerix/templates/codenerix/details.html:154
 #: codenerix/templates/codenerix/details.html:156
 #: codenerix/templates/codenerix/details.html:157
-#: codenerix/templates/codenerix/form.html:85
-#: codenerix/templates/codenerix/form.html:86
+#: codenerix/templates/codenerix/form.html:87
 #: codenerix/templates/codenerix/form.html:88
-#: codenerix/templates/codenerix/form.html:89
-#: codenerix/templates/codenerix/form.html:550
-#: codenerix/templates/codenerix/form.html:551
-#: codenerix/templates/codenerix/form.html:553
+#: codenerix/templates/codenerix/form.html:90
+#: codenerix/templates/codenerix/form.html:91
 #: codenerix/templates/codenerix/form.html:554
+#: codenerix/templates/codenerix/form.html:555
+#: codenerix/templates/codenerix/form.html:557
+#: codenerix/templates/codenerix/form.html:558
 #: codenerix/templates/codenerix/formmodal.html:62
 #: codenerix/templates/codenerix/formmodal.html:63
 #: codenerix/templates/codenerix/formmodal.html:65
@@ -415,39 +414,52 @@ msgstr "Añadir nuevo"
 
 #: codenerix/templates/codenerix/add.html:30
 #: codenerix/templates/codenerix/add.html:31
-#: codenerix/templates/codenerix/add.html:39
-#: codenerix/templates/codenerix/add.html:40
+#: codenerix/templates/codenerix/add.html:42
+#: codenerix/templates/codenerix/add.html:43
 #: codenerix/templates/codenerix/details.html:74
 #: codenerix/templates/codenerix/details.html:148
 #: codenerix/templates/codenerix/details.html:149
 #: codenerix/templates/codenerix/detailsmodal_log.html:42
 #: codenerix/templates/codenerix/detailsmodal_log.html:97
 #: codenerix/templates/codenerix/detailsmodal_log.html:98
-#: codenerix/templates/codenerix/form.html:76
-#: codenerix/templates/codenerix/form.html:77
+#: codenerix/templates/codenerix/form.html:78
 #: codenerix/templates/codenerix/form.html:79
-#: codenerix/templates/codenerix/form.html:80
-#: codenerix/templates/codenerix/form.html:541
-#: codenerix/templates/codenerix/form.html:542
-#: codenerix/templates/codenerix/form.html:544
+#: codenerix/templates/codenerix/form.html:81
+#: codenerix/templates/codenerix/form.html:82
 #: codenerix/templates/codenerix/form.html:545
+#: codenerix/templates/codenerix/form.html:546
+#: codenerix/templates/codenerix/form.html:548
+#: codenerix/templates/codenerix/form.html:549
 msgid "Go back"
 msgstr "Volver"
 
 #: codenerix/templates/codenerix/add.html:33
 #: codenerix/templates/codenerix/add.html:34
-#: codenerix/templates/codenerix/add.html:42
-#: codenerix/templates/codenerix/add.html:43
+#: codenerix/templates/codenerix/add.html:45
+#: codenerix/templates/codenerix/add.html:46
 #: codenerix/templates/codenerix/addmodal.html:41
 #: codenerix/templates/codenerix/addmodal.html:42
 #: codenerix/templates/codenerix/form.html:67
 #: codenerix/templates/codenerix/form.html:68
-#: codenerix/templates/codenerix/form.html:532
-#: codenerix/templates/codenerix/form.html:533
+#: codenerix/templates/codenerix/form.html:534
+#: codenerix/templates/codenerix/form.html:535
 #: codenerix/templates/codenerix/formmodal.html:70
 #: codenerix/templates/codenerix/formmodal.html:71
 msgid "Save"
 msgstr "Guardar"
+
+#: codenerix/templates/codenerix/add.html:36
+#: codenerix/templates/codenerix/add.html:37
+#: codenerix/templates/codenerix/add.html:48
+#: codenerix/templates/codenerix/add.html:49
+#: codenerix/templates/codenerix/form.html:71
+#: codenerix/templates/codenerix/form.html:72
+#: codenerix/templates/codenerix/form.html:538
+#: codenerix/templates/codenerix/form.html:539
+#, fuzzy
+#| msgid "Save here"
+msgid "Save & new"
+msgstr "Guardar aquí"
 
 #: codenerix/templates/codenerix/details.html:64
 #: codenerix/templates/codenerix/details.html:65
@@ -463,8 +475,8 @@ msgstr "Volver"
 
 #: codenerix/templates/codenerix/details.html:82
 #: codenerix/templates/codenerix/details.html:157
-#: codenerix/templates/codenerix/form.html:89
-#: codenerix/templates/codenerix/form.html:554
+#: codenerix/templates/codenerix/form.html:91
+#: codenerix/templates/codenerix/form.html:558
 #: codenerix/templates/codenerix/formmodal.html:66
 msgid "Are you sure you would like to delete this register?"
 msgstr "¿Está seguro que desea borrar este registros?"
@@ -476,20 +488,20 @@ msgstr "Editando"
 
 #: codenerix/templates/codenerix/form.html:69
 #: codenerix/templates/codenerix/form.html:70
-#: codenerix/templates/codenerix/form.html:534
-#: codenerix/templates/codenerix/form.html:535
+#: codenerix/templates/codenerix/form.html:536
+#: codenerix/templates/codenerix/form.html:537
 msgid "Save here"
 msgstr "Guardar aquí"
 
-#: codenerix/templates/codenerix/form.html:71
-#: codenerix/templates/codenerix/form.html:72
-#: codenerix/templates/codenerix/form.html:536
-#: codenerix/templates/codenerix/form.html:537
+#: codenerix/templates/codenerix/form.html:73
+#: codenerix/templates/codenerix/form.html:74
+#: codenerix/templates/codenerix/form.html:540
+#: codenerix/templates/codenerix/form.html:541
 msgid "Reload"
 msgstr "Recargar"
 
-#: codenerix/templates/codenerix/form.html:72
-#: codenerix/templates/codenerix/form.html:537
+#: codenerix/templates/codenerix/form.html:74
+#: codenerix/templates/codenerix/form.html:541
 msgid "You will loose all your changes, are you sure?"
 msgstr "Perderá todos sus cambios, ¿está seguro?"
 
@@ -515,7 +527,6 @@ msgid "Search"
 msgstr "Buscar"
 
 #: codenerix/views.py:506
-#| msgid "registers"
 msgid "Filters"
 msgstr "Filtros"
 
@@ -585,8 +596,8 @@ msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
 msgstr ""
-"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para"
-" add_permission: detail, change y delete"
+"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
+"add_permission: detail, change y delete"
 
 #: codenerix/views.py:1335 codenerix/views.py:1348 codenerix/views.py:1975
 #: codenerix/views.py:2022

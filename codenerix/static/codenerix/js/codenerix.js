@@ -647,6 +647,9 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                 }
                 // Reload page
                 $state.reload($state.current);
+            } else if (next=='new') {
+                $state.go('formadd'+listid);
+                $state.transitionTo('formadd'+listid, {}, { reload: true, inherit: true, notify: true });
             } else if (next=='details') {
                 $state.go('details'+listid,{'pk':answer.__pk__});
             } else {
