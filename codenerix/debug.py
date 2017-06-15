@@ -82,7 +82,7 @@ def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI):
 def codenerix_statics(DEBUG, STATIC_URL="/static/"):
 
     # Backward compatibility for older configurations (CODENERIXSOURCE is deprecated from now!)
-    if STATIC_URL is bool:
+    if type(STATIC_URL) is bool:
         DEBUG = STATIC_URL
         STATIC_URL = "/static/"
 
