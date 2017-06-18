@@ -614,7 +614,6 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
             }
         }
     });
-
     // Clear cache
     $templateCache.remove(url);
     // POST
@@ -627,6 +626,8 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                 if (kind=='add') {
                     // Jump to the edit form
                     $state.go('formedit'+listid,{'pk':answer.pk});
+                    // Reload page
+                    $state.reload($state.current);
                 } else if ((kind=='addmodal') || (kind=='editmodal')) {
                     // Set the primary key and let it finish execution
                     $uibModalInstance.close(answer);
@@ -644,9 +645,9 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                     // Reset form status
                     form.$pristine = true;
                     form.$dirty = false;
+                    // Reload page
+                    $state.reload($state.current);
                 }
-                // Reload page
-                $state.reload($state.current);
             } else if (next=='new') {
                 $state.go('formadd'+listid);
                 $state.transitionTo('formadd'+listid, {}, { reload: true, inherit: true, notify: true });
@@ -671,7 +672,6 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                 }
             }
         } else {
-            console.log("ERROR "+stat+": "+answer)
             $window.alert("Internal error detected (Error was: "+answer+")")
         }
     });
