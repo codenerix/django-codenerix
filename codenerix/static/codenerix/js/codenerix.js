@@ -1093,6 +1093,7 @@ var codenerix_libraries = [
     'vcRecaptcha',
     'checklist-model',
     'ngQuill',
+    'cfp.hotkeys',
 ];
 
 /*
