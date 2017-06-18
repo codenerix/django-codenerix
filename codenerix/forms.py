@@ -199,22 +199,26 @@ class BaseForm(object):
                 ('extra',None),
                 ('extra_div',None),
                 ]
-        labels=[x[0] for x in attributes]
+        labels = [x[0] for x in attributes]
         
         # Get groups if none was given
         if gs is None:
-            gs=self.__groups__()
+            gs = self.__groups__()
         
         # Prepare the answer
-        groups=[]
-
+        groups = []
+        
+        # Prepare focus control
+        focus_first = None
+        focus_must = None
+        
         # html helper for groups and fields
         html_helper = self.html_helper()
         
         # Start processing
         for g in gs:
-            token={}
-            token['name']=g[0]
+            token = {}
+            token['name'] = g[0]
             
             if token['name'] in html_helper:
                 if 'pre' in html_helper[token['name']]:
@@ -287,9 +291,17 @@ class BaseForm(object):
                             break
                     
                     if found:
+                        # Get attributes (required and original attributes)
+                        wrequired=found.field.widget.is_required
+                        wattrs=found.field.widget.attrs
                         # Fill base attributes
                         atr['name']=found.html_name
                         atr['input']=found
+                        atr['focus']=False
+                        # Set focus
+                        if focus_must is None:
+                            if focus_first is None: focus_first = atr
+                            if wrequired: focus_must = atr
                         # Autocomplete
                         if 'autofill' in dir(self.Meta):
                             autofill=self.Meta.autofill.get(found.html_name,None)
@@ -298,10 +310,6 @@ class BaseForm(object):
                                 # Check format of the request
                                 autokind=autofill[0]
                                 if type(autokind)==str:
-                                    # Get old information
-                                    wattrs=found.field.widget.attrs
-                                    wrequired=found.field.widget.is_required
-
                                     # Using new format
                                     if autokind=='select':
                                         # If autofill is True for this field set the DynamicSelect widget
@@ -324,8 +332,6 @@ class BaseForm(object):
                                     found.field.widget.autofill=autofill[3:]    
                                 else:
                                     # Get old information [COMPATIBILITY WITH OLD VERSION]
-                                    wattrs=found.field.widget.attrs
-                                    wrequired=found.field.widget.is_required
                                     # If autofill is True for this field set the DynamicSelect widget
                                     found.field.widget=DynamicSelect(wattrs)
                                     found.field.widget.is_required=wrequired
@@ -341,8 +347,6 @@ class BaseForm(object):
                         
                         # Check if we have to replace the widget with a newer one
                         if isinstance(found.field.widget, Select) and not isinstance(found.field.widget, DynamicSelect):
-                            wattrs=found.field.widget.attrs
-                            wrequired=found.field.widget.is_required
                             if not isinstance(found.field.widget, MultiStaticSelect):
                                 found.field.widget=StaticSelect(wattrs)
                             found.field.widget.choices = found.field.choices
@@ -379,10 +383,20 @@ class BaseForm(object):
             fields=[]
             for infield in list_fields:
                 if infield.__dict__[check_system] not in processed:
+                    # Get attributes (required and original attributes)
+                    wattrs=infield.field.widget.attrs
+                    wrequired=infield.field.widget.is_required
+                    # Prepare attr
                     atr={}
                     # Fill base attributes
                     atr['name']=infield.html_name
                     atr['input']=infield
+                    atr['focus']=False
+                    # Set focus
+                    if focus_must is None:
+                        if focus_first is None: focus_first = atr
+                        if wrequired: focus_must = atr
+                    # Autocomplete
                     if 'autofill' in dir(self.Meta):
                         autofill=self.Meta.autofill.get(infield.html_name,None)
                         atr['autofill']=autofill
@@ -391,8 +405,6 @@ class BaseForm(object):
                             autokind=autofill[0]
                             if type(autokind)==str:
                                 # Get old information
-                                wattrs=infield.field.widget.attrs
-                                wrequired=infield.field.widget.is_required
 
                                 # Using new format
                                 if autokind=='select':
@@ -416,8 +428,6 @@ class BaseForm(object):
                                 infield.field.widget.autofill=autofill[3:]    
                             else:
                                 # Get old information [COMPATIBILITY WITH OLD VERSION]
-                                wattrs=infield.field.widget.attrs
-                                wrequired=infield.field.widget.is_required
                                 # If autofill is True for this field set the DynamicSelect widget
                                 infield.field.widget=DynamicSelect(wattrs)
                                 infield.field.widget.is_required=wrequired
@@ -433,8 +443,6 @@ class BaseForm(object):
                     
                     # Check if we have to replace the widget with a newer one
                     if isinstance(infield.field.widget, Select) and not isinstance(infield.field.widget, DynamicSelect):
-                        wattrs=infield.field.widget.attrs
-                        wrequired=infield.field.widget.is_required
                         if not isinstance(infield.field.widget, MultiStaticSelect):
                             infield.field.widget=StaticSelect(wattrs)
                         infield.field.widget.choices = infield.field.choices
@@ -462,6 +470,12 @@ class BaseForm(object):
             # Save the new elements
             if fields:
                 groups.append({'name':None,'columns':12,'fields':fields})
+        
+        # Set focus
+        if focus_must:
+            focus_must['focus']=True
+        else:
+            focus_first['focus']=True
         
         # Return the resulting groups
         return groups

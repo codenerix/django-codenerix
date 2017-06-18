@@ -226,3 +226,10 @@ def addition(value, arg):
 
 def subtraction(value, arg):
     return float(value) - float(arg)
+
+
+def autofocus(f):
+    if f.get('focus', False):
+        return "autofocus"
+    else:
+        return ""

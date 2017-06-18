@@ -21,7 +21,7 @@
 from django import template
 
 from codenerix.helpers import zeropad,monthname,nameunify
-from codenerix.templatetags_common import codenerix, nicenull, debugme, debugmedict, addedit, invert, differ, ghtml, smallerthan, br, nicekilometers, niceeuronull, nicepercentnull, nicebool, ynbool, toint, notval, count, countpages, freedombool, pair, lenlist, nbsp, mod, keyvalue, acumulate, getforms, langforms, objectatrib, TrueFalse, multiplication, division, addition, subtraction
+from codenerix.templatetags_common import codenerix, nicenull, debugme, debugmedict, addedit, invert, differ, ghtml, smallerthan, br, nicekilometers, niceeuronull, nicepercentnull, nicebool, ynbool, toint, notval, count, countpages, freedombool, pair, lenlist, nbsp, mod, keyvalue, acumulate, getforms, langforms, objectatrib, TrueFalse, multiplication, division, addition, subtraction, autofocus
 
 def fbuilder1(f): return lambda arg: f(arg)
 def fbuilder2(f): return lambda arg1,arg2: f(arg1,arg2)
@@ -66,3 +66,4 @@ register.filter('multiplication',fbuilder2(multiplication))
 register.filter('division',fbuilder2(division))
 register.filter('addition',fbuilder2(addition))
 register.filter('subtraction',fbuilder2(subtraction))
+register.filter('autofocus',fbuilder1(autofocus))

@@ -571,7 +571,17 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
     // Build in data
     var in_data = { };
     var form_name = form.$name;
-
+    
+    // Autosubmit logic
+    if (form.autosubmit===undefined) {
+        form.autosubmits = false;
+    } else {
+        if (form.autosubmits===false) {
+            form.autosubmits=true;
+            return false;
+        }
+    }
+    
     angular.forEach($scope.field_list, function(field){
         // normal input html
         if ($scope[field] != undefined){

@@ -40,11 +40,11 @@ limitations under the License.
 {% endverbatim %}
 <form
     name="{{form.form_name}}"
-    data-custom-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" 
     class="form-horizontal"
     role="form"
     autocomplete="off"
-    ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'">
+    ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'"
+    ng-submit="{{form.form_name}}.autosubmit=true ; submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', 'autosubmit'); {{form.form_name}}.autosubmit=false">
     <div 
     {% if form.attributes.ngcontroller %}
     ng-controller="{{ form.attributes.ngcontroller }}"
@@ -53,6 +53,7 @@ limitations under the License.
         {% block extra_form_top%}{% endblock %}
         <input type="text" id="id_elementid" name="elementid" ng-model="elementid" ng-value="elementid" style="display:none" />
         <input type="text" id="__pk__" name="__pk__" ng-model="__pk__" ng-value="{{object.pk}}" value="{{object.pk}}" style="display:none" />
+        <input type="submit" value="submit" ng-show="false">
         {% if show_internal_name and formlist|len <= 1 %}
             <div class="col-sm-12 col-md-12 internal-name">
                 <h4>{% block form_action %}{% trans "Editing" %}{% endblock %} {{form.get_name}}</h4>
@@ -180,7 +181,8 @@ limitations under the License.
                                                 {# IF INPUT: INI ============================================================================= {{{1 #}
                                                 {% with zi=forloop.revcounter|stringformat:"s" %}
                                                 {% with zindex="style=z-index:"|add:zi %}
-                                                {% with attrs=input|widgetize|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:field.extra|lockattr:cannot_update %}
+                                                {% with autofocus=field|autofocus %}
+                                                {% with attrs=input|widgetize|addattr:autofocus|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:field.extra|lockattr:cannot_update %}
                                                 <div class="col-sm-{{field.columns}}" ng-class="{{form.form_name|invalidator:input}}" {{field.extra_div|join_list:" "}}>
                                                     {# FIELD: INI {{{2 #}
 
@@ -346,6 +348,7 @@ limitations under the License.
                                                 {% endwith %}
                                                 {% endwith %}
                                                 {% endwith %}
+                                                {% endwith %}
                                                 {# IF INPUT: END ============================================================================= }}} 1#}
                                                 {% endif %}
                                             {% else %}
@@ -376,8 +379,9 @@ limitations under the License.
                                                                         {% else %}
                                                                             {# INPUT PROCESSOR: INI {{{2 #}
                                                                             {% with zi=forloop.revcounter|stringformat:"s" %}
+                                                                            {% with autofocus=input|autofocus %}
                                                                             {% with zindex="style=z-index:"|add:zi %}
-{% with attrs=input|widgetize|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:subfield.extra|lockattr:cannot_update %}
+{% with attrs=input|widgetize|addattr:autofocus|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:subfield.extra|lockattr:cannot_update %}
                                                                             <div class="col-sm-{{subfield.columns}}" ng-class="{{form.form_name|invalidator:input}}">
                                                                                 {# FIELD: INI {{{3 #}
                                                                                 <label for="{{input.id_for_label}}"{{field|headstyle}}>{%if subfield.label%}{{subfield.label}}{%else%}&nbsp;{%endif%}
@@ -461,6 +465,7 @@ limitations under the License.
                                                                                 {# FIELD: END }}}3 #}
                                                                             </div>
                                                                             {# INPUT PROCESSOR: END }}}2 #}
+                                                                            {% endwith %}
                                                                             {% endwith %}
                                                                             {% endwith %}
                                                                             {% endwith %}
