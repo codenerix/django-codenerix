@@ -568,6 +568,7 @@ function refresh($scope, $timeout, Register, callback, internal) {
 }
 
 function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, url, form, next, kind) {
+    console.warn("formsubmit() should check if the form is ready to be submited: $pristine, $dirty, etc...");
     // Build in data
     var in_data = { };
     var form_name = form.$name;
@@ -717,14 +718,15 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
         var modalInstance = $uibModal.open({
             template:  $scope.inhtml,
             templateUrl: $scope.inurl,
-            controller:  ['$scope', '$rootScope', '$http', '$window', '$uibModal', '$uibModalInstance', '$state', '$stateParams', '$templateCache', 'Register', 'ws', function ($scope, $rootScope, $http, $window, $uibModal, $uibModalInstance, $state, $stateParams, $templateCache, Register, ws) {
-                // Autostart multiadd
+            controller:  ['$scope', '$rootScope', '$http', '$window', '$uibModal', '$uibModalInstance', '$state', '$stateParams', '$templateCache', 'Register', 'ws', 'hotkeys', function ($scope, $rootScope, $http, $window, $uibModal, $uibModalInstance, $state, $stateParams, $templateCache, Register, ws, hotkeys) {
+                // Autostart multitools
+                var hotkeysrv = hotkeys.bindTo($scope);
                 if (id) {
                     var action="editmodal"
-                    multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws);
+                    multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws, hotkeysrv);
                 } else {
                     var action="addmodal"
-                    multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws);
+                    multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws, hotkeysrv);
                 }
                 
                 // Set submit function
@@ -1125,6 +1127,40 @@ answer_rendered(element,$q).then(function (element) {
 });
 */
 
+var codenerix_directive_focus = ['codenerixFocus', ['$timeout', function($timeout) {
+    return {
+        scope: { trigger: '=codenerixFocus' },
+        link: function(scope, element) {
+            scope.$watch('trigger', function(value) {
+                if(value === true) { 
+                    $timeout(function() {
+                        element[0].focus();
+                        scope.trigger = false;
+                    });
+                }
+            });
+        }
+    };
+    /*
+    return {
+        link: function(scope, element, attrs) {
+            scope.$watch(attrs.codenerixFocus, function(value) {
+                console.log('FOCUS=',value);
+                if(value === true) {
+                    $timeout(function() {
+                        element[0].focus();
+                        console.log(scope.trigger);
+                        console.log(scope[attrs.codenerixFocus]);
+                        scope[attrs.codenerixFocus] = false;
+                        console.log(scope[attrs.codenerixFocus]);
+                    });
+                }
+            });
+        }
+    };
+    */
+}]];
+
 var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q','Register', function($window, $timeout, $q, Register) {
     return {
         restrict : 'A',
@@ -1423,6 +1459,7 @@ function codenerix_builder(libraries, routes) {
     
     // Set Codenerix directives
     .directive(codenerix_directive_vtable[0], codenerix_directive_vtable[1])
+    .directive(codenerix_directive_focus[0], codenerix_directive_focus[1])
     .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
     
     // Set routing system
@@ -1546,7 +1583,7 @@ function codenerix_builder(libraries, routes) {
     return module;
 }
 
-function multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, listid, ws, callback, sublist) {
+function multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, listid, ws, callback, sublist, hotkeys) {
     // Move to inside state to get double view resolved
     if ((callback==undefined) && (!sublist)) {
         $state.go('list'+listid+'.rows');
@@ -1574,6 +1611,8 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         $scope.minute=null;
         $scope.second=null;
         $scope.context={};
+        $scope.focus={};
+        $scope.focus.search_box=false;
         
         // Prepare query
         $scope.query = {
@@ -1625,6 +1664,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             $rootScope.elementname=name;
         }
     };
+    
     $scope.addnew = function () {
         if ($scope.data.meta.linkadd) {
             if (!sublist) {
@@ -1649,6 +1689,8 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             }
         }
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: '+', description: 'Add new row', callback: $scope.addnew})}
+    
     $scope.detail = function (pk) {
         if ($scope.data.meta.linkedit) {
             if (!sublist) {
@@ -1692,6 +1734,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     };
     // Extra help functions
     $scope.refresh = function () { refresh($scope, $timeout, Register, callback); }
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'r', description: 'Refresh', callback: $scope.refresh})}
     $scope.isList = function (obj) { return obj instanceof Array; };
     $scope.getKey = function (string) { return string.split("__")[1]; };
     $scope.date_change = function(name) {
@@ -1741,11 +1784,21 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         };
         refresh($scope, $timeout, Register, callback);
     };
+    
+    $scope.goto_search = function() {
+        $scope.focus.search_box=true;
+    };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 's', description: 'Go to search box', callback: $scope.goto_search})}
+    $scope.switch_filters = function() {
+        $scope.data.meta.search_filter_button=!$scope.data.meta.search_filter_button
+    };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'f', description: 'Enable/disable filters', callback: $scope.switch_filters})}
 
     $scope.print_excel = function(){
         $scope.query.printer = 'xls';
         refresh($scope, $timeout, Register, callback);
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'x', description: 'Export to Excel', callback: $scope.print_excel})}
     
     // Get details 
     $scope.list_modal = function(id) {
@@ -2104,7 +2157,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     refresh($scope,$timeout,Register, callback);
 };
 
-function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws) {
+function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws, hotkeys) {
     // Set our own url
     var url = ws+"/add";
     $scope.options={};
@@ -2135,11 +2188,13 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', callback: $scope.gotoback})}
     
     // Update this element
     $scope.submit = function(form, next) {
         formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'add');
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit})}
 
     var fields = [];
     $scope.preUpdateField = function(field_o, field_d) {
@@ -2179,7 +2234,7 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     };
 };
 
-function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws) {
+function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws, hotkeys) {
     // Set our own url
     var url = ws+"/"+$stateParams.pk;
     
@@ -2195,6 +2250,7 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', callback: $scope.gotoback})}
     
     // Delete this element
     $scope.edit = function() {
@@ -2203,6 +2259,8 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
         // Go to edit state
         $state.go('formedit'+listid,{pk:$stateParams.pk});
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'e', description: 'Edit', callback: $scope.edit})}
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+right', description: 'Edit', callback: $scope.edit})}
     
     $scope.msg = function(msg){
         alert(msg);
@@ -2238,7 +2296,7 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
     };
 };
 
-function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws) {
+function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws, hotkeys) {
     // Set our own url
     var url = ws+"/"+$stateParams.pk+"/edit";
     $scope.options={};
@@ -2275,6 +2333,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         // Go to list
         $state.go('details'+listid,{pk:$stateParams.pk});
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', callback: $scope.gotoback})}
     
     // Reload this form
     $scope.reload = function(msg) {
@@ -2360,6 +2419,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     $scope.submit = function(form, next) {
         formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'edit');
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit})}
 
     var fields = [];
     $scope.preUpdateField = function(field_o, field_d) {

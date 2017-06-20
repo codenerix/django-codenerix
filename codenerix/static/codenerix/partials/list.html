@@ -73,7 +73,7 @@ limitations under the License.
                     <div class="pull-left"><!-- SEARCH {{{1-->
                         <form name="search" data-custom-submit="refresh()" role="form">
                             <div class="input-group input-group-sm">
-                                <input type="text" class="form-control input-sm" ng-model="data.filter.search">
+                                <input type="text" class="form-control input-sm" ng-model="data.filter.search" codenerix-focus='focus.search_box'>
                                 <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.Search}}" popover-trigger="mouseenter">
                                     <button type="submit" class="btn btn-default btn-sm" ng-click="refresh()">
                                         <span class="glyphicon glyphicon-search"></span>
