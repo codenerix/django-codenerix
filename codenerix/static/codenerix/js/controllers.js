@@ -78,6 +78,7 @@ angular.module('codenerixControllers', [])
             $state.go('details0.sublist'+listid+'.rows',{'listid':listid});
             var register = angular.injector(['codenerixInlineServices']).get('Register'+listid);
             var hotkeysrv = hotkeys.bindTo($scope);
+            hotkeysrv = undefined;
             multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, register, ListMemory, listid, subws_entry_point[listid], undefined, true, hotkeysrv);
         } else {
             // Activate autorender tabs

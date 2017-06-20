@@ -568,7 +568,7 @@ function refresh($scope, $timeout, Register, callback, internal) {
 }
 
 function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, url, form, next, kind) {
-    console.warn("formsubmit() should check if the form is ready to be submited: $pristine, $dirty, etc...");
+    console.error("formsubmit() must check if the form is ready to be submited: $pristine, $dirty, etc...");
     // Build in data
     var in_data = { };
     var form_name = form.$name;
@@ -1167,7 +1167,7 @@ var codenerix_directive_vtable = ['codenerixVtable', ['$window','$timeout','$q',
         transclude: true,
         replace: false,
         template : "<tr><td ng-repeat='column in data.table.head.columns' ng-style=\"{height: codenerix_vtable.top+'px'}\" style='margin:0px;padding:0px;border:1px solid #fff;' id='codenerix_vtable_top'></td></tr>"+
-                   "<tr ng-repeat=\"row in data.table.body\" id='row{{row.pk}}' ng-click=\"detail(row.pk)\" ui-view>"+
+                   "<tr ng-repeat=\"row in data.table.body\" id='row{{row.pk}}' ng-click=\"detail(row.pk)\" ng-class=\"{'row_selected':$index+1==selected_row}\" ui-view>"+
                    "<tr><td ng-repeat='column in data.table.head.columns' ng-style=\"{height: codenerix_vtable.bottom+'px'}\" style='margin:0px;padding:0px;border:1px solid #fff;'></td></tr>",
         link: function(scope, element, attrs) {
             if (scope.data!=undefined && scope.data.meta!=undefined && scope.data.meta.vtable!=undefined && scope.data.meta.vtable) {
@@ -1611,8 +1611,6 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         $scope.minute=null;
         $scope.second=null;
         $scope.context={};
-        $scope.focus={};
-        $scope.focus.search_box=false;
         
         // Prepare query
         $scope.query = {
@@ -1634,7 +1632,12 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             "printer": null,
         };
     }
-
+    
+    // Initialize general variables
+    $scope.focus={};
+    $scope.focus.search_box=false;
+    $scope.selected_row=0;
+    
     // Remember http
     $scope.http=$http;
     // Set dynamic foreign fields controller functions
@@ -1690,6 +1693,31 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         }
     };
     if (hotkeys!==undefined) {hotkeys.add({combo: '+', description: 'Add new row', callback: $scope.addnew})}
+    
+    // Go to previous row
+    $scope.goto_row_previous = function () {
+        if ($scope.selected_row>1) {
+            $scope.selected_row = $scope.selected_row - 1;
+        }
+    }
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+up', description: 'Select previous row', callback: $scope.goto_row_previous})}
+    // Go to next row
+    $scope.goto_row_next = function () {
+        if ($scope.selected_row<$scope.data.meta.row_total) {
+            $scope.selected_row = $scope.selected_row + 1;
+        }
+    };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+down', description: 'Select next row', callback: $scope.goto_row_next})}
+    // Go to selected row
+    $scope.goto_row_detail = function () {
+        if ($scope.selected_row) {
+            var pk = $scope.data.table.body[$scope.selected_row-1].pk;
+            $scope.detail(pk);
+        }
+    };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'enter', description: 'Go to selected row', callback: $scope.goto_row_detail})}
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+right', description: 'Go to selected row', callback: $scope.goto_row_detail})}
+
     
     $scope.detail = function (pk) {
         if ($scope.data.meta.linkedit) {
@@ -2188,7 +2216,7 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', callback: $scope.gotoback})}
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback})}
     
     // Update this element
     $scope.submit = function(form, next) {
@@ -2250,7 +2278,7 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', callback: $scope.gotoback})}
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback})}
     
     // Delete this element
     $scope.edit = function() {
@@ -2260,7 +2288,6 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
         $state.go('formedit'+listid,{pk:$stateParams.pk});
     };
     if (hotkeys!==undefined) {hotkeys.add({combo: 'e', description: 'Edit', callback: $scope.edit})}
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+right', description: 'Edit', callback: $scope.edit})}
     
     $scope.msg = function(msg){
         alert(msg);
@@ -2325,6 +2352,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         $state.go('list'+listid);
         // $state.go('details'+listid,{pk:$stateParams.pk});
     };
+    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback})}
     
     // Go to details
     $scope.gotodetails = function() {
@@ -2333,7 +2361,6 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         // Go to list
         $state.go('details'+listid,{pk:$stateParams.pk});
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', callback: $scope.gotoback})}
     
     // Reload this form
     $scope.reload = function(msg) {
