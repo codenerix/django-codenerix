@@ -28,38 +28,33 @@ angular.module('codenerixControllers', [])
 .controller('ListCtrl', ['$scope', '$rootScope', '$timeout', '$location', '$uibModal', '$templateCache', '$http', '$state', 'Register', 'ListMemory', 'hotkeys',
     function($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, hotkeys) {
         if (ws_entry_point==undefined) { ws_entry_point=""; }
-        var hotkeysrv = hotkeys.bindTo($scope);
-        multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, 0, "/"+ws_entry_point, undefined, undefined, hotkeysrv);
+        multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, 0, "/"+ws_entry_point, undefined, undefined, hotkeys);
     }
 ])
 .controller('DetailsCtrl', ['$scope', '$rootScope', '$timeout', '$http', '$window', '$uibModal', '$state', '$stateParams', '$templateCache', 'Register', 'hotkeys',
     function($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, hotkeys) {
         if (ws_entry_point==undefined) { ws_entry_point=""; }
-        var hotkeysrv = hotkeys.bindTo($scope);
-        multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeysrv);
+        multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeys);
     }
 ])
 .controller('FormAddCtrl', ['$scope', '$rootScope', '$timeout', '$http', '$window', '$uibModal', '$state', '$stateParams', '$templateCache', 'Register','hotkeys',
     function ($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, hotkeys) {
         if (ws_entry_point==undefined) { ws_entry_point=""; }
         $scope.options = [];
-        var hotkeysrv = hotkeys.bindTo($scope);
-        multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeysrv);
+        multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeys);
     }
 ])
 .controller('FormEditCtrl', ['$scope', '$rootScope', '$timeout', '$http', '$window', '$uibModal', '$state', '$stateParams', '$templateCache', 'Register','hotkeys',
     function($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, hotkeys) {
         if (ws_entry_point==undefined) { ws_entry_point=""; }
         $scope.options = [];
-        var hotkeysrv = hotkeys.bindTo($scope);
-        multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeysrv);
+        multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeys);
     }
 ])
 .controller('AlarmsCtrl', ['$scope', '$rootScope', '$timeout', '$location', '$uibModal', '$templateCache', '$http', '$state', 'Register', 'ListMemory','hotkeys',
     function($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, hotkeys) {
         if (ws_entry_point==undefined) { ws_entry_point=""; }
-        var hotkeysrv = hotkeys.bindTo($scope);
-        multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, 0, "/"+ws_entry_point, undefined, undefined, hotkeysrv);
+        multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, 0, "/"+ws_entry_point, undefined, undefined, hotkeys);
 
     }
 ])
@@ -77,9 +72,8 @@ angular.module('codenerixControllers', [])
             }
             $state.go('details0.sublist'+listid+'.rows',{'listid':listid});
             var register = angular.injector(['codenerixInlineServices']).get('Register'+listid);
-            var hotkeysrv = hotkeys.bindTo($scope);
-            hotkeysrv = undefined;
-            multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, register, ListMemory, listid, subws_entry_point[listid], undefined, true, hotkeysrv);
+            hotkeys = undefined; // Don't use it rignt now on sublist
+            multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, register, ListMemory, listid, subws_entry_point[listid], undefined, true, hotkeys);
         } else {
             // Activate autorender tabs
             angular.forEach(tabs_js, function(tab, i){

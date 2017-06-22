@@ -720,13 +720,12 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
             templateUrl: $scope.inurl,
             controller:  ['$scope', '$rootScope', '$http', '$window', '$uibModal', '$uibModalInstance', '$state', '$stateParams', '$templateCache', 'Register', 'ws', 'hotkeys', function ($scope, $rootScope, $http, $window, $uibModal, $uibModalInstance, $state, $stateParams, $templateCache, Register, ws, hotkeys) {
                 // Autostart multitools
-                var hotkeysrv = hotkeys.bindTo($scope);
                 if (id) {
                     var action="editmodal"
-                    multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws, hotkeysrv);
+                    multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws, hotkeys);
                 } else {
                     var action="addmodal"
-                    multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws, hotkeysrv);
+                    multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, ws, hotkeys);
                 }
                 
                 // Set submit function
@@ -1692,7 +1691,6 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             }
         }
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: '+', description: 'Add new row', callback: $scope.addnew})}
     
     // Go to previous row
     $scope.goto_row_previous = function () {
@@ -1700,14 +1698,12 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             $scope.selected_row = $scope.selected_row - 1;
         }
     }
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+up', description: 'Select previous row', callback: $scope.goto_row_previous})}
     // Go to next row
     $scope.goto_row_next = function () {
         if ($scope.selected_row<$scope.data.meta.row_total) {
             $scope.selected_row = $scope.selected_row + 1;
         }
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+down', description: 'Select next row', callback: $scope.goto_row_next})}
     // Go to selected row
     $scope.goto_row_detail = function () {
         if ($scope.selected_row) {
@@ -1715,8 +1711,6 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             $scope.detail(pk);
         }
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'enter', description: 'Go to selected row', callback: $scope.goto_row_detail})}
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+right', description: 'Go to selected row', callback: $scope.goto_row_detail})}
 
     
     $scope.detail = function (pk) {
@@ -1762,7 +1756,6 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     };
     // Extra help functions
     $scope.refresh = function () { refresh($scope, $timeout, Register, callback); }
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'r', description: 'Refresh', callback: $scope.refresh})}
     $scope.isList = function (obj) { return obj instanceof Array; };
     $scope.getKey = function (string) { return string.split("__")[1]; };
     $scope.date_change = function(name) {
@@ -1816,17 +1809,14 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     $scope.goto_search = function() {
         $scope.focus.search_box=true;
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 's', description: 'Go to search box', callback: $scope.goto_search})}
     $scope.switch_filters = function() {
         $scope.data.meta.search_filter_button=!$scope.data.meta.search_filter_button
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'f', description: 'Enable/disable filters', callback: $scope.switch_filters})}
 
     $scope.print_excel = function(){
         $scope.query.printer = 'xls';
         refresh($scope, $timeout, Register, callback);
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'x', description: 'Export to Excel', callback: $scope.print_excel})}
     
     // Get details 
     $scope.list_modal = function(id) {
@@ -2181,6 +2171,19 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         var url = ws+"/"+id+"/delete";
         del_item_sublist(id, msg, url, $scope, $http);
     };
+    // Startup hotkey system
+    if (hotkeys!==undefined) {
+        var hotkeysrv = hotkeys.bindTo($scope);
+        hotkeysrv.add({combo: '+', description: 'Add new row', callback: $scope.addnew});
+        hotkeysrv.add({combo: 'ctrl+up', description: 'Select previous row', callback: $scope.goto_row_previous});
+        hotkeysrv.add({combo: 'ctrl+down', description: 'Select next row', callback: $scope.goto_row_next});
+        hotkeysrv.add({combo: 'enter', description: 'Go to selected row', callback: $scope.goto_row_detail});
+        hotkeysrv.add({combo: 'ctrl+right', description: 'Go to selected row', callback: $scope.goto_row_detail});
+        hotkeysrv.add({combo: 'r', description: 'Refresh', callback: $scope.refresh});
+        hotkeysrv.add({combo: 's', description: 'Go to search box', callback: $scope.goto_search});
+        hotkeysrv.add({combo: 'f', description: 'Enable/disable filters', callback: $scope.switch_filters});
+        hotkeysrv.add({combo: 'x', description: 'Export to Excel', callback: $scope.print_excel});
+    }
     // First query
     refresh($scope,$timeout,Register, callback);
 };
@@ -2216,13 +2219,11 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback})}
     
     // Update this element
     $scope.submit = function(form, next) {
         formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'add');
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit})}
 
     var fields = [];
     $scope.preUpdateField = function(field_o, field_d) {
@@ -2260,6 +2261,13 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     $scope.changeActualDateFlight = function(){
         changeActualDateFlight($scope);
     };
+    
+    // Startup hotkey system
+    if (hotkeys!==undefined) {
+        var hotkeysrv = hotkeys.bindTo($scope);
+        hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
+        hotkeysrv.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit});
+    }
 };
 
 function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws, hotkeys) {
@@ -2278,7 +2286,6 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback})}
     
     // Delete this element
     $scope.edit = function() {
@@ -2287,7 +2294,6 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
         // Go to edit state
         $state.go('formedit'+listid,{pk:$stateParams.pk});
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'e', description: 'Edit', callback: $scope.edit})}
     
     $scope.msg = function(msg){
         alert(msg);
@@ -2321,6 +2327,14 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
             });
          }
     };
+    
+    // Startup hotkey system
+    if (hotkeys!==undefined) {
+        var hotkeysrv = hotkeys.bindTo($scope);
+        hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
+        hotkeysrv.add({combo: 'e', description: 'Edit', callback: $scope.edit});
+
+    }
 };
 
 function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws, hotkeys) {
@@ -2352,7 +2366,6 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         $state.go('list'+listid);
         // $state.go('details'+listid,{pk:$stateParams.pk});
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback})}
     
     // Go to details
     $scope.gotodetails = function() {
@@ -2446,7 +2459,6 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     $scope.submit = function(form, next) {
         formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'edit');
     };
-    if (hotkeys!==undefined) {hotkeys.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit})}
 
     var fields = [];
     $scope.preUpdateField = function(field_o, field_d) {
@@ -2460,6 +2472,13 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         fields[field_o] = $scope[field_o];
         fields[field_d] = $scope[field_d];
     };
+    
+    // Startup hotkey system
+    if (hotkeys!==undefined) {
+        var hotkeysrv = hotkeys.bindTo($scope);
+        hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
+        hotkeysrv.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit});
+    }
 };
 
 
