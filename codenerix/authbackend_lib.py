@@ -533,8 +533,6 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                             cn = value
                     elif key == 'DC':
                         dcs.append(value)
-                    else:
-                        raise IOError("Unknown KEY '{}'".format(key))
                 
                 # Prepare the full domain name addess of the AD
                 dc = ".".join(dcs)
