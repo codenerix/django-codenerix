@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-15 19:18+0200\n"
+"POT-Creation-Date: 2017-06-19 11:45+0200\n"
 "PO-Revision-Date: 2017-06-15 17:07+0000\n"
 "Last-Translator:   <jsoler@centrologic.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -289,14 +289,14 @@ msgstr "Cambiar"
 #: codenerix/templates/codenerix/details.html:154
 #: codenerix/templates/codenerix/details.html:156
 #: codenerix/templates/codenerix/details.html:157
-#: codenerix/templates/codenerix/form.html:87
 #: codenerix/templates/codenerix/form.html:88
-#: codenerix/templates/codenerix/form.html:90
+#: codenerix/templates/codenerix/form.html:89
 #: codenerix/templates/codenerix/form.html:91
-#: codenerix/templates/codenerix/form.html:554
-#: codenerix/templates/codenerix/form.html:555
-#: codenerix/templates/codenerix/form.html:557
-#: codenerix/templates/codenerix/form.html:558
+#: codenerix/templates/codenerix/form.html:92
+#: codenerix/templates/codenerix/form.html:559
+#: codenerix/templates/codenerix/form.html:560
+#: codenerix/templates/codenerix/form.html:562
+#: codenerix/templates/codenerix/form.html:563
 #: codenerix/templates/codenerix/formmodal.html:62
 #: codenerix/templates/codenerix/formmodal.html:63
 #: codenerix/templates/codenerix/formmodal.html:65
@@ -422,14 +422,14 @@ msgstr "Añadir nuevo"
 #: codenerix/templates/codenerix/detailsmodal_log.html:42
 #: codenerix/templates/codenerix/detailsmodal_log.html:97
 #: codenerix/templates/codenerix/detailsmodal_log.html:98
-#: codenerix/templates/codenerix/form.html:78
 #: codenerix/templates/codenerix/form.html:79
-#: codenerix/templates/codenerix/form.html:81
+#: codenerix/templates/codenerix/form.html:80
 #: codenerix/templates/codenerix/form.html:82
-#: codenerix/templates/codenerix/form.html:545
-#: codenerix/templates/codenerix/form.html:546
-#: codenerix/templates/codenerix/form.html:548
-#: codenerix/templates/codenerix/form.html:549
+#: codenerix/templates/codenerix/form.html:83
+#: codenerix/templates/codenerix/form.html:550
+#: codenerix/templates/codenerix/form.html:551
+#: codenerix/templates/codenerix/form.html:553
+#: codenerix/templates/codenerix/form.html:554
 msgid "Go back"
 msgstr "Volver"
 
@@ -439,10 +439,10 @@ msgstr "Volver"
 #: codenerix/templates/codenerix/add.html:46
 #: codenerix/templates/codenerix/addmodal.html:41
 #: codenerix/templates/codenerix/addmodal.html:42
-#: codenerix/templates/codenerix/form.html:67
 #: codenerix/templates/codenerix/form.html:68
-#: codenerix/templates/codenerix/form.html:534
-#: codenerix/templates/codenerix/form.html:535
+#: codenerix/templates/codenerix/form.html:69
+#: codenerix/templates/codenerix/form.html:539
+#: codenerix/templates/codenerix/form.html:540
 #: codenerix/templates/codenerix/formmodal.html:70
 #: codenerix/templates/codenerix/formmodal.html:71
 msgid "Save"
@@ -452,10 +452,10 @@ msgstr "Guardar"
 #: codenerix/templates/codenerix/add.html:37
 #: codenerix/templates/codenerix/add.html:48
 #: codenerix/templates/codenerix/add.html:49
-#: codenerix/templates/codenerix/form.html:71
 #: codenerix/templates/codenerix/form.html:72
-#: codenerix/templates/codenerix/form.html:538
-#: codenerix/templates/codenerix/form.html:539
+#: codenerix/templates/codenerix/form.html:73
+#: codenerix/templates/codenerix/form.html:543
+#: codenerix/templates/codenerix/form.html:544
 msgid "Save & new"
 msgstr "Guardar y nuevo"
 
@@ -473,33 +473,33 @@ msgstr "Volver"
 
 #: codenerix/templates/codenerix/details.html:82
 #: codenerix/templates/codenerix/details.html:157
-#: codenerix/templates/codenerix/form.html:91
-#: codenerix/templates/codenerix/form.html:558
+#: codenerix/templates/codenerix/form.html:92
+#: codenerix/templates/codenerix/form.html:563
 #: codenerix/templates/codenerix/formmodal.html:66
 msgid "Are you sure you would like to delete this register?"
 msgstr "¿Está seguro que desea borrar este registros?"
 
-#: codenerix/templates/codenerix/form.html:58
+#: codenerix/templates/codenerix/form.html:59
 #: codenerix/templates/codenerix/formmodal.html:27
 msgid "Editing"
 msgstr "Editando"
 
-#: codenerix/templates/codenerix/form.html:69
 #: codenerix/templates/codenerix/form.html:70
-#: codenerix/templates/codenerix/form.html:536
-#: codenerix/templates/codenerix/form.html:537
+#: codenerix/templates/codenerix/form.html:71
+#: codenerix/templates/codenerix/form.html:541
+#: codenerix/templates/codenerix/form.html:542
 msgid "Save here"
 msgstr "Guardar aquí"
 
-#: codenerix/templates/codenerix/form.html:73
 #: codenerix/templates/codenerix/form.html:74
-#: codenerix/templates/codenerix/form.html:540
-#: codenerix/templates/codenerix/form.html:541
+#: codenerix/templates/codenerix/form.html:75
+#: codenerix/templates/codenerix/form.html:545
+#: codenerix/templates/codenerix/form.html:546
 msgid "Reload"
 msgstr "Recargar"
 
-#: codenerix/templates/codenerix/form.html:74
-#: codenerix/templates/codenerix/form.html:541
+#: codenerix/templates/codenerix/form.html:75
+#: codenerix/templates/codenerix/form.html:546
 msgid "You will loose all your changes, are you sure?"
 msgstr "Perderá todos sus cambios, ¿está seguro?"
 
