@@ -30,6 +30,7 @@ Features
 * several authentication methods' including OTP (One Time Password)
 * ready for authentication with Microsoft Active Directory
 * compatible with Python 2.7 and Python >= 3.4
+* hotkeys support
 
 Ready for:
 ''''''''''
@@ -175,4 +176,5 @@ nsPopover                           MIT                 contact@
 Quill                               COPYRIGHT           Jason Chen & salesforce.com https://quilljs.com/
 Rangy                               MIT                 Tim Down                    https://github.com/timdown/rangy
 textAngular                         MIT                 Austin Anderson             https://github.com/fraywing/textAngular/wiki
+hotkeys                             MIT                 Wes Cruver                  https://github.com/chieffancypants/angular-hotkeys/
 =================================== =================== =========================== =========================================================

@@ -97,3 +97,7 @@ input[type="checkbox"] {
 .md-autocomplete-suggestions-container {
     z-index:9999 !important;
 }
+
+.row_selected {
+    background-color: #66ffff;
+}

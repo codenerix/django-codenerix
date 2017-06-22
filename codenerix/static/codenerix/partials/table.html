@@ -104,15 +104,6 @@ limitations under the License.
                         </tr>
                     </thead>
                     <tbody codenerix-vtable>
-                        <tr ng-repeat="row in data.table.body" ng-click="detail(row.pk)" ui-view>
-                            <!-- This is the default behavior -->
-                            <!-- <ng-include src="'/static/demo/partials/info.html'"/>  -->
-<!--                            <td ng-repeat="column in data.table.head.columns" ng-switch="isList(row[column.pk])">
-                                <ul ng-switch-when="true" ng-init="key=getKey(column.pk)">
-                                    <li ng-repeat="info in row[column.pk]">{{info}}</li>
-                                </ul>
-                                <span ng-switch-when="false">{{row[column.pk]}}</span>
-                                <td> -->
-                        </tr>
+                        <tr ng-repeat="row in data.table.body" ng-click="detail(row.pk)" ui-view></tr>
                     </tbody>
                 </table>

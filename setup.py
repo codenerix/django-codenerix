@@ -1,4 +1,5 @@
 import os
+import sys
 from setuptools import setup
 
 import codenerix
@@ -16,6 +17,11 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+
+if sys.version_info[0] < 3:
+    requirements = codenerix.__requirements__['2']
+else:
+    requirements = codenerix.__requirements__['3']
 
 setup(
     name='django-codenerix',
@@ -49,21 +55,6 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     # cmdclass={ 'install': CustomInstallCommand, },
-    install_requires = [
-        "pymongo",
-        "django-angular",
-        "python-dateutil",
-        "django-recaptcha>=1.2.1,<1.3",
-        "django-rosetta",
-        "jsonfield",
-        "openpyxl",
-        "Pillow",
-        "Unidecode",
-        "xhtml2pdf",
-        "html5lib==1.0b8", # Default version 0.99999999 is broken with error 'from html5lib import treebuilders, inputstream' => 'ImportError: cannot import name inputstream' (1.0b10 also fails)
-        "Django>=1.10.6,<1.11",
-        "django-multi-email-field",
-        "ldap3",
-        ],
+    install_requires = requirements,
 )
 
