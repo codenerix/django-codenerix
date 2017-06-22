@@ -544,10 +544,45 @@ function refresh($scope, $timeout, Register, callback, internal) {
 
                 var blob = new Blob(byteArrays, {type: $scope.tempdata.meta.content_type});
                 // FIN: Decode base 64
-                var downloadLink = angular.element('<a></a>');
-                downloadLink.attr('href',window.URL.createObjectURL(blob));
-                downloadLink.attr('download', $scope.tempdata.table.printer.filename);
-                downloadLink[0].click();
+                
+                var isFirefox = typeof InstallTrigger !== 'undefined';
+                var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+                var isIE = /*@cc_on!@*/false || !!document.documentMode;
+                var isEdge = !isIE && !!window.StyleMedia;
+                var isChrome = !!window.chrome && !!window.chrome.webstore;
+                var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+                var isBlink = (isChrome || isOpera) && !!window.CSS;
+
+                if(isFirefox || isIE || isChrome){
+                    if(isChrome){
+                        
+                        var downloadLink = angular.element('<a></a>');
+                        downloadLink.attr('href',window.URL.createObjectURL(blob));
+                        downloadLink.attr('download', $scope.tempdata.table.printer.filename);
+                        downloadLink[0].click();
+                    }
+                    if(isIE){
+                        console.log('Manage IE download>10');
+                        window.navigator.msSaveOrOpenBlob($scope.tempdata.table.printer.file,$scope.tempdata.table.printer.filename); 
+                    }
+                    if(isFirefox){
+                        console.log('Manage Mozilla Firefox download');
+                        var url = window.URL || window.webkitURL;
+                        var fileURL = url.createObjectURL(blob);
+
+                        var downloadLink = document.createElement('a');
+                        downloadLink.href=fileURL;
+                        downloadLink.setAttribute('download', $scope.tempdata.table.printer.filename);
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();//we call click function
+                        document.body.removeChild(downloadLink);
+                    }
+
+
+                }else{
+                    alert('SORRY YOUR BROWSER IS NOT COMPATIBLE');
+                }
+                
             }
             $scope.query.printer = null;
         }else{
