@@ -33,6 +33,7 @@ import calendar
 import hashlib
 import string
 import random
+from StringIO import StringIO
 
 # Django
 from django.db import models
@@ -2587,8 +2588,6 @@ class GenList(GenBase, ListView):
     def response_to_xls(self, answer):
         wb = Workbook()
 
-        dest_filename = '/tmp/empty_book.xlsx'
-
         ws1 = wb.active
         ws1.title = _("List")
 
@@ -2608,22 +2607,26 @@ class GenList(GenBase, ListView):
                     tmp.append("\n".join(col[id]))
             ws1.append(tmp)
 
-        wb.save(filename=dest_filename)
-
+        data_output = StringIO()
+        wb.save(data_output)
+        
         size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
-        tam_file = os.stat(dest_filename).st_size
-        if tam_file <= (size_max * 1000000):
-            return {
+        if data_output.len <= (size_max * 1000000):
+            data_output.seek(0)
+            result = {
                 'message': "",
-                'file': base64.b64encode(open(dest_filename, 'r').read()),
+                'file': base64.b64encode(data_output.read()),
                 'filename': 'list.xlsx'
             }
         else:
-            return {
-                'message': _("The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the config".format(tam_file / 1000000.0)),
+            result = {
+                'message': _("The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the config".format(data_output.len / 1000000.0)),
                 'file': "",
                 'filename': ""
             }
+
+        data_output.close()
+        return result
 
 
 class GenListModal(GenList):
