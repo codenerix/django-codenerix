@@ -36,6 +36,10 @@ from django.core.exceptions import PermissionDenied
 from codenerix.middleware import get_current_user
 from codenerix.helpers import daterange_filter
 
+# Separator to log
+SEPARATOR = u'\u8594'
+SEPARATOR_HTML = ' &rarr; '
+
 
 class CodenerixMetaType(dict):
     """
@@ -244,10 +248,13 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             else:
                 cambios = ''
             for c in cambios:
-                text.append(u"{}: {}".format(_(c), cambios[c]))
+                if type(cambios[c]) is list:
+                    text.append(u"{}: {}".format(cambios[c][0], cambios[c][1]))
+                else:
+                    text.append(u"{}: {}".format(_(c), cambios[c]))
 
             if view == 'html':
-                result = mark_safe(u'<ul><li>{}</li></ul>'.format(u'</li><li>'.join(text)))
+                result = mark_safe(u'<ul><li>{}</li></ul>'.format(u'</li><li>'.join(text)).replace(SEPARATOR, SEPARATOR_HTML))
             else:
                 result = '\n'.join(text)
 
@@ -315,6 +322,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             return tf
 
     class GenLog(object):
+
+        class CodenerixMeta(CodenerixModel.CodenerixMeta):
+            log_full = False
+        
         def save(self, **kwargs):
             user = get_current_user()
             if user:
@@ -380,22 +391,44 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                       
                             try:
                                 json.dumps(field, default=json_util.default)
-                                attrs[key] = field
+                                if key not in attrs_bd or not self.CodenerixMeta.log_full:
+                                    attrs[key] = field
+                                else:
+                                    if isinstance(attrs_bd[key], CodenerixModel):
+                                        attrs[key] = (attrs_bd[key].pk, field, )
+                                    else:
+                                        attrs[key] = (attrs_bd[key], field, )
                             except:
                                 # If related, we don't do anything
                                 if getattr(field, 'all', None) is None:
                                     field = str(field)
-                                    attrs[key] = field
+                                    if key not in attrs_bd or not self.CodenerixMeta.log_full:
+                                        attrs[key] = field
+                                    else:
+                                        attrs[key] = (attrs_bd[key], field, )
                             
                             if hasattr(ffield, "verbose_name"):
                                 try:
                                     string_checks = [unicode, str]
                                 except NameError:
                                     string_checks = [str]
+
                                 if type(ffield.verbose_name) in string_checks:
-                                    attrs_txt[ffield.verbose_name] = force_text(field_txt, errors='replace')
+                                    ffield_verbose_name = ffield.verbose_name
                                 else:
-                                    attrs_txt[str(ffield.verbose_name)] = force_text(field_txt, errors='replace')
+                                    ffield_verbose_name = str(ffield.verbose_name)
+
+                                if key not in attrs_bd or not self.CodenerixMeta.log_full:
+                                    attrs_txt[ffield_verbose_name] = force_text(field_txt, errors='replace')
+                                else:
+                                    attrs_txt[key] = (
+                                        ffield_verbose_name,
+                                        u"{}{}{}".format(
+                                            force_text(attrs_bd[key], errors='replace'),
+                                            SEPARATOR,
+                                            force_text(field_txt, errors='replace')
+                                        )
+                                    )
                         
             log = Log()
             log.user_id = user_id
@@ -418,6 +451,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                 log.object_id = self.pk
             log.save()
             return aux
+    
+    class GenLogFull(GenLog):
+        class CodenerixMeta(CodenerixModel.CodenerixMeta):
+            log_full = True
     
     @receiver(post_delete)
     def codenerixmodel_delete_post(sender, instance, **kwargs):
