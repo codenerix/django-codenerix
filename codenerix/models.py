@@ -467,23 +467,49 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             action = DELETION
             
             attrs = {}
+            attrs_txt = {}
+
             # ._meta.get_fields() return all fields include related name
             # ._meta.fields return all fields of models
             
-            for key in instance._meta.fields:
-                value = getattr(instance, key.name)
-                if isinstance(value, models.Model):
-                    attrs[key.name] = value.pk
+            # list_fields = [x.name for x in instance._meta.get_fields()]
+            for ffield in instance._meta.get_fields():
+                key = ffield.name
+                # exclude manytomany
+                if instance._meta.model._meta.local_many_to_many and key in [x.name for x in instance._meta.model._meta.local_many_to_many]:
+                    field = None
+                # elif self._meta.get_all_related_many_to_many_objects() and key in [x.name for x in self._meta.get_all_related_many_to_many_objects()]:
+                elif instance._meta.get_fields(include_hidden=True) and key in [x.name for x in instance._meta.get_fields(include_hidden=True) if x.many_to_many and x.auto_created]:
+                    field = None
+                else:
+                    field = getattr(instance, key, None)
+
+                value = getattr(instance, ffield.name)
+                if isinstance(value, CodenerixModel):
+                    attrs[ffield.name] = value.pk
                 else:
                     try:
                         json.dump(value, default=json_util.default)
-                        attrs[key.name] = value
+                        attrs[ffield.name] = value
                     except TypeError:
                         # If related, we don't do anything
                         if getattr(value, 'all', None) is None:
                             # value = str(value)
                             value = smart_text(value)
-                            attrs[key.name] = value
+                            attrs[ffield.name] = value
+
+                if hasattr(ffield, "verbose_name"):
+                    try:
+                        string_checks = [unicode, str]
+                    except NameError:
+                        string_checks = [str]
+
+                    if type(ffield.verbose_name) in string_checks:
+                        ffield_verbose_name = ffield.verbose_name
+                    else:
+                        ffield_verbose_name = str(ffield.verbose_name)
+
+                    attrs_txt[ffield_verbose_name] = force_text(field, errors='replace')
             
             log = Log()
             log.user_id = user_id
@@ -491,5 +517,6 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             log.object_id = instance.pk
             log.object_repr = force_text(instance)
             log.change_json = json.dumps(attrs, default=json_util.default)
+            log.change_txt = json.dumps(attrs_txt, default=json_util.default)
             log.action_flag = action
             log.save()
