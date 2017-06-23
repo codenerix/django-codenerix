@@ -33,7 +33,10 @@ import calendar
 import hashlib
 import string
 import random
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 # Django
 from django.db import models
