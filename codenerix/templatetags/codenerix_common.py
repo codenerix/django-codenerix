@@ -239,7 +239,6 @@ def TrueFalse(value):
 
 @register.simple_tag(takes_context=True)
 def cdnx_beauty(context, value, kind=None):
-    raise IOError(context)
     if kind:
         if kind == 'skype':
             return u"<a ng-click='$event.stopPropagation();' href='tel:{0}'>{0}</a>".format(value);
