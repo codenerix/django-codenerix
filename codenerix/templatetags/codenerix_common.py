@@ -18,52 +18,278 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+import datetime
+
 from django import template
+from django.utils.translation import ugettext as _
+from django.conf import settings
 
 from codenerix.helpers import zeropad,monthname,nameunify
-from codenerix.templatetags_common import codenerix, nicenull, debugme, debugmedict, addedit, invert, differ, ghtml, smallerthan, br, nicekilometers, niceeuronull, nicepercentnull, nicebool, ynbool, toint, notval, count, countpages, freedombool, pair, lenlist, nbsp, mod, keyvalue, acumulate, getforms, langforms, objectatrib, TrueFalse, multiplication, division, addition, subtraction, autofocus
-
-def fbuilder1(f): return lambda arg: f(arg)
-def fbuilder2(f): return lambda arg1,arg2: f(arg1,arg2)
-def fcodenerix(arg1, arg2=None):
-    return codenerix(arg1, arg2)
 
 register = template.Library()
 register.filter('digitos',zeropad)
 register.filter('monthname',monthname)
 register.filter('nameunify',nameunify)
-register.filter('nicenull',fbuilder1(nicenull))
-register.filter('debugme',fbuilder1(debugme))
-register.filter('debugmedict',fbuilder1(debugmedict))
-register.filter('addedit',fbuilder1(addedit))
-register.filter('invert',fbuilder1(invert))
-register.filter('differ',fbuilder2(differ))
-register.filter('ghtml',fbuilder1(ghtml))
-register.filter('smallerthan',fbuilder2(smallerthan))
-register.filter('br',fbuilder1(br))
-register.filter('nicekilometers',fbuilder1(nicekilometers))
-register.filter('niceeuronull',fbuilder1(niceeuronull))
-register.filter('nicepercentnull',fbuilder1(nicepercentnull))
-register.filter('nicebool',fbuilder1(nicebool))
-register.filter('ynbool',fbuilder1(ynbool))
-register.filter('toint',fbuilder1(toint))
-register.filter('notval',fbuilder1(notval))
-register.filter('count',fbuilder1(count))
-register.filter('countpages',fbuilder1(countpages))
-register.filter('freedombool',fbuilder2(freedombool))
-register.filter('pair',fbuilder1(pair))
-register.filter('len',fbuilder1(lenlist))
-register.filter('nbsp',fbuilder1(nbsp))
-register.filter('mod',fbuilder1(mod))
-register.filter('keyvalue',fbuilder2(keyvalue))
-register.filter('acumulate',fbuilder2(acumulate))
-register.filter('getforms',fbuilder2(getforms))
-register.filter('langforms',fbuilder2(langforms))
-register.filter('objectatrib',fbuilder2(objectatrib))
-register.filter('TrueFalse',fbuilder1(TrueFalse))
-register.filter('codenerix',fcodenerix)
-register.filter('multiplication',fbuilder2(multiplication))
-register.filter('division',fbuilder2(division))
-register.filter('addition',fbuilder2(addition))
-register.filter('subtraction',fbuilder2(subtraction))
-register.filter('autofocus',fbuilder1(autofocus))
+
+@register.filter
+def debugme(obj):
+        raise IOError(obj)
+
+@register.filter
+def debugmedict(obj):
+        raise IOError(obj.__dict__)
+
+@register.filter
+def addedit(value):
+    return (value=='add') or (value=='edit')
+
+@register.filter
+def invert(listt):
+    newlist=[]
+    for element in listt:
+        newlist.insert(0,element)
+    return newlist
+
+@register.filter
+def differ(value1,value2):
+    return abs(value1-value2)
+
+
+@register.filter
+def ghtml(value):
+    if value:
+        splitted=value.replace("\r","").split("\n")
+        result=''
+        for row in splitted:
+            oldlen=0
+            while oldlen!=len(row):
+                oldlen=len(row)
+                row=row.replace('  ','&nbsp;&nbsp;')
+            if len(row)>0 and row[0]=='#':
+                result+="<b>%s</b>" % (row[1:])
+            else:
+                result+="%s" % (row)
+            result+='<br>'
+    else:
+        result=value
+    return result
+
+@register.filter
+def smallerthan(value1,value2):
+    return value1<value2
+
+@register.filter
+def br(value):
+    splitted=value.split("\n")
+    header=splitted[0]
+    body='<br>'.join(splitted[1:])
+    return "<div style='color:#5588BB'>%s</div><div style='color:#22BB00; margin-top:5px;'>%s</div>" % (header,body)
+
+@register.filter
+def nicenull(value):
+    if value:
+        return value
+    else:
+        return "-"
+
+@register.filter
+def nicekilometers(value):
+    if value:
+        return "{0}km".format(value)
+    else:
+        return "-"
+
+@register.filter
+def niceeuronull(value):
+    if value:
+        return u"{0}\u20AC".format(value)
+    else:
+        return "-"
+
+@register.filter
+def nicepercentnull(value):
+    if value:
+        return "%s%%" % (value)
+    else:
+        return "-"
+
+@register.filter
+def nicebool(value):
+    if value:
+        return _("Yes")
+    else:
+        return _("No")
+
+@register.filter
+def ynbool(value):
+    if value:
+        return "yes"
+    else:
+        return "no"
+
+@register.filter
+def toint(value):
+    try:
+        newvalue=int(value)
+    except:
+        newvalue=None
+    return newvalue
+
+@register.filter
+def notval(value):
+    return not value
+
+@register.filter
+def count(values):
+    return values.count()
+
+@register.filter
+def countpages(values):
+    return (values.count()-1)
+
+@register.filter
+def freedombool(value1,value2):
+    if value1>=value2:
+        return "yes"
+    else:
+        return "no"
+
+@register.filter
+def pair(value):
+    if value % 2:
+        return False
+    else:
+        return True
+
+@register.filter(name='len')
+def lenlist(list):
+    return len(list)
+
+@register.filter
+def nbsp(value):
+    return value.replace(' ','&nbsp;')
+
+
+@register.filter
+def mod(value, arg):
+    if (value%arg==0):
+        return 1
+    else:
+        return 
+
+@register.filter
+def keyvalue(dic, key):
+        return dic[key]
+
+@register.filter
+def acumulate(element,l):
+    if l:
+        number=l[-1]['id']+1
+    else:
+        number=1
+    l.append({'id':number,'value':element})
+    return number
+
+@register.filter
+def getforms(forms,form):
+    if forms:
+        return forms
+    else:
+        return [form]
+
+@register.filter
+def langforms(forms, language):
+    for form in forms:
+        form.set_language(language)
+    return forms
+
+@register.filter
+def objectatrib(instance, atrib):
+    '''
+    this filter is going to be useful to execute an object method or get an 
+    object attribute dynamically. this method is going to take into account
+    the atrib param can contains underscores
+    '''
+    atrib = atrib.replace("__", ".")
+    atribs = []
+    atribs = atrib.split(".")
+    
+    obj = instance
+    for atrib in atribs:
+        if type(obj)==dict:
+            result = obj[atrib]
+        else:
+            try:
+                result = getattr(obj, atrib)()
+            except:
+                result = getattr(obj, atrib)
+        
+        obj = result
+    return result
+
+@register.filter
+def TrueFalse(value):
+    if type(value)==bool:
+        if value:
+            return _('True')
+        else:
+            return _('False')
+    return value
+
+@register.filter
+def cdnx_beauty(context, value, kind=None):
+    raise IOError(context)
+    if kind:
+        if kind == 'skype':
+            return u"<a ng-click='$event.stopPropagation();' href='tel:{0}'>{0}</a>".format(value);
+        elif kind == 'image':
+            return u"<img ng-click='$event.stopPropagation();' src='{0}{1}'>".format(settings.MEDIA_URL, value);
+        elif kind == 'nofilter':
+            return value
+        else:
+            raise Exception("Django filter 'codenerix' got a wrong kind named '"+kind+"'")
+    else:
+        if value is None:
+            return nicenull(value)
+        elif type(value) is bool:
+            return TrueFalse(value)
+        elif type(value) is time:
+            # fmt = formats.get_format('DATETIME_INPUT_FORMATS', lang=langcode)[0]
+            pass
+        elif type(value) is datetime:
+            # fmt = formats.get_format('TIME_INPUT_FORMATS', lang=langcode)[0]
+            pass
+    
+    return value
+
+
+@register.filter
+def multiplication(value, arg):
+    return float(value) * float(arg)
+
+
+@register.filter
+def division(value, arg):
+    if arg != 0:
+        return float(value) / float(arg)
+    else:
+        return None
+
+
+@register.filter
+def addition(value, arg):
+    return float(value) + float(arg)
+
+
+@register.filter
+def subtraction(value, arg):
+    return float(value) - float(arg)
+
+
+@register.filter
+def autofocus(f):
+    if f.get('focus', False):
+        return "autofocus"
+    else:
+        return ""

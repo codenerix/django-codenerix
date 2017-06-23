@@ -103,7 +103,7 @@ limitations under the License.
                                 <div class="panel-body">
                                 {% for subsubitem in subitem.value %}
                                     <label >{{subsubitem.name}}:</label>
-                                    {{subsubitem.value|nicenull|TrueFalse|codenerix:subitem.filter|safe}}<br>
+                                    {% codenerix_beauty subsubitem.value subitem.filter %}<br>
                                 {% endfor %}
                                 </div>
                             </div>
@@ -111,7 +111,7 @@ limitations under the License.
                     {% else %}
                         
                         <label >{{subitem.name}}:</label>
-                        {{subitem.value|nicenull|TrueFalse|codenerix:subitem.filter|safe}}<br>
+                        {% codenerix_beauty subsubitem.value subitem.filter %}<br>
                     {% endif %}
                 {% endfor %}
                         </div>
@@ -122,7 +122,7 @@ limitations under the License.
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <label>{{item.name}}:</label>
-                            {{item.value|nicenull|TrueFalse|safe}}
+                            {% codenerix_beauty item.value %}<br>
                         </div>
                     </div>
                 </div>
