@@ -607,7 +607,10 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
         minview=2
         maxview=4
         icon='calendar'
-
+        
+        ##############################################################################
+        # WARNING: Language code should be detected on runtime from the user request #
+        ##############################################################################
         langcode = settings.LANGUAGE_CODE
         format_date = formats.get_format('DATETIME_INPUT_FORMATS', lang=langcode)[0].replace("%","").replace('d','dd').replace('m','mm').replace('Y','yyyy').replace('H','hh').replace('M','ii').split(" ")[0]
         language = settings.LANGUAGE_CODE
