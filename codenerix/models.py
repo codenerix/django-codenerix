@@ -458,7 +458,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
     
     @receiver(post_delete)
     def codenerixmodel_delete_post(sender, instance, **kwargs):
-        if not hasattr(instance, "name_models_list") and isinstance(sender, GenLog):
+        if not hasattr(instance, "name_models_list") and issubclass(sender, GenLog):
             user = get_current_user()
             if user:
                 user_id = user.pk

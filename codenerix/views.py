@@ -51,7 +51,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import string_concat, gettext
 from django.core.exceptions import ImproperlyConfigured
 from django.core import serializers
-from django.http import HttpResponse, HttpResponseForbidden, Http404
+from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -971,7 +971,8 @@ class GenList(GenBase, ListView):
         show_modal = True                           # With 'True' it will push the system to render the result in a modal window
         vtable = False                              # With 'True' it will use one-page-only lists with scroll detection for autoloading rows
         ngincludes = {'name':'path_to_partial'}     # Keep trace for ngincludes extra partials
-        export_excel = True                         # Export to excel the list
+        export_excel = True                         # Show button 'Export to excel' in the list
+        export = 'xlsx'                             # Force the download the list as file. Default None
 
         ws_entry_point                              # Set ws_entry_point variable to a fixed value
         static_partial_row                          # Set static_partial_row to a fixed value
@@ -1142,8 +1143,11 @@ class GenList(GenBase, ListView):
                 return super(GenList, self).dispatch(*args, **kwargs)
 
         # Initialize a default context
-        self.__kwargs=kwargs
-        self.__context={}
+        self.__kwargs = kwargs
+        self.__context = {}
+
+        # Force export list
+        self.export = getattr(self, 'export', self.request.GET.get('export', self.request.POST.get('export', None)))
 
         # Call the base implementation
         return super(GenList, self).dispatch(*args, **kwargs)
@@ -1960,7 +1964,7 @@ class GenList(GenBase, ListView):
         # Check the total count of registers + rows per page
         total_rows_per_page = jsondata.get('rowsperpage', self.default_rows_per_page)
         pages_to_bring = jsondata.get('pages_to_bring', 1)
-        if total_rows_per_page == 'All' or 'printer' in context:
+        if total_rows_per_page == 'All' or self.export:
             total_rows_per_page = queryset.count()
         paginator = Paginator(queryset, total_rows_per_page)
         total_registers = paginator.count
@@ -2177,7 +2181,7 @@ class GenList(GenBase, ListView):
         # Build get structure
         a['getval'] = {}
         for key in context['getval']:
-            if key not in ['search', 'ordering', 'month', 'filters', 'page', 'pages_to_bring', 'rowsperpage', 'year', 'month', 'day', 'hour', 'minute', 'second', 'json', 'printer']:
+            if key not in ['search', 'ordering', 'month', 'filters', 'page', 'pages_to_bring', 'rowsperpage', 'year', 'month', 'day', 'hour', 'minute', 'second', 'json']:
                 a['getval'] = context['getval'][key]
 
         # Set data
@@ -2195,6 +2199,10 @@ class GenList(GenBase, ListView):
         a['show_details'] = context['show_details']
         a['show_modal'] = context['show_modal']
         a['search_filter_button'] = context['search_filter_button']
+        a['request'] = {
+            'path_info': self.request.META.get('PATH_INFO', None),
+            'query_string': self.request.META.get('QUERY_STRING', None),
+        }
 
         if self.__authtoken:
             a['version'] = getattr(settings, "VERSION", None)
@@ -2228,8 +2236,6 @@ class GenList(GenBase, ListView):
             translate_key = list(a['rowsperpageallowed'].keys())[-1]
             a['rowsperpageallowed'][translate_key] = a['rowsperpageallowed'][translate_key]
 
-        if 'printer' in context['getval']:
-            a['printer'] = context['getval']['printer']
         # Return answer
         return a
 
@@ -2426,12 +2432,6 @@ class GenList(GenBase, ListView):
             elementid=None
         newget['elementid'] = elementid
 
-        if 'printer' in v:
-            printer = v['printer']
-        else:
-            printer = None
-        newget['printer'] = printer
-
         # Return new get
         return newget
 
@@ -2564,31 +2564,27 @@ class GenList(GenBase, ListView):
                 # Call bodybuilder
                 answer['table']['body'] = self.bodybuilder(context['object_list'], self.__autorules)
 
-            if answer['meta']['printer']:
-                if answer['meta']['printer'] == 'xls':
+            if self.export:
+                if self.export == 'xlsx':
                     answer['meta']['content_type'] = 'application/vnd.ms-excel;charset=utf-8;'
                     # return_xls = self.response_to_xls(answer)
-                    answer['table']['printer'] = self.response_to_xls(answer)
+                    return self.response_to_xls(answer, response_kwargs)
                 else:
-                    raise Exception("Export to {} invalid".format(answer['meta']['printer']))
+                    raise Exception("Export to {} invalid".format(self.export))
             else:
                 answer['meta']['content_type'] = None
-                answer['table']['printer'] = {}
-                answer['table']['printer']['message'] = None
-                answer['table']['printer']['file'] = None
-                answer['table']['printer']['filename'] = None
 
             # Try to serialize it as a JSON string
             try:
-                json_answer=json.dumps(answer)
-            except TypeError as  e:
-                raise TypeError("The method json_builder() from model '{0}' inside app '{1}' didn't return a JSON serializable object. Error was: {2}".format(self._modelname,self._appname,e))
+                json_answer = json.dumps(answer)
+            except TypeError as e:
+                raise TypeError("The method json_builder() from model '{0}' inside app '{1}' didn't return a JSON serializable object. Error was: {2}".format(self._modelname, self._appname, e))
             # Return the new answer
-            return HttpResponse(json_answer,content_type='application/json', **response_kwargs)
+            return HttpResponse(json_answer, content_type='application/json', **response_kwargs)
         else:
             return super(GenList, self).render_to_response(context, **response_kwargs)
 
-    def response_to_xls(self, answer):
+    def response_to_xls(self, answer, response_kwargs):
         wb = Workbook()
 
         ws1 = wb.active
@@ -2616,20 +2612,17 @@ class GenList(GenBase, ListView):
         size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
         if data_output.len <= (size_max * 1000000):
             data_output.seek(0)
-            result = {
-                'message': "",
-                'file': base64.b64encode(data_output.read()),
-                'filename': 'list.xlsx'
-            }
+            response = HttpResponse(data_output.getvalue(), content_type='application/vnd.ms-excel;charset=utf-8;', **response_kwargs)
+            response['Content-Disposition'] = 'attachment; filename=list.xlsx'
+            return response
         else:
             result = {
                 'message': _("The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the config".format(data_output.len / 1000000.0)),
                 'file': "",
                 'filename': ""
             }
-
-        data_output.close()
-        return result
+            args = "json={}".format(json.dumps(result))
+            return HttpResponseRedirect("{}?{}".format(reverse('show_error'), args))
 
 
 class GenListModal(GenList):

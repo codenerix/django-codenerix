@@ -1851,8 +1851,8 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     };
 
     $scope.print_excel = function(){
-        $scope.query.printer = 'xls';
-        refresh($scope, $timeout, Register, callback);
+        var url = $scope.data.meta.request.path_info + '?' + $scope.data.meta.request.query_string + '&export=xlsx';
+        window.open(url, '_blank');
     };
     
     // Get details 
