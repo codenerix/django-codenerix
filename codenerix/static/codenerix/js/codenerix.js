@@ -145,8 +145,8 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
                 if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
 
                 // Add linked element
-                $scope.linked=function (ngmodel, appname, modelname, formobj, formname, id, wsbaseurl) {
-                    inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, null, ngmodel, appname, modelname, formobj, formname, id, wsbaseurl, $timeout);
+                $scope.linked=function (ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl) {
+                    inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, null, ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl, $timeout);
                 }
 
                 // Functions
@@ -725,19 +725,21 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
 
 
 // Linked elements behavior when they are called by a link() call from a click on a plus symbol
-function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, appname, modelname, formobj, formname, id, wsbaseurl, $timeout) {
+function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl, $timeout) {
     // Get incoming attributes
     $scope.ngmodel=ngmodel;
+    $scope.base_url=base_url;
     $scope.appname=appname;
     $scope.modelname=modelname;
     $scope.formobj=formobj;
     $scope.formname=formname;
     
     // Build ws callback
+    $scope.ws="/"+base_url+appname+"/"+modelname+"/";
     if (id) {
-        $scope.ws="/"+appname+"/"+modelname+"/"+id+"/editmodal";
+        $scope.ws+=id+"/editmodal";
     } else {
-        $scope.ws="/"+appname+"/"+modelname+"/addmodal";
+        $scope.ws+="addmodal";
     }
     $templateCache.remove($scope.ws);
     
@@ -2241,8 +2243,8 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     }
     
     // Add linked element
-    $scope.linked=function (ngmodel, appname, modelname, formobj, formname, id, wsbaseurl) {
-        inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, appname, modelname, formobj, formname, id, wsbaseurl, $timeout);
+    $scope.linked=function (ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl) {
+        inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl, $timeout);
     }
     
     // Set dynamic foreign fields controller functions
@@ -2384,8 +2386,8 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     $templateCache.remove(url);
     
     // Add linked element
-    $scope.linked=function (ngmodel, appname, modelname, formobj, formname, id, wsbaseurl) {
-        inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, appname, modelname,formobj, formname, id, wsbaseurl, $timeout);
+    $scope.linked=function (ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl) {
+        inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, base_url, appname, modelname,formobj, formname, id, wsbaseurl, $timeout);
     }
     
     // Set dynamic foreign fields controller functions

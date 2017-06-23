@@ -24,6 +24,8 @@ import datetime
 from django import template
 from django.utils.translation import ugettext as _
 from django.conf import settings
+from django.utils.translation import get_language
+from django.utils import formats
 
 from codenerix.helpers import zeropad,monthname,nameunify
 
@@ -237,8 +239,8 @@ def TrueFalse(value):
             return _('False')
     return value
 
-@register.simple_tag(takes_context=True)
-def cdnx_beauty(context, value, kind=None):
+@register.filter
+def cdnx_beauty(value, kind=None):
     if kind:
         if kind == 'skype':
             return u"<a ng-click='$event.stopPropagation();' href='tel:{0}'>{0}</a>".format(value);
@@ -253,12 +255,12 @@ def cdnx_beauty(context, value, kind=None):
             return nicenull(value)
         elif type(value) is bool:
             return TrueFalse(value)
-        elif type(value) is time:
-            # fmt = formats.get_format('DATETIME_INPUT_FORMATS', lang=langcode)[0]
-            pass
-        elif type(value) is datetime:
-            # fmt = formats.get_format('TIME_INPUT_FORMATS', lang=langcode)[0]
-            pass
+        elif type(value) is datetime.datetime:
+            fmt = formats.get_format('DATETIME_INPUT_FORMATS', lang=get_language())[0]
+            value = datetime.datetime.strftime(value, fmt)
+        elif type(value) is time.time:
+            fmt = formats.get_format('TIME_INPUT_FORMATS', lang=get_language())[0]
+            value = time.time.strftime(value, fmt)
     
     return value
 
