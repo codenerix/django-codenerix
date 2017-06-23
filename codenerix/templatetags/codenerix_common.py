@@ -237,7 +237,7 @@ def TrueFalse(value):
             return _('False')
     return value
 
-@register.filter
+@register.simple_tag(takes_context=True)
 def cdnx_beauty(context, value, kind=None):
     raise IOError(context)
     if kind:
