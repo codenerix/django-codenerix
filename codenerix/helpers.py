@@ -25,10 +25,7 @@ import random
 from dateutil.tz import tzutc
 import dateutil.parser
 import zipfile
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import BytesIO
 from unidecode import unidecode
 
 # Django
@@ -461,22 +458,35 @@ class InMemoryZip(object):
     imz.append("info.dat", data).append("test.txt","asdfasfdsaf")
     datazip = imz.read()
     
+    # Get FILE pointer and read() from it
+    FILE = imz.get_fp()
+    FILE.read()
+    
     # Uncompress
     imz = InMemoryZip(datazip)$
     info_unzipped = imz.get("info.dat")
     '''
+    
     def __init__(self, data=None):
         # Create the in-memory file-like object
-        self.in_memory_zip = StringIO()
+        self.in_memory_zip = BytesIO()
+        self.writeable = True
         if data:
             self.in_memory_zip.write(data)
             self.in_memory_zip.seek(0)
+    
+    def get_fp(self):
+        self.in_memory_zip.seek(0)
+        return self.in_memory_zip
     
     def append(self, filename_in_zip, file_contents):
         '''
         Appends a file with name filename_in_zip and contents of
         file_contents to the in-memory zip.
         '''
+        # Set the file pointer to the end of the file
+        self.in_memory_zip.seek(self.in_memory_zip.getbuffer().nbytes)
+        
         # Get a handle to the in-memory zip in append mode
         zf = zipfile.ZipFile(self.in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
         
@@ -491,6 +501,7 @@ class InMemoryZip(object):
         return self
     
     def get(self, filename):
+        self.in_memory_zip.seek(0)
         zf = zipfile.ZipFile(self.in_memory_zip, "r", zipfile.ZIP_DEFLATED, False)
         fp = zf.open(filename)
         data = fp.read()

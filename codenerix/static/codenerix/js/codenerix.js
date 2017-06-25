@@ -519,83 +519,15 @@ function refresh($scope, $timeout, Register, callback, internal) {
     $scope.query.elementid = $scope.elementid;
     // Refresh now
     var wrapper_callback = function () {
-        if (
-                   (typeof($scope.tempdata.meta)!='undefined')
-                && (typeof($scope.tempdata.meta.printer)!='undefined')
-                && ($scope.tempdata.meta.printer!=null)
-                ) {
-            if ($scope.tempdata.table.printer.message != ''){
-                alert($scope.tempdata.table.printer.message);
-            }else{
-                // Decode base 64
-                var sliceSize = 512;
-                var byteCharacters = atob($scope.tempdata.table.printer.file);
-                var byteArrays = [];
-
-                for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-                    var slice = byteCharacters.slice(offset, offset + sliceSize);
-                    var byteNumbers = new Array(slice.length);
-                    for (var i = 0; i < slice.length; i++) {
-                        byteNumbers[i] = slice.charCodeAt(i);
-                    }
-                    var byteArray = new Uint8Array(byteNumbers);
-                    byteArrays.push(byteArray);
-                }
-
-                var blob = new Blob(byteArrays, {type: $scope.tempdata.meta.content_type});
-                // FIN: Decode base 64
-                
-                var isFirefox = typeof InstallTrigger !== 'undefined';
-                var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-                var isIE = /*@cc_on!@*/false || !!document.documentMode;
-                var isEdge = !isIE && !!window.StyleMedia;
-                var isChrome = !!window.chrome && !!window.chrome.webstore;
-                var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-                var isBlink = (isChrome || isOpera) && !!window.CSS;
-
-                if(isFirefox || isIE || isChrome){
-                    if(isChrome){
-                        
-                        var downloadLink = angular.element('<a></a>');
-                        downloadLink.attr('href',window.URL.createObjectURL(blob));
-                        downloadLink.attr('download', $scope.tempdata.table.printer.filename);
-                        downloadLink[0].click();
-                    }
-                    if(isIE){
-                        console.log('Manage IE download>10');
-                        window.navigator.msSaveOrOpenBlob($scope.tempdata.table.printer.file,$scope.tempdata.table.printer.filename); 
-                    }
-                    if(isFirefox){
-                        console.log('Manage Mozilla Firefox download');
-                        var url = window.URL || window.webkitURL;
-                        var fileURL = url.createObjectURL(blob);
-
-                        var downloadLink = document.createElement('a');
-                        downloadLink.href=fileURL;
-                        downloadLink.setAttribute('download', $scope.tempdata.table.printer.filename);
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();//we call click function
-                        document.body.removeChild(downloadLink);
-                    }
-
-
-                }else{
-                    alert('SORRY YOUR BROWSER IS NOT COMPATIBLE');
-                }
-                
-            }
-            $scope.query.printer = null;
-        }else{
-            $scope.data = $scope.tempdata;
-            // Callback passed as an argument
-            if (callback!=undefined) {
-                callback();
-            }
-            
-            // Callback preinstalled in the scope
-            if ((internal!==true) && ($scope.refresh_callback!=undefined)) {
-                $scope.refresh_callback();
-            }
+        $scope.data = $scope.tempdata;
+        // Callback passed as an argument
+        if (callback!=undefined) {
+            callback();
+        }
+        
+        // Callback preinstalled in the scope
+        if ((internal!==true) && ($scope.refresh_callback!=undefined)) {
+            $scope.refresh_callback();
         }
     };
     // Call the service for the data
@@ -1655,7 +1587,6 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             "minute":null,
             "second":null,
             "context":{},
-            "printer": null,
         };
     }
     
@@ -1828,7 +1759,6 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
             "minute":null,
             "second":null,
             "context":{},
-            "printer": null,
         };
         refresh($scope, $timeout, Register, callback);
     };
