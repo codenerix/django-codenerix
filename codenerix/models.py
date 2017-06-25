@@ -75,6 +75,12 @@ class CodenerixMetaType(dict):
         super(CodenerixMetaType, self).__delitem__(key)
         del self.__dict__[key]
 
+    def __getnewargs__(self):
+        return tuple()
+
+    def __getstate__(self):
+        return self.__dict__
+
 
 class CodenerixModelBase(models.Model):
     class Meta:
