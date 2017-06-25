@@ -33,10 +33,7 @@ import calendar
 import hashlib
 import string
 import random
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import BytesIO
 
 # Django
 from django.db import models
@@ -70,6 +67,7 @@ from django.utils.http import urlsafe_base64_decode
 
 # Export to Excel
 from openpyxl import Workbook
+from openpyxl.writer.excel import save_virtual_workbook
 
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter
 from codenerix.templatetags.codenerix_lists import unlist
@@ -2568,7 +2566,7 @@ class GenList(GenBase, ListView):
                 if self.export == 'xlsx':
                     answer['meta']['content_type'] = 'application/vnd.ms-excel;charset=utf-8;'
                     # return_xls = self.response_to_xls(answer)
-                    return self.response_to_xls(answer, response_kwargs)
+                    return self.response_to_xls(answer, **response_kwargs)
                 else:
                     raise Exception("Export to {} invalid".format(self.export))
             else:
@@ -2584,7 +2582,7 @@ class GenList(GenBase, ListView):
         else:
             return super(GenList, self).render_to_response(context, **response_kwargs)
 
-    def response_to_xls(self, answer, response_kwargs):
+    def response_to_xls(self, answer, **response_kwargs):
         wb = Workbook()
 
         ws1 = wb.active
@@ -2606,18 +2604,18 @@ class GenList(GenBase, ListView):
                     tmp.append("\n".join(col[id]))
             ws1.append(tmp)
 
-        data_output = StringIO()
-        wb.save(data_output)
+        data_output = BytesIO(save_virtual_workbook(wb))
+        data_output_len = data_output.getbuffer().nbytes
         
         size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
-        if data_output.len <= (size_max * 1000000):
+        if data_output_len <= (size_max * 1000000):
             data_output.seek(0)
             response = HttpResponse(data_output.getvalue(), content_type='application/vnd.ms-excel;charset=utf-8;', **response_kwargs)
             response['Content-Disposition'] = 'attachment; filename=list.xlsx'
             return response
         else:
             result = {
-                'message': _("The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the config".format(data_output.len / 1000000.0)),
+                'message': _("The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the config".format(data_output_len / 1000000.0)),
                 'file': "",
                 'filename': ""
             }
