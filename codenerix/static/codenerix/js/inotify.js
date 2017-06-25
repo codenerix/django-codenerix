@@ -81,8 +81,8 @@ $.notify.addStyle("bootstrap_id_button", {
           "<div class='clearfix'>" +
             "<div class='title' data-notify-html='title'/>" +
             "<div class='buttons'>" +
-              "<button class='notifyjs-yes' data-notify-text='button'></button>" +
-              "<button class='notifyjs-no'>Cancel</button>" +
+              "<button type='button' class='notifyjs-yes' data-notify-text='button'></button>" +
+              "<button type='button' class='notifyjs-no'>Cancel</button>" +
             "</div>" +
           "</div>" +
         "</div>",

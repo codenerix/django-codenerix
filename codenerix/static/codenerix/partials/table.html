@@ -80,7 +80,7 @@ limitations under the License.
                                                 <option ng-repeat='entry in filter.choice' value='{{$index}}' ng-selected='$index==filter.choosen'>{{entry}}</option>
                                             </select>
                                             <input ng-if="filter.kind=='input'" type="text" class="form-control input-sm " ng-model="filter.value" ng-class="{'input-filter':filter.value}">
-                                            <button ng-if="filter.kind=='input'" ng-hide="true" type="submit" class="form-control btn btn-default btn-sm" ng-click="refresh()"><span class="glyphicon glyphicon-search"></span></button>
+                                            <button ng-if="filter.kind=='input'" ng-hide="true" type="button" class="form-control btn btn-default btn-sm" ng-click="refresh()"><span class="glyphicon glyphicon-search"></span></button>
                                             <input ng-if="filter.kind=='daterange'" date-range-picker type="text" class="form-control input-sm date-pickerr" ng-class="{'input-filter':filter.value}" ng-change="refresh()" ng-model="filter.value" options="">
 
                                             <script type="text/javascript">

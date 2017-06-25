@@ -60,17 +60,17 @@ limitations under the License.
         {% if linkdelete %}
             {% if cannot_delete %}
                 <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                <button id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
             {% else %}
                 <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                <button id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
             {% endif %}
         {% endif %}
         {% if not cannot_update %}
             <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-            <button id="submit_save" ng-click="submit({{form.form_name}})" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+            <button type="button" id="submit_save" ng-click="submit({{form.form_name}})" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
         {% endif %}
         <label  class="sr-only"  for="cancel">{% trans "Cancel" %}</label>
-        <button class="btn btn-sm btn-danger" ng-click="cancel()">Cancel</button>
+        <button type="button" class="btn btn-sm btn-danger" ng-click="cancel()">Cancel</button>
     </div>
 {% endblock %}

@@ -62,7 +62,7 @@ limitations under the License.
             {% if linkedit %}
                 {% if not cannot_update %}
                     <label  class="sr-only" for="submit_edit">{% trans "Edit" %}</label>
-                    <button id="submit_edit" ng-click="edit()" class="btn btn-sm btn-info">{% trans "Edit" %}</button>
+                    <button type="button" id="submit_edit" ng-click="edit()" class="btn btn-sm btn-info">{% trans "Edit" %}</button>
                 {% endif %}
             {% endif %}
 
@@ -71,15 +71,15 @@ limitations under the License.
             
             {% if linkback %}
                <label  class="sr-only"  for="submit_back">{% trans "Go to back" %}</label>
-               <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+               <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
             {% endif %}
             {% if linkdelete %}
                 {% if cannot_delete %}
                     <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                    <button id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% else %}
                     <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                    <button id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% endif %}
             {% endif %}
         </div>
@@ -137,7 +137,7 @@ limitations under the License.
             {% if linkedit %}
                 {% if not cannot_update %}
                     <label  class="sr-only"  for="submit_edit">{% trans "Edit" %}</label>
-                    <button id="submit_edit" ng-click="edit()" class="btn btn-sm btn-info">{% trans "Edit" %}</button>
+                    <button type="button" id="submit_edit" ng-click="edit()" class="btn btn-sm btn-info">{% trans "Edit" %}</button>
                 {% endif %}
             {% endif %}
 
@@ -146,15 +146,15 @@ limitations under the License.
 
             {% if linkback %}
                 <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
-                <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
             {% endif %}
             {% if linkdelete %}
                 {% if cannot_delete %}
                     <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                    <button id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% else %}
                     <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                    <button id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% endif %}
             {% endif %}
             {% endblock %}

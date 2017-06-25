@@ -75,22 +75,22 @@ limitations under the License.
                             <div class="input-group input-group-sm">
                                 <input type="text" class="form-control input-sm" ng-model="data.filter.search" codenerix-focus='focus.search_box'>
                                 <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.Search}}" popover-trigger="mouseenter">
-                                    <button type="submit" class="btn btn-default btn-sm" ng-click="refresh()">
+                                    <button type="button" class="btn btn-default btn-sm" ng-click="refresh()">
                                         <span class="glyphicon glyphicon-search"></span>
                                     </button>
                                 </span>
                                 <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.Filters}}" popover-trigger="mouseenter">
-                                    <button class="btn btn-default btn-sm" ng-class="{'btn-default':!data.meta.search_filter_button,'btn-info':data.meta.search_filter_button}" ng-click="data.meta.search_filter_button=!data.meta.search_filter_button">
+                                    <button type="button" class="btn btn-default btn-sm" ng-class="{'btn-default':!data.meta.search_filter_button,'btn-info':data.meta.search_filter_button}" ng-click="data.meta.search_filter_button=!data.meta.search_filter_button">
                                         <span class="fa fa-sliders" ng-class="{'fa-inverse':data.meta.search_filter_button}"></span>
                                     </button>
                                 </span>
                                 <span class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.CleanFilters}}" popover-trigger="mouseenter">
-                                    <button class="btn btn-default btn-sm" ng-click="reset_filter()">
+                                    <button type="button" class="btn btn-default btn-sm" ng-click="reset_filter()">
                                         <span class="fa fa-refresh"></span>
                                     </button>
                                 </span>
                                 <span ng-if="data.meta.export_excel" class="input-group-btn" popover-placement="top" uib-popover="{{data.meta.gentranslate.PrintExcel}}" popover-trigger="mouseenter">
-                                    <button class="btn btn-default btn-sm" ng-click="print_excel()">
+                                    <button type="button" class="btn btn-default btn-sm" ng-click="print_excel()">
                                         <span class="fa fa-file-excel-o"></span>
                                     </button>
                                 </span>
@@ -167,7 +167,7 @@ limitations under the License.
                                     <option ng-repeat='entry in filter.choice' value='{{$index}}' ng-selected='$index==filter.choosen'>{{entry}}</option>
                                 </select>
                                 <input ng-if="filter.kind=='input'" type="text" class="form-control input-sm" ng-model="filter.value">
-                                <button ng-if="filter.kind=='input'" ng-hide="true" type="submit" class="form-control btn btn-default btn-sm" ng-click="refresh()"><span class="glyphicon glyphicon-search"></span></button>
+                                <button ng-if="filter.kind=='input'" ng-hide="true" type="button" class="form-control btn btn-default btn-sm" ng-click="refresh()"><span class="glyphicon glyphicon-search"></span></button>
                                 <input ng-if="filter.kind=='daterange'" date-range-picker type="text" class="form-control input-sm date-picker" ng-change="refresh()" ng-model="filter.value" options="">
                                 <script type="text/javascript">
                                     $(".date-picker").each(function(){

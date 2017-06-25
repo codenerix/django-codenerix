@@ -39,7 +39,7 @@ limitations under the License.
             {% endblock %}
             {% if linkback %}
                 <label  class="sr-only"  for="submit_back">{% trans "Go to back" %}</label>
-                <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
             {% endif %}
         </div>
     </div>
@@ -95,7 +95,7 @@ limitations under the License.
 
             {% if linkback %}
                 <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
-                <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
             {% endif %}
             {% endblock %}
         </div>

@@ -44,7 +44,7 @@ limitations under the License.
     role="form"
     autocomplete="off"
     ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'"
-    ng-submit="{{form.form_name}}.autosubmit=true ; submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', 'autosubmit'); {{form.form_name}}.autosubmit=false">
+    ng-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')">
     <div 
     {% if form.attributes.ngcontroller %}
     ng-controller="{{ form.attributes.ngcontroller }}"
@@ -66,30 +66,30 @@ limitations under the License.
                 {% block buttons_top %}
                 {% if not cannot_update %}
                     <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-                    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
                     <label  class="sr-only"  for="submit_savehere">{% trans "Save here" %}</label>
-                    <button id="submit_savehere" ng-click="submit({{form.form_name}},'here')" class="btn green btn-sm" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
+                    <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here')" class="btn green btn-sm" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
                     <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-                    <button id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+                    <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
                     <label  class="sr-only"  for="submit_reload">{% trans "Reload" %}</label>
-                    <button id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
+                    <button type="button" id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
                 {% endif %}
                 {% if linkback %}
                     {% if show_details %}
                         <label  class="sr-only"  for="submit_details">{% trans "Go back" %}</label>
-                        <button id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                        <button type="button" id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
                     {% else %}
                         <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
-                        <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
                     {% endif %}
                 {% endif %}
                 {% if linkdelete %}
                     {% if cannot_delete %}
                         <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                        <button id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                        <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                     {% else %}
                         <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                        <button id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                        <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                     {% endif %}
                 {% endif %}
                 {% endblock %}
@@ -537,30 +537,30 @@ limitations under the License.
                 {% block buttons_bottom %}
                 {% if not cannot_update %}
                     <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-                    <button id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
                     <label  class="sr-only"  for="submit_savehere">{% trans "Save here" %}</label>
-                    <button id="submit_savehere" ng-click="submit({{form.form_name}},'here')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
+                    <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
                     <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-                    <button id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+                    <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
                     <label  class="sr-only"  for="submit_reload">{% trans "Reload" %}</label>
-                    <button id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
+                    <button type="button" id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
                 {% endif %}
                 {% if linkback %}
                     {% if show_details %}
                         <label  class="sr-only"  for="submit_details">{% trans "Go back" %}</label>
-                        <button id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                        <button type="button" id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
                     {% else %}
                         <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
-                        <button id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
                     {% endif %}
                 {% endif %}
                 {% if linkdelete %}
                     {% if cannot_delete %}
                         <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                        <button id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                        <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                     {% else %}
                         <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                        <button id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                        <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                     {% endif %}
                 {% endif %}
                 {% endblock %}
