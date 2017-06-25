@@ -25,7 +25,7 @@ import random
 from dateutil.tz import tzutc
 import dateutil.parser
 import zipfile
-from io import BytesIO
+import io
 from unidecode import unidecode
 
 # Django
@@ -469,7 +469,7 @@ class InMemoryZip(object):
     
     def __init__(self, data=None):
         # Create the in-memory file-like object
-        self.in_memory_zip = BytesIO()
+        self.in_memory_zip = io.BytesIO()
         self.writeable = True
         if data:
             self.in_memory_zip.write(data)
@@ -485,7 +485,7 @@ class InMemoryZip(object):
         file_contents to the in-memory zip.
         '''
         # Set the file pointer to the end of the file
-        self.in_memory_zip.seek(self.in_memory_zip.getbuffer().nbytes)
+        self.in_memory_zip.seek(-1, io.SEEK_END)
         
         # Get a handle to the in-memory zip in append mode
         zf = zipfile.ZipFile(self.in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
@@ -506,6 +506,9 @@ class InMemoryZip(object):
         fp = zf.open(filename)
         data = fp.read()
         return data
+    
+    def size(self):
+        return self.in_memory_zip.seek(-1, io.SEEK_END)
     
     def read(self):
         '''Returns a string with the contents of the in-memory zip.'''

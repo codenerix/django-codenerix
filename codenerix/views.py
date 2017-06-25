@@ -33,7 +33,7 @@ import calendar
 import hashlib
 import string
 import random
-from io import BytesIO
+import io
 
 # Django
 from django.db import models
@@ -2604,8 +2604,8 @@ class GenList(GenBase, ListView):
                     tmp.append("\n".join(col[id]))
             ws1.append(tmp)
 
-        data_output = BytesIO(save_virtual_workbook(wb))
-        data_output_len = data_output.getbuffer().nbytes
+        data_output = io.BytesIO(save_virtual_workbook(wb))
+        data_output_len = data_output.seek(-1,io.SEEK_END)
         
         size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
         if data_output_len <= (size_max * 1000000):
