@@ -498,6 +498,9 @@ class InMemoryZip(object):
         for zfile in zf.filelist:
             zfile.create_system = 0
         
+        # Rewind the file
+        self.in_memory_zip.seek(0)
+        
         return self
     
     def get(self, filename):
@@ -508,7 +511,9 @@ class InMemoryZip(object):
         return data
     
     def size(self):
-        return self.in_memory_zip.seek(-1, io.SEEK_END)
+        size = self.in_memory_zip.seek(-1, io.SEEK_END)
+        self.in_memory_zip.seek(0)
+        return size
     
     def read(self):
         '''Returns a string with the contents of the in-memory zip.'''
