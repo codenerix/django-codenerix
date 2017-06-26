@@ -470,7 +470,6 @@ class InMemoryZip(object):
     def __init__(self, data=None):
         # Create the in-memory file-like object
         self.in_memory_zip = io.BytesIO()
-        self.writeable = True
         if data:
             self.in_memory_zip.write(data)
             self.in_memory_zip.seek(0)
@@ -498,6 +497,9 @@ class InMemoryZip(object):
         for zfile in zf.filelist:
             zfile.create_system = 0
         
+        # Close the ZipFile
+        zf.close()
+        
         # Rewind the file
         self.in_memory_zip.seek(0)
         
@@ -508,6 +510,9 @@ class InMemoryZip(object):
         zf = zipfile.ZipFile(self.in_memory_zip, "r", zipfile.ZIP_DEFLATED, False)
         fp = zf.open(filename)
         data = fp.read()
+        # Close the ZipFile
+        zf.close()
+        # Return the result
         return data
     
     def size(self):
