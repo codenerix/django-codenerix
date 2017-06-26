@@ -55,13 +55,13 @@ limitations under the License.
         <input type="text" id="__pk__" name="__pk__" ng-model="__pk__" ng-value="{{object.pk}}" value="{{object.pk}}" style="display:none" />
         <input type="submit" value="submit" ng-show="false">
         {% if show_internal_name and formlist|len <= 1 %}
-            <div class="col-sm-12 col-md-12 internal-name">
+            <div class="col-md-12 internal-name">
                 <h4>{% block form_action %}{% trans "Editing" %}{% endblock %} {{form.get_name}}</h4>
             </div>
         {% endif %}
         
         {# BUTTONS at the top #}
-        <div class="col-sm-12 col-md-12 internal-buttons-top {%if formlist|len > 1 %} multiform_top{%endif%}">
+        <div class="col-md-12 internal-buttons-top {%if formlist|len > 1 %} multiform_top{%endif%}">
             <div class="form-group text-center">
                 {% block buttons_top %}
                 {% if not cannot_update %}
@@ -117,7 +117,7 @@ limitations under the License.
             <br />
             {% endif %}
 
-            <div class="col-sm-12 col-md-12">
+            <div class="col-md-12">
                 {% if formobj.get_errors %}
                     <br />
                     <br />
@@ -154,7 +154,7 @@ limitations under the License.
                     {% if column_counter0|add_columns:group.columns %}
                         <div class="row"></div>
                     {% endif %}
-                    <div class="col-sm-12 col-md-{{group.columns}}">
+                    <div class="col-md-{{group.columns}}">
                         {% if group.name %}
                         <div class="panel panel-default">
                             <div class="panel-heading"{{group|headstyle}}><strong>{{group.name}}</strong></div>
@@ -183,7 +183,7 @@ limitations under the License.
                                                 {% with zindex="style=z-index:"|add:zi %}
                                                 {% with autofocus=field|autofocus %}
                                                 {% with attrs=input|widgetize|addattr:autofocus|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:field.extra|lockattr:cannot_update %}
-                                                <div class="col-sm-{{field.columns}}" ng-class="{{form.form_name|invalidator:input}}" {{field.extra_div|join_list:" "}}>
+                                                <div class="col-md-{{field.columns}}" ng-class="{{form.form_name|invalidator:input}}" {{field.extra_div|join_list:" "}}>
                                                     {# FIELD: INI {{{2 #}
 
                                                     {% if field.html_helper_pre %}
@@ -354,7 +354,7 @@ limitations under the License.
                                             {% else %}
                                                 {# IF NOT INPUT: INI ========================================================================= {{{1 #}
                                                 </div>
-                                                <div class="col-sm-12 col-md-{{field.columns}}">
+                                                <div class="col-md-{{field.columns}}">
 
                                                     {% if field.html_helper_pre %}
                                                         {{field.html_helper_pre|safe}}
@@ -382,7 +382,7 @@ limitations under the License.
                                                                             {% with autofocus=input|autofocus %}
                                                                             {% with zindex="style=z-index:"|add:zi %}
 {% with attrs=input|widgetize|addattr:autofocus|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:subfield.extra|lockattr:cannot_update %}
-                                                                            <div class="col-sm-{{subfield.columns}}" ng-class="{{form.form_name|invalidator:input}}">
+                                                                            <div class="col-md-{{subfield.columns}}" ng-class="{{form.form_name|invalidator:input}}">
                                                                                 {# FIELD: INI {{{3 #}
                                                                                 <label for="{{input.id_for_label}}"{{field|headstyle}}>{%if subfield.label%}{{subfield.label}}{%else%}&nbsp;{%endif%}
                                                                                 {%if input.help_text %}
@@ -502,7 +502,7 @@ limitations under the License.
             {% endwith %}
             
 
-            <div class="col-sm-12 col-md-12">
+            <div class="col-md-12">
                 {% if formobj.get_errors %}
                     <div class="non-field-errors text-center">
                         <div class="alert alert-danger">
@@ -532,7 +532,7 @@ limitations under the License.
         {% endfor %}
         
         {# BUTTONS at the bottom #}
-        <div class="col-sm-12 col-md-12 internal-buttons-botton {%if formlist|len > 1 %} multiform_top{%endif%}">
+        <div class="col-md-12 internal-buttons-botton {%if formlist|len > 1 %} multiform_top{%endif%}">
             <div class="form-group text-center">
                 {% block buttons_bottom %}
                 {% if not cannot_update %}

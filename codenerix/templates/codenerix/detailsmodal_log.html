@@ -29,11 +29,11 @@ limitations under the License.
 
 {% with langcode=LANGUAGE_CODE|default:"en" %}
     {# if there is an existing title for the form, it is shown #}
-    <div class="col-sm-12 col-md-12 internal-name">
+    <div class="col-md-12 internal-name">
         <h4>{{object}}</h4>
     </div>
     {# BUTTONS at the top #}
-    <div class="col-sm-12 col-md-12 internal-buttNOons-top">
+    <div class="col-md-12 internal-buttNOons-top">
         <div class="form-group text-center">----------
             {% block extra_btn_up %}
             {% endblock %}
@@ -48,13 +48,13 @@ limitations under the License.
             
             {% if item.value.0.name %}
             {# if the current item have several elements in value it is a group #}
-                <div class="col-sm-12 col-md-12">
+                <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading"><strong>{{item.name}}</strong></div>
                         <div class="panel-body">
                 {% for subitem in item.value %}
                     {% if subitem.value.0.name %}
-                        <div class="col-sm-12 col-md-12">
+                        <div class="col-md-12">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <strong>{{subitem.name}}</strong>
@@ -86,7 +86,7 @@ limitations under the License.
     {% endblock %}
     
     {# BUTTONS at the bottom #}
-    <div class="col-sm-12 col-md-12">
+    <div class="col-md-12">
         <div class="form-group text-center">
             {% block buttons_bottom %}
 

@@ -53,11 +53,11 @@ limitations under the License.
 
 {% with langcode=LANGUAGE_CODE|default:"en" %}
     {# if there is an existing title for the form, it is shown #}
-    <div class="col-sm-12 col-md-12 internal-name">
+    <div class="col-md-12 internal-name">
         <h4>{{object}}</h4>
     </div>
     {# BUTTONS at the top #}
-    <div class="col-sm-12 col-md-12 internal-buttons-top">
+    <div class="col-md-12 internal-buttons-top">
         <div class="form-group text-center">
             {% if linkedit %}
                 {% if not cannot_update %}
@@ -89,13 +89,13 @@ limitations under the License.
             
             {% if item.value.0.name %}
             {# if the current item have several elements in value it is a group #}
-                <div class="col-sm-{{item.col}} col-md-{{item.col}}">
+                <div class="col-md-{{item.col}}">
                     <div class="panel panel-default">
                         <div class="panel-heading"><strong>{{item.name}}</strong></div>
                         <div class="panel-body">
                 {% for subitem in item.value %}
                     {% if subitem.value.0.name %}
-                        <div class="col-sm-12 col-md-12">
+                        <div class="col-md-12">
                             <div class="panel panel-default">
                                 <div class="panel-heading">
                                     <strong>{{subitem.name}}</strong>
@@ -118,7 +118,7 @@ limitations under the License.
                     </div>
                 </div>
             {% else %}
-                <div class="col-sm-12 col-md-12">
+                <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <label>{{item.name}}:</label>
@@ -131,7 +131,7 @@ limitations under the License.
     {% endblock %}
     
     {# BUTTONS at the bottom #}
-    <div class="col-sm-12 col-md-12 internal-buttons-bottom">
+    <div class="col-md-12 internal-buttons-bottom">
         <div class="form-group text-center">
             {% block buttons_bottom %}
             {% if linkedit %}
@@ -175,7 +175,7 @@ limitations under the License.
                     </uib-accordion-heading>
                     
                     <div ng-if="(tabs_autorender.tab_{{tab.id}} == true)">
-                        <div class='col-sm-12' ui-view></div>
+                        <div class='col-md-12' ui-view></div>
                     </div>
                     
                 </uib-accordion-group>
@@ -192,7 +192,7 @@ limitations under the License.
                         </span>
                     </uib-tab-heading>
                     <div ng-if="(tabs_autorender.tab_{{tab.id}} == true)">
-                        <div class='col-sm-12 internal-view' ui-view>-</div>
+                        <div class='col-md-12 internal-view' ui-view>-</div>
                     </div>
                 </uib-tab>
             {% endfor %}
