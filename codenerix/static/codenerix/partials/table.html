@@ -40,7 +40,7 @@ limitations under the License.
                             <th ng-repeat="column in data.table.head.columns">
                                 <div ng-if="data.filter.subfiltersC.length" ng-repeat="filter in data.filter.subfiltersC">
                                     <form name="search"
-                                        data-custom-submit="refresh()"
+                                        ng-submit="refresh()"
                                         ng-if="column.id==filter.key"
                                         role="form">
                                         <div class="input-group input-group-sm">
