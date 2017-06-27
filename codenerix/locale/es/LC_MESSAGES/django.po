@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-19 11:45+0200\n"
+"POT-Creation-Date: 2017-06-27 16:02+0200\n"
 "PO-Revision-Date: 2017-06-15 17:07+0000\n"
 "Last-Translator:   <jsoler@centrologic.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -147,7 +147,7 @@ msgstr "Aplicar"
 
 #: codenerix/context.py:80 codenerix/templates/codenerix/addmodal.html:43
 #: codenerix/templates/codenerix/addmodal.html:44
-#: codenerix/templates/codenerix/formmodal.html:73 codenerix/views.py:504
+#: codenerix/templates/codenerix/formmodal.html:73 codenerix/views.py:506
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -179,39 +179,39 @@ msgstr "Vi"
 msgid "Sa"
 msgstr "Sa"
 
-#: codenerix/context.py:88 codenerix/helpers.py:113
+#: codenerix/context.py:88 codenerix/helpers.py:110
 msgid "January"
 msgstr "Enero"
 
-#: codenerix/context.py:89 codenerix/helpers.py:115
+#: codenerix/context.py:89 codenerix/helpers.py:112
 msgid "February"
 msgstr "Febrero"
 
-#: codenerix/context.py:90 codenerix/helpers.py:117
+#: codenerix/context.py:90 codenerix/helpers.py:114
 msgid "March"
 msgstr "Marzo"
 
-#: codenerix/context.py:91 codenerix/helpers.py:119
+#: codenerix/context.py:91 codenerix/helpers.py:116
 msgid "April"
 msgstr "Abril"
 
-#: codenerix/context.py:92 codenerix/helpers.py:121
+#: codenerix/context.py:92 codenerix/helpers.py:118
 msgid "May"
 msgstr "Mayo"
 
-#: codenerix/context.py:93 codenerix/helpers.py:123
+#: codenerix/context.py:93 codenerix/helpers.py:120
 msgid "June"
 msgstr "Junio"
 
-#: codenerix/context.py:94 codenerix/helpers.py:125
+#: codenerix/context.py:94 codenerix/helpers.py:122
 msgid "July"
 msgstr "Julio"
 
-#: codenerix/context.py:95 codenerix/helpers.py:127
+#: codenerix/context.py:95 codenerix/helpers.py:124
 msgid "August"
 msgstr "Agosto"
 
-#: codenerix/context.py:96 codenerix/helpers.py:129
+#: codenerix/context.py:96 codenerix/helpers.py:126
 msgid "September"
 msgstr "Septiembre"
 
@@ -219,11 +219,11 @@ msgstr "Septiembre"
 msgid "October"
 msgstr "Octubre"
 
-#: codenerix/context.py:98 codenerix/helpers.py:133
+#: codenerix/context.py:98 codenerix/helpers.py:130
 msgid "November"
 msgstr "Noviembre"
 
-#: codenerix/context.py:99 codenerix/helpers.py:135
+#: codenerix/context.py:99 codenerix/helpers.py:132
 msgid "December"
 msgstr "Diciembre"
 
@@ -251,36 +251,36 @@ msgstr "Error verificando la entrada, por favor inténtelo de nuevo."
 msgid "Invalid color"
 msgstr "Color inválido"
 
-#: codenerix/helpers.py:131
+#: codenerix/helpers.py:128
 msgid "Octuber"
 msgstr "Octubre"
 
-#: codenerix/helpers.py:402
+#: codenerix/helpers.py:399
 msgid "ERROR: dic has repeated elements"
 msgstr "Error: El diccionario tiene elementos repetidos"
 
-#: codenerix/models.py:125 codenerix/models_people.py:74
+#: codenerix/models.py:135 codenerix/models_people.py:74
 msgid "Created"
 msgstr "Creado"
 
-#: codenerix/models.py:126
+#: codenerix/models.py:136
 msgid "Updated"
 msgstr "Actualizado"
 
-#: codenerix/models.py:147
+#: codenerix/models.py:157
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
 msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
 
-#: codenerix/models.py:216 codenerix/models.py:265 codenerix/views.py:502
+#: codenerix/models.py:226 codenerix/models.py:278 codenerix/views.py:504
 msgid "Add"
 msgstr "Añadir"
 
-#: codenerix/models.py:217 codenerix/models.py:267 codenerix/views.py:520
+#: codenerix/models.py:227 codenerix/models.py:280 codenerix/views.py:522
 msgid "Change"
 msgstr "Cambiar"
 
-#: codenerix/models.py:218 codenerix/models.py:269
+#: codenerix/models.py:228 codenerix/models.py:282
 #: codenerix/templates/codenerix/details.html:78
 #: codenerix/templates/codenerix/details.html:79
 #: codenerix/templates/codenerix/details.html:81
@@ -300,72 +300,72 @@ msgstr "Cambiar"
 #: codenerix/templates/codenerix/formmodal.html:62
 #: codenerix/templates/codenerix/formmodal.html:63
 #: codenerix/templates/codenerix/formmodal.html:65
-#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:521
+#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:523
 msgid "Delete"
 msgstr "Borrar"
 
-#: codenerix/models.py:230 codenerix/models.py:279 codenerix/models.py:310
+#: codenerix/models.py:240 codenerix/models.py:292 codenerix/models.py:323
 msgid "Action"
 msgstr "Acción"
 
-#: codenerix/models.py:277 codenerix/models.py:309 codenerix/views.py:512
+#: codenerix/models.py:290 codenerix/models.py:322 codenerix/views.py:514
 msgid "Date"
 msgstr "Fecha"
 
-#: codenerix/models.py:278 codenerix/models.py:312
+#: codenerix/models.py:291 codenerix/models.py:325
 #: codenerix/models_people.py:70
 msgid "User"
 msgstr "Usuario"
 
-#: codenerix/models.py:281
+#: codenerix/models.py:294
 msgid "APP Name"
 msgstr "Nombre de la APP"
 
-#: codenerix/models.py:282 codenerix/models.py:313
+#: codenerix/models.py:295 codenerix/models.py:326
 msgid "APP Label"
 msgstr "Título de la APP"
 
-#: codenerix/models.py:283
+#: codenerix/models.py:296
 msgid "APP Model"
 msgstr "Modelo de la APP"
 
-#: codenerix/models.py:284 codenerix/models.py:311
+#: codenerix/models.py:297 codenerix/models.py:324
 msgid "ID"
 msgstr "ID"
 
-#: codenerix/models.py:286
+#: codenerix/models.py:299
 msgid "Txt"
 msgstr "Txt"
 
-#: codenerix/models.py:293
+#: codenerix/models.py:306
 msgid "add"
 msgstr "añadir"
 
-#: codenerix/models.py:293
+#: codenerix/models.py:306
 msgid "addition"
 msgstr "adición"
 
-#: codenerix/models.py:295
+#: codenerix/models.py:308
 msgid "change"
 msgstr "cambiar"
 
-#: codenerix/models.py:295
+#: codenerix/models.py:308
 msgid "changed"
 msgstr "cambiado"
 
-#: codenerix/models.py:297
+#: codenerix/models.py:310
 msgid "edit"
 msgstr "editar"
 
-#: codenerix/models.py:297
+#: codenerix/models.py:310
 msgid "edition"
 msgstr "edicción"
 
-#: codenerix/models.py:299
+#: codenerix/models.py:312
 msgid "delete"
 msgstr "borrar"
 
-#: codenerix/models.py:299
+#: codenerix/models.py:312
 msgid "deleted"
 msgstr "borrado"
 
@@ -389,13 +389,13 @@ msgstr "Email"
 msgid "Active"
 msgstr "Activo"
 
-#: codenerix/models_people.py:95 codenerix/templatetags_common.py:96
-#: codenerix/views.py:1158
+#: codenerix/models_people.py:95
+#: codenerix/templatetags/codenerix_common.py:122 codenerix/views.py:1164
 msgid "Yes"
 msgstr "Si"
 
-#: codenerix/models_people.py:95 codenerix/templatetags_common.py:98
-#: codenerix/views.py:1158
+#: codenerix/models_people.py:95
+#: codenerix/templatetags/codenerix_common.py:124 codenerix/views.py:1164
 msgid "No"
 msgstr "No"
 
@@ -462,7 +462,7 @@ msgstr "Guardar y nuevo"
 #: codenerix/templates/codenerix/details.html:64
 #: codenerix/templates/codenerix/details.html:65
 #: codenerix/templates/codenerix/details.html:139
-#: codenerix/templates/codenerix/details.html:140 codenerix/views.py:503
+#: codenerix/templates/codenerix/details.html:140 codenerix/views.py:505
 msgid "Edit"
 msgstr "Editar"
 
@@ -503,7 +503,7 @@ msgstr "Recargar"
 msgid "You will loose all your changes, are you sure?"
 msgstr "Perderá todos sus cambios, ¿está seguro?"
 
-#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:2593
+#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:2589
 msgid "List"
 msgstr "Lista"
 
@@ -512,84 +512,84 @@ msgstr "Lista"
 msgid "Close"
 msgstr "Cerrar"
 
-#: codenerix/templatetags_common.py:195
+#: codenerix/templatetags/codenerix_common.py:237
 msgid "True"
 msgstr "Verdad"
 
-#: codenerix/templatetags_common.py:197
+#: codenerix/templatetags/codenerix_common.py:239
 msgid "False"
 msgstr "Falso"
 
-#: codenerix/views.py:505
+#: codenerix/views.py:507
 msgid "Search"
 msgstr "Buscar"
 
-#: codenerix/views.py:506
+#: codenerix/views.py:508
 msgid "Filters"
 msgstr "Filtros"
 
-#: codenerix/views.py:507
+#: codenerix/views.py:509
 msgid "Rows per page"
 msgstr "Filas por página"
 
-#: codenerix/views.py:508
+#: codenerix/views.py:510
 msgid "Page number"
 msgstr "Número de página"
 
-#: codenerix/views.py:509
+#: codenerix/views.py:511
 msgid "registers"
 msgstr "registros"
 
-#: codenerix/views.py:510
+#: codenerix/views.py:512
 msgid "Clean filters"
 msgstr "Limpiar filtros"
 
-#: codenerix/views.py:511
+#: codenerix/views.py:513
 msgid "Print Excel"
 msgstr "Imprimir en Excel"
 
-#: codenerix/views.py:513 codenerix/views.py:2240
+#: codenerix/views.py:515 codenerix/views.py:2248
 msgid "Year"
 msgstr "Año"
 
-#: codenerix/views.py:514 codenerix/views.py:2241
+#: codenerix/views.py:516 codenerix/views.py:2249
 msgid "Month"
 msgstr "Mes"
 
-#: codenerix/views.py:515 codenerix/views.py:2242
+#: codenerix/views.py:517 codenerix/views.py:2250
 msgid "Day"
 msgstr "Día"
 
-#: codenerix/views.py:516
+#: codenerix/views.py:518
 msgid "Time"
 msgstr "Hora"
 
-#: codenerix/views.py:517 codenerix/views.py:2243 codenerix/widgets.py:617
+#: codenerix/views.py:519 codenerix/views.py:2251 codenerix/widgets.py:620
 msgid "Hour"
 msgstr "Hora"
 
-#: codenerix/views.py:518 codenerix/views.py:2244
+#: codenerix/views.py:520 codenerix/views.py:2252
 msgid "Minute"
 msgstr "Minuto"
 
-#: codenerix/views.py:519 codenerix/views.py:2245
+#: codenerix/views.py:521 codenerix/views.py:2253
 msgid "Second"
 msgstr "Segundo"
 
-#: codenerix/views.py:522
+#: codenerix/views.py:524
 msgid "View"
 msgstr "Ver"
 
-#: codenerix/views.py:523
+#: codenerix/views.py:525
 msgid "Download"
 msgstr "Descargar"
 
-#: codenerix/views.py:553
+#: codenerix/views.py:555
 msgid "The view/model definition requires, that this user must be a superuser"
 msgstr ""
 "La definición de la vista/modelo, necesita que el usuario sea superuser"
 
-#: codenerix/views.py:840
+#: codenerix/views.py:842
 msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
@@ -597,16 +597,16 @@ msgstr ""
 "Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
 "add_permission: detail, change y delete"
 
-#: codenerix/views.py:1335 codenerix/views.py:1348 codenerix/views.py:1975
-#: codenerix/views.py:2022
+#: codenerix/views.py:1341 codenerix/views.py:1354 codenerix/views.py:1981
+#: codenerix/views.py:2028
 msgid "All"
 msgstr "Todos"
 
-#: codenerix/views.py:2246
+#: codenerix/views.py:2254
 msgid "Unknown"
 msgstr "Desconocidos"
 
-#: codenerix/views.py:2623
+#: codenerix/views.py:2618
 msgid ""
 "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in "
 "Megabytes) of the config"
@@ -614,23 +614,23 @@ msgstr ""
 "Este fichero es demasiado grande ({}M). Cambie el parámetro "
 "FILE_DOWNLOAD_SIZE_MAX (en Megabytes) en la configuración"
 
-#: codenerix/views.py:2896
+#: codenerix/views.py:2893
 msgid "This shouldn't happen, state is not $dirty or $pristine"
 msgstr "Esto no debería ocurrir, el estado no es ni $dirty ni $pristine"
 
-#: codenerix/views.py:3492
+#: codenerix/views.py:3489
 msgid "Manager"
 msgstr "Gestor"
 
-#: codenerix/views.py:3492
+#: codenerix/views.py:3489
 msgid "Log"
 msgstr "Log"
 
-#: codenerix/views.py:3505
+#: codenerix/views.py:3502
 msgid "Identification"
 msgstr "Identificación"
 
-#: codenerix/views.py:3513
+#: codenerix/views.py:3510
 msgid "Changes"
 msgstr "Cambios"
 
@@ -646,27 +646,27 @@ msgstr "Presione * o comience a escribir"
 msgid "Select an option"
 msgstr "Seleccione una opción"
 
-#: codenerix/widgets.py:701
+#: codenerix/widgets.py:704
 msgid "NG Quill"
 msgstr "NG Quill"
 
-#: codenerix/widgets.py:702
+#: codenerix/widgets.py:705
 msgid "Text Angular"
 msgstr "Text Angular"
 
-#: codenerix/widgets.py:703
+#: codenerix/widgets.py:706
 msgid "Source code"
 msgstr "Código fuente"
 
-#: codenerix/widgets.py:704
+#: codenerix/widgets.py:707
 msgid "Preview"
 msgstr "Previsualización"
 
-#: codenerix/widgets.py:784
+#: codenerix/widgets.py:787
 msgid "Field deleted in the template"
 msgstr "Campo borrado en el template"
 
-#: codenerix/widgets.py:797
+#: codenerix/widgets.py:800
 msgid "We are working on this plugin, it will be ready for next version"
 msgstr ""
 "Estamos trabajando en este plugin, estará listo en la siguiente versión"
