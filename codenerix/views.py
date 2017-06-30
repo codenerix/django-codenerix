@@ -1067,6 +1067,7 @@ class GenList(GenBase, ListView):
 
     xls_style = {
         'head': {
+            'deviation': 1.2,
             'border': Border(
                 left=Side(border_style='thin', color='FF000000'),
                 right=Side(border_style='thin', color='FF000000'),
@@ -2636,10 +2637,13 @@ class GenList(GenBase, ListView):
 
         # Autoajust columns
         dims = {}
+        head_deviation = self.xls_style['head']['deviation']
         for row in ws1.rows:
             for cell in row:
                 if cell.value:
-                    dims[cell.column] = max((dims.get(cell.column, 0), len(cell.value)))
+                    dims[cell.column] = max((dims.get(cell.column, 0), len(cell.value))) * head_deviation
+            # Deviation only accepts to first row
+            head_deviation = 1.0
         for col, value in dims.items():
             ws1.column_dimensions[col].width = value
 

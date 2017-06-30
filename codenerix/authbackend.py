@@ -25,6 +25,8 @@ except ImportError:
 import hashlib
 import base64
 import ssl
+import datetime
+import time
 
 from django.utils import timezone
 from django.contrib.auth import logout
@@ -92,6 +94,8 @@ class LimitedAuth(ModelBackend):
 class LimitedAuthMiddleware(object):
     '''
     Check every request if the user should or shouldn't be inside the system
+    SESSION_EXPIRE_WHEN_INACTIVE: number of seconds the user can be innactive on the website without being logged out
+    SESSION_SHIFTS: list of hours of the day when all users must be logged out
 
     NOTE: install in your MIDDLEWARE setting after (order matters):
         'django.contrib.auth.middleware.AuthenticationMiddleware'
@@ -102,9 +106,81 @@ class LimitedAuthMiddleware(object):
 
     def process_request(self, request):
         # If the user is authenticated and shouldn't be
-        if request.user.is_authenticated() and not check_auth(request.user):
-            # Push it out from the system
-            logout(request)
+        if request.user.is_authenticated():
+            
+            # If the user doesn't pass the check_auth test
+            if not check_auth(request.user):
+                # Push it out from the system
+                logout(request)
+            
+            # Get now
+            now = datetime.datetime.now()
+            
+            # Create delta for caducity by EXPIRE_WHEN_INACTIVE
+            expire_when_innactive = getattr(settings, 'SESSION_EXPIRE_WHEN_INACTIVE', None)
+            if expire_when_innactive is not None:
+                # Get last_seen
+                last_seen = request.session.get('user_last_seen', None)
+                # Calculate delta
+                if last_seen is not None:
+                    # Check if we have to logout this user for being innactive too long
+                    try:
+                        # python3
+                        nowts = now.timestamp()
+                    except AttributeError:
+                        # python2
+                        nowts = float(time.mktime(now.timetuple()) + now.microsecond / 1000000.0)
+                    
+                    diff = nowts - last_seen - expire_when_innactive
+                    
+                    # Get caducity
+                    if diff > 0:
+                        # Push it out from the system
+                        logout(request)
+                
+                # Refresh last_seen
+                last_seen = datetime.datetime.now()
+                try:
+                    # python3
+                    last_seen = last_seen.timestamp()
+                except AttributeError:
+                    # python2
+                    last_seen = float(time.mktime(last_seen.timetuple()) + last_seen.microsecond / 1000000.0)
+                
+                # Remember in session
+                request.session['user_last_seen'] = last_seen
+
+            # Create delta for caducity by SHIFTS
+            shifts = getattr(settings, 'SESSION_SHIFTS', None)
+            if shifts is not None:
+                shifts = shifts + [shifts[0] + 24]
+                for turno in shifts:
+                    if turno > now.hour:
+                        delta = turno % 24
+                        break
+
+                # Calculate caducity
+                kickout = datetime.datetime(now.year, now.month, now.day, delta)
+                try:
+                    # python3
+                    kickout = kickout.timestamp() - now.timestamp()
+                except AttributeError:
+                    # python2
+                    ts = float(time.mktime(kickout.timetuple()) + kickout.microsecond / 1000000.0)
+                    tz = float(time.mktime(now.timetuple()) + now.microsecond / 1000000.0)
+                    kickout = ts - tz
+                
+                # Get caducity
+                caducity = request.session.get('user_session_caducity', None)
+                if not caducity or kickout < caducity:
+                    # Remember new caducity
+                    request.session.set_expiry(kickout)
+                    request.session['user_session_caducity'] = kickout
+                else:
+                    # Push it out from the system
+                    request.session.pop('user_session_caducity')
+                    logout(request)
+
 
     def __call__(self, request):
 
