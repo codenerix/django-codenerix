@@ -67,6 +67,7 @@ from django.utils.http import urlsafe_base64_decode
 
 # Export to Excel
 from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill, Color
 from openpyxl.writer.excel import save_virtual_workbook
 
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter
@@ -1063,6 +1064,30 @@ class GenList(GenBase, ListView):
     get_template_names_key='list'
     action_permission = 'list'
     extends_base = "base/base.html"
+
+    xls_style = {
+        'head': {
+            'border': Border(
+                left=Side(border_style='thin', color='FF000000'),
+                right=Side(border_style='thin', color='FF000000'),
+                top=Side(border_style='thin', color='FF000000'),
+                bottom=Side(border_style='thin', color='FF000000'),
+                diagonal=Side(border_style=None, color='FF000000'),
+                diagonal_direction=0,
+                outline=Side(border_style=None, color='FF000000'),
+                vertical=Side(border_style=None, color='FF000000'),
+                horizontal=Side(border_style=None, color='FF000000')
+            ),
+            'fill': PatternFill(
+                patternType='solid',
+                fill_type='solid',
+                fgColor=Color('C4C4C4')
+            ),
+            'font': Font(
+                bold=True,
+            ),
+        }
+    }
 
     def dispatch(self, *args, **kwargs):
         '''
@@ -2595,6 +2620,11 @@ class GenList(GenBase, ListView):
             columns.append(col['id'])
         ws1.append(tmp)
 
+        for col in range(len(columns)):
+            ws1.cell(row=1, column=(col + 1)).border = self.xls_style['head']['border']
+            ws1.cell(row=1, column=(col + 1)).font = self.xls_style['head']['font']
+            ws1.cell(row=1, column=(col + 1)).fill = self.xls_style['head']['fill']
+
         for col in answer['table']['body']:
             tmp = []
             for id in columns:
@@ -2604,6 +2634,16 @@ class GenList(GenBase, ListView):
                     tmp.append("\n".join(col[id]))
             ws1.append(tmp)
 
+        # Autoajust columns
+        dims = {}
+        for row in ws1.rows:
+            for cell in row:
+                if cell.value:
+                    dims[cell.column] = max((dims.get(cell.column, 0), len(cell.value)))
+        for col, value in dims.items():
+            ws1.column_dimensions[col].width = value
+
+        # Prepare output
         data_output = io.BytesIO(save_virtual_workbook(wb))
         data_output_len = data_output.seek(-1,io.SEEK_END)
         
