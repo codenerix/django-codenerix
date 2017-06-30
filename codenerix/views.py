@@ -2641,7 +2641,7 @@ class GenList(GenBase, ListView):
         for row in ws1.rows:
             for cell in row:
                 if cell.value:
-                    dims[cell.column] = max((dims.get(cell.column, 0), len(cell.value))) * head_deviation
+                    dims[cell.column] = max((dims.get(cell.column, 0), len(smart_text(cell.value)))) * head_deviation
             # Deviation only accepts to first row
             head_deviation = 1.0
         for col, value in dims.items():
