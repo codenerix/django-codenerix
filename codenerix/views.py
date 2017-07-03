@@ -34,6 +34,7 @@ import hashlib
 import string
 import random
 import io
+import pytz
 
 # Django
 from django.db import models
@@ -977,9 +978,11 @@ class GenList(GenBase, ListView):
         static_partial_row                          # Set static_partial_row to a fixed value
         static_filters_row                          # Set static_filters_row to a fixed value
 
-        field_delete = False     # Show/Hide button for delete register ('True'/'False')
-        field_check = None      # None don't show checkbox, else show checkbox. if 'True' checked ('None', 'True', 'False')
-
+        field_delete = False                        # Show/Hide button for delete register ('True'/'False')
+        field_check = None                          # None don't show checkbox, else show checkbox. if 'True' checked ('None', 'True', 'False')
+        
+        search_filter_button = True                 # Enable filtering system by default
+        autofiltering = False                        # Disable autofiltering system
 
     Templates will be selected using the next process:
     Grammar: <path>/<filename>[.<profile>][.<language>].html for this example we use 'seller' profile and 'es' language (spanish)
@@ -1064,7 +1067,7 @@ class GenList(GenBase, ListView):
     get_template_names_key='list'
     action_permission = 'list'
     extends_base = "base/base.html"
-    filter_autosearch = True
+    autofiltering = True
     
     xls_style = {
         'head': {
@@ -1285,7 +1288,7 @@ class GenList(GenBase, ListView):
 
         listfilters = {}
         # Autofilter system
-        if self.filter_autosearch:
+        if self.autofiltering:
             listfilters.update(self.autoSearchF(MODELINF))
         # List of filters from the MODELINF
         listfilters.update(MODELINF.searchF())
@@ -2488,13 +2491,16 @@ class GenList(GenBase, ListView):
                     # Rewrite values if required
                     if type(value)==datetime.datetime:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
+                        value=value.replace(tzinfo=pytz.utc).astimezone().strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
+                        pass
                     elif type(value)==datetime.date:
                         # Convert datetime to string
                         value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
+                        pass
                     elif type(value)==datetime.time:
                         # Convert datetime to string
                         value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
+                        pass
                     # Save token
                     token[key]=value
 
@@ -2532,13 +2538,16 @@ class GenList(GenBase, ListView):
                             value=self.bodybuilder(value.all(),rkval)
                         elif type(value)==datetime.datetime:
                             # Convert datetime to string
-                            value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
+                            value=value.replace(tzinfo=pytz.utc).astimezone().strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
+                            pass
                         elif type(value)==datetime.date:
                             # Convert datetime to string
                             value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
+                            pass
                         elif type(value)==datetime.time:
                             # Convert datetime to string
                             value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
+                            pass
                         elif related:
                             # If the object is related but nobody is taking care of it
                             values = []

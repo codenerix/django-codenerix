@@ -72,10 +72,8 @@ def date2string(dtime, formt, default):
 
 
 def daterange_filter(value, variable):
-    startt = value['startDate'].split("T")[0]
-    endt = value['endDate'].split("T")[0]
-    start = datetime.strptime(startt, settings.DATETIME_RANGE_FORMAT[0])
-    end = datetime.strptime(endt, settings.DATETIME_RANGE_FORMAT[0])
+    start = dateutil.parser.parse(value['startDate'])
+    end = dateutil.parser.parse(value['endDate'])
     result = {'{0}__gte'.format(variable): start, '{0}__lte'.format(variable): end}
     return result
 
