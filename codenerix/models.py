@@ -385,13 +385,14 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                 else:
                     field = getattr(self, key, None)
                 
-                if key in list_fields and field:
+                if key in list_fields:
                     # if (not attrs_bd.has_key(key)) or (field != attrs_bd[key]):
                     if (key not in attrs_bd) or (field != attrs_bd[key]):
-                        
-                        if field is not None:
+                        if field is not None or action == CHANGE:
                             aux = ffield
                             field_txt = field
+                            if field_txt is None:
+                                field_txt = '---'
                             if isinstance(field, CodenerixModel):
                                 field = field.pk
                                       
@@ -427,6 +428,8 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                 if key not in attrs_bd or not self.CodenerixMeta.log_full:
                                     attrs_txt[ffield_verbose_name] = force_text(field_txt, errors='replace')
                                 else:
+                                    if attrs_bd[key] is None:
+                                        attrs_bd[key] = '---'
                                     attrs_txt[key] = (
                                         ffield_verbose_name,
                                         u"{}{}{}".format(
