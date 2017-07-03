@@ -21,6 +21,37 @@
 
  'use strict';
 
+// Codenerix libraries
+var codenerix_libraries = [
+    'ui.bootstrap',
+    'ui.router',
+    'ui.select',
+    'ui.bootstrap.datetimepicker',
+    //'chieffancypants.loadingBar',
+    'colorpicker.module',
+    'colorContrast',
+    'ngAnimate',
+    'ngCookies',
+    'ngSanitize',
+    'ngTouch',
+    'ngMaterial',
+    'ng.django.forms',
+    'angular-loading-bar',
+    'nsPopover',
+    'codenerixControllers',
+    'codenerixServices',
+    'codenerixFilters',
+    'codenerixNotify',
+    'naif.base64',
+    'fileValidation',
+    'daterangepicker',
+    'textAngular',
+    'vcRecaptcha',
+    'checklist-model',
+    'ngQuill',
+    'cfp.hotkeys',
+];
+
 // Add the remove method to the Array structure
 Array.prototype.remove = function(from, to) {
     var rest = this.slice((to || from) + 1 || this.length);
@@ -1024,37 +1055,6 @@ function dynamic_fields(scope) {
     };
 
 }
-
-// Codenerix libraries
-var codenerix_libraries = [
-    'ui.bootstrap',
-    'ui.router',
-    'ui.select',
-    'ui.bootstrap.datetimepicker',
-    //'chieffancypants.loadingBar',
-    'colorpicker.module',
-    'colorContrast',
-    'ngAnimate',
-    'ngCookies',
-    'ngSanitize',
-    'ngTouch',
-    'ngMaterial',
-    'ng.django.forms',
-    'angular-loading-bar',
-    'nsPopover',
-    'codenerixControllers',
-    'codenerixServices',
-    'codenerixFilters',
-    'codenerixNotify',
-    'naif.base64',
-    'fileValidation',
-    'daterangepicker',
-    'textAngular',
-    'vcRecaptcha',
-    'checklist-model',
-    'ngQuill',
-    'cfp.hotkeys',
-];
 
 /*
 function answer_rendered(element,$q) {

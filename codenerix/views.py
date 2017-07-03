@@ -1064,7 +1064,8 @@ class GenList(GenBase, ListView):
     get_template_names_key='list'
     action_permission = 'list'
     extends_base = "base/base.html"
-
+    filter_autosearch = True
+    
     xls_style = {
         'head': {
             'deviation': 1.2,
@@ -1282,9 +1283,11 @@ class GenList(GenBase, ListView):
         except Exception:
             filters_by_struct=[]
 
-        # 
-        listfilters = self.autoSearchF(MODELINF)
-        # List of filters from the model
+        listfilters = {}
+        # Autofilter system
+        if self.filter_autosearch:
+            listfilters.update(self.autoSearchF(MODELINF))
+        # List of filters from the MODELINF
         listfilters.update(MODELINF.searchF())
 
         # Process the search

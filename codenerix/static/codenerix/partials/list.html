@@ -168,18 +168,7 @@ limitations under the License.
                                 </select>
                                 <input ng-if="filter.kind=='input'" type="text" class="form-control input-sm" ng-model="filter.value">
                                 <button ng-if="filter.kind=='input'" ng-hide="true" type="button" class="form-control btn btn-default btn-sm" ng-click="refresh()"><span class="glyphicon glyphicon-search"></span></button>
-                                <input ng-if="filter.kind=='daterange'" date-range-picker type="text" class="form-control input-sm date-picker" ng-change="refresh()" ng-model="filter.value" options="">
-                                <script type="text/javascript">
-                                    $(".date-picker").each(function(){
-                                        if (!$(this).hasClass("drp")){
-                                            $(this).daterangepicker(cnf_daterangepicker)
-                                                .on("apply.daterangepicker", function (){
-                                                    angular.element(".date-picker").scope().refresh();
-                                                })
-                                                .addClass("drp");
-                                        }
-                                    });
-                                </script>
+                                <input ng-if="filter.kind=='daterange'" date-range-picker type="text" class="form-control input-sm date-picker" ng-change="refresh()" ng-model="filter.value">
                                 <label class="checkbox inline" for="filter.value">{{filter.name}}
                                     <input type="checkbox" ng-if="filter.kind=='checkbox'" ng-true-value="1" ng-click="refresh()" value="1" ng-model="filter.value" id="filter.value" />
                                 </label>
