@@ -35,6 +35,7 @@ import string
 import random
 import io
 import pytz
+from dateutil import tz
 
 # Django
 from django.db import models
@@ -2489,18 +2490,15 @@ class GenList(GenBase, ListView):
                 # Check all items if they need conversion
                 for (key,value) in o.items():
                     # Rewrite values if required
-                    if type(value)==datetime.datetime:
+                    if type(value) == datetime.datetime:
                         # Convert datetime to string
-                        value=value.replace(tzinfo=pytz.utc).astimezone().strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
-                        pass
-                    elif type(value)==datetime.date:
+                        value = value.replace(tzinfo=pytz.utc).astimezone(tz.tzlocal()).strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
+                    elif type(value) == datetime.date:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
-                        pass
-                    elif type(value)==datetime.time:
+                        value = value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
+                    elif type(value) == datetime.time:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
-                        pass
+                        value = value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                     # Save token
                     token[key]=value
 
@@ -2531,23 +2529,20 @@ class GenList(GenBase, ListView):
                     # If value is None, return None
                     if value is not None:
                         # Analize if is related
-                        related=(getattr(value,'all',None) is not None)
+                        related = (getattr(value, 'all', None) is not None)
                         # Analize data type
-                        if type(rkval)==dict:
+                        if type(rkval) == dict:
                             # This is a recursive call to go through foreign keys
-                            value=self.bodybuilder(value.all(),rkval)
-                        elif type(value)==datetime.datetime:
+                            value = self.bodybuilder(value.all(), rkval)
+                        elif type(value) == datetime.datetime:
                             # Convert datetime to string
-                            value=value.replace(tzinfo=pytz.utc).astimezone().strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
-                            pass
-                        elif type(value)==datetime.date:
+                            value = value.replace(tzinfo=pytz.utc).astimezone(tz.tzlocal()).strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
+                        elif type(value) == datetime.date:
                             # Convert datetime to string
-                            value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
-                            pass
-                        elif type(value)==datetime.time:
+                            value = value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
+                        elif type(value) == datetime.time:
                             # Convert datetime to string
-                            value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
-                            pass
+                            value = value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                         elif related:
                             # If the object is related but nobody is taking care of it
                             values = []
