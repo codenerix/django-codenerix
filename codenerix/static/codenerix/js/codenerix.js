@@ -566,114 +566,117 @@ function refresh($scope, $timeout, Register, callback, internal) {
 }
 
 function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, url, form, next, kind) {
-    console.error("formsubmit() must check if the form is ready to be submited: $pristine, $dirty, etc...");
-    // Build in data
-    var in_data = { };
-    var form_name = form.$name;
-    
-    angular.forEach($scope.field_list, function(field){
-        // normal input html
-        if ($scope[field] != undefined){
-            in_data[field]=$scope[field];
-        // for multiselect (angular material chip)
-        }else if ($scope.amc_select[field] != undefined){
-            var datas_temp=[];
-            angular.forEach($scope.amc_select[field], function (el){
-                datas_temp.push(el.id);
-            });
-            in_data[field] = datas_temp;
-        }
-    });
+    if (form.$dirty && form.$valid){
+        // Build in data
+        var in_data = { };
+        var form_name = form.$name;
+        
+        angular.forEach($scope.field_list, function(field){
+            // normal input html
+            if ($scope[field] != undefined){
+                in_data[field]=$scope[field];
+            // for multiselect (angular material chip)
+            }else if ($scope.amc_select[field] != undefined){
+                var datas_temp=[];
+                angular.forEach($scope.amc_select[field], function (el){
+                    datas_temp.push(el.id);
+                });
+                in_data[field] = datas_temp;
+            }
+        });
 
-    /*  
-        2016-07-15
-        Se quita porque los angular material chip no son elementos html por lo que no estan en el formulario
-        2016-10-17
-        Se vuelve a descomentar para ser compatible con las directivas dinamicas (iberosime) y con los multiselect dinamicos
-    */
-    angular.forEach( form , function ( formElement , fieldName ) {
-        // If the fieldname starts with a '$' sign, it means it's an Angular property or function. Skip those items.
-        if ( fieldName[0] === '$' ) {
-            return;
-        } else {
-            if (fieldName != form_name) {
-                if (typeof(formElement.$viewValue) == "object"){
-                    var value = [];
-                    angular.forEach(formElement.$viewValue, function(val, key){
-                        if (typeof(val.id) !== 'undefined'){
-                            value.push(val.id);
-                        }
-                    });
-                    if (value.length == 0)
-                        value = formElement.$viewValue;
-                    in_data[fieldName]=value;
-                }else{
-                    in_data[fieldName]=formElement.$viewValue;
+        /*  
+            2016-07-15
+            Se quita porque los angular material chip no son elementos html por lo que no estan en el formulario
+            2016-10-17
+            Se vuelve a descomentar para ser compatible con las directivas dinamicas (iberosime) y con los multiselect dinamicos
+        */
+        angular.forEach( form , function ( formElement , fieldName ) {
+            // If the fieldname starts with a '$' sign, it means it's an Angular property or function. Skip those items.
+            if ( fieldName[0] === '$' ) {
+                return;
+            } else {
+                if (fieldName != form_name) {
+                    if (typeof(formElement.$viewValue) == "object"){
+                        var value = [];
+                        angular.forEach(formElement.$viewValue, function(val, key){
+                            if (typeof(val.id) !== 'undefined'){
+                                value.push(val.id);
+                            }
+                        });
+                        if (value.length == 0)
+                            value = formElement.$viewValue;
+                        in_data[fieldName]=value;
+                    }else{
+                        in_data[fieldName]=formElement.$viewValue;
+                    }
                 }
             }
-        }
-    });
-    // Clear cache
-    $templateCache.remove(url);
-    // POST
-    $http.post( url, in_data, { headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} } )
-    .success(function(answer, stat) {
-        // If the request was accepted
-        if (stat==202) {
-            // Go back to the list
-            if (next=='here') {
-                if (kind=='add') {
-                    // Jump to the edit form
-                    $state.go('formedit'+listid,{'pk':answer.pk});
-                    // Reload page
-                    $state.reload($state.current);
-                } else if ((kind=='addmodal') || (kind=='editmodal')) {
-                    // Set the primary key and let it finish execution
-                    $uibModalInstance.close(answer);
-                } else {
-                    // Reset all elements status
-                    angular.forEach( form , function ( formElement , fieldName ) {
-                        // If the fieldname starts with a '$' sign, it means it's an Angular property or function. Skip those items.
-                        if ( fieldName[0] === '$' ) {
-                            return;
-                        } else {
-                            formElement.$pristine = true;
-                            formElement.$dirty = false;
-                        }
-                    });
-                    // Reset form status
-                    form.$pristine = true;
-                    form.$dirty = false;
-                    // Reload page
-                    $state.reload($state.current);
-                }
-            } else if (next=='new') {
-                $state.go('formadd'+listid);
-                $state.transitionTo('formadd'+listid, {}, { reload: true, inherit: true, notify: true });
-            } else if (next=='details') {
-                $state.go('details'+listid,{'pk':answer.__pk__});
-            } else {
-                $state.go('list'+listid);
-            }
-        } else if (stat==200) {
-            if (answer['error']) {
-                $scope.error=answer['error'];
-            } else {
+        });
+        // Clear cache
+        $templateCache.remove(url);
+        // POST
+        $http.post( url, in_data, { headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} } )
+        .success(function(answer, stat) {
+            // If the request was accepted
+            if (stat==202) {
+                // Go back to the list
                 if (next=='here') {
-                    $uibModalInstance.close();
-                    $uibModalInstance.build_modal(answer);
+                    if (kind=='add') {
+                        // Jump to the edit form
+                        $state.go('formedit'+listid,{'pk':answer.pk});
+                        // Reload page
+                        $state.reload($state.current);
+                    } else if ((kind=='addmodal') || (kind=='editmodal')) {
+                        // Set the primary key and let it finish execution
+                        $uibModalInstance.close(answer);
+                    } else {
+                        // Reset all elements status
+                        angular.forEach( form , function ( formElement , fieldName ) {
+                            // If the fieldname starts with a '$' sign, it means it's an Angular property or function. Skip those items.
+                            if ( fieldName[0] === '$' ) {
+                                return;
+                            } else {
+                                formElement.$pristine = true;
+                                formElement.$dirty = false;
+                            }
+                        });
+                        // Reset form status
+                        form.$pristine = true;
+                        form.$dirty = false;
+                        // Reload page
+                        $state.reload($state.current);
+                    }
+                } else if (next=='new') {
+                    $state.go('formadd'+listid);
+                    $state.transitionTo('formadd'+listid, {}, { reload: true, inherit: true, notify: true });
+                } else if (next=='details') {
+                    $state.go('details'+listid,{'pk':answer.__pk__});
                 } else {
-                    var templateUrl=$state.current.templateUrl;
-                    $state.current.template=answer;
-                    // $state.transitionTo($state.current, $state.$current.params, { reload: true, inherit: true, notify: true });
-                    $state.transitionTo($state.current, {}, { reload: true, inherit: true, notify: true });
-                    $state.current.templateUrl=templateUrl;
+                    $state.go('list'+listid);
                 }
+            } else if (stat==200) {
+                if (answer['error']) {
+                    $scope.error=answer['error'];
+                } else {
+                    if (next=='here') {
+                        $uibModalInstance.close();
+                        $uibModalInstance.build_modal(answer);
+                    } else {
+                        var templateUrl=$state.current.templateUrl;
+                        $state.current.template=answer;
+                        // $state.transitionTo($state.current, $state.$current.params, { reload: true, inherit: true, notify: true });
+                        $state.transitionTo($state.current, {}, { reload: true, inherit: true, notify: true });
+                        $state.current.templateUrl=templateUrl;
+                    }
+                }
+            } else {
+                $window.alert("Internal error detected (Error was: "+answer+")")
             }
-        } else {
-            $window.alert("Internal error detected (Error was: "+answer+")")
-        }
-    });
+        });
+    }else{
+        console.info("formsubmit() will work only when form is $dirty and $valid");
+    }
 }
 
 
@@ -2025,7 +2028,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         $scope.base_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
 
     };
-    //
+    // DEPRECATED: 2017-07-04
     $scope.open_details = function(id, id_parent) {
         id = String(id);
         id_parent = String(id_parent);
