@@ -53,12 +53,14 @@ limitations under the License.
 
 {% with langcode=LANGUAGE_CODE|default:"en" %}
     {# if there is an existing title for the form, it is shown #}
+    {% block block_top %}
     <div class="col-md-12 internal-name">
         <h4>{{object}}</h4>
     </div>
     {# BUTTONS at the top #}
     <div class="col-md-12 internal-buttons-top">
         <div class="form-group text-center">
+        {% block buttons_top %}
             {% if linkedit %}
                 {% if not cannot_update %}
                     <label  class="sr-only" for="submit_edit">{% trans "Edit" %}</label>
@@ -82,8 +84,11 @@ limitations under the License.
                     <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% endif %}
             {% endif %}
+        {% endblock %}
         </div>
     </div>
+    {% endblock %}
+
     {% block details %}
         {% for item in object_detail %}
             
@@ -131,6 +136,7 @@ limitations under the License.
     {% endblock %}
     
     {# BUTTONS at the bottom #}
+    {% block block_bottom %}
     <div class="col-md-12 internal-buttons-bottom">
         <div class="form-group text-center">
             {% block buttons_bottom %}
@@ -160,6 +166,7 @@ limitations under the License.
             {% endblock %}
         </div>
     </div>
+    {% endblock %}
 {% endwith %}
 
 {% block body %}
