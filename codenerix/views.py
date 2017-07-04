@@ -1156,8 +1156,8 @@ class GenList(GenBase, ListView):
 
         # Get if this is a template only answer
         self.__authtoken = (bool( getattr( self.request, "authtoken", False ) ))
-        self.__json_worker=(hasattr(self, 'json_builder')) or self.__authtoken or (self.json is True)
-        if self.__json_worker:
+        self.json_worker=(hasattr(self, 'json_builder')) or self.__authtoken or (self.json is True)
+        if self.json_worker:
             # Check if the request has some json query, if not, just render the template
             if self.request.GET.get('json',self.request.POST.get('json',None)) is None:
                 # Calculate tabs
@@ -1667,7 +1667,7 @@ class GenList(GenBase, ListView):
             context['datefilter']['data'].sort()
 
             # Prepare the rightnow result
-            if self.__json_worker:
+            if self.json_worker:
                 rightnow={}
                 for key in ['year','month','day','hour','minute','second']:
                     rightnow[key]=(f[key][2] and f[key][0]) or None
@@ -2173,7 +2173,7 @@ class GenList(GenBase, ListView):
         context['search_filter_button'] = getattr(self, 'search_filter_button', False)
 
         # Get base template
-        if not self.__json_worker:
+        if not self.json_worker:
             template_base=getattr(self,'template_base', 'base/base')
             template_base_ext=getattr(self, 'template_base_ext', 'html')
             context['template_base']=get_template(template_base,self.user,self.language,extension=template_base_ext)
@@ -2579,7 +2579,7 @@ class GenList(GenBase, ListView):
 
     def render_to_response(self, context, **response_kwargs):
 
-        if self.__json_worker:
+        if self.json_worker:
             # Get json ready context
             json_context=self.get_context_json(context)
 
@@ -2713,11 +2713,11 @@ class GenModify(object):
         '''
 
         # Check if this is a webservice request
-        self.__json_worker = (bool(getattr(self.request, "authtoken", False))) or (self.json is True)
+        self.json_worker = (bool(getattr(self.request, "authtoken", False))) or (self.json is True)
         self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
 
         # Check if this is an AJAX request
-        if (request.is_ajax() or self.__json_worker) and request.body:
+        if (request.is_ajax() or self.json_worker) and request.body:
             request.POST = QueryDict('').copy()
             body = request.body
             if type(request.body) == bytes:
@@ -2971,7 +2971,7 @@ class GenModify(object):
         return jc
 
     def render_to_response(self, context, **response_kwargs):
-        if self.__json_worker:
+        if self.json_worker:
             # Get json ready context
             answer=self.get_context_json(context)
 
@@ -3051,7 +3051,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
 
         # Check if this is a webservice request
         self.__authtoken = (bool( getattr( self.request, "authtoken", False ) ))
-        self.__json_worker = self.__authtoken or (self.json is True)
+        self.json_worker = self.__authtoken or (self.json is True)
         # Call the base implementation
         return super(GenDelete, self).dispatch(request, **kwargs)
 
@@ -3082,7 +3082,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
             api_obj = None
 
         if lock:
-            if self.__json_worker:
+            if self.json_worker:
                 json_struct = {"error": lock, "__pk__": obj.pk}
                 if self.__authtoken and api_obj is not None:
                     json_struct['__obj__']=api_obj
@@ -3094,7 +3094,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
             try:
                 return super(GenDelete, self).delete(*args, **kwargs)
             except ValidationError as e:
-                if self.__json_worker:
+                if self.json_worker:
                     json_struct = {"error": e, "__pk__": obj.pk}
                     if self.__authtoken and api_obj is not None:
                         json_struct['__obj__']=api_obj
@@ -3141,10 +3141,10 @@ class GenDetail(GenBase, DetailView):
 
         # Detect if we have to answer in json
         self.__authtoken = (bool( getattr( self.request, "authtoken", False ) ))
-        self.__json_worker=self.__authtoken or (self.json is True)
+        self.json_worker=self.__authtoken or (self.json is True)
 
         # Check if this is an AJAX request
-        if (request.is_ajax() or self.__json_worker) and request.body:
+        if (request.is_ajax() or self.json_worker) and request.body:
             request.POST = json.loads(request.body)
 
         # Set class internal variables
@@ -3374,7 +3374,7 @@ class GenDetail(GenBase, DetailView):
 
     def get_context_data(self, **kwargs):
         object_property = dir(self.object)
-        if self.__json_worker:
+        if self.json_worker:
             return self.get_context_data_json(object_property, **kwargs)
         else:
             return self.get_context_data_html(object_property, **kwargs)
@@ -3382,7 +3382,7 @@ class GenDetail(GenBase, DetailView):
 
     def render_to_response(self, context, **response_kwargs):
 
-        if self.__json_worker:
+        if self.json_worker:
             # Try to serialize it as a JSON string
             try:
                 json_answer=json.dumps(context)
