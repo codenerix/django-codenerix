@@ -105,7 +105,7 @@ function del_item_sublist(id, msg, url, scope, $http){
     }
 }
 
-function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
+function openmodal($scope, $timeout, $uibModal, size, functions, callback, locked) {
     var ngmodel=null;
     // Define the modal window
     $scope.build_modal = function (inline) {
@@ -116,8 +116,8 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
             $scope.inurl=$scope.ws;
             $scope.inhtml=null;
         }
-        
-        var modalInstance = $uibModal.open({
+
+        var info = {
             template: $scope.inhtml,
             templateUrl: $scope.inurl,
             controller:  ['$scope', '$rootScope', '$http', '$window', '$uibModal', '$uibModalInstance', '$state', '$stateParams', '$templateCache', 'Register', 'ws', function ($scope, $rootScope, $http, $window, $uibModal, $uibModalInstance, $state, $stateParams, $templateCache, Register, ws) {
@@ -189,7 +189,14 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback) {
             resolve: {
                 ws:         function () { return $scope.ws;         },
             },
-        });
+        }
+        
+        if (locked != undefined || locked == true){
+            info['backdrop'] = 'static';
+            info['keyboard'] = false;
+        }
+        
+        var modalInstance = $uibModal.open(info);
         
         modalInstance.build_modal=$scope.build_modal;
         
