@@ -328,20 +328,23 @@ class MODELINFO:
                 return {}
 
     def searchQ(self,search):
-        if self.__MsearchQ:
-            f=self.__MsearchQ
-        elif self.__soul:
-            f=getattr(self.__soul,'__searchQ__',None)
-        else:
-            f=None
-        if callable(f):
-            return f(self,search)
-        else:
+        if search:
             if self.__MsearchQ:
-                e="View {1} inside app {0} has a __searchQ__ attribute which is not callable".format(self.__appname,self.__viewname)
-                raise ImproperlyConfigured(e)
+                f=self.__MsearchQ
+            elif self.__soul:
+                f=getattr(self.__soul,'__searchQ__',None)
             else:
-                return {}
+                f=None
+            if callable(f):
+                return f(self,search)
+            else:
+                if self.__MsearchQ:
+                    e="View {1} inside app {0} has a __searchQ__ attribute which is not callable".format(self.__appname,self.__viewname)
+                    raise ImproperlyConfigured(e)
+                else:
+                    return {}
+        else:
+            return {}
 
 
 def gen_auth_permission(user, action_permission, model_name, appname, permission=None, permission_group=None, explained=False):
