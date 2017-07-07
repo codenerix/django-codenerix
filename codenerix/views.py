@@ -1922,7 +1922,7 @@ class GenList(GenBase, ListView):
                     if fi.name == nfrule[0] and fi.is_relation:
                         fields_related_model.append(nfrule[0])
 
-            if nof self.haystack and (do_select_related or rule in self.__foreignkeys):
+            if not self.haystack and (do_select_related or rule in self.__foreignkeys):
                 # Compatibility with Django 1.10
                 if "__" in rule:
                     query_select_related.append("__".join(rule.split('__')[0:-1]))
