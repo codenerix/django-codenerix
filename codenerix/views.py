@@ -55,7 +55,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, resolve, reverse
-from django.utils.http import urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.exceptions import ValidationError
 from django.core.cache import cache
 from django.utils import formats
@@ -65,7 +65,6 @@ from django.utils.translation import get_language
 from django.conf import settings
 
 from django.db.models import Q, F, FieldDoesNotExist
-from django.utils.http import urlsafe_base64_decode
 
 # Export to Excel
 from openpyxl import Workbook
