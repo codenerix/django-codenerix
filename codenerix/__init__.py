@@ -22,6 +22,7 @@ __requirements__ = {
         "Django>=1.10.6,<1.11",
         "django-multi-email-field",
         "ldap3",
+        "django-haystack>=2.6.1",
     ],
     '3':[
         "pymongo",
@@ -38,5 +39,6 @@ __requirements__ = {
         "Django>=1.10.6,<1.11",
         "django-multi-email-field",
         "ldap3",
+        "django-haystack>=2.6.1",
         ],
     }

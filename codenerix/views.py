@@ -72,6 +72,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill, Color
 from openpyxl.writer.excel import save_virtual_workbook
 
+from haystack.query import SearchQuerySet
+
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter
 from codenerix.templatetags.codenerix_lists import unlist
 
@@ -242,9 +244,8 @@ class MODELINFO:
         l['profile_people_limit']=reduce(operator_or_,criterials)
         return l
     '''
-    def __init__(self, queryset, appname, modelname, viewname, request, user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, kwargs):
+    def __init__(self, soul, appname, modelname, viewname, request, user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, kwargs):
         # Internal attributes
-        soul = queryset.__dict__.get('model',None)
         if soul:
             self.__soul = soul()
         else:
@@ -891,7 +892,7 @@ class GenBase(object):
             MsearchQ = None
             if hasattr(myclass, '__limitQ__'):
                 MlimitQ = myclass().__limitQ__
-            MODELINF = MODELINFO(myclass, appname, modelname, myclass.__module__, self.request, self.user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
+            MODELINF = MODELINFO(myclass.__dict__.get('model',None), appname, modelname, myclass.__module__, self.request, self.user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
 
             # Filter on limits
             if hasattr(self, '__limitQ__'):
@@ -983,7 +984,8 @@ class GenList(GenBase, ListView):
         field_check = None                          # None don't show checkbox, else show checkbox. if 'True' checked ('None', 'True', 'False')
         
         search_filter_button = True                 # Enable filtering system by default
-        autofiltering = False                        # Disable autofiltering system
+        autofiltering = False                       # Disable autofiltering system
+        haystack = True                             # Enable Haystack support
 
     Templates will be selected using the next process:
     Grammar: <path>/<filename>[.<profile>][.<language>].html for this example we use 'seller' profile and 'es' language (spanish)
@@ -1069,6 +1071,7 @@ class GenList(GenBase, ListView):
     action_permission = 'list'
     extends_base = "base/base.html"
     autofiltering = True
+    haystack = False
     
     xls_style = {
         'head': {
@@ -1201,7 +1204,10 @@ class GenList(GenBase, ListView):
 
     def get_queryset(self):
         # Call the base implementation
-        queryset=super(GenList, self).get_queryset()
+        if not self.haystack:
+            queryset = super(GenList, self).get_queryset()
+        else:
+            queryset = SearchQuerySet().models(self.model)
 
         # Optional tweak methods
         Mfields=None; MlimitQ=None; MsearchF=None; MsearchQ=None
@@ -1229,7 +1235,7 @@ class GenList(GenBase, ListView):
             jsondata={}
 
         # Build info for GenModel methods
-        MODELINF=MODELINFO(queryset, self._appname, self._modelname, self._viewname, self.request, self.user, self.profile, Mfields, MlimitQ, MsearchF, MsearchQ,listid,elementid,self.__kwargs)
+        MODELINF=MODELINFO(self.model, self._appname, self._modelname, self._viewname, self.request, self.user, self.profile, Mfields, MlimitQ, MsearchF, MsearchQ,listid,elementid,self.__kwargs)
 
         # Process the filter
         context['filters']=[]
@@ -1272,7 +1278,10 @@ class GenList(GenBase, ListView):
             queryset=queryset.filter(qobjects)
 
         if hasattr(self, 'annotations'):
-            queryset=queryset.annotate(**self.annotations)
+            if not self.haystack:
+                queryset=queryset.annotate(**self.annotations)
+            else:
+                raise IOError("Haystack doesn't support annotate")
 
         if distinct:
             queryset=queryset.distinct()
@@ -1910,7 +1919,7 @@ class GenList(GenBase, ListView):
                     if fi.name == nfrule[0] and fi.is_relation:
                         fields_related_model.append(nfrule[0])
 
-            if do_select_related or rule in self.__foreignkeys:
+            if nof self.haystack and (do_select_related or rule in self.__foreignkeys):
                 # Compatibility with Django 1.10
                 if "__" in rule:
                     query_select_related.append("__".join(rule.split('__')[0:-1]))
@@ -2490,13 +2499,13 @@ class GenList(GenBase, ListView):
                 # Check all items if they need conversion
                 for (key,value) in o.items():
                     # Rewrite values if required
-                    if type(value) == datetime.datetime:
+                    if isinstance(value, datetime.datetime):
                         # Convert datetime to string
                         value = value.replace(tzinfo=pytz.utc).astimezone(tz.tzlocal()).strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
-                    elif type(value) == datetime.date:
+                    elif isinstance(value, datetime.date):
                         # Convert datetime to string
                         value = value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
-                    elif type(value) == datetime.time:
+                    elif isinstance(value, datetime.time):
                         # Convert datetime to string
                         value = value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                     # Save token

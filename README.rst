@@ -31,6 +31,7 @@ Features
 * ready for authentication with Microsoft Active Directory
 * compatible with Python 2.7 and Python >= 3.4
 * hotkeys support
+* `Haystack <http://haystacksearch.org>`_ support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
 
 Ready for:
 ''''''''''
