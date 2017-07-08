@@ -61,37 +61,13 @@
         return input.split(splitChar)[splitIndex];
     }
 })
+
 .filter('highlightRow', function() {
-    return function(input, txt) {
-        var result = '';
-        if (txt!==undefined){
-            txt = String(txt).trim()
-            var index = 0;
-            var search = -1;
-            var search_old = -1;
-            var len = txt.length;
-
-            var txt_m = txt.toUpperCase();
-            var input_m = input.toUpperCase()
-
-            if (len!=0 && txt!="" && input.length>0){
-                while ((search=input_m.indexOf(txt_m, index) )!=-1){
-                    if (search==search_old){
-                        break;
-                    }
-                    result=result+input.substring(index, search);
-                    result=result+'<span class="standout">'+input.substring(result.length, result.length+len)+'</span>';
-                    index=search+len;
-                    search_old = search;
-                }
-            }
+    return function(text, search) {
+        if (!search) {
+            return text;
         }
-        if (result == ''){
-            result = input;
-        }else if(index<input.length){
-            result=result+input.substring(search_old+len);
-        }
-        return result;
+        return text.replace(new RegExp(search, 'gi'), '<mark>$&</mark>');
     }
 })
 
