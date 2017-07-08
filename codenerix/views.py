@@ -48,7 +48,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import string_concat, gettext
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -56,7 +56,6 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, resolve, reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.core.exceptions import ValidationError
 from django.core.cache import cache
 from django.utils import formats
 from django.http import QueryDict
@@ -68,10 +67,12 @@ from django.db.models import Q, F, FieldDoesNotExist
 
 # Export to Excel
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill, Color
+from openpyxl.styles import Font, Border, Side, PatternFill, Color # , Alignment
 from openpyxl.writer.excel import save_virtual_workbook
 
-from haystack.query import SearchQuerySet
+# Import only when defined by the user and there is something we can work with
+if getattr(settings, 'HAYSTACK_CONNECTIONS', None):
+    from haystack.query import SearchQuerySet
 
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter
 from codenerix.templatetags.codenerix_lists import unlist
