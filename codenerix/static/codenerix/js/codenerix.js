@@ -1974,67 +1974,6 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         $scope.base_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);//, callback);
 
     };
-
-    // DEPRECATED: 2017-02-14
-    $scope.removedocinput = function(id, msg){
-        if (confirm(msg)){
-            var url = $scope.wsbase+id+"/delete";
-            //$scope.ws= $scope.wsbase+id_parent+"/modal";
-                
-            
-            $http.post( url, {}, {} )
-            .success(function(answer, stat) {
-                // Check the answer
-                if (stat==200 || stat ==202) {
-                    refresh($scope,$timeout,Register, callback);
-                } else {
-                    // Error happened, show an alert
-                    console.log("ERROR "+stat+": "+answer)
-                    console.log(answer);
-                    alert("ERROR "+stat+": "+answer)
-                }
-            })
-            .error(function(data, status, headers, config) {
-                if (cnf_debug){
-                    alert(data);
-                }else{
-                    alert(cnf_debug_txt)
-                }
-            });
-        }
-    };
-    // DEPRECATED: 2017-02-14
-    $scope.relationdocinput = function(id){
-        id = String(id);
-        $scope.wsbase = ws+"/";
-        // Base window
-        $scope.ws=$scope.wsbase+id+"/relationship";
-        $scope.relationship(id);
-    };
-    // DEPRECATED: 2017-02-14
-    $scope.relationdocoutput = function(id){
-        id = String(id);
-        $scope.wsbase = ws+"/";
-        // Base window
-        $scope.ws=$scope.wsbase+id+"/relationship";
-        $scope.relationship(id);
-    };
-    // DEPRECATED: 2017-02-14
-    $scope.relationship = function(id){
-        
-        $scope.initialws = $scope.ws;
-        // Base Window functions
-        var functions = function(scope) {
-            scope.gotoback = function() {
-                $scope.det_window.dismiss('cancel');
-            };
-        };
-        
-        // Prepare for refresh
-        $scope.base_reload=[$scope.relationship, id];
-        $scope.base_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
-
-    };
     // DEPRECATED: 2017-07-04
     $scope.open_details = function(id, id_parent) {
         id = String(id);
