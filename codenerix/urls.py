@@ -23,7 +23,7 @@ from django.conf.urls import url
 from codenerix.views import LogList, LogDetails, status
 
 urlpatterns = [
-    url(r'^status/(?P<status>\w+)/(?P<answer>[a-zA-Z0-9+-/]+)$', status, name='status'),
+    url(r'^status/(?P<status>\w+)/(?P<answer>[a-zA-Z0-9+-_/]+)$', status, name='status'),
     url(r'^logs$', LogList.as_view(), name='codenerix_log_list'),
     url(r'^logs/(?P<pk>\w+)$', LogDetails.as_view(), name='codenerix_log_details'),
 ]
