@@ -205,7 +205,7 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback, locke
                 
                 // Execute call back is requested
                 if (callback!=undefined) {
-                    callback($scope);
+                    callback($scope, answer);
                 }
                 
                 // Select the new created item
