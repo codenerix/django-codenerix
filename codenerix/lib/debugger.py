@@ -88,7 +88,18 @@ class Debugger(object):
                 self.debug("\033[1;31mColor '%s' unknown\033[1;00m\n" % (color))
             return ''
     
-    def debug(self,msg=None,header=True,color=None, tail=True):
+    def debug(self,msg=None,header=None,color=None, tail=None, head=None, footer=None):
+        # Allow better names for debug calls
+        if header is None:
+            if head is None:
+                header=True
+            else:
+                header=head
+        if tail is None:
+            if footer is None:
+                tail=True
+            else:
+                tail=footer
         
         # Retrieve the name of the class
         clname=self.__class__.__name__
