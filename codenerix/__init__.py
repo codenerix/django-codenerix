@@ -24,7 +24,6 @@ __requirements__ = {
         "django-haystack>=2.6.1",
         "pytz",
         "elasticsearch>=2.0.0,<3.0.0",
-        "unittest2",
     ],
     '2':[
         "html5lib==1.0b8", # Default version 0.99999999 is broken with error 'from html5lib import treebuilders, inputstream' => 'ImportError: cannot import name inputstream' (1.0b10 also fails)
