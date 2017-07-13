@@ -18,10 +18,11 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
+requirements = codenerix.__requirements__['all']
 if sys.version_info[0] < 3:
-    requirements = codenerix.__requirements__['2']
+    requirements += codenerix.__requirements__['2']
 else:
-    requirements = codenerix.__requirements__['3']
+    requirements += codenerix.__requirements__['3']
 
 setup(
     name='django-codenerix',

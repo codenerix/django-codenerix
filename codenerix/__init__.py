@@ -1,4 +1,4 @@
-__version__ = "1.0.40"
+__version__ = "1.0.41"
 
 __authors__ = [
     'Juan Miguel Taboada Godoy <juanmi@juanmitaboada.com>',
@@ -7,7 +7,7 @@ __authors__ = [
 ]
 
 __requirements__ = {
-    '2':[
+    'all':[
         "pymongo",
         "django-angular",
         "python-dateutil",
@@ -18,33 +18,17 @@ __requirements__ = {
         "Pillow",
         "Unidecode",
         "xhtml2pdf",
-        "html5lib==1.0b8", # Default version 0.99999999 is broken with error 'from html5lib import treebuilders, inputstream' => 'ImportError: cannot import name inputstream' (1.0b10 also fails)
         "Django>=1.10.6,<1.11",
         "django-multi-email-field",
         "ldap3",
         "django-haystack>=2.6.1",
         "pytz",
-        "django-haystack>=2.6.1",
         "elasticsearch>=2.0.0,<3.0.0",
     ],
+    '2':[
+        "html5lib==1.0b8", # Default version 0.99999999 is broken with error 'from html5lib import treebuilders, inputstream' => 'ImportError: cannot import name inputstream' (1.0b10 also fails)
+    ],
     '3':[
-        "pymongo",
-        "django-angular",
-        "python-dateutil",
-        "django-recaptcha>=1.2.1,<1.3",
-        "django-rosetta",
-        "jsonfield",
-        "openpyxl",
-        "Pillow",
-        "Unidecode",
-        "xhtml2pdf",
         "html5lib",
-        "Django>=1.10.6,<1.11",
-        "django-multi-email-field",
-        "ldap3",
-        "django-haystack>=2.6.1",
-        "pytz",
-        "django-haystack>=2.6.1",
-        "elasticsearch>=2.0.0,<3.0.0",
         ],
     }
