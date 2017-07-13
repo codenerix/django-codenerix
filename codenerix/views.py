@@ -2609,7 +2609,7 @@ class GenList(GenBase, ListView):
 
             if self.export:
                 if self.export == 'xlsx':
-                    answer['meta']['content_type'] = 'application/vnd.ms-excel;charset=utf-8;'
+                    answer['meta']['content_type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;'
                     # return_xls = self.response_to_xls(answer)
                     return self.response_to_xls(answer, **response_kwargs)
                 else:
@@ -2673,7 +2673,7 @@ class GenList(GenBase, ListView):
         size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
         if data_output_len <= (size_max * 1000000):
             data_output.seek(0)
-            response = HttpResponse(data_output.getvalue(), content_type='application/vnd.ms-excel;charset=utf-8;', **response_kwargs)
+            response = HttpResponse(data_output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;', **response_kwargs)
             response['Content-Disposition'] = 'attachment; filename=list.xlsx'
             return response
         else:
