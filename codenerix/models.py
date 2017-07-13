@@ -179,7 +179,7 @@ class CodenerixModel(CodenerixModelBase):
         self.CodenerixMeta = CodenerixMetaType()
         return super(CodenerixModel, self).__init__(*args, **kwards)
 
-    def __strlog_add__(self, newobj):
+    def __strlog_add__(self):
         return ''
 
     def __strlog_update__(self, newobj):
@@ -464,7 +464,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                 log.change_txt = json.dumps({'error': '*JSON_ENCODE_ERROR*'}, default=json_util.default)
             log.action_flag = action
             if pk is None:
-                log.snapshot_txt = obj.__strlog_add__(self)
+                log.snapshot_txt = self.__strlog_add__()
             else:
                 log.snapshot_txt = obj.__strlog_update__(self)
             
