@@ -59,6 +59,7 @@ def codenerix_js( request ):
     if ALARMS_QUICKLOOP is not None: cnf['alarms_quickloop'] = ALARMS_QUICKLOOP
     if ALARMS_ERRORLOOP is not None: cnf['alarms_errorloop'] = ALARMS_ERRORLOOP
     cnf['debug'] = str(DEBUG).lower()
+    cnf['session_cookie_age'] = getattr(settings,'SESSION_COOKIE_AGE', None)
     cnf['codenerix_css'] = getattr(settings,'CODENERIX_CSS', _('WARNING: CODENERIX_CSS is not set in your configuration!!!'))
     cnf['codenerix_js']  = getattr(settings,'CODENERIX_JS', _('WARNING: CODENERIX_JS is not set in your configuration!!!'))
     
