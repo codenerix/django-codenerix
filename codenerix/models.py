@@ -453,6 +453,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             except UnicodeDecodeError:
                 log.change_txt = json.dumps({'error': '*JSON_ENCODE_ERROR*'}, default=json_util.default)
             log.action_flag = action
+            if pk is None:
+                log.snapshot_txt = obj.__strlog_add__(self)
+            else:
+                log.snapshot_txt = obj.__strlog_update__(self)
             
             aux = super(GenLog, self).save(**kwargs)
             if pk is None:
@@ -527,5 +531,6 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             log.object_repr = force_text(instance)
             log.change_json = json.dumps(attrs, default=json_util.default)
             log.change_txt = json.dumps(attrs_txt, default=json_util.default)
+            log.snapshot_txt = instance.__strlog_delete__()
             log.action_flag = action
             log.save()
