@@ -179,6 +179,15 @@ class CodenerixModel(CodenerixModelBase):
         self.CodenerixMeta = CodenerixMetaType()
         return super(CodenerixModel, self).__init__(*args, **kwards)
 
+    def __strlog_add__(self, newobj):
+        return ''
+
+    def __strlog_update__(self, newobj):
+        return ''
+
+    def __strlog_delete__(self):
+        return ''
+
 
 class GenInterface(CodenerixModelBase):
     """
@@ -240,6 +249,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         action_flag = models.PositiveSmallIntegerField(_("Action"), choices=TYPE_ACTION)
         change_json = models.TextField('Json', blank=True, null=False)
         change_txt = models.TextField('Txt', blank=True, null=False)
+        snapshot_txt = models.TextField('Snapshot Txt', blank=True, null=False)
         
         class Meta:
             permissions = (
