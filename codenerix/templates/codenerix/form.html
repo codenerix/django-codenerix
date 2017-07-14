@@ -490,9 +490,9 @@ limitations under the License.
                             </div>
                         {% if group.name %}
                             </div>
-                        {% if group.html_helper_pre %}
+                        {% if group.html_helper_post %}
                             <div class="panel-footer">
-                            {{group.html_helper_pre|safe}}
+                            {{group.html_helper_post|safe}}
                             </div>
                         {% endif %}
                         </div>
