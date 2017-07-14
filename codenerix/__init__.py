@@ -17,7 +17,6 @@ __requirements__ = {
         "openpyxl",
         "Pillow",
         "Unidecode",
-        "xhtml2pdf",
         "Django>=1.10.6,<1.11",
         "django-multi-email-field",
         "ldap3",
