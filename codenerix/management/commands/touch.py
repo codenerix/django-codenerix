@@ -103,8 +103,8 @@ class Command(BaseCommand, Debugger):
             filenames = os.listdir(appdir)
             filenames.sort()
             for name in filenames:
-                if name[0:4]=='wsgi':
-                    status, output = getstatusoutput("/usr/bin/touch {}/wsgi*.py".format(appdir))
+                if name[0:4]=='wsgi' or name[-4:]=='wsgi':
+                    status, output = getstatusoutput("/usr/bin/touch {}/{}".format(appdir, name))
                     if status: raise CommandError(output)
                     self.debug(" [{}]".format(name),color='cyan', header=False, tail=False)
             self.debug(" Done",color='green', header=False)
