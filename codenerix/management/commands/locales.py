@@ -203,7 +203,7 @@ class Command(BaseCommand, Debugger):
                 raise CommandError("Wrong mode for sudo '{}'".format(mode))
             for app in ['']+apps:
                 testpath = os.path.abspath("{}/{}/locale".format(appdir,app).replace("//","/"))
-                cmd="sudo chown {}.{} {}/* -R".format(user,user,testpath)
+                cmd="sudo chown {}.{} {}/ -R".format(user,user,testpath)
                 status, output = getstatusoutput(cmd)
                 if status: raise CommandError(output)
 
