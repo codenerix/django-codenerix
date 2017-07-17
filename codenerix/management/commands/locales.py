@@ -80,20 +80,14 @@ class Command(BaseCommand, Debugger):
         appname=settings.ROOT_URLCONF.split(".")[0]
         basedir=settings.BASE_DIR
         appdir = os.path.abspath("{}/{}".format(basedir,appname))
-        print(appdir)
         noauto=options['noauto']
         
         # Check user selection
         if not options['noguess']:
-            cmd = "ls -lR {} | grep www-data".format(appdir)
+            cmd = "find {} -name 'locale' -exec ls -lR {{}} \; | grep www-data".format(appdir)
             status, output = getstatusoutput(cmd)
             if status:
-                cmd = "ls -lR {} | grep www-data".format(appdir)
-                status, output = getstatusoutput(cmd)
-                if status:
-                    guess="suexec"
-                else:
-                    guess="apache"
+                guess="suexec"
             else:
                 guess="wwwdata"
             if guess!=mode:
