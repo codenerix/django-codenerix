@@ -32,6 +32,7 @@ Features
 * compatible with Python 2.7 and Python >= 3.4
 * hotkeys support
 * `Haystack <http://haystacksearch.org>`_ support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
+* nice packages with plenty of icons ready to use (Glyphicon, Font Awesome & Font Awesome Animation)
 
 Ready for:
 ''''''''''
@@ -176,6 +177,8 @@ Checklist-model                     MIT                 
 Date Range Picker                   MIT                 Fragaria, s.r.o.            https://github.com/dangrossman/bootstrap-daterangepicker
 django-angular                      MIT                 Jacob Rief                  https://github.com/jrief/django-angular
 Font Awesome                        MIT & SIL OFL 1.1   Dave Gandy                  https://github.com/FortAwesome/Font-Awesome/
+Font Awesome Animation              MIT                 Louis Lin                   https://github.com/l-lin/font-awesome-animation/
+hotkeys                             MIT                 Wes Cruver                  https://github.com/chieffancypants/angular-hotkeys/
 HTML Clean for jQuery               BSD                 Anthony Johnston            https://github.com/components/jquery-htmlclean
 HTML5 Shiv                          MIT or GPL2         Alexander Farkas            https://github.com/aFarkas/html5shiv
 jQuery                              MIT                 jQuery Foundation, Inc.     https://github.com/jquery/jquery
@@ -185,5 +188,4 @@ nsPopover                           MIT                 contact@
 Quill                               COPYRIGHT           Jason Chen & salesforce.com https://quilljs.com/
 Rangy                               MIT                 Tim Down                    https://github.com/timdown/rangy
 textAngular                         MIT                 Austin Anderson             https://github.com/fraywing/textAngular/wiki
-hotkeys                             MIT                 Wes Cruver                  https://github.com/chieffancypants/angular-hotkeys/
 =================================== =================== =========================== =========================================================

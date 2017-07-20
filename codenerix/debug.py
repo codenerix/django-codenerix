@@ -146,6 +146,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/css/lists.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-vertical-grid.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/fontawesome/css/font-awesome.css" rel="stylesheet"> \
+    <link href="{STATIC_URL}codenerix/lib/fontawesome-animation/font-awesome-animation.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/textAngular/textAngular.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.css" rel="stylesheet"> \
@@ -165,6 +166,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/css/lists.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-vertical-grid.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/fontawesome/css/font-awesome.min.css" rel="stylesheet"> \
+    <link href="{STATIC_URL}codenerix/lib/fontawesome-animation/font-awesome-animation.min.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/textAngular/textAngular.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.css" rel="stylesheet"> \
