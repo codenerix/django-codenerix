@@ -24,7 +24,6 @@ Base library to handle CODENERIX system
 
 # System
 import os
-import base64
 import re
 import time
 import json
@@ -67,24 +66,24 @@ from django.db.models import Q, F, FieldDoesNotExist
 
 # Export to Excel
 from openpyxl import Workbook
-from openpyxl.styles import Font, Border, Side, PatternFill, Color # , Alignment
+from openpyxl.styles import Font, Border, Side, PatternFill, Color  # , Alignment
 from openpyxl.writer.excel import save_virtual_workbook
+
+from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter
+from codenerix.templatetags.codenerix_lists import unlist
 
 # Import only when defined by the user and there is something we can work with
 if getattr(settings, 'HAYSTACK_CONNECTIONS', None):
     from haystack.query import SearchQuerySet
-
-from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter
-from codenerix.templatetags.codenerix_lists import unlist
 
 
 def status(request, status, answer):
     answerjson = urlsafe_base64_decode(answer)
     status = status.lower()
     if status == 'accept':
-        out=202     # Accepted
+        out = 202     # Accepted
     else:
-        out=501     # Not Implemented
+        out = 501     # Not Implemented
     return HttpResponse(answerjson, status=out)
 
 
@@ -138,7 +137,7 @@ def pages(paginator, current):
     pages.append(first)
 
     # Decide block size
-    ini_block = int( holes * current / total )
+    ini_block = int(holes * current / total)
     end_block = holes - ini_block
     # Calculate grains
     if ini_block > 0:
@@ -284,62 +283,62 @@ class MODELINFO:
     def limitQ(self):
         # Get the limits from limitQ internal function
         if self.__soul:
-            f=getattr(self.__soul,'__limitQ__',None)
+            f = getattr(self.__soul, '__limitQ__', None)
             if callable(f):
-                limitQi=f(self)
+                limitQi = f(self)
             else:
-                limitQi={}
+                limitQi = {}
         else:
-            limitQi={}
+            limitQi = {}
 
         # Get the limits from limitQ external function
         if self.__MlimitQ:
             if callable(self.__MlimitQ):
-                limitQe=self.__MlimitQ(self)
+                limitQe = self.__MlimitQ(self)
             else:
-                e="View {1} inside app {0} has a __limitQ__ attribute which is not callable".format(self.__appname,self.__viewname)
+                e = "View {1} inside app {0} has a __limitQ__ attribute which is not callable".format(self.__appname, self.__viewname)
                 raise ImproperlyConfigured(e)
         else:
-            limitQe={}
+            limitQe = {}
 
-        answer={}
+        answer = {}
         for key in limitQi:
-            answer["i_{0}".format(key)]=limitQi[key]
+            answer["i_{0}".format(key)] = limitQi[key]
         for key in limitQe:
-            answer["e_{0}".format(key)]=limitQe[key]
+            answer["e_{0}".format(key)] = limitQe[key]
 
         # Return the resulting list
         return answer
 
     def searchF(self):
         if self.__MsearchF:
-            f=self.__MsearchF
+            f = self.__MsearchF
         elif self.__soul:
-            f=getattr(self.__soul,'__searchF__',None)
+            f = getattr(self.__soul, '__searchF__', None)
         else:
-            f=None
+            f = None
         if callable(f):
             return f(self)
         else:
             if self.__MsearchF:
-                e="View {1} inside app {0} has a __searchF__ attribute which is not callable".format(self.__appname,self.__viewname)
+                e = "View {1} inside app {0} has a __searchF__ attribute which is not callable".format(self.__appname, self.__viewname)
                 raise ImproperlyConfigured(e)
             else:
                 return {}
 
-    def searchQ(self,search):
+    def searchQ(self, search):
         if search:
             if self.__MsearchQ:
-                f=self.__MsearchQ
+                f = self.__MsearchQ
             elif self.__soul:
-                f=getattr(self.__soul,'__searchQ__',None)
+                f = getattr(self.__soul, '__searchQ__', None)
             else:
-                f=None
+                f = None
             if callable(f):
-                return f(self,search)
+                return f(self, search)
             else:
                 if self.__MsearchQ:
-                    e="View {1} inside app {0} has a __searchQ__ attribute which is not callable".format(self.__appname,self.__viewname)
+                    e = "View {1} inside app {0} has a __searchQ__ attribute which is not callable".format(self.__appname, self.__viewname)
                     raise ImproperlyConfigured(e)
                 else:
                     return {}
@@ -382,9 +381,9 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
             # python 3.x
             secret_key = bytes(settings.SECRET_KEY, encoding='utf-8')
             hash_key = hashlib.sha1(secret_key).hexdigest()
-        
+
         cache_key = "{}_{}_{}_{}_{}_".format(hash_key, user.pk, appname, model_name, action_permission)
-        
+
         if permission:
             if type(permission) == str:
                 cache_key += "".join(permission)
@@ -468,7 +467,7 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
                             # If already authorized, leave the bucle
                             if auth:
                                 break
-                    
+
                     if not auth:
                         reason = "Not authorized for: permissions: {} - permission group: {}".format(",".join(permission), ",".join(permission_group))
 
@@ -477,7 +476,7 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
                 if user.has_perm(specific_permission) or user.has_perm(app_specific_permission):
                     auth = True
                 else:
-                    
+
                     for group in user.groups.all():
                         if group.permissions.filter(codename=specific_permission).exists():
                             auth = True
@@ -485,7 +484,7 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
                         elif group.permissions.filter(codename=app_specific_permission).exists():
                             auth = True
                             break
-                    
+
                     if not auth:
                         reason = "Not authorized for {} or {}".format(specific_permission, app_specific_permission)
 
@@ -532,7 +531,6 @@ class GenBase(object):
         'Download': _("Download"),
         }
 
-
     # Default tabs information
     tabs = []
 
@@ -559,14 +557,14 @@ class GenBase(object):
             if not self.request.user.is_superuser:
                 redir = redirect('not_authorized')
                 if getattr(settings, 'DEBUG', False):
-                    redir['NotAuthorizedReason']=_("The view/model definition requires, that this user must be a superuser")
+                    redir['NotAuthorizedReason'] = _("The view/model definition requires, that this user must be a superuser")
                 return redir
 
         (authorized, reason) = self.auth_permission(self.action_permission, explained=True)
         if not authorized:
             redir = redirect('not_authorized')
             if getattr(settings, 'DEBUG', False):
-                redir['NotAuthorizedReason']=reason
+                redir['NotAuthorizedReason'] = reason
             return redir
 
         # Keep going with dispatch
@@ -627,10 +625,10 @@ class GenBase(object):
         '''
 
         # Get user template
-        template_model = getattr(self, 'template_model', "{0}/{1}_{2}".format(self._appname.lower(),self._modelname.lower(),self.get_template_names_key))
-        template_model_ext = getattr( self, 'template_model_ext', 'html')
-        templates=get_template(template_model,self.user,self.language,template_model_ext, raise_error=False)
-        if type(templates)==list:
+        template_model = getattr(self, 'template_model', "{0}/{1}_{2}".format(self._appname.lower(), self._modelname.lower(), self.get_template_names_key))
+        template_model_ext = getattr(self, 'template_model_ext', 'html')
+        templates = get_template(template_model, self.user, self.language, template_model_ext, raise_error=False)
+        if type(templates) == list:
             templates.append("codenerix/{0}.html".format(self.get_template_names_key))
 
         # Return thet of templates
@@ -666,8 +664,8 @@ class GenBase(object):
         if (api is not None) and ('include' in api or 'exclude' in api):
 
             # Get the fields for the API
-            includes=api.get('include', None)
-            excludes=api.get('exclude', None)
+            includes = api.get('include', None)
+            excludes = api.get('exclude', None)
 
             # Get the list of fields
             fields = [f.name for f in obj._meta.get_fields()]
@@ -678,10 +676,10 @@ class GenBase(object):
                 for fieldname in excludes:
                     fields.pop(fields.index(fieldname))
             elif includes is not None:
-                newfields=[]
+                newfields = []
                 for fieldname in includes:
                     newfields.append(fieldname)
-                fields=newfields
+                fields = newfields
 
             # Build the answer
             answer = {}
@@ -693,37 +691,37 @@ class GenBase(object):
                 if fieldname not in related:
 
                     # Analize data type
-                    if type(value)==datetime.datetime:
+                    if type(value) == datetime.datetime:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
-                    elif type(value)==datetime.date:
+                        value = value.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
+                    elif type(value) == datetime.date:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
-                    elif type(value)==datetime.time:
+                        value = value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
+                    elif type(value) == datetime.time:
                         # Convert datetime to string
-                        value=value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
+                        value = value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                     else:
                         # Analize if is related with another field but it is not a reverse relationship
-                        isrelated=(getattr(value,'all',None) is not None)
+                        isrelated = (getattr(value, 'all', None) is not None)
                         if isrelated:
                             # If the object is related, get the list of PKs
-                            values=[]
+                            values = []
                             for v in value.all():
                                 # This is a recursive call to go through foreign keys
                                 values.append(v.pk)
                             # Save the list in value
-                            value=values
+                            value = values
                         elif callable(value):
                             # Build the list of arguments
-                            args={}
+                            args = {}
                             # if 'request' in value.func_code.co_varnames:
                             if 'request' in value.__code__.co_varnames:
-                                args['request']=self.request
+                                args['request'] = self.request
                             # Call the method
-                            value=value(**args)
+                            value = value(**args)
                         elif hasattr(value, 'pk'):
                             # It is a foreignkey
-                            value=value.pk
+                            value = value.pk
 
                     # Save the value
                     answer[fieldname] = value
@@ -754,15 +752,15 @@ class GenBase(object):
             mydetailsclss = self
 
         # Check for 'tabs' in extra_context
-        mydetailsextra = getattr(mydetailsclss,'extra_context',None)
+        mydetailsextra = getattr(mydetailsclss, 'extra_context', None)
         if mydetailsextra:
             if js:
-                for tab in mydetailsextra.get('tabs',[]):
+                for tab in mydetailsextra.get('tabs', []):
                     # Get destination LIST class
                     tabdetailsclss = get_class(resolve(reverse(tab["ws"], kwargs={"pk": 0})).func)
 
                     # Build the sublist tab
-                    tabfinal=tab.copy()
+                    tabfinal = tab.copy()
 
                     # Set kind
                     tabfinal['auto'] = False
@@ -770,9 +768,9 @@ class GenBase(object):
                     # Get static partial row information
                     if 'static_partial_row' not in tab:
                         tabdetailinfo = model_inspect(tabdetailsclss)
-                        static_partial_row_path="{0}/{1}_rows.html".format(tabdetailinfo['appname'],"{0}s".format(tabdetailinfo['modelname'].lower()))
+                        static_partial_row_path = "{0}/{1}_rows.html".format(tabdetailinfo['appname'], "{0}s".format(tabdetailinfo['modelname'].lower()))
                     else:
-                        static_partial_row_path=tab['static_partial_row']
+                        static_partial_row_path = tab['static_partial_row']
 
                     # Save static partial information
                     tabfinal['static_partial_row_path'] = settings.STATIC_URL + static_partial_row_path
@@ -780,12 +778,12 @@ class GenBase(object):
 
                     # Save Internal ID
                     tabfinal['internal_id'] = internal_id
-                    internal_id+=1
+                    internal_id += 1
 
                     # Save in the queue
                     tabs_js.append(tabfinal)
             else:
-                internal_id = len(mydetailsextra.get('tabs',[]))
+                internal_id = len(mydetailsextra.get('tabs', []))
 
         first = True
         tab_auto_open = None
@@ -794,7 +792,7 @@ class GenBase(object):
             tabdetailsclss = get_class(resolve(reverse(tab["ws"], kwargs={"pk": 0})).func)
 
             # Build the sublist tab
-            tabfinal=tab.copy()
+            tabfinal = tab.copy()
 
             # Set kind (this is autorender)
             tabfinal['auto'] = True
@@ -813,9 +811,9 @@ class GenBase(object):
             # Get static partial row information
             if 'static_partial_row' not in tab:
                 tabdetailinfo = model_inspect(tabdetailsclss)
-                static_partial_row_path="{0}/{1}_rows.html".format(tabdetailinfo['appname'],"{0}s".format(tabdetailinfo['modelname'].lower()))
+                static_partial_row_path = "{0}/{1}_rows.html".format(tabdetailinfo['appname'], "{0}s".format(tabdetailinfo['modelname'].lower()))
             else:
-                static_partial_row_path=tab['static_partial_row']
+                static_partial_row_path = tab['static_partial_row']
 
             # Save static partial information
             tabfinal['static_partial_row_path'] = settings.STATIC_URL + static_partial_row_path
@@ -823,7 +821,7 @@ class GenBase(object):
 
             # Save Internal ID
             tabfinal['internal_id'] = internal_id
-            internal_id+=1
+            internal_id += 1
 
             # Save in the right queue
             tabs_js.append(tabfinal)
@@ -895,7 +893,7 @@ class GenBase(object):
             MsearchQ = None
             if hasattr(myclass, '__limitQ__'):
                 MlimitQ = myclass().__limitQ__
-            MODELINF = MODELINFO(myclass.__dict__.get('model',None), appname, modelname, myclass.__module__, self.request, self.user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
+            MODELINF = MODELINFO(myclass.__dict__.get('model', None), appname, modelname, myclass.__module__, self.request, self.user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
 
             # Filter on limits
             if hasattr(self, '__limitQ__'):
@@ -985,7 +983,7 @@ class GenList(GenBase, ListView):
 
         field_delete = False                        # Show/Hide button for delete register ('True'/'False')
         field_check = None                          # None don't show checkbox, else show checkbox. if 'True' checked ('None', 'True', 'False')
-        
+
         search_filter_button = True                 # Enable filtering system by default
         autofiltering = False                       # Disable autofiltering system
         haystack = True                             # Enable Haystack support
@@ -1068,14 +1066,14 @@ class GenList(GenBase, ListView):
     '''
 
     # Default values
-    json=True
+    json = True
     default_rows_per_page = 50
-    get_template_names_key='list'
+    get_template_names_key = 'list'
     action_permission = 'list'
     extends_base = "base/base.html"
     autofiltering = True
     haystack = False
-    
+
     xls_style = {
         'head': {
             'deviation': 1.2,
@@ -1107,9 +1105,9 @@ class GenList(GenBase, ListView):
         '''
 
         # Check if this is a REST query to pusth the answer to responde in JSON
-        if bool(self.request.META.get('HTTP_X_REST',False)):
+        if bool(self.request.META.get('HTTP_X_REST', False)):
             self.json = True
-            if self.request.GET.get('json',self.request.POST.get('json',None)) is None:
+            if self.request.GET.get('json', self.request.POST.get('json', None)) is None:
                 newget = {}
                 newget['json'] = "{}"
                 for key in self.request.GET:
@@ -1129,18 +1127,18 @@ class GenList(GenBase, ListView):
         self._setup(self.request)
 
         # Deprecations
-        deprecated=[('retrictions','2016061000')]
-        for (depre,version) in deprecated:
+        deprecated = [('retrictions', '2016061000')]
+        for (depre, version) in deprecated:
             if hasattr(self, depre):
                 raise IOError("The attribute '{}' has been deprecated in version '{}' and it is not available anymore".format(version))
 
         # Build extracontext
         if not hasattr(self, 'extra_context'):
-            self.extra_context={}
+            self.extra_context = {}
         if not hasattr(self, 'client_context'):
-            self.client_context={}
+            self.client_context = {}
         # Attach user to the extra_context
-        self.extra_context['user']=self.user
+        self.extra_context['user'] = self.user
 
         # Attach WS entry point and STATIC entry point
         self.extra_context['ws_entry_point'] = self.BASE_URL + getattr(self, "ws_entry_point", "{0}/{1}".format(self._appname, "{0}s".format(self._modelname.lower())))
@@ -1161,19 +1159,19 @@ class GenList(GenBase, ListView):
             self.extra_context['extends_base'] = self.extends_base
 
         # Get if this is a template only answer
-        self.__authtoken = (bool( getattr( self.request, "authtoken", False ) ))
-        self.json_worker=(hasattr(self, 'json_builder')) or self.__authtoken or (self.json is True)
+        self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
+        self.json_worker = (hasattr(self, 'json_builder')) or self.__authtoken or (self.json is True)
         if self.json_worker:
             # Check if the request has some json query, if not, just render the template
-            if self.request.GET.get('json',self.request.POST.get('json',None)) is None:
+            if self.request.GET.get('json', self.request.POST.get('json', None)) is None:
                 # Calculate tabs
                 if getattr(self, 'show_details', False):
                     self.extra_context['tabs_js'] = json.dumps(self.get_tabs_js())
 
                 # Silence the normal execution from this class
-                self.get_queryset=lambda: None
-                self.get_context_data=lambda **kwargs: self.extra_context
-                self.render_to_response=lambda context, **response_kwargs: super(GenList, self).render_to_response(context, **response_kwargs)
+                self.get_queryset = lambda: None
+                self.get_context_data = lambda **kwargs: self.extra_context
+                self.render_to_response = lambda context, **response_kwargs: super(GenList, self).render_to_response(context, **response_kwargs)
                 # Call the base implementation and finish execution here
                 return super(GenList, self).dispatch(*args, **kwargs)
 
@@ -1213,91 +1211,98 @@ class GenList(GenBase, ListView):
             queryset = SearchQuerySet().models(self.model)
 
         # Optional tweak methods
-        Mfields=None; MlimitQ=None; MsearchF=None; MsearchQ=None
-        if hasattr(self, '__fields__'):     Mfields=self.__fields__
-        if hasattr(self, '__limitQ__'):     MlimitQ=self.__limitQ__
-        if hasattr(self, '__searchF__'):    MsearchF=self.__searchF__
-        if hasattr(self, '__searchQ__'):    MsearchQ=self.__searchQ__
+        Mfields = None
+        MlimitQ = None
+        MsearchF = None
+        MsearchQ = None
+        if hasattr(self, '__fields__'):
+            Mfields = self.__fields__
+        if hasattr(self, '__limitQ__'):
+            MlimitQ = self.__limitQ__
+        if hasattr(self, '__searchF__'):
+            MsearchF = self.__searchF__
+        if hasattr(self, '__searchQ__'):
+            MsearchQ = self.__searchQ__
 
-        self._viewname=self.__module__
+        self._viewname = self.__module__
 
         # Link to our context and kwargs
-        context=self.__context
+        context = self.__context
 
         # Update kwargs if json key is present
-        jsonquery=self.request.GET.get('json',self.request.POST.get('json',None))
+        jsonquery = self.request.GET.get('json', self.request.POST.get('json', None))
         if jsonquery is not None:
-            jsondata=self.set_context_json(jsonquery)
+            jsondata = self.set_context_json(jsonquery)
             # Get listid
-            listid=jsondata.pop('listid')
+            listid = jsondata.pop('listid')
             # Get elementid
-            elementid=jsondata.pop('elementid')
+            elementid = jsondata.pop('elementid')
         else:
-            listid=None
-            elementid=None
-            jsondata={}
+            listid = None
+            elementid = None
+            jsondata = {}
 
         # Build info for GenModel methods
-        MODELINF=MODELINFO(self.model, self._appname, self._modelname, self._viewname, self.request, self.user, self.profile, Mfields, MlimitQ, MsearchF, MsearchQ,listid,elementid,self.__kwargs)
+        MODELINF = MODELINFO(self.model, self._appname, self._modelname, self._viewname, self.request, self.user, self.profile, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, self.__kwargs)
 
         # Process the filter
-        context['filters']=[]
-        context['filters_obj']={}
+        context['filters'] = []
+        context['filters_obj'] = {}
 
         # Get field list
         fields = getattr(self, 'fields', MODELINF.fields())
 
         # Save GET values
-        context['get']=[]
-        context['getval']={}
+        context['get'] = []
+        context['getval'] = {}
         for name in jsondata:
-            struct={}
-            struct['name']=name
-            if name=='rowsperpage':
-                struct['value']=self.default_rows_per_page
-            elif name=='page':
-                struct['value']=1
-            elif name=='pages_to_bring':
-                struct['value']=1
+            struct = {}
+            struct['name'] = name
+            if name == 'rowsperpage':
+                struct['value'] = self.default_rows_per_page
+            elif name == 'page':
+                struct['value'] = 1
+            elif name == 'pages_to_bring':
+                struct['value'] = 1
             else:
-                struct['value']=jsondata[name]
+                struct['value'] = jsondata[name]
             context['get'].append(struct)
-            context['getval'][name]=struct['value']
+            context['getval'][name] = struct['value']
 
         # Filter on limits
-        limits=MODELINF.limitQ()
-        qobjects=None
-        distinct=False
+        limits = MODELINF.limitQ()
+        qobjects = None
+        distinct = False
         for name in limits:
-            if name=='i_distinct' or name=='e_distinct':
-                distinct=True
+            if name == 'i_distinct' or name == 'e_distinct':
+                distinct = True
             else:
                 if qobjects:
-                    qobjects&=limits[name]
+                    qobjects &= limits[name]
                 else:
-                    qobjects=limits[name]
+                    qobjects = limits[name]
 
         if qobjects:
-            queryset=queryset.filter(qobjects)
+            queryset = queryset.filter(qobjects)
 
         if hasattr(self, 'annotations'):
             if not self.haystack:
-                queryset=queryset.annotate(**self.annotations)
+                queryset = queryset.annotate(**self.annotations)
             else:
                 raise IOError("Haystack doesn't support annotate")
 
         if distinct:
-            queryset=queryset.distinct()
+            queryset = queryset.distinct()
 
         # Filters on fields requested by the user request
         try:
-            filters_get=jsondata.get('filters','{}')
-            if type(filters_get)==dict:
-                filters_by_struct=filters_get
+            filters_get = jsondata.get('filters', '{}')
+            if type(filters_get) == dict:
+                filters_by_struct = filters_get
             else:
-                filters_by_struct=json.loads(str(filters_get))
+                filters_by_struct = json.loads(str(filters_get))
         except Exception:
-            filters_by_struct=[]
+            filters_by_struct = []
 
         listfilters = {}
         # Autofilter system
@@ -1307,10 +1312,10 @@ class GenList(GenBase, ListView):
         listfilters.update(MODELINF.searchF())
 
         # Process the search
-        filters_struct={}
+        filters_struct = {}
         for key in filters_by_struct:
             # Get the value of the original filter
-            value=filters_by_struct[key]
+            value = filters_by_struct[key]
             # If there is something to filter, filter is not being changed and filter is known by the class
             try:
                 value = int(value)
@@ -1358,24 +1363,24 @@ class GenList(GenBase, ListView):
                 filters_struct[key] = value
 
         # Rewrite filters_json updated
-        filters_json=json.dumps(filters_struct)
+        filters_json = json.dumps(filters_struct)
 
         # Build the clean get for filters
-        get=context['get']
-        filters_get=[]
+        get = context['get']
+        filters_get = []
         for element in get:
             if element['name'] not in ['filters']:
-                struct={}
-                struct['name']=element['name']
-                struct['value']=element['value']
+                struct = {}
+                struct['name'] = element['name']
+                struct['value'] = element['value']
                 filters_get.append(struct)
 
         # Add filter_json
-        struct={}
-        struct['name']='filters'
-        struct['value']=filters_json
+        struct = {}
+        struct['name'] = 'filters'
+        struct['value'] = filters_json
         filters_get.append(struct)
-        context['filters_get']=filters_get
+        context['filters_get'] = filters_get
 
         # Get the list of filters allowed by this class
         filters = []
@@ -1450,254 +1455,258 @@ class GenList(GenBase, ListView):
             filters.append(filtertuple)
 
         # Save all filters
-        context['filters']=filters
+        context['filters'] = filters
 
         # Search filter button
-        search_filter_button = jsondata.get('search_filter_button',None)
+        search_filter_button = jsondata.get('search_filter_button', None)
         if search_filter_button is not None:
-            self.search_filter_button=search_filter_button
+            self.search_filter_button = search_filter_button
 
         # Search text in all fields
-        search=jsondata.get('search','').lower()
+        search = jsondata.get('search', '').lower()
         # Remove extra spaces
-        newlen=len(search)
-        oldlen=0
-        while newlen!=oldlen:
-            oldlen=newlen
-            search=search.replace("  "," ")
-            newlen=len(search)
-        if len(search)>0 and search[0]==' ':
-            search=search[1:]
-        if len(search)>0 and search[-1]==' ':
-            search=search[:-1]
+        newlen = len(search)
+        oldlen = 0
+        while newlen != oldlen:
+            oldlen = newlen
+            search = search.replace("  ", " ")
+            newlen = len(search)
+        if len(search) > 0 and search[0] == ' ':
+            search = search[1:]
+        if len(search) > 0 and search[-1] == ' ':
+            search = search[:-1]
 
         # Save in context
-        context['search']=search
-        datetimeQ=None
-        if len(search)>0:
+        context['search'] = search
+        datetimeQ = None
+        if len(search) > 0:
 
             # Get ID
-            tid=None
+            tid = None
             if 'id:' in search:
-                tid=search.split(":")[1].split(" ")[0]
+                tid = search.split(":")[1].split(" ")[0]
                 # Decide if it is what we expect
                 try:
-                    tid=int(tid)
-                except:
-                    tid=None
+                    tid = int(tid)
+                except Exception:
+                    tid = None
                 # Remove the token
                 if tid:
-                    search=search.replace("id:%s" % (tid),'')
-                    search=search.replace("  "," ")
+                    search = search.replace("id:%s" % (tid), '')
+                    search = search.replace("  ", " ")
 
             # Get PK
-            tpk=None
+            tpk = None
             if 'pk:' in search:
-                tpk=search.split(":")[1].split(" ")[0]
+                tpk = search.split(":")[1].split(" ")[0]
                 # Decide if it is what we expect
                 try:
-                    tpk=int(tpk)
-                except:
-                    tpk=None
+                    tpk = int(tpk)
+                except Exception:
+                    tpk = None
                 # Remove the token
                 if tpk:
-                    search=search.replace("pk:%s" % (tpk),'')
-                    search=search.replace("  "," ")
+                    search = search.replace("pk:%s" % (tpk), '')
+                    search = search.replace("  ", " ")
 
             # Spaces on front and behind
-            if len(search)>0 and search[0]==' ':
-                search=search[1:]
-            if len(search)>0 and search[-1]==' ':
-                search=search[:-1]
+            if len(search) > 0 and search[0] == ' ':
+                search = search[1:]
+            if len(search) > 0 and search[-1] == ' ':
+                search = search[:-1]
 
             # Get fields to search in
-            searchs=MODELINF.searchQ(search)
-            qobjects={}
-            qobjectsCustom={}
+            searchs = MODELINF.searchQ(search)
+            qobjects = {}
+            qobjectsCustom = {}
             for name in searchs:
                 # Extract the token
-                qtoken=searchs[name]
-                if qtoken=='datetime':
+                qtoken = searchs[name]
+                if qtoken == 'datetime':
                     # If it is a datetime
-                    datetimeQ=name
+                    datetimeQ = name
                     continue
                 elif (type(qtoken) == str) or (type(qtoken) == list):
                     # Prepare query
-                    if type(qtoken)==tuple:
-                        (query,func)=qtoken
+                    if type(qtoken) == tuple:
+                        (query, func) = qtoken
                     else:
-                        query=qtoken
-                        func=lambda x:x
+
+                        def lambdax(x):
+                            return x
+
+                        func = lambdax
+                        query = qtoken
 
                     # If it is a string
                     if search:
                         for word in search.split(" "):
                             # If there is a word to process
-                            if len(word)>0:
+                            if len(word) > 0:
                                 # Build the key for the arguments and set the word as a value for the Q search
-                                if word[0]=='-':
+                                if word[0] == '-':
                                     # If negated request
-                                    #key="-{}".format(hashlib.md5(word[1:]).hexdigest())
-                                    qdict={'{}'.format(query):func(word[1:])}
-                                    qtokens_element=~Q(**qdict)
+                                    # key="-{}".format(hashlib.md5(word[1:]).hexdigest())
+                                    qdict = {'{}'.format(query): func(word[1:])}
+                                    qtokens_element = ~Q(**qdict)
                                 else:
                                     # If positive request
-                                    #key="-{}".format(hashlib.md5(word[1:]).hexdigest())
-                                    qdict={'{}'.format(query):func(word)}
-                                    qtokens_element=Q(**qdict)
+                                    # key="-{}".format(hashlib.md5(word[1:]).hexdigest())
+                                    qdict = {'{}'.format(query): func(word)}
+                                    qtokens_element = Q(**qdict)
 
                                 # Safe the token
                                 if word in qobjects:
                                     qobjects[word].append(qtokens_element)
                                 else:
-                                    qobjects[word]=[qtokens_element]
+                                    qobjects[word] = [qtokens_element]
                 else:
                     if qobjectsCustom:
-                        qobjectsCustom|=searchs[name]
+                        qobjectsCustom |= searchs[name]
                     else:
-                        qobjectsCustom=searchs[name]
+                        qobjectsCustom = searchs[name]
 
             # Build positive/negative
-            qdata=None
+            qdata = None
             if search and qobjects:
                 for word in search.split(" "):
-                    if word.split(":")[0] not in ['id','pk']:
-                        if word[0]=='-':
-                            negative=True
+                    if word.split(":")[0] not in ['id', 'pk']:
+                        if word[0] == '-':
+                            negative = True
                         else:
-                            negative=False
-                        qword=None
+                            negative = False
+                        qword = None
                         for token in qobjects[word]:
                             if qword:
                                 if negative:
-                                    qword&=token
+                                    qword &= token
                                 else:
-                                    qword|=token
+                                    qword |= token
                             else:
-                                qword=token
+                                qword = token
                         if qword:
                             if qdata:
-                                qdata&=qword
+                                qdata &= qword
                             else:
-                                qdata=qword
+                                qdata = qword
 
             # Process ID/PK specific searches
             if tid:
-                queryset=queryset.filter(id=tid)
+                queryset = queryset.filter(id=tid)
             if tpk:
-                queryset=queryset.filter(pk=tpk)
+                queryset = queryset.filter(pk=tpk)
             # Add custom Q-objects
             if qobjectsCustom:
-                queryset=queryset.filter(qobjectsCustom)
+                queryset = queryset.filter(qobjectsCustom)
             # Add word by word search Q-objects
             if qdata:
-                queryset=queryset.filter(qdata)
+                queryset = queryset.filter(qdata)
         else:
             # Look for datetimeQ field
-            searchs=MODELINF.searchQ(search)
+            searchs = MODELINF.searchQ(search)
             for name in searchs:
-                if (searchs[name]=='datetime'):
-                    datetimeQ=name
+                if (searchs[name] == 'datetime'):
+                    datetimeQ = name
                     continue
 
         # Datetime Q
-        context['datetimeQ']=datetimeQ
+        context['datetimeQ'] = datetimeQ
         if datetimeQ:
             # Inicialization
-            f={}
-            f['year']=(1900,2100,False)
-            f['month']=(1,12,False)
-            f['day']=(1,31,False)
-            f['hour']=(0,23,False)
-            f['minute']=(0,59,False)
-            f['second']=(0,59,False)
-            date_elements=[None,'year','month','day','hour','minute','second']
+            f = {}
+            f['year'] = (1900, 2100, False)
+            f['month'] = (1, 12, False)
+            f['day'] = (1, 31, False)
+            f['hour'] = (0, 23, False)
+            f['minute'] = (0, 59, False)
+            f['second'] = (0, 59, False)
+            date_elements = [None, 'year', 'month', 'day', 'hour', 'minute', 'second']
             # Get configuration of dates and set limits to the queryset
             for element in date_elements[1:]:
-                value=jsondata.get(element,None)
+                value = jsondata.get(element, None)
                 if value:
-                    f[element]=(int(value),int(value),True)
+                    f[element] = (int(value), int(value), True)
             if f['year'][2] and f['month'][2] and not f['day'][2]:
-                (g,lastday)=calendar.monthrange(f['year'][1],f['month'][1])
-                f['day']=(f['day'][0],lastday,f['day'][2])
+                (g, lastday) = calendar.monthrange(f['year'][1], f['month'][1])
+                f['day'] = (f['day'][0], lastday, f['day'][2])
             # Limits
-            date_min=datetime.datetime(f['year'][0], f['month'][0], f['day'][0], f['hour'][0], f['minute'][0], f['second'][0])
-            date_max=datetime.datetime(f['year'][1], f['month'][1], f['day'][1], f['hour'][1], f['minute'][1], f['second'][1])
-            qarg1={"{}__gte".format(datetimeQ):date_min}
-            qarg2={"{}__lte".format(datetimeQ):date_max}
-            qarg3={datetimeQ:None}
-            queryset=queryset.filter((Q(**qarg1) & Q(**qarg2)) | Q(**qarg3))
+            date_min = datetime.datetime(f['year'][0], f['month'][0], f['day'][0], f['hour'][0], f['minute'][0], f['second'][0])
+            date_max = datetime.datetime(f['year'][1], f['month'][1], f['day'][1], f['hour'][1], f['minute'][1], f['second'][1])
+            qarg1 = {"{}__gte".format(datetimeQ): date_min}
+            qarg2 = {"{}__lte".format(datetimeQ): date_max}
+            qarg3 = {datetimeQ: None}
+            queryset = queryset.filter((Q(**qarg1) & Q(**qarg2)) | Q(**qarg3))
 
             # Find actual deepness
-            deepness_index=0
+            deepness_index = 0
             for element in date_elements[1:]:
                 if f[element][2]:
-                    deepness_index+=1
+                    deepness_index += 1
                 else:
                     break
 
             # Get results from dates to set the new order
-            exclusion={}
-            exclusion[datetimeQ]=None
-            date_results=queryset.exclude(**exclusion).values_list(datetimeQ, flat=True)
+            exclusion = {}
+            exclusion[datetimeQ] = None
+            date_results = queryset.exclude(**exclusion).values_list(datetimeQ, flat=True)
             # Remove empty results (usefull when the date is allowed to be empty)
-            if f['day'][0]!=f['day'][1]:
-                if f['month'][0]==f['month'][1]:
-                    date_results=date_results.datetimes(datetimeQ,'day')
-                elif f['year'][0]==f['year'][1]:
-                    date_results=date_results.datetimes(datetimeQ,'month')
+            if f['day'][0] != f['day'][1]:
+                if f['month'][0] == f['month'][1]:
+                    date_results = date_results.datetimes(datetimeQ, 'day')
+                elif f['year'][0] == f['year'][1]:
+                    date_results = date_results.datetimes(datetimeQ, 'month')
                 else:
-                    date_results=date_results.datetimes(datetimeQ,'year')
+                    date_results = date_results.datetimes(datetimeQ, 'year')
 
-            get=context['get']
-            context['datefilter']={}
+            get = context['get']
+            context['datefilter'] = {}
             # Save the deepness
-            if (deepness_index+1==len(date_elements)):
-                context['datefilter']['deepness']=None
+            if (deepness_index+1 == len(date_elements)):
+                context['datefilter']['deepness'] = None
             else:
-                context['datefilter']['deepness']=date_elements[deepness_index+1]
-            context['datefilter']['deepnessback']=[]
-            context['datefilter']['deepnessinit']=[]
+                context['datefilter']['deepness'] = date_elements[deepness_index+1]
+            context['datefilter']['deepnessback'] = []
+            context['datefilter']['deepnessinit'] = []
             for element in get:
                 if (not element['name'] in date_elements):
-                    struct={}
-                    struct['name']=element['name']
-                    struct['value']=element['value']
+                    struct = {}
+                    struct['name'] = element['name']
+                    struct['value'] = element['value']
                     context['datefilter']['deepnessinit'].append(struct)
                     context['datefilter']['deepnessback'].append(struct)
-                elif (element['name']!=date_elements[deepness_index] and f[element['name']][2]):
-                    struct={}
-                    struct['name']=element['name']
-                    struct['value']=element['value']
+                elif (element['name'] != date_elements[deepness_index] and f[element['name']][2]):
+                    struct = {}
+                    struct['name'] = element['name']
+                    struct['value'] = element['value']
                     context['datefilter']['deepnessback'].append(struct)
             # Build the list of elements
-            context['datefilter']['data']=[]
+            context['datefilter']['data'] = []
             for element in date_results:
                 # Save the data
                 context['datefilter']['data'].append(element.timetuple()[deepness_index])
-            context['datefilter']['data']=list(set(context['datefilter']['data']))
+            context['datefilter']['data'] = list(set(context['datefilter']['data']))
             context['datefilter']['data'].sort()
 
             # Prepare the rightnow result
             if self.json_worker:
-                rightnow={}
-                for key in ['year','month','day','hour','minute','second']:
-                    rightnow[key]=(f[key][2] and f[key][0]) or None
+                rightnow = {}
+                for key in ['year', 'month', 'day', 'hour', 'minute', 'second']:
+                    rightnow[key] = (f[key][2] and f[key][0]) or None
             else:
                 if f['month'][2]:
-                    month=monthname(f['month'][0])
+                    month = monthname(f['month'][0])
                 else:
-                    month='__'
+                    month = '__'
                 if f['hour'][2]:
-                    rightnow=string_concat(grv(f,'day'),"/",month,"/",grv(f,'year')," ",grv(f,'hour'),":",grv(f,'minute'),":",grv(f,'second'))
+                    rightnow = string_concat(grv(f, 'day'), "/", month, "/", grv(f, 'year'), " ", grv(f, 'hour'), ":",  grv(f, 'minute'), ":", grv(f, 'second'))
                 else:
-                    rightnow=string_concat(grv(f,'day'),"/",month,"/",grv(f,'year'))
-            context['datefilter']['rightnow']=rightnow
+                    rightnow = string_concat(grv(f, 'day'), "/", month, "/", grv(f, 'year'))
+            context['datefilter']['rightnow'] = rightnow
         else:
-            context['datefilter']=None
+            context['datefilter'] = None
 
         # Distinct
-        #queryset=queryset.distinct()
+        # queryset=queryset.distinct()
 
         # Ordering field autofill
         try:
@@ -1777,15 +1786,15 @@ class GenList(GenBase, ListView):
                 size = value[2]
             else:
                 size = None
-            if len(value)>3:
+            if len(value) > 3:
                 align = value[3]
             else:
                 align = None
             # filter column
-            if len(value)>4:
-                filter_column=value[4]
+            if len(value) > 4:
+                filter_column = value[4]
             else:
-                filter_column=None
+                filter_column = None
 
             # Process ordering
             ordering = []
@@ -1801,7 +1810,7 @@ class GenList(GenBase, ListView):
                         direction = 'desc'
                         sort_class = 'headerSortDown'
                     else:
-                        sort_class =''
+                        sort_class = ''
                         direction = 'asc'
                     found = True
                 if direction == 'asc' or direction == 'desc':
@@ -1822,7 +1831,7 @@ class GenList(GenBase, ListView):
                 sort[order_key]['size'] = size
                 sort[order_key]['class'] = sort_class
                 if order_key and order_key[0] != '*':
-                        sort[order_key]['ordering'] = json.dumps(ordering).replace('"','\\"')
+                        sort[order_key]['ordering'] = json.dumps(ordering).replace('"', '\\"')
                 if order_key in position:
                     sort[order_key]['position'] = position[order_key]
 
@@ -1943,7 +1952,7 @@ class GenList(GenBase, ListView):
                 if rule not in fields_related_model:
                     # Save verifier name
                     query_verifier.append(rule_org)
-                
+
                 # Save renamed field
                 if alias != rule:
                     query_renamed[alias] = F(rule)
@@ -1979,11 +1988,11 @@ class GenList(GenBase, ListView):
         if found and query_select_related:
             queryset = queryset.select_related(*query_select_related)
         # If we got the query_optimizer to optimize everything, use it
-        use_extra = False
+        # use_extra = False
         query_verifier.sort()
         autorules_keys.sort()
         if found and query_verifier == autorules_keys:
-            use_extra = True
+            # use_extra = True
             if query_renamed:
                 # queryset=queryset.extra(select=query_renamed).values(*query_optimizer)
                 queryset = queryset.annotate(**query_renamed).values(*query_optimizer)
@@ -2026,29 +2035,29 @@ class GenList(GenBase, ListView):
             total_rows_per_page_out = _('All')
             total_pages = 1
         else:
-            total_rows_per_page = int(total_rows_per_page) # By default 10 rows per page
+            total_rows_per_page = int(total_rows_per_page)  # By default 10 rows per page
             total_rows_per_page_out = total_rows_per_page
-            total_pages=int(total_registers/total_rows_per_page)
-            if total_registers%total_rows_per_page:
-                total_pages+=1
-            page_number=jsondata.get('page',1)                  # If no page specified use first page
-            if page_number=='last':
-                page_number=total_pages
+            total_pages = int(total_registers / total_rows_per_page)
+            if total_registers % total_rows_per_page:
+                total_pages += 1
+            page_number = jsondata.get('page', 1)  # If no page specified use first page
+            if page_number == 'last':
+                page_number = total_pages
             else:
                 try:
-                    page_number=int(page_number)
-                except:
-                    page_number=1
-                if page_number<1:
-                    page_number=1
-                if page_number>total_pages:
-                    page_number=total_pages
+                    page_number = int(page_number)
+                except Exception:
+                    page_number = 1
+                if page_number < 1:
+                    page_number = 1
+                if page_number > total_pages:
+                    page_number = total_pages
 
         # Build the list of page counters allowed
         choice = {}
         c = self.default_rows_per_page
         chk = 1
-        while total_registers>=c:
+        while total_registers >= c:
             choice[c] = c
             if chk == 1:
                 # From 5 to 10
@@ -2057,7 +2066,7 @@ class GenList(GenBase, ListView):
                 chk = 2
             elif chk == 2:
                 # From 10 to 25 (10*2+10/2)
-                c = c * 2 + int( c / 2 )
+                c = c * 2 + int(c / 2)
                 # Next level
                 chk = 3
             elif chk == 3:
@@ -2071,7 +2080,6 @@ class GenList(GenBase, ListView):
         # Add all choice in any case
         if settings.ALL_PAGESALLOWED:
             choice['All'] = _('All')
-
 
         # Save the pagination in the structure
         context['rowsperpageallowed'] = choice
@@ -2104,7 +2112,7 @@ class GenList(GenBase, ListView):
             context['showing_registers'] = total_rows_per_page
 
         # Calculate end
-        context['end_register'] = min(context['start_register']+context['showing_registers']-1,total_registers)
+        context['end_register'] = min(context['start_register']+context['showing_registers']-1, total_registers)
 
         # Add pagination
         regs = []
@@ -2130,16 +2138,16 @@ class GenList(GenBase, ListView):
 
         # Fill pages
         if total_registers:
-            context['pages']=pages(paginator,page_number)
+            context['pages'] = pages(paginator, page_number)
             try:
                 range_fill = xrange(pages_to_bring-1)
             except NameError:
                 range_fill = range(pages_to_bring-1)
             for p in range_fill:
-                page_number+=1
-                context['pages']+=pages(paginator,page_number)
+                page_number += 1
+                context['pages'] += pages(paginator, page_number)
         else:
-            context['pages']=[]
+            context['pages'] = []
 
         # Return queryset
         return regs
@@ -2155,62 +2163,69 @@ class GenList(GenBase, ListView):
         context.update(self.__context)
 
         # Initialize with our timestamp
-        context['now']=epochdate(time.time())
-        context['profile']=self.profile
+        context['now'] = epochdate(time.time())
+        context['profile'] = self.profile
 
         # Check vtable
-        context['vtable']=getattr(self,'vtable', False)
+        context['vtable'] = getattr(self, 'vtable', False)
 
         # Export to excel
         context['export_excel'] = getattr(self, 'export_excel', True)
 
         # Check ngincludes
-        context['ngincludes']=getattr(self,'ngincludes', {})
+        context['ngincludes'] = getattr(self, 'ngincludes', {})
         if 'table' not in context['ngincludes'].keys():
-            context['ngincludes']['table']="{}codenerix/partials/table.html".format(settings.STATIC_URL)
+            context['ngincludes']['table'] = "{}codenerix/partials/table.html".format(settings.STATIC_URL)
 
         # Check linkadd
-        context['linkadd']=getattr(self,'linkadd', self.auth_permission('add') or getattr(self,'public',False))
+        context['linkadd'] = getattr(self, 'linkadd', self.auth_permission('add') or getattr(self, 'public', False))
 
         # Check linkedit
-        context['linkedit']=getattr(self, 'linkedit', self.auth_permission('change') or getattr(self,'public',False))
+        context['linkedit'] = getattr(self, 'linkedit', self.auth_permission('change') or getattr(self, 'public', False))
 
         # Check showdetails
-        context['show_details']=getattr(self, 'show_details', False)
+        context['show_details'] = getattr(self, 'show_details', False)
 
         # Check showmodal
-        context['show_modal']=getattr(self, 'show_modal', False)
+        context['show_modal'] = getattr(self, 'show_modal', False)
 
         # Set search filter button
         context['search_filter_button'] = getattr(self, 'search_filter_button', False)
 
         # Get base template
         if not self.json_worker:
-            template_base=getattr(self,'template_base', 'base/base')
-            template_base_ext=getattr(self, 'template_base_ext', 'html')
-            context['template_base']=get_template(template_base,self.user,self.language,extension=template_base_ext)
+            template_base = getattr(self, 'template_base', 'base/base')
+            template_base_ext = getattr(self, 'template_base_ext', 'html')
+            context['template_base'] = get_template(template_base, self.user, self.language, extension=template_base_ext)
 
         # Try to convert object_id to a numeric id
-        object_id=kwargs.get('object_id',None)
+        object_id = kwargs.get('object_id', None)
         try:
-            object_id=int(object_id)
-        except:
+            object_id = int(object_id)
+        except Exception:
             pass
 
-        if type(object_id)==type(u'abc'):
+        # Python 2 VS Python 3 compatibility
+        try:
+            unicode('codenerix')
+            unicodetest = unicode
+        except NameError:
+            unicodetest = str
+
+        if isinstance(object_id, str) or isinstance(object_id, unicodetest):
             # If object_id is a string, we have a name not an object
-            context['object_name']=object_id
+            context['object_name'] = object_id
             object_obj = None
         else:
             # If is not an string
             if object_id:
                 # If we got one, load the object
-                obj=context['obj']
+                obj = context['obj']
                 object_obj = get_object_or_404(obj, pk=object_id)
             else:
                 # There is no object
                 object_obj = None
-            context['object_obj']=object_obj
+            context['object_obj'] = object_obj
 
         # Attach extra_context
         context.update(self.extra_context)
@@ -2284,49 +2299,55 @@ class GenList(GenBase, ListView):
 
     def __jcontext_filter(self, context):
         # Initialiaze
-        a={}
+        a = {}
 
         # Set filters
-        a['search']=context['search']
-        a['date']=context['datefilter']
+        a['search'] = context['search']
+        a['date'] = context['datefilter']
         if a['date']:
-            if a['date']['deepness']=='year':       name=gettext(_("Year"))
-            elif a['date']['deepness']=='month':    name=gettext(_("Month"))
-            elif a['date']['deepness']=='day':      name=gettext(_("Day"))
-            elif a['date']['deepness']=='hour':     name=gettext(_("Hour"))
-            elif a['date']['deepness']=='minute':   name=gettext(_("Minute"))
-            elif a['date']['deepness']=='second':   name=gettext(_("Second"))
-            else:                                   name=gettext(_("Unknown"))
-            a['date']['deepname']=name
+            if a['date']['deepness'] == 'year':
+                name = gettext(_("Year"))
+            elif a['date']['deepness'] == 'month':
+                name = gettext(_("Month"))
+            elif a['date']['deepness'] == 'day':
+                name = gettext(_("Day"))
+            elif a['date']['deepness'] == 'hour':
+                name = gettext(_("Hour"))
+            elif a['date']['deepness'] == 'minute':
+                name = gettext(_("Minute"))
+            elif a['date']['deepness'] == 'second':
+                name = gettext(_("Second"))
+            else:
+                name = gettext(_("Unknown"))
+            a['date']['deepname'] = name
             # Adapters
             a['date'].pop('deepnessinit')
             a['date'].pop('deepnessback')
 
         # Fill filters
-        a['subfilters']=[]
-        a['subfiltersC']=[]
-        for (key,name,typekind,argument,value) in context['filters']:
+        a['subfilters'] = []
+        a['subfiltersC'] = []
+        for (key, name, typekind, argument, value) in context['filters']:
             # Rebuild the tuple
-            token={}
-            token['key']=key.split(":")[0]
-            token['name']=gettext(name)
-            token['kind']=typekind
+            token = {}
+            token['key'] = key.split(":")[0]
+            token['name'] = gettext(name)
+            token['kind'] = typekind
             # Decide by kind of data
-            if typekind=='select':
+            if typekind == 'select':
                 # Rebuild the choices
-                newchoices=[]
+                newchoices = []
                 for filt in argument:
                     newchoices.append(gettext(filt))
                 # Decide kind
-                token['choice']=newchoices
-                token['choosen']=value
-            elif typekind=='multiselect':
-                token['choice']=argument
-                token['choosen']=value
-            elif typekind=='multidynamicselect':
-                token['choicedynamic']=argument
-                token['choosen']=value
-
+                token['choice'] = newchoices
+                token['choosen'] = value
+            elif typekind == 'multiselect':
+                token['choice'] = argument
+                token['choosen'] = value
+            elif typekind == 'multidynamicselect':
+                token['choicedynamic'] = argument
+                token['choosen'] = value
 
                 func = resolve(argument[1]+'*').func
                 clss = get_class(func)
@@ -2334,9 +2355,9 @@ class GenList(GenBase, ListView):
 
             elif typekind in ['daterange', 'input', 'checkbox']:
                 # Decide kind
-                token['value']=value
+                token['value'] = value
             else:
-                raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind,key))
+                raise IOError("Wrong typekind '{0}' for filter '{1}'".format(typekind, key))
             # Save it
             if key in self.__fields:
                 a['subfiltersC'].append(token)
@@ -2349,16 +2370,16 @@ class GenList(GenBase, ListView):
         # Return answer
         return a
 
-    def __jcontext_tablehead(self,context):
+    def __jcontext_tablehead(self, context):
         # Initialize the answer
-        a={}
+        a = {}
 
         # Add adapted columns
-        a['columns']=[]
+        a['columns'] = []
         for column in context['columns']:
             if column['name']:
                 # Repair the name
-                column['name']=gettext(column['name'])
+                column['name'] = gettext(column['name'])
                 # Save the column
                 a['columns'].append(column)
 
@@ -2371,10 +2392,10 @@ class GenList(GenBase, ListView):
             value = orderer[key]
             # Prepare value
             if value == 'asc':
-                newvalue =+ weight
+                newvalue = +weight
                 weight += 1
             elif value == 'desc':
-                newvalue =- weight
+                newvalue = -weight
                 weight += 1
             else:
                 newvalue = 0
@@ -2399,23 +2420,23 @@ class GenList(GenBase, ListView):
         # Return the answer
         return a
 
-    def get_context_json(self,context):
+    def get_context_json(self, context):
         '''
         Return a base answer for a json answer
         '''
         # Initialize answer
-        answer={}
+        answer = {}
 
         # Metadata builder
-        answer['meta']=self.__jcontext_metadata(context)
+        answer['meta'] = self.__jcontext_metadata(context)
 
         # Filter builder
-        answer['filter']=self.__jcontext_filter(context)
+        answer['filter'] = self.__jcontext_filter(context)
 
         # Head builder
-        answer['table']={}
-        answer['table']['head']=self.__jcontext_tablehead(context)
-        answer['table']['body']=None
+        answer['table'] = {}
+        answer['table']['head'] = self.__jcontext_tablehead(context)
+        answer['table']['body'] = None
 
         # Return answer
         return answer
@@ -2426,16 +2447,16 @@ class GenList(GenBase, ListView):
         '''
 
         # Set we will answer json to this request
-        self.json=True
+        self.json = True
 
         # Open json string
-        v=json.loads(jsonquery)
+        v = json.loads(jsonquery)
 
         # Transfer keys
-        newget={}
-        for key in ['search','search_filter_button','page','pages_to_bring','rowsperpage','filters','year','month','day','hour','minute','second']:
+        newget = {}
+        for key in ['search', 'search_filter_button', 'page', 'pages_to_bring', 'rowsperpage', 'filters', 'year', 'month', 'day', 'hour', 'minute', 'second']:
             if key in v:
-                newget[key]=v[key]
+                newget[key] = v[key]
 
         # Add transformed ordering
         if ('ordering' in v) and (v['ordering']):
@@ -2463,16 +2484,16 @@ class GenList(GenBase, ListView):
 
         # Get listid
         if 'listid' in v:
-            listid=v['listid']
+            listid = v['listid']
         else:
-            listid=None
-        newget['listid']=listid
+            listid = None
+        newget['listid'] = listid
 
         # Get elementid
         if 'elementid' in v:
-            elementid=v['elementid']
+            elementid = v['elementid']
         else:
-            elementid=None
+            elementid = None
         newget['elementid'] = elementid
 
         # Return new get
@@ -2487,20 +2508,20 @@ class GenList(GenBase, ListView):
                 a[f] = None
         return a
 
-    def bodybuilder(self,object_list,rules):
+    def bodybuilder(self, object_list, rules):
 
         # Initialize answer
-        body=[]
+        body = []
 
         # Process all the list
         for o in object_list:
             # Initialize our token
-            token={}
+            token = {}
 
             # Check if we got a dict (optimized answer)
             if type(o) == dict:
                 # Check all items if they need conversion
-                for (key,value) in o.items():
+                for (key, value) in o.items():
                     # Rewrite values if required
                     if isinstance(value, datetime.datetime):
                         # Convert datetime to string
@@ -2512,25 +2533,25 @@ class GenList(GenBase, ListView):
                         # Convert datetime to string
                         value = value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
                     # Save token
-                    token[key]=value
+                    token[key] = value
 
             else:
                 # Process all rules
                 for rktemp in rules:
                     # Get the value
-                    rkval=rules[rktemp]
+                    rkval = rules[rktemp]
                     # Check if as an alias
-                    rktempsp=rktemp.split(":")
-                    if len(rktempsp)==1:
-                        alias=rktemp
-                        rk=rktemp
+                    rktempsp = rktemp.split(":")
+                    if len(rktempsp) == 1:
+                        alias = rktemp
+                        rk = rktemp
                     else:
-                        alias=rktempsp[0]
-                        rk=rktempsp[1]
+                        alias = rktempsp[0]
+                        rk = rktempsp[1]
 
                     # Get actual value
-                    rksp=rk.split("__")
-                    head=rksp[0]
+                    rksp = rk.split("__")
+                    head = rksp[0]
                     if len(rksp) > 1:
                         tail = "__".join(rksp[1:])
                     else:
@@ -2593,17 +2614,17 @@ class GenList(GenBase, ListView):
 
         if self.json_worker:
             # Get json ready context
-            json_context=self.get_context_json(context)
+            json_context = self.get_context_json(context)
 
             # Build the new answer
             if hasattr(self, 'json_builder'):
-                answer=self.json_builder(json_context,context)
+                answer = self.json_builder(json_context, context)
             else:
                 # User doesn't want to change anything in our answer
-                answer=json_context
+                answer = json_context
 
             # Check if the user filled table body, if not, we will do it now
-            if (type(answer)==dict) and ('table' in answer) and ('body' in answer['table']) and (answer['table']['body'] is None):
+            if (type(answer) == dict) and ('table' in answer) and ('body' in answer['table']) and (answer['table']['body'] is None):
                 # Call bodybuilder
                 answer['table']['body'] = self.bodybuilder(context['object_list'], self.__autorules)
 
@@ -2668,8 +2689,8 @@ class GenList(GenBase, ListView):
 
         # Prepare output
         data_output = io.BytesIO(save_virtual_workbook(wb))
-        data_output_len = data_output.seek(-1,io.SEEK_END)
-        
+        data_output_len = data_output.seek(-1, io.SEEK_END)
+
         size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
         if data_output_len <= (size_max * 1000000):
             data_output.seek(0)
@@ -2738,7 +2759,7 @@ class GenModify(object):
             for key in post:
                 if type(post[key]) == dict and '__JSON_DATA__' in post[key]:
                     post[key] = json.dumps(post[key]['__JSON_DATA__'])
-            
+
             request.POST.update(post)
 
         # Set class internal variables
@@ -2831,7 +2852,7 @@ class GenModify(object):
         # Return context
         return context
 
-    def get_context_json(self,c):
+    def get_context_json(self, c):
         # Decide form
         jc = {}
         if 'form' in c:
@@ -2840,33 +2861,37 @@ class GenModify(object):
             form = None
 
         # Define json_details
-        json_details = bool( getattr( self.request, "json_details", getattr( self, "json_details", False ) ) )
+        json_details = bool(getattr(self.request, "json_details", getattr(self, "json_details", False)))
 
         # Head
-        h={}
-        o={}
-        if c['cannot_delete']: o['cannot_delete'] = c['cannot_delete']
-        if c['cannot_update']: o['cannot_update'] = c['cannot_update']
+        h = {}
+        o = {}
+        if c['cannot_delete']:
+            o['cannot_delete'] = c['cannot_delete']
+        if c['cannot_update']:
+            o['cannot_update'] = c['cannot_update']
 
-        if o: h['options']=o
-        if form: h['bound']=form.is_bound
+        if o:
+            h['options'] = o
+        if form:
+            h['bound'] = form.is_bound
 
         if json_details:
-            groups = getattr(form,"__groups__",None)
+            groups = getattr(form, "__groups__", None)
             if groups:
-                h['groups']=groups()
+                h['groups'] = groups()
             else:
-                h['groups']=None
-            h['form_name']=''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15))
+                h['groups'] = None
+            h['form_name'] = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15))
 
-        jc['head']=h
+        jc['head'] = h
 
         # Check version
         meta = {}
         if self.__authtoken:
             meta['version'] = getattr(settings, "VERSION", None)
             meta['version_api'] = getattr(settings, "VERSION_API", None)
-        jc['meta']=meta
+        jc['meta'] = meta
 
         # Build the list of forms
         if form:
@@ -2879,8 +2904,8 @@ class GenModify(object):
             formlist = None
 
         # Forms
-        generrors={}
-        fields={}
+        generrors = {}
+        fields = {}
 
         if formlist:
             for formobj in formlist:
@@ -2899,10 +2924,10 @@ class GenModify(object):
 
                 # Append to the general list of fields
                 for group in formobj.get_groups():
-                    for mainfield in group.get("fields",[]):
-                        for field in [mainfield]+mainfield.get("fields",[]):
+                    for mainfield in group.get("fields", []):
+                        for field in [mainfield]+mainfield.get("fields", []):
                             # Get the input
-                            inp=field.get("input")
+                            inp = field.get("input")
 
                             # Get value
                             if inp.html_name in inp.form.data:
@@ -2913,71 +2938,77 @@ class GenModify(object):
                                 inpvalue = ""
 
                             # Rewrite inpvalues if required
-                            if type(inpvalue)==datetime.datetime:
+                            if type(inpvalue) == datetime.datetime:
                                 # Convert datetime to string
-                                inpvalue=inpvalue.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
-                            elif type(inpvalue)==datetime.date:
+                                inpvalue = inpvalue.strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
+                            elif type(inpvalue) == datetime.date:
                                 # Convert datetime to string
-                                inpvalue=inpvalue.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
-                            elif type(inpvalue)==datetime.time:
+                                inpvalue = inpvalue.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
+                            elif type(inpvalue) == datetime.time:
                                 # Convert datetime to string
-                                inpvalue=inpvalue.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
+                                inpvalue = inpvalue.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
 
                             if not json_details:
                                 fields[inp.html_name] = inpvalue
                             else:
                                 # Build a new field
-                                newfield={}
-                                newfield['for']=inp.id_for_label
-                                newfield['type']=inp.field.__class__.__name__.replace("Field","").lower()
-                                newfield['html_name']=inp.html_name
+                                newfield = {}
+                                newfield['for'] = inp.id_for_label
+                                newfield['type'] = inp.field.__class__.__name__.replace("Field", "").lower()
+                                newfield['html_name'] = inp.html_name
 
-                                if newfield['type']=='genrecaptcha':
+                                if newfield['type'] == 'genrecaptcha':
                                     # Say the widget to work as it was designed (not to use CODENERIX code)
                                     inp.field.widget.legacy = True
                                     # Get html code
-                                    newfield['value']=str(inp)
+                                    newfield['value'] = str(inp)
                                 else:
-                                    newfield['value']=inpvalue
+                                    newfield['value'] = inpvalue
 
                                 if "label" in field:
-                                    newfield['label']=field.get("label")
-                                notes=[]
-                                errors=[]
-                                for (f1,f2,dirty,f4,f5,msg) in unlist(inp.errors).data:
-                                    if msg and msg!="$message":
-                                        if dirty=='$dirty':
+                                    newfield['label'] = field.get("label")
+                                notes = []
+                                errors = []
+                                for (f1, f2, dirty, f4, f5, msg) in unlist(inp.errors).data:
+                                    if msg and msg != "$message":
+                                        if dirty == '$dirty':
                                             # Messages for dirty status (validations for AngularJS)
                                             notes.append(msg)
-                                        elif dirty=='$pristine':
+                                        elif dirty == '$pristine':
                                             # Messages for pristine status (validations from Django)
                                             errors.append(msg)
                                         else:
                                             raise IOError(_("This shouldn't happen, state is not $dirty or $pristine"))
-                                if errors: newfield['errors']=errors
-                                if notes: newfield['notes']=notes
+                                if errors:
+                                    newfield['errors'] = errors
+                                if notes:
+                                    newfield['notes'] = notes
 
                                 # Limits
-                                min_length=getattr(inp.field,"min_length",None)
-                                max_length=getattr(inp.field,"max_length",None)
-                                required=getattr(inp.field,"required",None)
-                                limits={}
-                                if min_length: limits['min_length']=min_length
-                                if max_length: limits['max_length']=max_length
-                                if required: limits['required']=required
-                                newfield['limits']=limits
+                                min_length = getattr(inp.field, "min_length", None)
+                                max_length = getattr(inp.field, "max_length", None)
+                                required = getattr(inp.field, "required", None)
+                                limits = {}
+                                if min_length:
+                                    limits['min_length'] = min_length
+                                if max_length:
+                                    limits['max_length'] = max_length
+                                if required:
+                                    limits['required'] = required
+                                newfield['limits'] = limits
 
                                 # Help
-                                help_text=getattr(inp,"help_text",None)
+                                help_text = getattr(inp, "help_text", None)
                                 if help_text:
-                                    newfield['help']=help_text
+                                    newfield['help'] = help_text
 
                                 # Attach a the field
-                                fields[inp.name]=newfield
+                                fields[inp.name] = newfield
 
         # Save all errors and fields
-        if generrors: jc['head']['errors']=generrors
-        jc['body']=fields
+        if generrors:
+            jc['head']['errors'] = generrors
+        jc['body'] = fields
 
         # Return json_context
         return jc
@@ -2985,38 +3016,38 @@ class GenModify(object):
     def render_to_response(self, context, **response_kwargs):
         if self.json_worker:
             # Get json ready context
-            answer=self.get_context_json(context)
+            answer = self.get_context_json(context)
 
             # Try to serialize it as a JSON string
             try:
-                json_answer=json.dumps(answer)
-            except TypeError as  e:
-                raise TypeError("The method json_builder() from model '{0}' inside app '{1}' didn't return a JSON serializable object. Error was: {2}".format(self._modelname,self._appname,e))
+                json_answer = json.dumps(answer)
+            except TypeError as e:
+                raise TypeError("The method json_builder() from model '{0}' inside app '{1}' didn't return a JSON serializable object. Error was: {2}".format(self._modelname, self._appname, e))
             # Return the new answer
-            return HttpResponse(json_answer,content_type='application/json', **response_kwargs)
+            return HttpResponse(json_answer, content_type='application/json', **response_kwargs)
         else:
             return super(GenModify, self).render_to_response(context, **response_kwargs)
 
 
 class GenCreate(GenModify, GenBase, CreateView):
     action_permission = 'add'
-    get_template_names_key='add'
-    success_url = reverse_lazy("status",kwargs={'status':'accept','answer':''})
+    get_template_names_key = 'add'
+    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     show_internal_name = True
     extends_base = "codenerix/form.html"
 
 
 class GenCreateModal(GenCreate):
-    get_template_names_key='addmodal'
+    get_template_names_key = 'addmodal'
     show_internal_name = False
     extends_base = "codenerix/form.html"
 
 
 class GenUpdate(GenModify, GenBase, UpdateView):
     action_permission = 'change'
-    get_template_names_key='form'
-    success_url = reverse_lazy("status",kwargs={'status':'accept','answer':''})
+    get_template_names_key = 'form'
+    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     show_internal_name = True
 
@@ -3042,8 +3073,9 @@ class GenUpdate(GenModify, GenBase, UpdateView):
 
 
 class GenUpdateModal(GenUpdate):
-    get_template_names_key='formmodal'
+    get_template_names_key = 'formmodal'
     show_internal_name = False
+
 
 class GenDelete(GenModify, GenBase, DeleteView):
     '''
@@ -3051,8 +3083,9 @@ class GenDelete(GenModify, GenBase, DeleteView):
     success_url = {'status':'accept','answer':''})  This is the URL where the view will go if everything goes fine (answer will be autofilled)
     get_template_names_key='delete'                 Sufix added to all templates when templates name resolution is looking for the template
     '''
-    #get_template_names_key='delete'
-    success_url = reverse_lazy("status",kwargs={'status':'accept','answer':''})
+
+    # get_template_names_key='delete'
+    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     action_permission = 'delete'
 
@@ -3062,7 +3095,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
         '''
 
         # Check if this is a webservice request
-        self.__authtoken = (bool( getattr( self.request, "authtoken", False ) ))
+        self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
         self.json_worker = self.__authtoken or (self.json is True)
         # Call the base implementation
         return super(GenDelete, self).dispatch(request, **kwargs)
@@ -3081,11 +3114,11 @@ class GenDelete(GenModify, GenBase, DeleteView):
 
             # Get API field
             if getattr(self, '__api__', None):
-                api=self.__api__(self.request)
+                api = self.__api__(self.request)
             elif getattr(self, '__api__', None):
-                api=self.object.__api__(self.request)
+                api = self.object.__api__(self.request)
             else:
-                api=getattr(settings,'API_DEFAULT', None)
+                api = getattr(settings, 'API_DEFAULT', None)
 
             # Set the result
             api_obj = self.get_object_api(api, obj)
@@ -3097,9 +3130,9 @@ class GenDelete(GenModify, GenBase, DeleteView):
             if self.json_worker:
                 json_struct = {"error": lock, "__pk__": obj.pk}
                 if self.__authtoken and api_obj is not None:
-                    json_struct['__obj__']=api_obj
+                    json_struct['__obj__'] = api_obj
                 json_answer = json.dumps(json_struct)
-                return HttpResponse(json_answer,content_type='application/json')
+                return HttpResponse(json_answer, content_type='application/json')
             else:
                 return HttpResponseForbidden(lock, content_type="text/plain")
         else:
@@ -3109,19 +3142,19 @@ class GenDelete(GenModify, GenBase, DeleteView):
                 if self.json_worker:
                     json_struct = {"error": e, "__pk__": obj.pk}
                     if self.__authtoken and api_obj is not None:
-                        json_struct['__obj__']=api_obj
+                        json_struct['__obj__'] = api_obj
                     json_answer = json.dumps(json_struct)
-                    return HttpResponse(json_answer,content_type='application/json')
+                    return HttpResponse(json_answer, content_type='application/json')
                 else:
-                    return HttpResponseForbidden(e,content_type="text/plain")
+                    return HttpResponseForbidden(e, content_type="text/plain")
 
 
 class GenDetail(GenBase, DetailView):
-    get_template_names_key='details'
+    get_template_names_key = 'details'
     action_permission = 'detail'
 
-    #by default value of a necesary attribute
-    groups=[]
+    # by default value of a necesary attribute
+    groups = []
 
     def dispatch(self, request, **kwargs):
         '''
@@ -3129,11 +3162,11 @@ class GenDetail(GenBase, DetailView):
         '''
 
         # Check if this is a REST query to pusth the answer to responde in JSON
-        if bool(self.request.META.get('HTTP_X_REST',False)):
+        if bool(self.request.META.get('HTTP_X_REST', False)):
             self.json = True
 
         # Check if this is a REST query to add an element
-        if self.request.method in ['PUT','DELETE']:
+        if self.request.method in ['PUT', 'DELETE']:
             if self.request.method == 'PUT':
                 action = 'edit'
             else:
@@ -3143,7 +3176,7 @@ class GenDetail(GenBase, DetailView):
             self.request.method == 'POST'
 
             # Find the URL
-            target = get_class(resolve("{}/{}".format(self.request.META.get("REQUEST_URI"),action)).func)
+            target = get_class(resolve("{}/{}".format(self.request.META.get("REQUEST_URI"), action)).func)
 
             # Make sure we will answer as an API
             target.json = True
@@ -3152,8 +3185,8 @@ class GenDetail(GenBase, DetailView):
             return target.as_view()(self.request, pk=kwargs.get('pk'))
 
         # Detect if we have to answer in json
-        self.__authtoken = (bool( getattr( self.request, "authtoken", False ) ))
-        self.json_worker=self.__authtoken or (self.json is True)
+        self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
+        self.json_worker = self.__authtoken or (self.json is True)
 
         # Check if this is an AJAX request
         if (request.is_ajax() or self.json_worker) and request.body:
@@ -3165,21 +3198,21 @@ class GenDetail(GenBase, DetailView):
         # Call the base implementation
         return super(GenDetail, self).dispatch(request, **kwargs)
 
-    def get_filled_structure(self,subgroup=None):
+    def get_filled_structure(self, subgroup=None):
         '''
         method in charged of filling an structure containing the object fields
         values taking into account the 'group' attribute from the corresponding
         form object, which is necesary to fill the details form as it is configured
         in the 'group' attribute
         '''
-        #initilize the result structure
+        # initilize the result structure
         result = []
 
-        #the object corresponding model content is taken into a dictionary
+        # the object corresponding model content is taken into a dictionary
         object_content = model_to_dict(self.object)
 
-        #generallically some common or specific fields are not interesting
-        if not 'exclude_fields' in dir(self):
+        # generallically some common or specific fields are not interesting
+        if 'exclude_fields' not in dir(self):
             self.exclude_fields = []
 
         self.exclude_fields.append("id")
@@ -3187,14 +3220,13 @@ class GenDetail(GenBase, DetailView):
         for field in (self.exclude_fields):
             if field in object_content.keys():
                 object_content.pop(field)
-        #following is going to be created an structure with the appropieate caption
-        #for every existing field in the current model
+        # following is going to be created an structure with the appropieate caption
+        # for every existing field in the current model
         verbose_names = {}
         for field in object_content.keys():
             verbose_names[field] = self.model._meta.get_field(field).verbose_name
-        #the found fields in the groups structure are going to be taked into
-        #account
-        gr_object_content=[]
+        # the found fields in the groups structure are going to be taked into account
+        gr_object_content = []
 
         if subgroup:
             group_array = subgroup
@@ -3203,19 +3235,19 @@ class GenDetail(GenBase, DetailView):
 
         for group in group_array:
 
-            #raise Exception(group)
-            item={}
+            # raise Exception(group)
+            item = {}
 
-            item["name"]=smart_text(group[0])
-            item["col"]=group[1]
+            item["name"] = smart_text(group[0])
+            item["col"] = group[1]
             item_elements = group[2:]
 
-            sublist=[]
+            sublist = []
 
-            idx=0
+            idx = 0
             for item_element in item_elements:
-                #the element can contains another groups
-                if (idx>1) and (type(item_element)==tuple):
+                # the element can contains another groups
+                if (idx > 1) and (type(item_element) == tuple):
                     # Recursive
                     sublist.append(self.get_filled_structure([subgroup]))
                 else:
@@ -3267,35 +3299,35 @@ class GenDetail(GenBase, DetailView):
                     gr_object_content.append(field)
 
                 # Increment index
-                idx+=1
+                idx += 1
 
-            item["value"]=sublist
+            item["value"] = sublist
             result.append(item)
 
         for field in object_content.keys():
-            item={}
+            item = {}
             if field not in gr_object_content:
-                item["name"]=_(verbose_names[field])
-                item["value"]=getattr(self.object, field)
+                item["name"] = _(verbose_names[field])
+                item["value"] = getattr(self.object, field)
                 result.append(item)
 
         return result
 
-    def get_context_data_html(self,object_property, **kwargs):
+    def get_context_data_html(self, object_property, **kwargs):
         context = super(GenDetail, self).get_context_data(**kwargs)
-        context['object_detail']=self.get_filled_structure()
+        context['object_detail'] = self.get_filled_structure()
 
         # Get tabs_autorender information
         self.extra_context['tabs_autorender'] = self.get_tabs_autorender()
 
         # Check linkedit
-        context['linkedit']=getattr(self, 'linkedit', True)
+        context['linkedit'] = getattr(self, 'linkedit', True)
 
         # Check linkdelete
-        context['linkdelete']=getattr(self, 'linkdelete', True)
+        context['linkdelete'] = getattr(self, 'linkdelete', True)
 
         # Check linkback
-        context['linkback']=getattr(self, 'linkback', True)
+        context['linkback'] = getattr(self, 'linkback', True)
 
         # Check lock delete
         try:
@@ -3321,9 +3353,9 @@ class GenDetail(GenBase, DetailView):
         # Return context
         return context
 
-    def get_context_data_json(self,object_property, **kwargs):
+    def get_context_data_json(self, object_property, **kwargs):
         context = super(GenDetail, self).get_context_data(**kwargs)
-        #info = self.get_filled_structure()
+        # info = self.get_filled_structure()
 
         datas = json.loads(serializers.serialize('json', [context["object"], ]))[0]
         body = datas["fields"]
@@ -3332,20 +3364,20 @@ class GenDetail(GenBase, DetailView):
         meta = {}
         meta["gentranslate"] = {}
         for key in context["gentranslate"]:
-            meta["gentranslate"][key]=context["gentranslate"][key]
+            meta["gentranslate"][key] = context["gentranslate"][key]
         # Check version
         if self.__authtoken:
             meta['version'] = getattr(settings, "VERSION", None)
             meta['version_api'] = getattr(settings, "VERSION_API", None)
 
         # Check linkedit
-        meta['linkedit']=getattr(self, 'linkedit', True)
+        meta['linkedit'] = getattr(self, 'linkedit', True)
 
         # Check linkdelete
-        meta['linkdelete']=getattr(self, 'linkdelete', True)
+        meta['linkdelete'] = getattr(self, 'linkdelete', True)
 
         # Check linkback
-        meta['linkback']=getattr(self, 'linkback', True)
+        meta['linkback'] = getattr(self, 'linkback', True)
 
         # Check lock delete
         try:
@@ -3374,7 +3406,7 @@ class GenDetail(GenBase, DetailView):
                 meta["cannot_update"] = None
 
         # Update context
-        #context.update(self.extra_context)
+        # context.update(self.extra_context)
 
         ncontext = {
             'meta': meta,
@@ -3391,23 +3423,22 @@ class GenDetail(GenBase, DetailView):
         else:
             return self.get_context_data_html(object_property, **kwargs)
 
-
     def render_to_response(self, context, **response_kwargs):
 
         if self.json_worker:
             # Try to serialize it as a JSON string
             try:
-                json_answer=json.dumps(context)
-            except TypeError as  e:
-                raise TypeError("Couldn't serialize response from model '{0}' inside app '{1}', I can not return a JSON serializable object. Error was: {2}".format(self._modelname,self._appname,e))
+                json_answer = json.dumps(context)
+            except TypeError as e:
+                raise TypeError("Couldn't serialize response from model '{0}' inside app '{1}', I can not return a JSON serializable object. Error was: {2}".format(self._modelname, self._appname, e))
             # Return the new answer
-            return HttpResponse(json_answer,content_type='application/json', **response_kwargs)
+            return HttpResponse(json_answer, content_type='application/json', **response_kwargs)
         else:
             return super(GenDetail, self).render_to_response(context, **response_kwargs)
 
 
 class GenDetailModal(GenDetail):
-    get_template_names_key='detailsmodal'
+    get_template_names_key = 'detailsmodal'
     extends_base = "codenerix/details.html"
 
 
@@ -3549,9 +3580,9 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         linkedit = True
         show_details = True
         show_modal = True
-        extra_context={'menu':['manager','log'],'bread':[_('Manager'),_('Log')]}
-        default_ordering="-action_time"
-        must_be_superuser=True
+        extra_context = {'menu': ['manager', 'log'], 'bread': [_('Manager'), _('Log')]}
+        default_ordering = "-action_time"
+        must_be_superuser = True
 
     class LogDetails(GenDetailModal, GenDetail):
         model = Log
@@ -3559,19 +3590,21 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         linkdelete = False
         linkback = True
         exclude_fields = ["action_flag"]
-        must_be_superuser=True
-        get_template="detailsmodal_log.html"
-        groups=[
-               (_('Identification'),6,
-                    ['action_time',1],
-                    ['action',1],
-                    ['user',3],
-                    ['content_type',4],
-                    ['object_id',4],
-                    ['object_repr',4],
-                    ),
-                (_('Changes'),6,
-                    ['change_txt',12],
-                    ['change_json',12],
-                    ),
-            ]
+        must_be_superuser = True
+        get_template = "detailsmodal_log.html"
+        groups = [
+            (
+                _('Identification'), 6,
+                ['action_time', 1],
+                ['action', 1],
+                ['user', 3],
+                ['content_type', 4],
+                ['object_id', 4],
+                ['object_repr', 4],
+            ),
+            (
+                _('Changes'), 6,
+                ['change_txt', 12],
+                ['change_json', 12],
+            ),
+        ]
