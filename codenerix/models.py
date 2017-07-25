@@ -342,6 +342,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         class CodenerixMeta(CodenerixModel.CodenerixMeta):
             log_full = False
         
+        def post_save(self, log):
+            # custom post save from application
+            pass
+            
         def save(self, **kwargs):
             user = get_current_user()
             if user:
@@ -415,7 +419,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                         attrs[key] = (attrs_bd[key].pk, field, )
                                     else:
                                         attrs[key] = (attrs_bd[key], field, )
-                            except:
+                            except Exception:
                                 # If related, we don't do anything
                                 if getattr(field, 'all', None) is None:
                                     field = str(field)
@@ -473,6 +477,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                 # if new element, get pk
                 log.object_id = self.pk
             log.save()
+
+            # custom post save from application
+            self.post_save(log)
+
             return aux
     
     class GenLogFull(GenLog):
