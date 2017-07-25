@@ -976,6 +976,7 @@ class GenList(GenBase, ListView):
         ngincludes = {'name':'path_to_partial'}     # Keep trace for ngincludes extra partials
         export_excel = True                         # Show button 'Export to excel' in the list
         export = 'xlsx'                             # Force the download the list as file. Default None
+        export_name = 'list'                        # Filename as a result of export 
 
         ws_entry_point                              # Set ws_entry_point variable to a fixed value
         static_partial_row                          # Set static_partial_row to a fixed value
@@ -2116,25 +2117,26 @@ class GenList(GenBase, ListView):
 
         # Add pagination
         regs = []
-        desired_page_number = page_number
-        try:
-            range_pages_to_bring = xrange(pages_to_bring)
-        except NameError:
-            range_pages_to_bring = range(pages_to_bring)
-        for p in range_pages_to_bring:
+        if paginator.count:
+            desired_page_number = page_number
             try:
-                regs += paginator.page(desired_page_number)
-                desired_page_number += 1
-            except PageNotAnInteger:
-                # If page is not an integer, deliver first page.
-                regs += paginator.page(1)
-                desired_page_number = 2
-            except EmptyPage:
-                # If page is out of range (e.g. 9999), deliver last page of results.
-                if pages_to_bring == 1:
-                    regs += paginator.page(paginator.num_pages)
-                # Leave bucle
-                break
+                range_pages_to_bring = xrange(pages_to_bring)
+            except NameError:
+                range_pages_to_bring = range(pages_to_bring)
+            for p in range_pages_to_bring:
+                try:
+                    regs += paginator.page(desired_page_number)
+                    desired_page_number += 1
+                except PageNotAnInteger:
+                    # If page is not an integer, deliver first page.
+                    regs += paginator.page(1)
+                    desired_page_number = 2
+                except EmptyPage:
+                    # If page is out of range (e.g. 9999), deliver last page of results.
+                    if pages_to_bring == 1:
+                        regs += paginator.page(paginator.num_pages)
+                    # Leave bucle
+                    break
 
         # Fill pages
         if total_registers:
@@ -2171,6 +2173,7 @@ class GenList(GenBase, ListView):
 
         # Export to excel
         context['export_excel'] = getattr(self, 'export_excel', True)
+        context['export_name'] = getattr(self, 'export_name', 'list')
 
         # Check ngincludes
         context['ngincludes'] = getattr(self, 'ngincludes', {})
@@ -2252,6 +2255,7 @@ class GenList(GenBase, ListView):
         a['linkadd'] = context['linkadd']
         a['vtable'] = context['vtable']
         a['export_excel'] = context['export_excel']
+        a['export_name'] = context['export_name']
         a['ngincludes'] = context['ngincludes']
         a['linkedit'] = context['linkedit']
         a['show_details'] = context['show_details']
@@ -2695,7 +2699,7 @@ class GenList(GenBase, ListView):
         if data_output_len <= (size_max * 1000000):
             data_output.seek(0)
             response = HttpResponse(data_output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;', **response_kwargs)
-            response['Content-Disposition'] = 'attachment; filename=list.xlsx'
+            response['Content-Disposition'] = 'attachment; filename={}.xlsx'.format(answer['meta']['export_name'])
             return response
         else:
             result = {
