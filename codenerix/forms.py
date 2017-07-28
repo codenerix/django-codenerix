@@ -445,7 +445,8 @@ class BaseForm(object):
                     if isinstance(infield.field.widget, Select) and not isinstance(infield.field.widget, DynamicSelect):
                         if not isinstance(infield.field.widget, MultiStaticSelect):
                             infield.field.widget=StaticSelect(wattrs)
-                        infield.field.widget.choices = infield.field.choices
+                        if hasattr(infield.field.widget, 'choices') and hasattr(infield.field, 'choices'):
+                            infield.field.widget.choices = infield.field.choices
                         infield.field.widget.is_required=wrequired
                         infield.field.widget.form_name=self.form_name
                         infield.field.widget.field_name=infield.html_name
