@@ -22,7 +22,8 @@ from djng.forms.angular_model import NgModelFormMixin
 from djng.forms import NgFormValidationMixin, NgForm, NgModelForm
 
 from django.utils.translation import ugettext as _
-from django.forms.widgets import Select
+from django.forms.widgets import Select, CheckboxInput
+from django.forms import NullBooleanField
 
 from codenerix.helpers import model_inspect
 from codenerix.widgets import StaticSelect, DynamicSelect, DynamicInput, MultiStaticSelect, MultiDynamicSelect
@@ -456,7 +457,9 @@ class BaseForm(object):
                     
                     # Check if we have to replace the widget with a newer one
                     if isinstance(infield.field.widget, Select) and not isinstance(infield.field.widget, DynamicSelect):
-                        if not isinstance(infield.field.widget, MultiStaticSelect):
+                        if isinstance(infield.field, NullBooleanField):
+                            infield.field.widget = CheckboxInput(wattrs)
+                        elif not isinstance(infield.field.widget, MultiStaticSelect):
                             infield.field.widget = StaticSelect(wattrs)
                         if hasattr(infield.field.widget, 'choices') and hasattr(infield.field, 'choices'):
                             infield.field.widget.choices = infield.field.choices
