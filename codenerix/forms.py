@@ -27,6 +27,7 @@ from django.forms.widgets import Select
 from codenerix.helpers import model_inspect
 from codenerix.widgets import StaticSelect, DynamicSelect, DynamicInput, MultiStaticSelect, MultiDynamicSelect
 
+
 class BaseForm(object):
     
     __language = None
@@ -90,23 +91,23 @@ class BaseForm(object):
     
     def get_groups(self, gs=None, processed=[], initial=True):
         '''
-        <--------------------------------------- 12 columns ------------------------------------> 
-                    <--- 6 columns --->                           <--- 6 columns --->             
-         ------------------------------------------   ------------------------------------------  
-        | Info                                     | | Personal                                 | 
-        |==========================================| |==========================================| 
-        |  -----------------   ------------------  | |                                          | 
-        | | Passport        | | Name             | | | Phone                          Zipcode   | 
-        | |=================| | [.....]  [.....] | | | [...........................]  [.......] | 
-        | | CID     Country | | <- 6 ->  <- 6 -> | | |       <--- 8 columns --->      <-4 col-> | 
-        | | [.....] [.....] | |                  | | |                                          | 
-        | | <- 6 -> <- 6 -> |  -----------------   | | Address                                  | 
-        |  -----------------                       | | [.....................................]  | 
-         ------------------------------------------  |           <--- 12 columns --->           | 
-                                                     | [..] number                              | 
-                                                     |           <--- 12 columns --->           | 
-                                                     |                                          | 
-                                                      ------------------------------------------  
+        <--------------------------------------- 12 columns ------------------------------------>
+                    <--- 6 columns --->                           <--- 6 columns --->
+         ------------------------------------------   ------------------------------------------
+        | Info                                     | | Personal                                 |
+        |==========================================| |==========================================|
+        |  -----------------   ------------------  | |                                          |
+        | | Passport        | | Name             | | | Phone                          Zipcode   |
+        | |=================| | [.....]  [.....] | | | [...........................]  [.......] |
+        | | CID     Country | | <- 6 ->  <- 6 -> | | |       <--- 8 columns --->      <-4 col-> |
+        | | [.....] [.....] | |                  | | |                                          |
+        | | <- 6 -> <- 6 -> |  -----------------   | | Address                                  |
+        |  -----------------                       | | [.....................................]  |
+         ------------------------------------------  |           <--- 12 columns --->           |
+                                                     | [..] number                              |
+                                                     |           <--- 12 columns --->           |
+                                                     |                                          |
+                                                      ------------------------------------------
         group = [
                 (_('Info'),(6,'#8a6d3b','#fcf8e3','center'),
                     (_('Identification'),6,
@@ -179,26 +180,27 @@ class BaseForm(object):
             raise IOError("ERROR: No language suplied!")
         
         # Initialize the list
-        if initial: processed=[]
+        if initial:
+            processed = []
         # Where to look for fields
         if 'list_fields' in dir(self):
-            list_fields=self.list_fields
-            check_system="html_name"
+            list_fields = self.list_fields
+            check_system = "html_name"
         else:
-            list_fields=self
-            check_system="name"
+            list_fields = self
+            check_system = "name"
         
         # Default attributes for fields
-        attributes=[
-                ('columns',6),
-                ('color',None),
-                ('bgcolor',None),
-                ('textalign',None),
-                ('inline',False),       # input in line with label
-                ('label',True),
-                ('extra',None),
-                ('extra_div',None),
-                ]
+        attributes = [
+            ('columns', 6),
+            ('color', None),
+            ('bgcolor', None),
+            ('textalign', None),
+            ('inline', False),  # input in line with label
+            ('label', True),
+            ('extra', None),
+            ('extra_div', None),
+        ]
         labels = [x[0] for x in attributes]
         
         # Get groups if none was given
@@ -228,24 +230,31 @@ class BaseForm(object):
             
             styles = g[1]
             if type(styles) is tuple:
-                if len(styles)>=1: token['columns']=g[1][0]
-                if len(styles)>=2: token['color']=g[1][1]
-                if len(styles)>=3: token['bgcolor']=g[1][2]
-                if len(styles)>=4: token['textalign']=g[1][3]
-                if len(styles)>=5: token['inline']=g[1][4]
-                if len(styles)>=7: token['extra']=g[1][5]
-                if len(styles)>=8: token['extra_div']=g[1][6]
+                if len(styles) >= 1:
+                    token['columns'] = g[1][0]
+                if len(styles) >= 2:
+                    token['color'] = g[1][1]
+                if len(styles) >= 3:
+                    token['bgcolor'] = g[1][2]
+                if len(styles) >= 4:
+                    token['textalign'] = g[1][3]
+                if len(styles) >= 5:
+                    token['inline'] = g[1][4]
+                if len(styles) >= 7:
+                    token['extra'] = g[1][5]
+                if len(styles) >= 8:
+                    token['extra_div'] = g[1][6]
             else:
-                token['columns']=g[1]
-            fs=g[2:]
-            fields=[]
+                token['columns'] = g[1]
+            fs = g[2:]
+            fields = []
             for f in fs:
                 # Field
-                atr={}
+                atr = {}
                 # Decide weather this is a Group or not
-                if type(f)==tuple:
+                if type(f) == tuple:
                     # Recursive
-                    fields+=self.get_groups([list(f)],processed,False)
+                    fields += self.get_groups([list(f)], processed, False)
                 else:
                     try:
                         list_type = [str, unicode, ]
@@ -284,83 +293,85 @@ class BaseForm(object):
                         raise IOError("Uknown element type '{0}' inside group '{1}'".format(type(f), token['name']))
                     
                     # Get the Django Field object
-                    found=None
+                    found = None
                     for infield in list_fields:
-                        if infield.__dict__[check_system]==field:
-                            found=infield
+                        if infield.__dict__[check_system] == field:
+                            found = infield
                             break
                     
                     if found:
                         # Get attributes (required and original attributes)
-                        wrequired=found.field.widget.is_required
-                        wattrs=found.field.widget.attrs
+                        wrequired = found.field.widget.is_required
+                        wattrs = found.field.widget.attrs
                         # Fill base attributes
-                        atr['name']=found.html_name
-                        atr['input']=found
-                        atr['focus']=False
+                        atr['name'] = found.html_name
+                        atr['input'] = found
+                        atr['focus'] = False
                         # Set focus
                         if focus_must is None:
-                            if focus_first is None: focus_first = atr
-                            if wrequired: focus_must = atr
+                            if focus_first is None:
+                                focus_first = atr
+                            if wrequired:
+                                focus_must = atr
                         # Autocomplete
                         if 'autofill' in dir(self.Meta):
-                            autofill=self.Meta.autofill.get(found.html_name,None)
-                            atr['autofill']=autofill
+                            autofill = self.Meta.autofill.get(found.html_name, None)
+                            atr['autofill'] = autofill
                             if autofill:
                                 # Check format of the request
-                                autokind=autofill[0]
-                                if type(autokind)==str:
+                                autokind = autofill[0]
+                                if type(autokind) == str:
                                     # Using new format
-                                    if autokind=='select':
+                                    if autokind == 'select':
                                         # If autofill is True for this field set the DynamicSelect widget
-                                        found.field.widget=DynamicSelect(wattrs)
-                                    elif autokind=='multiselect':
+                                        found.field.widget = DynamicSelect(wattrs)
+                                    elif autokind == 'multiselect':
                                         # If autofill is True for this field set the DynamicSelect widget
-                                        found.field.widget=MultiDynamicSelect(wattrs)
-                                    elif autokind=='input':
+                                        found.field.widget = MultiDynamicSelect(wattrs)
+                                    elif autokind == 'input':
                                         # If autofill is True for this field set the DynamicSelect widget
-                                        found.field.widget=DynamicInput(wattrs)
+                                        found.field.widget = DynamicInput(wattrs)
                                     else:
                                         raise IOError("Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(autokind))
 
                                     # Configure the field
-                                    found.field.widget.is_required=wrequired
-                                    found.field.widget.form_name=self.form_name
-                                    found.field.widget.field_name=infield.html_name
-                                    found.field.widget.autofill_deepness=autofill[1]
-                                    found.field.widget.autofill_url=autofill[2]
-                                    found.field.widget.autofill=autofill[3:]    
+                                    found.field.widget.is_required = wrequired
+                                    found.field.widget.form_name = self.form_name
+                                    found.field.widget.field_name = infield.html_name
+                                    found.field.widget.autofill_deepness = autofill[1]
+                                    found.field.widget.autofill_url = autofill[2]
+                                    found.field.widget.autofill = autofill[3:]
                                 else:
                                     # Get old information [COMPATIBILITY WITH OLD VERSION]
                                     # If autofill is True for this field set the DynamicSelect widget
-                                    found.field.widget=DynamicSelect(wattrs)
-                                    found.field.widget.is_required=wrequired
-                                    found.field.widget.form_name=self.form_name
-                                    found.field.widget.field_name=infield.html_name
-                                    found.field.widget.autofill_deepness=autofill[0]
-                                    found.field.widget.autofill_url=autofill[1]
-                                    found.field.widget.autofill=autofill[2:]
+                                    found.field.widget = DynamicSelect(wattrs)
+                                    found.field.widget.is_required = wrequired
+                                    found.field.widget.form_name = self.form_name
+                                    found.field.widget.field_name = infield.html_name
+                                    found.field.widget.autofill_deepness = autofill[0]
+                                    found.field.widget.autofill_url = autofill[1]
+                                    found.field.widget.autofill = autofill[2:]
                         else:
                             
                             # Set we don't have autofill for this field
-                            atr['autofill']=None
+                            atr['autofill'] = None
                         
                         # Check if we have to replace the widget with a newer one
                         if isinstance(found.field.widget, Select) and not isinstance(found.field.widget, DynamicSelect):
                             if not isinstance(found.field.widget, MultiStaticSelect):
-                                found.field.widget=StaticSelect(wattrs)
+                                found.field.widget = StaticSelect(wattrs)
                             found.field.widget.choices = found.field.choices
-                            found.field.widget.is_required=wrequired
-                            found.field.widget.form_name=self.form_name
-                            found.field.widget.field_name=infield.html_name
+                            found.field.widget.is_required = wrequired
+                            found.field.widget.form_name = self.form_name
+                            found.field.widget.field_name = infield.html_name
                         
                         # Fill all attributes
-                        for (attribute,default) in attributes:
+                        for (attribute, default) in attributes:
                             if attribute not in atr.keys():
-                                atr[attribute]=default
+                                atr[attribute] = default
                         # Fill label
                         if atr['label'] is True:
-                            atr['label']=found.label
+                            atr['label'] = found.label
                         # Set language
                         flang = getattr(found.field, "set_language", None)
                         if flang:
@@ -373,91 +384,93 @@ class BaseForm(object):
                         # Remember we have processed it
                         processed.append(found.__dict__[check_system])
                     else:
-                        raise IOError("Unknown field '{0}' specified in group '{1}'".format(f,token['name']))
+                        raise IOError("Unknown field '{0}' specified in group '{1}'".format(f, token['name']))
             
-            token['fields']=fields
+            token['fields'] = fields
             groups.append(token)
         
         # Add the rest of attributes we didn't use yet
         if initial:
-            fields=[]
+            fields = []
             for infield in list_fields:
                 if infield.__dict__[check_system] not in processed:
                     # Get attributes (required and original attributes)
-                    wattrs=infield.field.widget.attrs
-                    wrequired=infield.field.widget.is_required
+                    wattrs = infield.field.widget.attrs
+                    wrequired = infield.field.widget.is_required
                     # Prepare attr
-                    atr={}
+                    atr = {}
                     # Fill base attributes
-                    atr['name']=infield.html_name
-                    atr['input']=infield
-                    atr['focus']=False
+                    atr['name'] = infield.html_name
+                    atr['input'] = infield
+                    atr['focus'] = False
                     # Set focus
                     if focus_must is None:
-                        if focus_first is None: focus_first = atr
-                        if wrequired: focus_must = atr
+                        if focus_first is None:
+                            focus_first = atr
+                        if wrequired:
+                            focus_must = atr
                     # Autocomplete
                     if 'autofill' in dir(self.Meta):
-                        autofill=self.Meta.autofill.get(infield.html_name,None)
-                        atr['autofill']=autofill
+                        autofill = self.Meta.autofill.get(infield.html_name, None)
+                        atr['autofill'] = autofill
                         if autofill:
                             # Check format of the request
-                            autokind=autofill[0]
-                            if type(autokind)==str:
+                            autokind = autofill[0]
+                            if type(autokind) == str:
                                 # Get old information
 
                                 # Using new format
-                                if autokind=='select':
+                                if autokind == 'select':
                                     # If autofill is True for this field set the DynamicSelect widget
-                                    infield.field.widget=DynamicSelect(wattrs)
-                                elif autokind=='multiselect':
+                                    infield.field.widget = DynamicSelect(wattrs)
+                                elif autokind == 'multiselect':
                                     # If autofill is True for this field set the DynamicSelect widget
-                                    infield.field.widget=MultiDynamicSelect(wattrs)
-                                elif autokind=='input':
+                                    infield.field.widget = MultiDynamicSelect(wattrs)
+                                elif autokind == 'input':
                                     # If autofill is True for this field set the DynamicSelect widget
-                                    infield.field.widget=DynamicInput(wattrs)
+                                    infield.field.widget = DynamicInput(wattrs)
                                 else:
                                     raise IOError("Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(autokind))
 
                                 # Configure the field
-                                infield.field.widget.is_required=wrequired
-                                infield.field.widget.form_name=self.form_name
-                                infield.field.widget.field_name=infield.html_name
-                                infield.field.widget.autofill_deepness=autofill[1]
-                                infield.field.widget.autofill_url=autofill[2]
-                                infield.field.widget.autofill=autofill[3:]    
+                                infield.field.widget.is_required = wrequired
+                                infield.field.widget.form_name = self.form_name
+                                infield.field.widget.field_name = infield.html_name
+                                infield.field.widget.autofill_deepness = autofill[1]
+                                infield.field.widget.autofill_url = autofill[2]
+                                infield.field.widget.autofill = autofill[3:]
                             else:
                                 # Get old information [COMPATIBILITY WITH OLD VERSION]
                                 # If autofill is True for this field set the DynamicSelect widget
-                                infield.field.widget=DynamicSelect(wattrs)
-                                infield.field.widget.is_required=wrequired
-                                infield.field.widget.form_name=self.form_name
-                                infield.field.widget.field_name=infield.html_name
-                                infield.field.widget.autofill_deepness=autofill[0]
-                                infield.field.widget.autofill_url=autofill[1]
-                                infield.field.widget.autofill=autofill[2:]
+                                infield.field.widget = DynamicSelect(wattrs)
+                                infield.field.widget.is_required = wrequired
+                                infield.field.widget.form_name = self.form_name
+                                infield.field.widget.field_name = infield.html_name
+                                infield.field.widget.autofill_deepness = autofill[0]
+                                infield.field.widget.autofill_url = autofill[1]
+                                infield.field.widget.autofill = autofill[2:]
                     else:
                         
                         # Set we don't have autofill for this field
-                        atr['autofill']=None
+                        atr['autofill'] = None
                     
                     # Check if we have to replace the widget with a newer one
                     if isinstance(infield.field.widget, Select) and not isinstance(infield.field.widget, DynamicSelect):
                         if not isinstance(infield.field.widget, MultiStaticSelect):
-                            infield.field.widget=StaticSelect(wattrs)
+                            infield.field.widget = StaticSelect(wattrs)
                         if hasattr(infield.field.widget, 'choices') and hasattr(infield.field, 'choices'):
                             infield.field.widget.choices = infield.field.choices
-                        infield.field.widget.is_required=wrequired
-                        infield.field.widget.form_name=self.form_name
-                        infield.field.widget.field_name=infield.html_name
+                        infield.field.widget.is_required = wrequired
+                        infield.field.widget.form_name = self.form_name
+                        infield.field.widget.field_name = infield.html_name
                     
                     # Fill all attributes
-                    for (attribute,default) in attributes:
+                    for (attribute, default) in attributes:
                         if attribute not in atr.keys():
-                            atr[attribute]=default
+                            atr[attribute] = default
                     # Fill label
                     if atr['label'] is True:
-                        atr['label']=infield.label
+                        atr['label'] = infield.label
                     # Set language
                     flang = getattr(infield.field, "set_language", None)
                     if flang:
@@ -470,13 +483,13 @@ class BaseForm(object):
             
             # Save the new elements
             if fields:
-                groups.append({'name':None,'columns':12,'fields':fields})
+                groups.append({'name': None, 'columns': 12, 'fields': fields})
         
         # Set focus
         if focus_must:
-            focus_must['focus']=True
+            focus_must['focus'] = True
         else:
-            focus_first['focus']=True
+            focus_first['focus'] = True
         
         # Return the resulting groups
         return groups
@@ -495,12 +508,13 @@ class BaseForm(object):
         """
         return {}
 
+
 class GenModelForm(BaseForm, NgModelFormMixin, NgFormValidationMixin, NgModelForm):
     pass
+
 
 class GenForm(BaseForm, NgFormValidationMixin, NgForm):
     add_djng_error = False
     
     class Meta:
-        name=""
-
+        name = ""
