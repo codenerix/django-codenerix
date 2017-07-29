@@ -25,7 +25,11 @@
   return function(input, kind) {
     if ((kind==null) || (kind==undefined)) {
         // No kind defined
-        return input;
+        if ((input==null) || (input==undefined)) {
+            return "-";
+        } else {
+            return input;
+        }
     } else if (kind=='skype') {
         return "<a ng-click='$event.stopPropagation();' href='tel:"+input+"'>"+input+"</a>";
     } else if (kind=='image') {
