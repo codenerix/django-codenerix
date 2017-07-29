@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
- angular.module('codenerixFilters', [])
+angular.module('codenerixFilters', [])
 
 .filter('codenerix', function() {
   return function(input, kind) {
@@ -27,9 +27,15 @@
         // No kind defined
         if ((input==null) || (input==undefined)) {
             return "-";
+        } else if (input=='True') {
+            return "<img src='"+get_static('codenerix/img/true.png')+"'>";
+        } else if (input=='False') {
+            return "<img src='"+get_static('codenerix/img/false.png')+"'>";
         } else {
             return input;
         }
+    } else if ((kind=='none') || (kind=='')) {
+        return input;
     } else if (kind=='skype') {
         return "<a ng-click='$event.stopPropagation();' href='tel:"+input+"'>"+input+"</a>";
     } else if (kind=='image') {
