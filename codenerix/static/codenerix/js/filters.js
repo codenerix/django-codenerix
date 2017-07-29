@@ -28,9 +28,9 @@ angular.module('codenerixFilters', [])
         if ((input==null) || (input==undefined)) {
             return "-";
         } else if (input=='True') {
-            return "<img src='"+get_static('codenerix/img/true.png')+"'>";
+            return "<div class='autotrue'><img src='"+get_static('codenerix/img/true.png')+"'></div>";
         } else if (input=='False') {
-            return "<img src='"+get_static('codenerix/img/false.png')+"'>";
+            return "<div class='autofalse'><img src='"+get_static('codenerix/img/false.png')+"'></div>";
         } else {
             return input;
         }
