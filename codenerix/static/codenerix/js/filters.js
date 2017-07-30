@@ -25,7 +25,7 @@ angular.module('codenerixFilters', [])
   return function(input, kind) {
     if ((kind==null) || (kind==undefined)) {
         // No kind defined
-        if ((input==null) || (input==undefined)) {
+        if ((input==null) || (input==undefined) || (input=='')) {
             return "-";
         } else if (input=='True') {
             return "<div class='autotrue'><img src='"+get_static('codenerix/img/true.png')+"'></div>";
