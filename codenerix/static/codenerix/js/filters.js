@@ -28,9 +28,9 @@ angular.module('codenerixFilters', [])
         if ((input==null) || (input==undefined) || (input=='')) {
             return "-";
         } else if (input=='True') {
-            return "<div class='autotrue'><img src='"+get_static('codenerix/img/true.png')+"'></div>";
+            return '<i class="autotrue text-success glyphicon glyphicon-ok"></i>';
         } else if (input=='False') {
-            return "<div class='autofalse'><img src='"+get_static('codenerix/img/false.png')+"'></div>";
+            return '<i class="autofalse text-danger glyphicon glyphicon-remove"></i>';
         } else {
             return input;
         }
