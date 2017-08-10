@@ -877,11 +877,15 @@ function dynamic_fields(scope) {
                 if (scope[scope.form_name] != undefined && scope[scope.form_name][key] != undefined){
                     var element = scope[scope.form_name][key];
                     if (typeof(value) == "object"){
-                        var info = [];
-                        info['id']= value[0];
-                        info['label']= value[1];
-                        scope.options[key].push(info);
-                        element.$setViewValue(value[0]);
+                        if (scope.options != undefined && key in scope.options){
+                            var info = [];
+                            info['id']= value[0];
+                            info['label']= value[1];
+                            scope.options[key].push(info);
+                            element.$setViewValue(value[0]);
+                        }else if ('__JSON_DATA__' in value){
+                            scope[key] = value;
+                        }
                     }else{
                         element.$setViewValue(value);
                     }
@@ -913,15 +917,17 @@ function dynamic_fields(scope) {
                     scope.resetAutoComplete();
                     angular.forEach(value2, (function (value3, key){
                         var async = true;
+                        var kind = undefined;
                         if (key && key!="label" && key!="id" && key[0]!='$') {
                             var keysp = key.split(":")
                             if (keysp.length>=2) {
                                 key = keysp[0];
-                                var kind = keysp[1];
+                                kind = keysp[1];
                                 if (kind=='__JSON_DATA__') {
                                     try {
                                         value3={'__JSON_DATA__':angular.fromJson(value3)};
                                     } catch(e) {
+                                        value3=undefined;
                                         console.log("ERROR: "+e);
                                     }
                                 } else if (kind=='__SCOPE_CALL__') {
@@ -948,6 +954,9 @@ function dynamic_fields(scope) {
                     return;
                 }
             }));
+        }else if (ngchange!==undefined) {
+            // Evaluate the expresion
+            scope.$eval(ngchange);
         }
     };
     
