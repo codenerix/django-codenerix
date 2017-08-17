@@ -491,7 +491,7 @@ class BaseForm(object):
         # Set focus
         if focus_must:
             focus_must['focus'] = True
-        else:
+        elif focus_first is not None:
             focus_first['focus'] = True
         
         # Return the resulting groups
