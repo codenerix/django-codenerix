@@ -25,6 +25,7 @@ from functools import reduce
 
 from django.db.models import Q
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User, Group, Permission
@@ -77,7 +78,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         return fields
 
     def __limitQ__(self, info):
-        l = {}
+        limit = {}
         # If user is not a superuser, the shown records depends on the profile
         if not info.request.user.is_superuser:
 
@@ -86,9 +87,9 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
             # The criterials are not exclusives
             if criterials:
-                l["profile_people_limit"] = reduce(operator.or_, criterials)
+                limit["profile_people_limit"] = reduce(operator.or_, criterials)
 
-        return l
+        return limit
 
     def __searchF__(self, info):
         tf = {}
@@ -114,13 +115,13 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         '''
         return the rolls this people is related with
         '''
-        l = []
+        limit = []
 
         if self.is_admin():
-            l.append(_("Administrator"))
-        l.sort()
+            limit.append(_("Administrator"))
+        limit.sort()
 
-        return l
+        return limit
 
     def delete(self):
         self.clean_memcache()
@@ -269,8 +270,8 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                             
                             # Remember perms for this group
                             if groupname not in groupsresult:
-                                groupsresult[groupname]=[]
-                            groupsresult[groupname]+=perms
+                                groupsresult[groupname] = []
+                            groupsresult[groupname] += perms
         
         # Set permissions for all groups
         for groupname in groupsresult:
@@ -314,6 +315,14 @@ class GenRole(object):
         for field in self._meta.get_fields():
             model = field.related_model
             if model and issubclass(model, GenPerson):
-                person = getattr(self, field.name)
+                try:
+                    person = getattr(self, field.name)
+                except ObjectDoesNotExist:
+                    pass
                 break
         return person
+
+    def CDNX_refresh_permissions_CDNX(self):
+        person = self.__CDNX_search_person_CDNX__()
+        if person:
+            person.refresh_permissions()
