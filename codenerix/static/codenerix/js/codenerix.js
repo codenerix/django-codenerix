@@ -2093,6 +2093,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         hotkeysrv.add({combo: 'ctrl+up', description: 'Select previous row', callback: $scope.goto_row_previous});
         hotkeysrv.add({combo: 'ctrl+down', description: 'Select next row', callback: $scope.goto_row_next});
         hotkeysrv.add({combo: 'enter', description: 'Go to selected row', callback: $scope.goto_row_detail});
+        hotkeysrv.add({combo: 'ctrl+enter', description: 'Go to selected row', callback: $scope.goto_row_detail});
         hotkeysrv.add({combo: 'ctrl+right', description: 'Go to selected row', callback: $scope.goto_row_detail});
         hotkeysrv.add({combo: 'r', description: 'Refresh', callback: $scope.refresh});
         hotkeysrv.add({combo: 's', description: 'Go to search box', callback: $scope.goto_search});
@@ -2137,6 +2138,10 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     
     // Update this element
     $scope.submit = function(form, next) {
+        if (form instanceof KeyboardEvent) {
+            form = $scope[$scope.form_name];
+            next = 'list';
+        }
         formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'add');
     };
 
@@ -2372,6 +2377,10 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     
     // Update this element
     $scope.submit = function(form, next) {
+        if (form instanceof KeyboardEvent) {
+            form = $scope[$scope.form_name];
+            next = 'list';
+        }
         formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'edit');
     };
 
