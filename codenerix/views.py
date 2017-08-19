@@ -34,6 +34,7 @@ import string
 import random
 import io
 import pytz
+import base64
 from dateutil import tz
 
 # Django
@@ -976,7 +977,7 @@ class GenList(GenBase, ListView):
         ngincludes = {'name':'path_to_partial'}     # Keep trace for ngincludes extra partials
         export_excel = True                         # Show button 'Export to excel' in the list
         export = 'xlsx'                             # Force the download the list as file. Default None
-        export_name = 'list'                        # Filename as a result of export 
+        export_name = 'list'                        # Filename as a result of export
 
         ws_entry_point                              # Set ws_entry_point variable to a fixed value
         static_partial_row                          # Set static_partial_row to a fixed value
@@ -2846,6 +2847,9 @@ class GenModify(object):
             except TypeError:
                 # Compatiblity mode for version 20160928 and lower
                 context["cannot_delete"] = self.object.internal_lock_delete()
+
+        # Subscribers
+        context['subscriptions'] = base64.b64encode(json.dumps(getattr(self.form_class.Meta, 'subscriptions', None)).encode('utf-8'))
 
         # Update context
         context.update(self.extra_context)

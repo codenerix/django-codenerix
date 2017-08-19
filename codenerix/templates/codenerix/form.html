@@ -43,7 +43,7 @@ limitations under the License.
     class="form-horizontal"
     role="form"
     autocomplete="off"
-    ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'"
+    ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'; subscribers('{{subscriptions|safe}}');"
     ng-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')">
     <div 
     {% if form.attributes.ngcontroller %}

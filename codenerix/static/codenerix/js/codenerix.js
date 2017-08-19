@@ -2104,6 +2104,107 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     refresh($scope,$timeout,Register, callback);
 };
 
+function subscribers(scope, subsjsb64) {
+    var subsjs = atob(subsjsb64);
+    if (subsjs) {
+        if (subsjs) {
+            try {
+                var subs = JSON.parse(subsjs);
+            } catch (e) {
+                var subs = null;
+            }
+            if (subs) {
+                if (typeof(CodenerixSubscribersWebsocket) != 'undefined') {
+                    var ws = CodenerixSubscribersWebsocket();
+
+                    // Define opener
+                    ws.opened = function () {
+                        ws.debug("Requesting config");
+                        ws.send({'action': 'get_config', 'uuid': ws.uuid}, null);
+                        angular.forEach(subs, (function (value, key) {
+                            ws.debug("Subscribe "+key);
+                            ws.send({'action': 'subscribe', 'uuid': key}, null);
+                        }));
+                    };
+
+                    // Define receiver
+                    ws.recv = function(message, ref, uuid) {
+                        ws.debug("Got message from '"+uuid+"': " + JSON.stringify(message) + " (REF: "+ref+")");
+                        
+                        var action = message.action;
+
+                        if (action == 'ping') {
+                            ws.debug("Sending PONG "+message.ref+" (ref:"+ref+")");
+                            ws.send({'action': 'pong'}, ref);
+                        } else if (action == 'config') {
+                            ws.debug("Got config: "+JSON.stringify(message)+" (ref:"+ref+")");
+                        } else if (action == 'subscription') {
+                            if (typeof(subs[uuid]) != 'undefined') {
+                                ws.debug("Got subscription message: "+JSON.stringify(message));
+                                angular.forEach(subs[uuid], (function (configtuple, key) {
+                                    // Get subscription configuration
+                                    var pkgkey = configtuple[0];
+                                    var config = configtuple[1];
+                                    if (typeof(config) == 'undefined') {
+                                        config = {'default':''}
+                                    }
+                                    
+                                    // If message brings data for our field
+                                    var msgdata = message.data[pkgkey];
+                                    if (typeof(msgdata) != 'undefined') {
+                                        // Fill the field with package information
+                                        if (typeof(config.mapper) == 'undefined') {
+                                            var newvalue = msgdata;
+                                        } else {
+                                            var newvalue = new Function('value', config.mapper)(msgdata);
+                                        }
+                                    } else {
+                                        // Fill the field with default information from subscription system
+                                        if (typeof(config.default) == 'undefined') {
+                                            var newvalue = '';
+                                        } else {
+                                            if (typeof(config.default.mapper) == 'undefined') {
+                                                var newvalue = config.default;
+                                            } else {
+                                                var newvalue = new Function('value', config.default.mapper)();
+                                            }
+                                        }
+                                    }
+                                    scope[scope.form_name][key].$setViewValue(newvalue);
+                                    scope[scope.form_name][key].$pristine = false;
+                                    scope[scope.form_name][key].$dirty = true;
+                                    scope[scope.form_name][key].$render();
+                                }));
+                                scope[scope.form_name].$pristine = false;
+                                scope[scope.form_name].$dirty = true;
+                                scope.$apply();
+                            } else {
+                            ws.error("Got message from unknown UUID '"+uuid+"': "+JSON.stringify(message));
+                            }
+                        } else if (action == 'error') {
+                            if ((typeof(message.error) == 'undefined') || (message.error == null)) {
+                                var error = "No error";
+                            } else {
+                                var error = message.error;
+                            }
+                            ws.error("Got an error from server: "+error);
+                        } else {
+                            ws.send_error("Unknown action '"+action+"'", ref);
+                        }
+                    };
+
+                    ws.closed = function() {
+                        ws.warning("We are not online! "+uuid);
+                    }
+
+                    // Start websocket
+                    ws.start();
+                }
+            }
+        }
+    }
+}
+
 function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws, hotkeys) {
     // Set our own url
     var url = ws+"/add";
@@ -2130,6 +2231,9 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     dynamic_fields($scope);
     angularmaterialchip($scope);
     if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
+    
+    // Set dynamic scope filling with subscribers
+    $scope.subscribers = function (subsjsb64) { subscribers($scope, subsjsb64) };
     
     // Go to list
     $scope.gotoback = function() {
@@ -2277,6 +2381,9 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     dynamic_fields($scope);
     angularmaterialchip($scope);
     if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
+    
+    // Set dynamic scope filling with subscribers
+    $scope.subscribers = function (subsjsb64) { subscribers($scope, subsjsb64) };
     
     // Go to list
     $scope.gotoback = function() {

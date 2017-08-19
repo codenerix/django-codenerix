@@ -30,16 +30,16 @@ from codenerix.widgets import StaticSelect, DynamicSelect, DynamicInput, MultiSt
 
 
 class BaseForm(object):
-    
+
     __language = None
     attributes = {}
-    
+
     def set_language(self, language):
         self.__language = language
 
     def set_attribute(self, key, value):
         self.attributes[key] = value
-    
+
     def get_name(self):
         # If name atrribute exists in Meta
         if 'name' in self.Meta.__dict__:
@@ -53,10 +53,10 @@ class BaseForm(object):
             else:
                 name = info['modelname']
         return name
-    
+
     def __errors__(self):
         return []
-    
+
     def clean_color(self):
         color = self.cleaned_data["color"]
         if len(color) != 0:
@@ -73,13 +73,13 @@ class BaseForm(object):
                 return color
         else:
             return color
-    
+
     def get_errors(self):
         # Where to look for fields
         if 'list_errors' in dir(self):
             list_errors = self.list_errors
         else:
-            r = self.non_field_errors()
+            # r = self.non_field_errors()
             # list_errors = [element[5] for element in self.non_field_errors()[:-1]]
             list_errors = []
             for element in self.non_field_errors()[:-1]:
@@ -89,7 +89,7 @@ class BaseForm(object):
 
     def __groups__(self):
         return []
-    
+
     def get_groups(self, gs=None, processed=[], initial=True):
         '''
         <--------------------------------------- 12 columns ------------------------------------>
@@ -127,44 +127,44 @@ class BaseForm(object):
                     ["number",None,12, True],
                 ),
             ]
-        
+
         Group: it is defined as tuple with 3 or more elements:
             Grammar: (<Name>, <Attributes>, <Element1>, <Element2>, ..., <ElementN>)
             If <Name> is None: no name will be given to the group and no panel decoration will be shown
             If <Size in columns> is None: default of 6 will be used
-            
+
             <Attributes>:
                 it can be an integer that represent the size in columns
                 it can be a tuple with several attributes where each element represents:
                     (<Size in columns>,'#<Font color>','#<Background color>','<Alignment>')
-            
+
             <Element>:
                 it can be a Group
                 it can be a Field
-            
+
             Examples:
             ('Info', 6, ["name",6], ["surname",6]) -> Info panel using 6 columns with 2 boxes 6 columns for each with name and surname inputs
             ('Info', (6,None,'#fcf8e3','center'), ["name",6], ["surname",6]) -> Info panel using 6 columns with a yellow brackground in centered title, 2 boxes, 6 columns for each with name and surname inputs
             ('Info', 12, ('Name', 6, ["name",12]), ('Surname',6, ["surname",12])) -> Info panel using 12 columns with 2 panels inside
               of 6 columns each named "Name" and "Surname" and inside each of them an input "name" and "surname" where it belongs.
-        
+
         Field: must be a list with at least 1 element in it:
             Grammar: [<Name of field>, <Size in columns>, <Label>]
-            
+
             <Name of field>:
                 This must be filled always
                 It is the input's name inside the form
                 Must exists as a form element or as a grouped form element
-                
+
             <Size in columns>:
                 Size of the input in columns
                 If it is not defined or if it is defined as None: default of 6 will be used
-            
+
             <Label>:
                 It it is defined as False: the label for this field will not be shown
                 If it is not defined or if it is defined as None: default of True will be used (default input's label will be shown)
                 If it is a string: this string will be shown as a label
-            
+
             Examples:
             ['age']                             Input 'age' will be shown with 6 columns and its default label
             ['age',8]                           Input 'age' will be shown with 8 columns and its default label
@@ -175,11 +175,11 @@ class BaseForm(object):
             ['age',6, None, None, None, None, None, ["ng-click=functionjs('param1')", "ng-change=functionjs2()"]]    Input 'age' with extras functions
             ['age',None,None,None,None, 'filter']    Input 'age' with extras filter ONLY DETAILS
         '''
-        
+
         # Check if language is set
         if not self.__language:
             raise IOError("ERROR: No language suplied!")
-        
+
         # Initialize the list
         if initial:
             processed = []
@@ -190,7 +190,7 @@ class BaseForm(object):
         else:
             list_fields = self
             check_system = "name"
-        
+
         # Default attributes for fields
         attributes = [
             ('columns', 6),
@@ -203,32 +203,32 @@ class BaseForm(object):
             ('extra_div', None),
         ]
         labels = [x[0] for x in attributes]
-        
+
         # Get groups if none was given
         if gs is None:
             gs = self.__groups__()
-        
+
         # Prepare the answer
         groups = []
-        
+
         # Prepare focus control
         focus_first = None
         focus_must = None
-        
+
         # html helper for groups and fields
         html_helper = self.html_helper()
-        
+
         # Start processing
         for g in gs:
             token = {}
             token['name'] = g[0]
-            
+
             if token['name'] in html_helper:
                 if 'pre' in html_helper[token['name']]:
                     token["html_helper_pre"] = html_helper[token['name']]['pre']
                 if 'post' in html_helper[token['name']]:
                     token["html_helper_post"] = html_helper[token['name']]['post']
-            
+
             styles = g[1]
             if type(styles) is tuple:
                 if len(styles) >= 1:
@@ -265,13 +265,13 @@ class BaseForm(object):
                     if type(f) == list:
                         # This is a field with attributes, get the name
                         field = f[0]
-                        
+
                         if html_helper and token['name'] in html_helper and 'items' in html_helper[token['name']] and field in html_helper[token['name']]['items']:
                             if 'pre' in html_helper[token['name']]['items'][field]:
                                 atr["html_helper_pre"] = html_helper[token['name']]['items'][field]['pre']
                             if 'post' in html_helper[token['name']]['items'][field]:
                                 atr["html_helper_post"] = html_helper[token['name']]['items'][field]['post']
-                        
+
                         # Process each attribute (if any)
                         dictionary = False
                         for idx, element in enumerate(f[1:]):
@@ -292,14 +292,14 @@ class BaseForm(object):
                         field = f
                     else:
                         raise IOError("Uknown element type '{0}' inside group '{1}'".format(type(f), token['name']))
-                    
+
                     # Get the Django Field object
                     found = None
                     for infield in list_fields:
                         if infield.__dict__[check_system] == field:
                             found = infield
                             break
-                    
+
                     if found:
                         # Get attributes (required and original attributes)
                         wrequired = found.field.widget.is_required
@@ -353,10 +353,10 @@ class BaseForm(object):
                                     found.field.widget.autofill_url = autofill[1]
                                     found.field.widget.autofill = autofill[2:]
                         else:
-                            
+
                             # Set we don't have autofill for this field
                             atr['autofill'] = None
-                        
+
                         # Check if we have to replace the widget with a newer one
                         if isinstance(found.field.widget, Select) and not isinstance(found.field.widget, DynamicSelect):
                             if not isinstance(found.field.widget, MultiStaticSelect):
@@ -365,7 +365,7 @@ class BaseForm(object):
                             found.field.widget.is_required = wrequired
                             found.field.widget.form_name = self.form_name
                             found.field.widget.field_name = infield.html_name
-                        
+
                         # Fill all attributes
                         for (attribute, default) in attributes:
                             if attribute not in atr.keys():
@@ -386,10 +386,10 @@ class BaseForm(object):
                         processed.append(found.__dict__[check_system])
                     else:
                         raise IOError("Unknown field '{0}' specified in group '{1}'".format(f, token['name']))
-            
+
             token['fields'] = fields
             groups.append(token)
-        
+
         # Add the rest of attributes we didn't use yet
         if initial:
             fields = []
@@ -451,10 +451,10 @@ class BaseForm(object):
                                 infield.field.widget.autofill_url = autofill[1]
                                 infield.field.widget.autofill = autofill[2:]
                     else:
-                        
+
                         # Set we don't have autofill for this field
                         atr['autofill'] = None
-                    
+
                     # Check if we have to replace the widget with a newer one
                     if isinstance(infield.field.widget, Select) and not isinstance(infield.field.widget, DynamicSelect):
                         if isinstance(infield.field, NullBooleanField):
@@ -466,7 +466,7 @@ class BaseForm(object):
                         infield.field.widget.is_required = wrequired
                         infield.field.widget.form_name = self.form_name
                         infield.field.widget.field_name = infield.html_name
-                    
+
                     # Fill all attributes
                     for (attribute, default) in attributes:
                         if attribute not in atr.keys():
@@ -483,17 +483,17 @@ class BaseForm(object):
                         flang(self.__language)
                     # Attach the attribute
                     fields.append(atr)
-            
+
             # Save the new elements
             if fields:
                 groups.append({'name': None, 'columns': 12, 'fields': fields})
-        
+
         # Set focus
         if focus_must:
             focus_must['focus'] = True
         elif focus_first is not None:
             focus_first['focus'] = True
-        
+
         # Return the resulting groups
         return groups
 
@@ -518,6 +518,6 @@ class GenModelForm(BaseForm, NgModelFormMixin, NgFormValidationMixin, NgModelFor
 
 class GenForm(BaseForm, NgFormValidationMixin, NgForm):
     add_djng_error = False
-    
+
     class Meta:
         name = ""
