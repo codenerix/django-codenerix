@@ -174,6 +174,7 @@ class BaseForm(object):
             ['age',8,_("Age in days"), True]    Input 'age' will be shown with 8 columns and translated label text "Age in days" to user's language, and input inline with label
             ['age',6, None, None, None, None, None, ["ng-click=functionjs('param1')", "ng-change=functionjs2()"]]    Input 'age' with extras functions
             ['age',None,None,None,None, 'filter']    Input 'age' with extras filter ONLY DETAILS
+            ['age',6, {'color': 'red'}          Input 'age' will be shown with red title
         '''
 
         # Check if language is set
@@ -201,6 +202,7 @@ class BaseForm(object):
             ('label', True),
             ('extra', None),
             ('extra_div', None),
+            ('foreign_info', {}),
         ]
         labels = [x[0] for x in attributes]
 
