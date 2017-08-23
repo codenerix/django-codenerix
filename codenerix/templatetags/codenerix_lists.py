@@ -278,10 +278,17 @@ def add_columns(obj, columns):
 
 
 @register.filter
-def linkedinfo(element):
+def linkedinfo(element, info_input={}):
     info = model_inspect(element.field._get_queryset().model())
+    info.update(info_input)
+
     ngmodel = element.html_name  # field.widget.attrs['ng-model']
-    return mark_safe("'{0}','{1}','{2}', '{3}s'".format(getattr(settings, 'BASE_URL', ''), ngmodel, info['appname'], info['modelname'].lower()))
+    return mark_safe("'{0}','{1}','{2}', '{3}s'".format(
+        getattr(settings, 'BASE_URL', ''),
+        ngmodel,
+        info['appname'],
+        info['modelname'].lower())
+    )
 
 
 # DEPRECATED: 2017-02-14

@@ -203,7 +203,7 @@ limitations under the License.
                                                                 {% else %}
                                                                     <div class="input-group input-group-sm">
                                                                         {{input|setattrs:attrs|safe}}
-                                                                        <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
+                                                                        <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo:field.foreign_info}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
                                                                             <div class="glyphicon glyphicon-plus-sign" ng-hide="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
                                                                             <div class="glyphicon glyphicon-pencil" ng-show="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
                                                                         </div>
@@ -284,7 +284,7 @@ limitations under the License.
                                                                 {% else %}
                                                                     <div class="input-group input-group-sm">
                                                                         {{input|setattrs:attrs|safe}}
-                                                                        <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
+                                                                        <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo:field.foreign_info}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
                                                                             <div class="glyphicon glyphicon-plus-sign" ng-hide="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
                                                                             <div class="glyphicon glyphicon-pencil" ng-show="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
                                                                         </div>
@@ -408,7 +408,7 @@ limitations under the License.
                                                                                         {% else %}
                                                                                             <div class="input-group input-group-sm">
                                                                                                 {{input|setattrs:attrs|safe}}
-                                                                                                <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
+                                                                                                <div class="input-group-addon select_add" ng-click="linked({{input|linkedinfo:subfield.foreign_info}},{{formobj.form_name}},'{{formobj.form_name}}',{{formobj.form_name}}.{{input.html_name}}.$viewValue,{{formobj|getws:input.html_name}})">
                                                                                                     <div class="glyphicon glyphicon-plus-sign" ng-hide="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
                                                                                                     <div class="glyphicon glyphicon-pencil" ng-show="{{formobj.form_name}}.{{input.html_name}}.$viewValue"></div>
                                                                                                 </div>

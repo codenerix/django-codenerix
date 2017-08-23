@@ -733,6 +733,38 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
                     // Submit the form control
                     formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, ws, form, 'here', action);
                 };
+                // Set delete function
+                $scope.delete = function(msg,url) {
+                    if (confirm(msg)) {
+                        // Build url
+                        if (url==undefined) {
+                            url = ws+"/../delete";
+                        }
+                        // Clear cache
+                        $templateCache.remove(url);
+                        // User confirmed
+                        $http.post( url, {}, {} )
+                        .success(function(answer, stat) {
+                            // Check the answer
+                            if (stat==202) {
+                                // Everything OK, close the window
+                                answer['delete'] = true;
+                                $uibModalInstance.close(answer);
+                            } else {
+                                // Error happened, show an alert
+                                console.log("ERROR "+stat+": "+answer)
+                                alert("ERROR "+stat+": "+answer)
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            if (cnf_debug){
+                                alert(data);
+                            }else{
+                                alert(cnf_debug_txt)
+                            }
+                        });
+                     }
+                };
                 // Set cancel function
                 $scope.cancel = function () { $uibModalInstance.dismiss('cancel'); };
             }],
@@ -749,8 +781,26 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
             if (answer) {
                 var options = $scope.options[ngmodel];
                 if (answer['__pk__']) {
-                    // Select the new created item
-                    if (ngmodel) {
+                    if ('delete' in answer && answer['delete'] == true){
+                        // Delete item
+                        var set_view_value = true;
+                        if (options == undefined){
+                            // multiselect
+                            options = $scope.amc_items[ngmodel]
+                            set_view_value = false;
+                        }
+                        var new_options = [];
+                        angular.forEach(options, function(key, value){
+                            // Update element
+                            if (options[value]["id"] != answer["__pk__"]){
+                                new_options[value] = options[value]
+                            }
+                        });
+                        $scope.options[ngmodel] = new_options;
+                        formobj[ngmodel].$setViewValue(null);
+
+                    }else if (ngmodel) {
+                        // Select the new created item
                         var set_view_value = true;
                         if (options == undefined){
                             // multiselect
@@ -2183,6 +2233,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
 };
 
 function subscribers(scope, subsjsb64) {
+    console.log("subscribers!!!");
     var subsjs = atob(subsjsb64);
     if (subsjs) {
         if (subsjs) {
