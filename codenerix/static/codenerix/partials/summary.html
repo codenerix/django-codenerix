@@ -23,7 +23,7 @@ limitations under the License.
    <input type="checkbox" name="checkline" value="{{ row.pk }}" ng-checked="CDNX_checkline_head" ng-model="CDNX_checkline[row.pk]" />
 </td>
 
-<td ng-repeat="column in data.table.head.columns" ng-switch="isList(row[column.id])">***
+<td ng-repeat="column in data.table.head.columns" ng-switch="isList(row[column.id])">
     <ul ng-switch-when="true" ng-init="key=getKey(column.id)">
         <li ng-repeat="info in row[column.id]">{{info}}</li>
     </ul>
