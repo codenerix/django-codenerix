@@ -208,7 +208,7 @@ function del_item_sublist(id, msg, url, scope, $http){
     }
 }
 
-function openmodal($scope, $timeout, $uibModal, size, functions, callback, locked) {
+function openmodal($scope, $timeout, $uibModal, size, functions, callback, locked, callback_cancel) {
     var ngmodel=null;
     // Define the modal window
     $scope.build_modal = function (inline) {
@@ -270,7 +270,12 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback, locke
                 };
                 
                 // Set cancel function
-                $scope.cancel = function () { $uibModalInstance.dismiss('cancel'); };
+                $scope.cancel = function () {
+                    if (callback_cancel != undefined) {
+                        callback_cancel($scope);
+                    }
+                    $uibModalInstance.dismiss('cancel');
+                };
                 
                 // Enable dynamic select 
                 $scope.http = $http;
