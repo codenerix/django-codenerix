@@ -2470,11 +2470,7 @@ class GenList(GenBase, ListView):
         answer['table'] = {}
         answer['table']['head'] = self.__jcontext_tablehead(context)
         answer['table']['body'] = None
-        s = []
-        s.append({"public": "True", "pk": "1", "show_menu": "True", "es__name": "familiaA", "code": "familiaA"})
-        s.append({"public": "True", "pk": "2", "show_menu": "True", "es__name": "familiaB", "code": "familiaB"})
-        s.append({"public": "True", "pk": "3", "show_menu": "True", "es__name": "familiaC", "code": "familiaC"})
-        answer['table']['summary'] = s
+        answer['table']['summary'] = None
 
         # Return answer
         return answer
