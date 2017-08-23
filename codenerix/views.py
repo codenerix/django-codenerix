@@ -538,6 +538,7 @@ class GenBase(object):
     # Constants
     BASE_URL = getattr(settings, 'BASE_URL', '')
     DEFAULT_STATIC_PARTIAL_ROWS = os.path.join(settings.STATIC_URL, 'codenerix/partials/rows.html')
+    DEFAULT_STATIC_PARTIAL_SUMMARY = os.path.join(settings.STATIC_URL, 'codenerix/partials/summary.html')
 
     def dispatch(self, *args, **kwargs):
         # Save arguments in the environment
@@ -777,6 +778,17 @@ class GenBase(object):
                     tabfinal['static_partial_row_path'] = settings.STATIC_URL + static_partial_row_path
                     tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
 
+                    # Get static partial summary information
+                    if 'static_partial_summary' not in tab:
+                        tabdetailinfo = model_inspect(tabdetailsclss)
+                        static_partial_summary_path = "{0}/{1}_summary.html".format(tabdetailinfo['appname'], "{0}s".format(tabdetailinfo['modelname'].lower()))
+                    else:
+                        static_partial_summary_path = tab['static_partial_summary']
+
+                    # Save static partial information
+                    tabfinal['static_partial_summary_path'] = settings.STATIC_URL + static_partial_summary_path
+                    tabfinal['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
+
                     # Save Internal ID
                     tabfinal['internal_id'] = internal_id
                     internal_id += 1
@@ -819,6 +831,17 @@ class GenBase(object):
             # Save static partial information
             tabfinal['static_partial_row_path'] = settings.STATIC_URL + static_partial_row_path
             tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
+
+            # Get static partial summary information
+            if 'static_partial_summary' not in tab:
+                tabdetailinfo = model_inspect(tabdetailsclss)
+                static_partial_summary_path = "{0}/{1}_summary.html".format(tabdetailinfo['appname'], "{0}s".format(tabdetailinfo['modelname'].lower()))
+            else:
+                static_partial_summary_path = tab['static_partial_summary']
+
+            # Save static partial information
+            tabfinal['static_partial_summary_path'] = settings.STATIC_URL + static_partial_summary_path
+            tabfinal['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
 
             # Save Internal ID
             tabfinal['internal_id'] = internal_id
@@ -981,6 +1004,7 @@ class GenList(GenBase, ListView):
 
         ws_entry_point                              # Set ws_entry_point variable to a fixed value
         static_partial_row                          # Set static_partial_row to a fixed value
+        static_partial_summary                      # Set static_partial_summary to a fixed value
         static_filters_row                          # Set static_filters_row to a fixed value
 
         field_delete = False                        # Show/Hide button for delete register ('True'/'False')
@@ -1147,6 +1171,10 @@ class GenList(GenBase, ListView):
 
         static_partial_row_path = getattr(self, 'static_partial_row', "{0}/{1}_rows.html".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
+
+        static_partial_summary_path = getattr(self, 'static_partial_summary', "{0}/{1}_summary.html".format(self._appname, "{0}s".format(self._modelname.lower())))
+        self.extra_context['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
+
 
         static_filters_row_path = getattr(self, 'static_filters_row', "{0}/{1}_filters.js".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_filters_row'] = get_static(static_filters_row_path, self.user, self.language, 'codenerix/js/rows.js', 'js', relative=True)
@@ -2442,6 +2470,11 @@ class GenList(GenBase, ListView):
         answer['table'] = {}
         answer['table']['head'] = self.__jcontext_tablehead(context)
         answer['table']['body'] = None
+        s = []
+        s.append({"public": "True", "pk": "1", "show_menu": "True", "es__name": "familiaA", "code": "familiaA"})
+        s.append({"public": "True", "pk": "2", "show_menu": "True", "es__name": "familiaB", "code": "familiaB"})
+        s.append({"public": "True", "pk": "3", "show_menu": "True", "es__name": "familiaC", "code": "familiaC"})
+        answer['table']['summary'] = s
 
         # Return answer
         return answer

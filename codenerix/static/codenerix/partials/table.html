@@ -95,4 +95,7 @@ limitations under the License.
                     <tbody codenerix-vtable>
                         <tr ng-repeat="row in data.table.body" ng-click="detail(row.pk)" ui-view></tr>
                     </tbody>
+                    <tfoot>
+                        <tr ng-repeat="row in data.table.summary" ui-view='summary'></tr>
+                    </tbody>
                 </table>

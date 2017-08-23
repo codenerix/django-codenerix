@@ -1,4 +1,4 @@
-__version__ = "1.0.43"
+__version__ = "1.0.44"
 
 __authors__ = [
     'Juan Miguel Taboada Godoy <juanmi@juanmitaboada.com>',
@@ -9,7 +9,7 @@ __authors__ = [
 __requirements__ = {
     'all':[
         "pymongo",
-        "django-angular",
+        "django-angular==0.8.4",
         "python-dateutil",
         "django-recaptcha>=1.2.1,<1.3",
         "django-rosetta",

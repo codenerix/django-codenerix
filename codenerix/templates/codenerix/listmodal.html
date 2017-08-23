@@ -32,6 +32,7 @@ limitations under the License.
         <script type="text/javascript">
             var ws_entry_point="{{ws_entry_point}}";
             var static_partial_row="{{static_partial_row}}";
+            var static_partial_summary="{{static_partial_summary}}";
             angular.module('gestdocumentServices', ['ngResource'])
             .factory('Register', ['$resource', function($resource){
                 return $resource('/{{ws_entry_point}}/:pk/:action', { json:'{}', pk:null, action:null },{
