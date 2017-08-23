@@ -40,6 +40,15 @@ angular.module('codenerixFilters', [])
         return "<a ng-click='$event.stopPropagation();' href='tel:"+input+"'>"+input+"</a>";
     } else if (kind=='image') {
         return "<img src='"+input+"'  />";
+    } else if (kind.substring(0,5)=='money') {
+        var kind = kind.substring(6);
+        if (kind=='euro') { return input+"€";
+        } else if (kind=='dollar') { return "$"+input;
+        } else if (kind=='pound') { return "£"+input;
+        } else if (kind=='yuan') { return "¥"+input;
+        } else if (kind=='bitcoin') { return input+"<span class='fa fa-btc'></span>";
+        } else { return input+"?";
+        }
     } else {
         console.error("AngularJS filter 'codenerix' got a wrong kind named '"+kind+"'");
         return input;
