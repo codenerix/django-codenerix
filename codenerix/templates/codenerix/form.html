@@ -174,9 +174,15 @@ limitations under the License.
                                                     </div><div class="form-group">
                                                 {% endif %}
                                                 {% if not input.field.label %}
-                                                    <div ng-class="{{form.form_name|invalidator:input}}">
-                                                        {{input}}
-                                                    </div>
+                                                    {% if input.data %}
+                                                        <div class="col-md-{{field.columns}}">
+                                                            {{input.data|safe}}
+                                                        </div>
+                                                    {% else %}
+                                                        <div ng-class="{{form.form_name|invalidator:input}}">
+                                                            {{input}}
+                                                        </div>
+                                                    {% endif %}
                                                 {% else %}
                                                 {# IF INPUT: INI ============================================================================= {{{1 #}
                                                 {% with zi=forloop.revcounter|stringformat:"s" %}
@@ -372,10 +378,18 @@ limitations under the License.
                                                                         {% if column_counter2|add_columns:subfield.columns %}
                                                                             </div><div class="form-group">
                                                                         {% endif %}
+
                                                                         {% if not input.field.label %}
-                                                                            <div ng-class="{{form.form_name|invalidator:input}}">
-                                                                                {{input}}
-                                                                            </div>
+                                                                            {% if input.data %}
+                                                                                <div class="col-md-{{subfield.columns}}">
+                                                                                    {{input.data|safe}}
+                                                                                </div>
+                                                                            {% else %}
+                                                                                <div ng-class="{{form.form_name|invalidator:input}}">
+                                                                                    {{input}}
+                                                                                </div>
+                                                                            {% endif %}
+
                                                                         {% else %}
                                                                             {# INPUT PROCESSOR: INI {{{2 #}
                                                                             {% with zi=forloop.revcounter|stringformat:"s" %}
