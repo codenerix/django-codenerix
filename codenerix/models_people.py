@@ -65,7 +65,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
     def __str__(self):
         return self.__unicode__()
-    
+
     def __fields__(self, info):
         fields = []
         fields.append(('user__username', _('User')))
@@ -108,7 +108,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def is_admin(self):
         try:
             return bool(self.user.is_superuser or self.user.groups.get(name='Admins'))
-        except:
+        except Exception:
             return False
 
     def profiles(self):
@@ -139,7 +139,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def clean_memcache(self):
         if self.pk:
             prefix = hashlib.md5()
-            prefix.update(base64.b64encode(settings.SECRET_KEY))
+            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')))
             clean_memcache_item("person:{}".format(self.pk), prefix.hexdigest())
 
     def get_grouppermit(self):
@@ -184,32 +184,32 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         self.user.save()
 
     def refresh_permissions(self):
-        
+
         # Check we have a user to work with
         if self.user:
-        
+
             # Clear groups and permisions for this user
             self.user.groups.clear()
             self.user.user_permissions.clear()
-            
+
             # Collect all groups and unique permissions for this user relationships
             groups = []
             permissions = []
             for x in self._meta.get_fields():
                 model = x.related_model
-                
+
                 # Only check roles
                 if model and issubclass(model, GenRole):
                     # Get the link
                     link = getattr(self, x.name, None)
-                    
+
                     # Check if the linked class has CodenerixMeta
                     if link and hasattr(link, 'CodenerixMeta'):
-                        
+
                         # Get groups and permissions from that class
                         groups += list(getattr(link.CodenerixMeta, 'rol_groups', None) or {})
                         permissions += list(getattr(link.CodenerixMeta, 'rol_permissions', None) or [])
-            
+
             # Add groups
             for groupname in set(groups):
                 group = Group.objects.filter(name=groupname).first()
@@ -220,44 +220,44 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                     group = Group.objects.filter(name=groupname).first()
                     if group is None:
                         raise IOError("Group '{} not found in the system. I have tried to remake groups but this group is not defined as a Role and it doesn't belong to the system either".format(groupname))
-                
+
                 # Add the user to this group
                 self.user.groups.add(group)
-            
+
             # Add permissions
             for permissionname in set(permissions):
                 permission = Permission.objects.filter(codename=permissionname).first()
                 if permission is None:
                     raise IOError("Permission '{}' not found in the system".format(permissionname))
-                
+
                 # Add the permission to this user
                 self.user.user_permissions.add(permission)
-            
+
         else:
             raise IOError("You can not refresh permissions for a Person wich doesn't have an associated user")
-    
+
     @staticmethod
     def group_permissions(clss):
-        
+
         groupsresult = {}
         for x in clss._meta.get_fields():
             model = x.related_model
-            
+
             # Check if it is a role
             if model and issubclass(model, GenRole):
-                
+
                 # Check if the class has CodenerixMeta
                 if hasattr(model, 'CodenerixMeta'):
-                    
+
                     # Get groups and permissions
                     groups = getattr(model.CodenerixMeta, 'rol_groups', [])
-                    
+
                     # Add groups
                     if groups:
                         groups_is_dict = type(groups) is dict
                         groupslist = list(set(groups))
                         for groupname in groupslist:
-                            
+
                             # Check permissions just in case something is wrong
                             perms = []
                             if groups_is_dict:
@@ -267,12 +267,12 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                                         raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname))
                                     else:
                                         perms.append(perm)
-                            
+
                             # Remember perms for this group
                             if groupname not in groupsresult:
                                 groupsresult[groupname] = []
                             groupsresult[groupname] += perms
-        
+
         # Set permissions for all groups
         for groupname in groupsresult:
             # Get group
@@ -284,7 +284,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             else:
                 # Remove all permissions for this group
                 group.permissions.clear()
-            
+
             # Add permissions to the group
             for perm in groupsresult[groupname]:
                 group.permissions.add(perm)
