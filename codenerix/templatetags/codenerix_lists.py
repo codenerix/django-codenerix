@@ -36,7 +36,7 @@ register = Library()
 def widgetize(i):
     # Initialize structure
     attrs = i.__dict__.get("field", {}).__dict__.get("widget", {}).__dict__.get('attrs', {})
-    
+
     # Select
     # if 'choices' in i.field.widget.__dict__:
     #
@@ -232,7 +232,7 @@ def foreignkey(element, exceptions):
 def headstyle(group):
     # Initialize
     style = ""
-    
+
     # Decide about colors
     if 'color' in group and group['color']:
         style += "color:{0};".format(group['color'])
@@ -240,7 +240,7 @@ def headstyle(group):
         style += "background-color:{0};".format(group['bgcolor'])
     if 'textalign' in group and group['textalign']:
         style += "text-align:{0};".format(group['textalign'])
-    
+
     # Check if we have some style
     if style:
         return "style={0}".format(style)

@@ -158,7 +158,11 @@ function subscribers_worker(scope, subsjsb64) {
                         };
 
                         ws.closed = function() {
-                            ws.warning("We are not online! "+uuid);
+                            if (typeof(uuid) == 'undefined') {
+                                ws.warning("We are not online! ");
+                            } else {
+                                ws.warning("We are not online! "+uuid);
+                            }
                         }
 
                         // Start websocket

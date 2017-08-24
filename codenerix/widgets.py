@@ -790,6 +790,41 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
         return html
 
 
+class VisualHTMLInput(forms.widgets.HiddenInput):
+    '''
+    Example
+    service_day_html = forms.CharField(
+        label=_("Quota"),
+        required=False,
+        widget=VisualHTMLInput(attrs={'selfname': 'service_day_html'}),
+        initial="<div class='form-control' id='<#id#>' ng-init='<#form:service_day_color#>=\"#ff00ff\"' color-contrast='{{<#form:service_day_color#>}}'>{{<#form:service_day_color#>}}</div>"
+    )
+    '''
+    def render(self, name, value, attrs=None):
+        # Compute hashkey
+        hashkey = attrs.get('id', str(random.randint(0, 1000)))
+        vmodel = attrs.get('ng-model').replace("'", '"')
+        selfname = attrs.get('selfname', None)
+
+        # Process all tags
+        for keydirty in value.split("<#")[1:]:
+            key = keydirty.split("#>")[0]
+            keysp = key.split(":")
+            actor = keysp[0]
+            args = keysp[1:]
+            if actor == 'form':
+                if selfname:
+                    newname = vmodel.replace(selfname, args[0])
+                    value = value.replace('<#{}#>'.format(key), newname)
+                else:
+                    raise IOError('selfname must be included in the attrs from the widget with the name of the field in the form')
+            elif actor == 'id':
+                value = value.replace('<#id#>', hashkey)
+
+        # Return result
+        return value
+
+
 class BootstrapWysiwygInput(forms.widgets.HiddenInput):
     def render(self, name, value, attrs=None):
         # Get model name
