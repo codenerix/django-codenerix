@@ -794,17 +794,21 @@ class VisualHTMLInput(forms.widgets.HiddenInput):
     '''
     Example
     service_day_html = forms.CharField(
-        label=_("Quota"),
+        label=_("Quota"),  # Optional
         required=False,
-        widget=VisualHTMLInput(attrs={'selfname': 'service_day_html'}),
-        initial="<div class='form-control' id='<#id#>' ng-init='<#form:service_day_color#>=\"#ff00ff\"' color-contrast='{{<#form:service_day_color#>}}'>{{<#form:service_day_color#>}}</div>"
+        widget=VisualHTMLInput(),
+        initial={'selfname': 'service_day_html', 'data': "<div id='<#id#>' ng-init='<#form:service_day_color#>=\"#ff00ff\"' color-contrast='{{<#form:service_day_color#>}}'>{{<#form:service_day_color#>}}</div>"}
     )
     '''
+
+    visual = True
+
     def render(self, name, value, attrs=None):
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
         vmodel = attrs.get('ng-model').replace("'", '"')
-        selfname = attrs.get('selfname', None)
+        selfname = value.get('selfname', None)
+        value = value.get('data', None)
 
         # Process all tags
         for keydirty in value.split("<#")[1:]:

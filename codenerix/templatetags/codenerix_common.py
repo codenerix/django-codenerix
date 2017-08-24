@@ -27,16 +27,22 @@ from django.conf import settings
 from django.utils.translation import get_language
 from django.utils import formats
 
-from codenerix.helpers import zeropad,monthname,nameunify
+from codenerix.helpers import zeropad, monthname, nameunify
 
 register = template.Library()
-register.filter('digitos',zeropad)
-register.filter('monthname',monthname)
-register.filter('nameunify',nameunify)
+register.filter('digitos', zeropad)
+register.filter('monthname', monthname)
+register.filter('nameunify', nameunify)
+
 
 @register.filter
-def debugme(obj):
-        raise IOError(obj)
+def debugme(obj, kind=None):
+    if kind == 'dict':
+        obj = obj.__dict__
+    elif kind == 'keys':
+        obj = obj.__dict__.keys()
+
+    raise IOError(obj)
 
 @register.filter
 def debugmedict(obj):
@@ -178,7 +184,7 @@ def mod(value, arg):
     if (value%arg==0):
         return 1
     else:
-        return 
+        return
 
 @register.filter
 def keyvalue(dic, key):
@@ -209,14 +215,14 @@ def langforms(forms, language):
 @register.filter
 def objectatrib(instance, atrib):
     '''
-    this filter is going to be useful to execute an object method or get an 
+    this filter is going to be useful to execute an object method or get an
     object attribute dynamically. this method is going to take into account
     the atrib param can contains underscores
     '''
     atrib = atrib.replace("__", ".")
     atribs = []
     atribs = atrib.split(".")
-    
+
     obj = instance
     for atrib in atribs:
         if type(obj)==dict:
@@ -226,7 +232,7 @@ def objectatrib(instance, atrib):
                 result = getattr(obj, atrib)()
             except:
                 result = getattr(obj, atrib)
-        
+
         obj = result
     return result
 
@@ -261,7 +267,7 @@ def cdnx_beauty(value, kind=None):
         elif type(value) is time.time:
             fmt = formats.get_format('TIME_INPUT_FORMATS', lang=get_language())[0]
             value = time.time.strftime(value, fmt)
-    
+
     return value
 
 

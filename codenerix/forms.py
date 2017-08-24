@@ -386,10 +386,6 @@ class BaseForm(object):
                         fields.append(atr)
                         # Remember we have processed it
                         processed.append(found.__dict__[check_system])
-                    elif type(f) is list and len(f)>0 and type(f[0]) is dict:
-                        atr['input'] = f[0]
-                        atr['input']['field'] = {'label': None}
-                        fields.append(atr)
                     else:
                         raise IOError("Unknown field '{0}' specified in group '{1}'".format(f, token['name']))
 

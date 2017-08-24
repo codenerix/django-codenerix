@@ -174,9 +174,9 @@ limitations under the License.
                                                     </div><div class="form-group">
                                                 {% endif %}
                                                 {% if not input.field.label %}
-                                                    {% if input.data %}
+                                                    {% if input.field.widget.visual %}
                                                         <div class="col-md-{{field.columns}}">
-                                                            {{input.data|safe}}
+                                                            {{input}}
                                                         </div>
                                                     {% else %}
                                                         <div ng-class="{{form.form_name|invalidator:input}}">
@@ -380,7 +380,7 @@ limitations under the License.
                                                                         {% endif %}
 
                                                                         {% if not input.field.label %}
-                                                                            {% if input.data %}
+                                                                            {% if input.field.widget.visual %}
                                                                                 <div class="col-md-{{subfield.columns}}">
                                                                                     {{input.data|safe}}
                                                                                 </div>
