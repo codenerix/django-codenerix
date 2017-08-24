@@ -263,9 +263,15 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                             if groups_is_dict:
                                 for permname in groups[groupname]:
                                     perm = Permission.objects.filter(codename=permname).first()
-                                    if perm is None:
-                                        raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname))
-                                    else:
+                                    # Commented by Juan Soler on a project we
+                                    # both are working on. Since this code is
+                                    # preventing a proper execution, I will
+                                    # comment it as he has done in our project
+                                    # and I will wait for him to validate this lines
+                                    #if perm is None:
+                                    #    raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname))
+                                    #else:
+                                    if perm is not None:
                                         perms.append(perm)
 
                             # Remember perms for this group
