@@ -147,7 +147,7 @@ class Debugger(object):
                         now = datetime.datetime.fromtimestamp(time.time())
                         message += "%02d/%02d/%d %02d:%02d:%02d %-15s - %s" % (now.day, now.month, now.year, now.hour, now.minute, now.second, headname, tabular)
                     if msg:
-e                       try:
+                        try:
                             message += str(msg)
                         except UnicodeEncodeError:
                             message += str(msg.encode('ascii', 'ignore'))
