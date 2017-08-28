@@ -184,6 +184,8 @@ class StaticSelect(forms.widgets.Select):
     def render(self, name, value, attrs=None, choices=()):
         # Initialization
         required = self.attrs.get('ng-required', 'false')
+        controller = self.attrs.get('ng-controller', None)
+        disabled = self.attrs.get('ng-disabled', None)
         change = self.attrs.get('ng-change', 'undefined').replace('"', "'").replace("'", "\\'")
         if change != "undefined":
             change = "'{}'".format(change)
@@ -197,6 +199,10 @@ class StaticSelect(forms.widgets.Select):
 
         # Render
         html = u"<input name='{0}' ng-required='{1}' ng-model='{0}' type='hidden'".format(vmodel, required)
+        if controller:
+            html += " ng-controller='{}' ".format(controller)
+        if disabled:
+            html += " ng-disabled='{}' ".format(disabled)
         valuejs = None
         if is_multiple:
             if value:
@@ -213,8 +219,13 @@ class StaticSelect(forms.widgets.Select):
 
         html += ">"
 
-        html += '<ui-select ng-disabled="{}"'.format(ngreadonly)
-
+        html += '<ui-select '
+        if disabled:
+            html += " ng-disabled='{}' ".format(disabled)
+        else:
+            html += ' ng-disabled="{}"'.format(ngreadonly)
+        if controller:
+            html += " ng-controller='{}' ".format(controller)
         if is_multiple:
             html += ' multiple '
         # Build options
@@ -352,6 +363,8 @@ class DynamicSelect(forms.widgets.Select):
         if not self.autofill_url:
             raise IOError("autofill_url not defined")
         # Initialization
+        controller = self.attrs.get('ng-controller', None)
+        disabled = self.attrs.get('ng-disabled', None)
         required = self.attrs.get('ng-required', 'false')
         change = self.attrs.get('ng-change', 'undefined').replace('"', "'").replace("'", "\\'")
         if change != "undefined":
@@ -373,11 +386,19 @@ class DynamicSelect(forms.widgets.Select):
 
         # Render
         html = u"<input name='{0}' ng-required='{1}' ng-model='{0}' id='{0}' type='hidden'".format(vmodel, required)
+        if controller:
+            html += " ng-controller='{}' ".format(controller)
+        if disabled:
+            html += " ng-disabled='{}' ".format(disabled)
         # Set initial value
         if value:
             html += u" ng-init=\"{0}={1}\"".format(vmodel, value, vform)
         html += ">"
         html += '<ui-select'
+        if controller:
+            html += " ng-controller='{}' ".format(controller)
+        if disabled:
+            html += " ng-disabled='{}' ".format(disabled)
         if hasattr(self, "multiple") and self.multiple:
             html += ' multiple '
         if value:
