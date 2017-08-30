@@ -3323,10 +3323,14 @@ class GenDetail(GenBase, DetailView):
 
                     if callable(value):
                         # if 'request' in value.func_code.co_varnames:
-                        if 'request' in value.__code__.co_varnames:
-                            args['request'] = self.request
-                            # Call the method
-                        value = value(**args)
+                        related = (getattr(value, 'all', None) is not None)
+                        if related:
+                            value = ", ".join([str(x) for x in value.all()])
+                        else:
+                            if 'request' in value.__code__.co_varnames:
+                                args['request'] = self.request
+                                # Call the method
+                            value = value(**args)
 
                     sublist.append({
                         "name": _(verbose_names[field]),
