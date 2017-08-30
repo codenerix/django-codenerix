@@ -135,7 +135,6 @@ def nicepercentnull(value):
 
 @register.filter
 def nicebool(value):
-    raise Exception(value)
     if value:
         return _("Yes")
     else:
