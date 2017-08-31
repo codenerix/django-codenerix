@@ -828,23 +828,26 @@ class VisualHTMLInput(forms.widgets.HiddenInput):
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
         vmodel = attrs.get('ng-model').replace("'", '"')
-        selfname = value.get('selfname', None)
-        value = value.get('data', None)
+        selfname = self.attrs.get('selfname', None)
+        value = self.attrs.get('data', None)
 
         # Process all tags
-        for keydirty in value.split("<#")[1:]:
-            key = keydirty.split("#>")[0]
-            keysp = key.split(":")
-            actor = keysp[0]
-            args = keysp[1:]
-            if actor == 'form':
-                if selfname:
-                    newname = vmodel.replace(selfname, args[0])
-                    value = value.replace('<#{}#>'.format(key), newname)
-                else:
-                    raise IOError('selfname must be included in the attrs from the widget with the name of the field in the form')
-            elif actor == 'id':
-                value = value.replace('<#id#>', hashkey)
+        if value is not None:
+            for keydirty in value.split("<#")[1:]:
+                key = keydirty.split("#>")[0]
+                keysp = key.split(":")
+                actor = keysp[0]
+                args = keysp[1:]
+                if actor == 'form':
+                    if selfname:
+                        newname = vmodel.replace(selfname, args[0])
+                        value = value.replace('<#{}#>'.format(key), newname)
+                    else:
+                        raise IOError('selfname must be included in the attrs from the widget with the name of the field in the form')
+                elif actor == 'id':
+                    value = value.replace('<#id#>', hashkey)
+        else:
+            raise IOError('data must be included in the attrs from the widget with the name of the field in the form')
 
         # Return result
         return value
