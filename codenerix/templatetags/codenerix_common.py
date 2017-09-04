@@ -327,3 +327,9 @@ def autofocus(f):
         return "autofocus"
     else:
         return ""
+
+
+@register.filter
+def replace(value, fromto):
+    (f, t) = fromto.split('·')
+    return str(value).replace(f, t)
