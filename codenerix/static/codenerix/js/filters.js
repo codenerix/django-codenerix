@@ -27,9 +27,9 @@ angular.module('codenerixFilters', [])
         // No kind defined
         if ((input==null) || (input==undefined) || (input=='')) {
             return "-";
-        } else if (input=='True' || input==true && isNaN(input)) {
+        } else if (input=='True' || input===true) {
             return '<i class="autotrue text-success glyphicon glyphicon-ok"></i>';
-        } else if (input=='False' || input==false && isNaN(input)) {
+        } else if (input=='False' || input===false) {
             return '<i class="autofalse text-danger glyphicon glyphicon-remove"></i>';
         } else {
             return input;
