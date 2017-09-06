@@ -43,11 +43,11 @@ def epochdate(timestamp):
     '''
     Convet an epoch date to a tuple in format ("yyyy-mm-dd","hh:mm:ss")
     Example: "1023456427" -> ("2002-06-07","15:27:07")
-    
+
     Parameters:
     - `timestamp`: date in epoch format
     '''
-    
+
     dt = datetime.fromtimestamp(float(timestamp)).timetuple()
     fecha = "{0:d}-{1:02d}-{2:02d}".format(dt.tm_year, dt.tm_mon, dt.tm_mday)
     hora = "{0:02d}:{1:02d}:{2:02d}".format(dt.tm_hour, dt.tm_min, dt.tm_sec)
@@ -136,23 +136,23 @@ def monthname(value):
 def nameunify(name, url=False):
     # Make unicode
     name = smart_text(name)
-    
+
     # Get it on lower
     namelow = unidecode(name).lower().strip(' \t\n\r')
-    
+
     # Define valid characters
     allowed_characters = 'abcdefghijklmnopqrstuvwxyz0123456789_-'
     if url:
         namelow = namelow.replace(' ', "-")
     else:
         namelow = namelow.replace("-", "").replace(' ', '_')
-    
+
     # Replace all unknown characters
     result = ''
     for c in namelow:
         if c in allowed_characters:
             result += c
-    
+
     if result[-1] in ("-", "_"):
         result = nameunify(result[0:-1], url)
     # Return the cleaned result
@@ -163,15 +163,15 @@ def get_profile(user):
     # Check if it has admin rights admin
     try:
         is_admin = bool(user.is_superuser or user.groups.get(name='Admins'))
-    except:
+    except Exception:
         is_admin = False
-    
+
     if is_admin:
         # Administrator use root
         profile = "admin"
     else:
         profile = None
-    
+
     # Return profile
     return profile
 
@@ -181,7 +181,7 @@ def get_profiled_paths(path, user, lang, extension):
     if user:
         # Check if it has admin rights admin
         profile = get_profile(user)
-        
+
         # Define the base_path to use
         paths.append("{0}.{1}".format(user.username, lang))
         paths.append(user.username)
@@ -191,18 +191,18 @@ def get_profiled_paths(path, user, lang, extension):
         if profile != 'admin':
             paths.append("user.{0}".format(lang))
             paths.append('user')
-    
+
     # Add an empty path
     paths.append(lang)
     paths.append("")
-    
+
     # Split path name
     pathsp = path.split(".")
     if pathsp[-1] == extension:
         basepath = ".".join(pathsp[:-1])
     else:
         basepath = path
-    
+
     # Return paths and basepath
     return (paths, basepath)
 
@@ -210,7 +210,7 @@ def get_profiled_paths(path, user, lang, extension):
 def get_template(template, user, lang, extension='html', raise_error=True):
     # Get profiled paths
     (templates, templatepath) = get_profiled_paths(template, user, lang, extension)
-    
+
     # Check templates
     test = []
     found = None
@@ -227,7 +227,7 @@ def get_template(template, user, lang, extension='html', raise_error=True):
             break
         except TemplateDoesNotExist:
             pass
-    
+
     # Return target template
     if found:
         return found
@@ -241,7 +241,7 @@ def get_template(template, user, lang, extension='html', raise_error=True):
 def get_static(desired, user, lang, default, extension='html', relative=False):
     # Get profiled paths
     (paths, basepath) = get_profiled_paths(desired, user, lang, extension)
-    
+
     # Check paths
     found = None
     for temp in paths:
@@ -256,7 +256,7 @@ def get_static(desired, user, lang, default, extension='html', relative=False):
             else:
                 found = target
             break
-    
+
     # Return target template
     if found:
         # Return the one we found
@@ -283,18 +283,20 @@ def model_inspect(obj):
             info['verbose_name'] = getattr(obj._meta, 'verbose_name', None)
         else:
             info['verbose_name'] = None
-        
+
         # Get info from the object
         if hasattr(obj, 'model') and obj.model:
-            namesp = str(obj.model)
+            model = obj.model
         else:
-            namesp = str(obj.__class__)
+            model = obj.__class__
 
+        namesp = str(model)
         namesp = namesp.replace("<class ", "").replace(">", "").replace("'", "").split(".")
 
         # Remember information
         info['appname'] = namesp[-3]
         info['modelname'] = namesp[-1]
+        info['model'] = model
 
         # Return the info
         return info
@@ -311,17 +313,17 @@ def upload_path(instance, filename):
     empty_string = ""
     # get the model name
     model_name = model_inspect(instance)['modelname']
-    
+
     # get the string date
     date = datetime.now().strftime("%Y-%m-%d").split(date_separator)
     curr_day = date[2]
     curr_month = date[1]
     curr_year = date[0]
-    
+
     split_filename = filename.split(ext_separator)
     filename = empty_string.join(split_filename[:-1])
     file_ext = split_filename[-1]
-    
+
     new_filename = empty_string.join([filename, str(random.random()).split(ext_separator)[1]])
     new_filename = ext_separator.join([new_filename, file_ext])
     string_path = path_separator.join([model_name, curr_year, curr_month, curr_day, new_filename])
@@ -365,7 +367,7 @@ def clean_memcache_item(key, item):
 
 
 class CodenerixEncoder(object):
-    
+
     codenerix_numeric_dic = {
         # Basic dicts
         'num': '0123456789',
@@ -378,73 +380,73 @@ class CodenerixEncoder(object):
         'hex16': '54BEF80D1C96A732',
         'hexz17': 'Z0123456789ABCDEF',
     }
-    
+
     def list_encoders(self):
         return self.codenerix_numeric_dic.keys()
-    
+
     def numeric_encode(self, number, dic='hex36', length=None, cfill=None):
-        
+
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
             dic = self.codenerix_numeric_dic[dic]
-        
+
         # Integrity check to dic
-        nr=""
+        nr = ""
         for c in dic:
             if c not in nr:
-                nr+=c
+                nr += c
             else:
                 raise IOError(_("ERROR: dic has repeated elements"))
-        
+
         # If no cfill
         if cfill is None:
             cfill = dic[0]
-        
+
         # Find lenght
         ldic = len(dic)
-        
+
         # Initialize
         string = ""
         div = ldic + 1
-        
+
         # Process number
         while div >= ldic:
-            div = int( number / ldic )
+            div = int(number / ldic)
             mod = number % ldic
             string += dic[mod]
             number = div
-        
+
         # If something left behind
         if div:
             string += dic[div]
-        
+
         # Fill the string if requested
         if length:
             string += cfill * (length - len(string))
-        
+
         # Return the reverse string
         return string[::-1]
-    
+
     def numeric_decode(self, string, dic='hex36'):
-        
+
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
             dic = self.codenerix_numeric_dic[dic]
-        
+
         # For each character in the string
         first = True
         number = 0
         for c in string:
-            
+
             # Not the first loop
             if not first:
                 number *= len(dic)
             else:
                 first = False
-            
+
             # Attach the character
             number += dic.index(c)
-        
+
         # Return the final resulting number
         return number
 
@@ -455,27 +457,27 @@ class InMemoryZip(object):
     imz = InMemoryZip()
     imz.append("info.dat", data).append("test.txt","asdfasfdsaf")
     datazip = imz.read()
-    
+
     # Get FILE pointer and read() from it
     FILE = imz.get_fp()
     FILE.read()
-    
+
     # Uncompress
     imz = InMemoryZip(datazip)$
     info_unzipped = imz.get("info.dat")
     '''
-    
+
     def __init__(self, data=None):
         # Create the in-memory file-like object
         self.in_memory_zip = io.BytesIO()
         if data:
             self.in_memory_zip.write(data)
             self.in_memory_zip.seek(0)
-    
+
     def get_fp(self):
         self.in_memory_zip.seek(0)
         return self.in_memory_zip
-    
+
     def append(self, filename_in_zip, file_contents):
         '''
         Appends a file with name filename_in_zip and contents of
@@ -483,26 +485,26 @@ class InMemoryZip(object):
         '''
         # Set the file pointer to the end of the file
         self.in_memory_zip.seek(-1, io.SEEK_END)
-        
+
         # Get a handle to the in-memory zip in append mode
         zf = zipfile.ZipFile(self.in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
-        
+
         # Write the file to the in-memory zip
         zf.writestr(filename_in_zip, file_contents)
-        
+
         # Mark the files as having been created on Windows so that
         # Unix permissions are not inferred as 0000
         for zfile in zf.filelist:
             zfile.create_system = 0
-        
+
         # Close the ZipFile
         zf.close()
-        
+
         # Rewind the file
         self.in_memory_zip.seek(0)
-        
+
         return self
-    
+
     def get(self, filename):
         self.in_memory_zip.seek(0)
         zf = zipfile.ZipFile(self.in_memory_zip, "r", zipfile.ZIP_DEFLATED, False)
@@ -512,20 +514,20 @@ class InMemoryZip(object):
         zf.close()
         # Return the result
         return data
-    
+
     def size(self):
         size = self.in_memory_zip.seek(-1, io.SEEK_END)
         self.in_memory_zip.seek(0)
         return size
-    
+
     def read(self):
         '''Returns a string with the contents of the in-memory zip.'''
         self.in_memory_zip.seek(0)
         return self.in_memory_zip.read()
-    
+
     def writetofile(self, filename):
         '''Writes the in-memory zip to a file.'''
-        f = file(filename, "w")
+        f = open(filename, "w")
         f.write(self.read())
         f.close()
 
