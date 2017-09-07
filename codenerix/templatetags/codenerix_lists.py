@@ -155,12 +155,14 @@ def date2timewidget(i, langcode):
 
 
 @register.filter
-def datewidget(i, langcode, kindtype='datetime'):
+def datewidget(i, langcode, kindtype='datetime', kind=None):
     # Initialization
     final = {}
     form = formats.get_format('DATETIME_INPUT_FORMATS', lang=langcode)[0].replace("%", "").replace('d', 'dd').replace('m', 'mm').replace('Y', 'yyyy').replace('H', 'hh').replace('M', 'ii').replace('S', 'ss')
 
-    kind = istype(i, kindtype)
+    if kind is None:
+        kind = istype(i, kindtype)
+
     if kind == 'DATETIME_INPUT_FORMATS':
         final['format'] = form
         final['startview'] = 2
