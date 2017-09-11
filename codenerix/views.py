@@ -375,14 +375,7 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
         #   1_flights_pilot_add_list_pilotslist_planes
         # NO DOESN'T HAVE PERMS:
         #   1_flights_pilot_add
-        try:
-            # python 2.7
-            hash_key = hashlib.sha1(settings.SECRET_KEY).hexdigest()
-        except TypeError:
-            # python 3.x
-            secret_key = bytes(settings.SECRET_KEY, encoding='utf-8')
-            hash_key = hashlib.sha1(secret_key).hexdigest()
-
+        hash_key = hashlib.sha1(settings.SECRET_KEY.encode()).hexdigest()
         cache_key = "{}_{}_{}_{}_{}_".format(hash_key, user.pk, appname, model_name, action_permission)
 
         if permission:
@@ -409,15 +402,8 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
             permission_group = []
 
         # Look for the key in cache
-        try:
-            # python 2.7
-            hash_key = hashlib.sha1(cache_key).hexdigest()
-            result = cache.get(hash_key)
-        except TypeError:
-            # python 3.x
-            cache_key = bytes(cache_key, encoding='utf-8')
-            hash_key = hashlib.sha1(cache_key).hexdigest()
-            result = cache.get(hash_key)
+        hash_key = hashlib.sha1(cache_key.encode()).hexdigest()
+        result = cache.get(hash_key)
 
         # If I found it in cache
         if result is not None:
@@ -1576,12 +1562,12 @@ class GenList(GenBase, ListView):
                                 # Build the key for the arguments and set the word as a value for the Q search
                                 if word[0] == '-':
                                     # If negated request
-                                    # key="-{}".format(hashlib.md5(word[1:]).hexdigest())
+                                    # key="-{}".format(hashlib.md5(word[1:].encode()).hexdigest())
                                     qdict = {'{}'.format(query): func(word[1:])}
                                     qtokens_element = ~Q(**qdict)
                                 else:
                                     # If positive request
-                                    # key="-{}".format(hashlib.md5(word[1:]).hexdigest())
+                                    # key="-{}".format(hashlib.md5(word[1:].encode()).hexdigest())
                                     qdict = {'{}'.format(query): func(word)}
                                     qtokens_element = Q(**qdict)
 
@@ -1802,13 +1788,7 @@ class GenList(GenBase, ListView):
             else:
                 name = value[0]
                 # not usable fields, example: fields.append((None, _('Selector'))) in airportslist
-                try:
-                    # python 2.7
-                    hash_key = hashlib.md5(value[1]).hexdigest()
-                except TypeError:
-                    # python 3.x
-                    info_key = bytes(value[1], encoding='utf-8')
-                    hash_key = hashlib.md5(info_key).hexdigest()
+                hash_key = hashlib.md5(value[1].encode()).hexdigest()
                 order_key = "#{}".format(hash_key)
 
             publicname = value[1]
@@ -1876,13 +1856,7 @@ class GenList(GenBase, ListView):
             if field:
                 context['columns'].append(sort[field.split(":")[0]])
             else:
-                try:
-                    # python 2.7
-                    hash_key = hashlib.md5(value[1]).hexdigest()
-                except TypeError:
-                    # python 3.x
-                    info_key = bytes(value[1], encoding='utf-8')
-                    hash_key = hashlib.md5(info_key).hexdigest()
+                hash_key = hashlib.md5(value[1].encode()).hexdigest()
                 field = "#{}".format(hash_key)
                 # selector
                 context['columns'].append(sort[field])

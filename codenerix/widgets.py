@@ -541,13 +541,7 @@ class FileAngularInput(forms.widgets.FileInput):
         if isinstance(field, dict):
             # Prepare filename
             temp_hexname = "{0}{1}".format(field['filename'].encode('ascii', 'ignore'), random.random())
-            try:
-                # python 2.7
-                hexname = hashlib.sha1(temp_hexname).hexdigest()
-            except TypeError:
-                # python 3.x
-                temp_hexname = bytes(temp_hexname, encoding='utf-8')
-                hexname = hashlib.sha1(temp_hexname).hexdigest()
+            hexname = hashlib.sha1(temp_hexname.encode()).hexdigest()
 
             ext = field['filename'].split(".")[-1]
             if not ext:

@@ -107,15 +107,15 @@ class LimitedAuthMiddleware(object):
     def process_request(self, request):
         # If the user is authenticated and shouldn't be
         if request.user.is_authenticated():
-            
+
             # If the user doesn't pass the check_auth test
             if not check_auth(request.user):
                 # Push it out from the system
                 logout(request)
-            
+
             # Get now
             now = datetime.datetime.now()
-            
+
             # Create delta for caducity by EXPIRE_WHEN_INACTIVE
             expire_when_innactive = getattr(settings, 'SESSION_EXPIRE_WHEN_INACTIVE', None)
             if expire_when_innactive is not None:
@@ -130,14 +130,14 @@ class LimitedAuthMiddleware(object):
                     except AttributeError:
                         # python2
                         nowts = float(time.mktime(now.timetuple()) + now.microsecond / 1000000.0)
-                    
+
                     diff = nowts - last_seen - expire_when_innactive
-                    
+
                     # Get caducity
                     if diff > 0:
                         # Push it out from the system
                         logout(request)
-                
+
                 # Refresh last_seen
                 last_seen = datetime.datetime.now()
                 try:
@@ -146,7 +146,7 @@ class LimitedAuthMiddleware(object):
                 except AttributeError:
                     # python2
                     last_seen = float(time.mktime(last_seen.timetuple()) + last_seen.microsecond / 1000000.0)
-                
+
                 # Remember in session
                 request.session['user_last_seen'] = last_seen
 
@@ -169,7 +169,7 @@ class LimitedAuthMiddleware(object):
                     ts = float(time.mktime(kickout.timetuple()) + kickout.microsecond / 1000000.0)
                     tz = float(time.mktime(now.timetuple()) + now.microsecond / 1000000.0)
                     kickout = ts - tz
-                
+
                 # Get caducity
                 caducity = request.session.get('user_session_caducity', None)
                 if not caducity or kickout < caducity:
@@ -275,42 +275,21 @@ class TokenAuth(ModelBackend):
                     keys.append(master)
                 if config['master_signed']:                     # MASTER KEY SIGNED
                     # keys.append("master_signed")
-                    try:
-                        # python 2.7
-                        key_encode = hashlib.sha1(tosign + master).hexdigest()
-                    except TypeError:
-                        # python 3.x
-                        key_temp = bytes(tosign + master, encoding='utf-8')
-                        key_encode = hashlib.sha1(key_temp).hexdigest()
-                    keys.append(key_encode)
+                    keys.append(hashlib.sha1(tosign.encode() + master.encode()).hexdigest())
             if user_key:
                 if config['user_unsigned']:                     # USER KEY
                     # keys.append("user_unsigned")
                     keys.append(user_key)
                 if config['user_signed']:                       # USER KEY SIGNED
                     # keys.append("user_signed")
-                    try:
-                        # python 2.7
-                        key_encode = hashlib.sha1(tosign + user_key).hexdigest()
-                    except TypeError:
-                        # python 3.x
-                        key_temp = bytes(tosign + user_key, encoding='utf-8')
-                        key_encode = hashlib.sha1(key_temp).hexdigest()
-                    keys.append(key_encode)
+                    keys.append(hashlib.sha1(tosign.encode() + user_key.encode()).hexdigest())
             if otp:
                 if config['otp_unsigned']:                      # OTP KEY
                     # keys.append("otp_unsigned")
                     keys.append(otp)
                 if config['otp_signed']:                        # OTP KEY SIGNED
                     # keys.append("otp_signed")
-                    try:
-                        # python 2.7
-                        key_encode = hashlib.sha1(tosign + otp).hexdigest()
-                    except TypeError:
-                        # python 3.x
-                        key_temp = bytes(tosign + otp, encoding='utf-8')
-                        key_encode = hashlib.sha1(key_temp).hexdigest()
-                    keys.append(key_encode)
+                    keys.append(hashlib.sha1(tosign.encode() + otp.encode()).hexdigest())
 
             # Key is valid
             if token in keys:
@@ -399,7 +378,7 @@ class TokenAuthMiddleware(object):
 class ActiveDirectoryGroupMembershipSSLBackend:
     '''
     Authorization backend for Active Directory in Django
-    
+
     # Possible configuration parameters
     # AD_SSL = True                             # Use SSL
     # AD_CERT_FILE='/path/to/your/cert.txt'     # Path to SSL certificate
@@ -414,19 +393,19 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             'last_name':    'sn',
         }
     '''
-    
+
     __debug = None
-    
+
     def debug(self, msg):
         '''
         Handle the debugging to a file
         '''
         # If debug is not disabled
         if self.__debug is not False:
-            
+
             # If never was set, try to set it up
             if self.__debug is None:
-                
+
                 # Check what do we have inside settings
                 debug_filename = getattr(settings, "AD_DEBUG_FILE", None)
                 if debug_filename:
@@ -435,17 +414,17 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 else:
                     # Disable debuging forever
                     self.__debug = False
-            
+
             if self.__debug:
                 # Debug the given message
                 self.__debug.write("{}\n".format(msg))
                 self.__debug.flush()
-    
+
     def ldap_link(self, username, password, mode='LOGIN'):
-        
+
         # If no password provided, we will not try to authenticate
         if password:
-            
+
             # Prepare LDAP connection details
             nt4_domain = settings.AD_NT4_DOMAIN.upper()
             dns_name = getattr(settings, "AD_DNS_NAME", nt4_domain).upper()
@@ -459,7 +438,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             port = getattr(settings, 'AD_LDAP_PORT', default_port)
             ldap_url = '{}://{}:{}'.format(proto, dns_name, port)
             self.debug('ldap.initialize :: url: {}'.format(ldap_url))
-            
+
             # Prepare library
             ser = {}
             ser['allowed_referral_hosts'] = [("*", True)]
@@ -494,37 +473,37 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 # The access for this user has been denied, Debug it if required
                 self.debug("LDAP connect failed 'LDAPException' for user '{}' with error '{}'".format(username, e))
                 answer = False
-            
+
         else:
             # The access for this user has been denied, Debug it if required
             self.debug("No password provided for user '{}'".format(username))
             answer = False
-        
+
         # Return the final result
         return answer
-    
+
     def authenticate(self, username=None, password=None):
         '''
         Authenticate the user agains LDAP
         '''
-        
+
         # Check user in Active Directory (authorization == None if can not connect to Active Directory Server)
         authorization = self.ldap_link(username, password, mode='LOGIN')
-        
+
         if authorization:
             # The user was validated in Active Directory
             user = self.get_or_create_user(username, password)
         else:
             # Access denied
             user = None
-        
+
         # Check if we didn't get a logged in user
         if user:
             # Make sure the user is active
             user.is_active = True
             user.save()
         else:
-            
+
             # If there was link to Active Directory and User is not authorized (lock it in Django)
             if authorization is not None and getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
                 u = User.objects.filter(username=username).first()
@@ -533,22 +512,22 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                     # Deactivate the user
                     u.is_active = False
                     u.save()
-        
+
         # Return the final decision
         return user
-    
+
     def get_ad_info(self, username, password):
-        
+
         self.debug("get_ad_info for user '{}'".format(username))
-        
+
         # Initialize the answer
         info = {}
-        
+
         # Get an already authenticated link connection to LDAP
         link = self.ldap_link(username, password, mode='SEARCH')
-        
+
         if link:
-            
+
             # Prepare SEARCH fields
             mapping = getattr(settings, 'AD_MAP_FIELDS', {})
             # Build the search fields
@@ -559,7 +538,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             for token in search_dns:
                 search_dnlist.append("dc={}".format(token))
             search_dn = ",".join(search_dnlist)
-            
+
             # Search for the user
             self.debug('Search "{}"'.format(search_dn))
             # Search in LDAP
@@ -573,16 +552,16 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 get_operational_attributes=True,
                 size_limit=1,
             )
-            
+
             # Get all results
             results = link.entries
-            
+
             # Make sure we found only one result
             if len(results) == 1:
-                
+
                 # Get answer
                 result = results[0].__dict__
-                
+
             elif len(results)>1:
                 # Found serveral results
                 self.debug("I found several results for your LDAP query")
@@ -591,17 +570,17 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 # Not found
                 self.debug("I didn't find any matching result for your LDAP query")
                 memberships = []
-            
+
             # Validate that they are a member of review board group
             memberships = result.get('memberOf', [])
-            
+
             # Process all memberships found
             groupsAD = {}
             for membership in memberships:
                 tokens = membership.split(",")
                 dcs = []
                 cn = None
-                
+
                 for token in tokens:
                     (key, value) = token.split("=")
                     if key == 'CN':
@@ -609,22 +588,22 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                             cn = value
                     elif key == 'DC':
                         dcs.append(value)
-                
+
                 # Prepare the full domain name addess of the AD
                 dc = ".".join(dcs)
-                
+
                 # Make sure the key exists
                 if dc not in groupsAD:
                     groupsAD[dc] = []
-                
+
                 # Add the new CN to the list
                 if cn not in groupsAD[dc]:
                     groupsAD[dc].append(cn)
-            
+
             # Prepare the answer
             info = {}
             info['groups'] = groupsAD
-            
+
             # Look for other tokens to get mapped
             for djfield in mapping.keys():
                 adfield = mapping[djfield]
@@ -633,70 +612,70 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                     self.debug("{}={}".format(adfield, info[djfield]))
                 else:
                     self.debug("{}=-NONE-".format(adfield))
-            
+
         else:
             # No link gotten
             self.debug("I didn't get a valid link to the LDAP server")
-        
+
         # Return the final result
         return info
-    
+
     def get_or_create_user(self, username, password):
         '''
         Get or create the given user
         '''
-        
+
         # Get the groups for this user
         info = self.get_ad_info(username, password)
         self.debug("INFO found: {}".format(info))
-        
+
         # Find the user
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             user = User(username=username)
-        
+
         # Update user
         user.first_name = info.get('first_name', '')
         user.last_name = info.get('last_name', '')
         user.email = info.get('email', '')
-        
+
         # Check if the user is in the Administrators groups
         is_admin = False
         for domain in info['groups']:
             if 'Domain Admins' in info['groups'][domain]:
                 is_admin = True
                 break
-        
+
         # Set the user permissions
         user.is_staff = is_admin
         user.is_superuser = is_admin
-        
+
         # Refresh the password
         user.set_password(password)
-        
+
         # Validate the selected user and gotten information
         user = self.validate(user, info)
         if user:
             self.debug("User got validated!")
-            
+
             # Autosave the user until this point
             user.save()
-            
+
             # Synchronize user
             self.synchronize(user, info)
         else:
             self.debug("User didn't pass validation!")
-        
+
         # Finally return user
         return user
-    
+
     def get_user(self, user_id):
         try:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
-    
+
     def validate(self, user, info):
         '''
         Dummy validate system, to be redeclared
@@ -705,18 +684,18 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         '''
         self.debug("Validation process!")
         return user
-    
+
     def synchronize(self, user, info):
         '''
         It tries to do a group synchronization if possible
         This methods should be redeclared by the developer
         '''
-        
+
         self.debug("Synchronize!")
-        
+
         # Remove all groups from this user
         user.groups.clear()
-        
+
         # For all domains found for this user
         for domain in info['groups']:
             # For all groups he is
