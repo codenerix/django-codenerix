@@ -20,10 +20,7 @@
 
 import random
 import hashlib
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+import io
 import base64
 from datetime import datetime
 import json
@@ -548,10 +545,10 @@ class FileAngularInput(forms.widgets.FileInput):
                 ext = "dat"
 
             # Prepare temporal file in memory
-            f = StringIO()
-            f.write(base64.b64decode(field[u'base64']))
+            f = io.BytesIO()
             f.name = "{0}.{1}".format(hexname, ext)
             f.original_name = field['filename']
+            f.write(base64.b64decode(field[u'base64']))
             f.seek(0)
 
             # Add the files to FILES

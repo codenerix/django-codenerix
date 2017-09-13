@@ -24,8 +24,6 @@ from django.db import transaction
 # Warning: Q objects are used inside an eval() that you can find somewhere down
 from django.db.models import Q
 
-from codenerix.helpers import model_inspect
-
 class MultiForm(object):
     '''
     model = Flight                                  # Main model
@@ -203,7 +201,7 @@ class MultiForm(object):
         # Check validation
         valid = form.is_valid()
         if (not valid) and ('non_field_errors' in dir(self)):
-            errors = [element[5] for element in self.non_field_errors()[:-1]]
+            errors = [element[5] for element in list(self.non_field_errors())[:-1]]
         elif form.errors.as_data():
             errors = []
             for element in form.errors.as_data():
@@ -262,8 +260,8 @@ class MultiForm(object):
                 valid *= formobj.is_valid()
 
                 # append error
-                if not formobj.is_valid():
-                    errors += list([element[5] for element in formobj.non_field_errors()[:-1]])
+                if not formobj.is_valid() and ('non_field_errors' in dir(formobj)):
+                    errors += [element[5] for element in list(formobj.non_field_errors())[:-1]]
 
             # Save fields to the list
             if groups:

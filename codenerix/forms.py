@@ -80,9 +80,9 @@ class BaseForm(object):
             list_errors = self.list_errors
         else:
             # r = self.non_field_errors()
-            # list_errors = [element[5] for element in self.non_field_errors()[:-1]]
+            # list_errors = [element[5] for element in list(self.non_field_errors())[:-1]]
             list_errors = []
-            for element in self.non_field_errors()[:-1]:
+            for element in list(self.non_field_errors())[:-1]:
                 if len(element) >= 5:
                     list_errors.append(element[5])
         return list_errors
