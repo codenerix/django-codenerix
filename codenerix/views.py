@@ -1161,7 +1161,6 @@ class GenList(GenBase, ListView):
         static_partial_summary_path = getattr(self, 'static_partial_summary', "{0}/{1}_summary.html".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
 
-
         static_filters_row_path = getattr(self, 'static_filters_row', "{0}/{1}_filters.js".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_filters_row'] = get_static(static_filters_row_path, self.user, self.language, 'codenerix/js/rows.js', 'js', relative=True)
 
