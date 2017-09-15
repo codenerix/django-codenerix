@@ -19,8 +19,11 @@
 # limitations under the License.
 
 
+from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
+from django.contrib.auth.management import create_permissions
+from django.contrib.contenttypes.management import update_contenttypes
 
 from codenerix.lib.debugger import Debugger
 
@@ -29,14 +32,35 @@ class Command(BaseCommand, Debugger):
 
     # Show this when the user types help
     help = "Refresh all permissions from a project"
-    
+
     def handle(self, *args, **options):
-        
+
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
         self.debug("Settings permissions for:", color='blue')
-        
+
+        # Get list of apps
+        self.debug("Getting list of APPs", color='blue')
+        apps_config = apps.get_app_configs()
+        apps_total = len(apps_config)
+
+        # Create missins permissions
+        self.debug("Creating missing permissions", color='blue')
+        idx = 1
+        for app_config in apps_config:
+            self.debug("    -> {}/{} {}".format(idx, apps_total, app_config.label), color='cyan')
+            create_permissions(app_config, apps=apps, verbosity=0)
+            idx += 1
+
+        # Update contenttypes
+        self.debug("Updating Content Types", color='blue')
+        idx = 1
+        for app_config in apps_config:
+            self.debug("    -> {}/{} {}".format(idx, apps_total, app_config.label), color='cyan')
+            update_contenttypes(app_config)
+            idx += 1
+
         # Get all users from the system
         person = None
         for user in User.objects.all():
@@ -47,7 +71,7 @@ class Command(BaseCommand, Debugger):
                 person = user.person
             else:
                 self.debug("NO PERSON".format(user.username), color='red', header=None)
-        
+
         # Remake groups permissions if we have at least one valid user
         if person:
             self.debug("Refreshing group permissions... ", color='blue', tail=None)
