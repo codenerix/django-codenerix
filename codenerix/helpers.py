@@ -23,7 +23,6 @@ import os
 from datetime import datetime
 import random
 from dateutil.tz import tzutc
-import dateutil.parser
 import zipfile
 import io
 from unidecode import unidecode
@@ -37,6 +36,7 @@ from django.shortcuts import render
 from django.conf import settings
 from django.views.generic.base import View
 from django.core.cache import cache
+from django.utils import dateparse
 
 
 def epochdate(timestamp):
@@ -72,8 +72,8 @@ def date2string(dtime, formt, default):
 
 
 def daterange_filter(value, variable):
-    start = dateutil.parser.parse(value['startDate'])
-    end = dateutil.parser.parse(value['endDate'])
+    start = dateparse.parse_datetime(value['startDate'])
+    end = dateparse.parse_datetime(value['endDate'])
     result = {'{0}__gte'.format(variable): start, '{0}__lte'.format(variable): end}
     return result
 
@@ -95,7 +95,7 @@ def timezone_deserialize(string):
     if string is None:
         result = None
     else:
-        result = dateutil.parser.parse(string)
+        result = dateparse.parse_datetime(string)
     return result
 
 
