@@ -837,6 +837,8 @@ class VisualHTMLInput(forms.widgets.HiddenInput):
                         raise IOError('selfname must be included in the attrs from the widget with the name of the field in the form')
                 elif actor == 'id':
                     value = value.replace('<#id#>', hashkey)
+                elif actor == 'ngmodel':
+                    value = value.replace('<#ngmodel#>', vmodel)
         else:
             raise IOError('data must be included in the attrs from the widget with the name of the field in the form')
 
