@@ -225,7 +225,7 @@ def acumulate(element, li):
 @register.filter
 def getforms(forms, form):
     if forms:
-        return forms
+        return [x[0] for x in forms]
     else:
         return [form]
 
