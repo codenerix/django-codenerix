@@ -1572,6 +1572,17 @@ function codenerix_builder(libraries, routes) {
      *              - You can add any custom state to the router dictionary
      *              - If you set <null> to any element in the list URL/Template/Controller will not be added to the route in the router:
      *                  Ex: { 'customState': [ '/custom_url', null, 'customController'] }
+     * 
+     * This two sentences works the same:
+     *  'list0': [undefined, get_static('codenerix_products/partials/products_list.html'), undefined]
+     *  'list0': {'': {templateUrl: get_static('codenerix_products/partials/products_list.html')}}
+     *  
+     *  
+     * Example custom ui-view name
+     *  'list0': {  '': {...},  // ui-view without name
+     *              'example1': {....}, // ui-view named example1 ->  ui-view='example1'
+     *              'example2': {....},
+     *           }
      *
      * Notes:
      *      - If libraries is not set (it is undefined), libraries will become an empty list [] by default
@@ -1713,16 +1724,25 @@ function codenerix_builder(libraries, routes) {
                     state=null;
                 } else {
                     // Get information
-                    if (route.length == 'number') {
+                    if (typeof(route.length) == 'number') {
                         // It is a list (old method)
                         angular.forEach(['url', 'templateUrl', 'controller'], function(key, value) {
                             if (route[value]===null) {
                                 delete state_dict[''][key];
-                            } else if (route[value]==!undefined) {
+                            } else if (route[value]!==undefined) {
                                 state_dict[''][key] = route[value];
                             }
                         });
                     } else {
+                        angular.forEach(route, function(v, k){
+                            if (k == ''){
+                                angular.forEach(route[''], function(v2, k2){
+                                    state_dict[''][k2] = v2;
+                                });
+                            }else{
+                                state_dict[k] = v;
+                            }
+                        });
                         // It is a dict (nw method)
                         console.log("NEW METHOD");
                     }
