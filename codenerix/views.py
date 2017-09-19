@@ -991,6 +991,8 @@ class GenList(GenBase, ListView):
         ws_entry_point                              # Set ws_entry_point variable to a fixed value
         static_partial_row                          # Set static_partial_row to a fixed value
         static_partial_summary                      # Set static_partial_summary to a fixed value
+        static_app_row                              # Set static_app_row to a fixed value
+        static_controllers_row                      # Set static_controllers_row to a fixed value
         static_filters_row                          # Set static_filters_row to a fixed value
 
         field_delete = False                        # Show/Hide button for delete register ('True'/'False')
@@ -1161,8 +1163,14 @@ class GenList(GenBase, ListView):
         static_partial_summary_path = getattr(self, 'static_partial_summary', "{0}/{1}_summary.html".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
 
+        static_app_row_path = getattr(self, 'static_app_row', "{0}/{1}_app.js".format(self._appname, "{0}s".format(self._modelname.lower())))
+        self.extra_context['static_app_row'] = get_static(static_app_row_path, self.user, self.language, os.path.join(settings.STATIC_URL, 'codenerix/js/app.js'), 'js', relative=True)
+
+        static_controllers_row_path = getattr(self, 'static_controllers_row', "{0}/{1}_controllers.js".format(self._appname, "{0}s".format(self._modelname.lower())))
+        self.extra_context['static_controllers_row'] = get_static(static_controllers_row_path, self.user, self.language, None, 'js', relative=True)
+
         static_filters_row_path = getattr(self, 'static_filters_row', "{0}/{1}_filters.js".format(self._appname, "{0}s".format(self._modelname.lower())))
-        self.extra_context['static_filters_row'] = get_static(static_filters_row_path, self.user, self.language, 'codenerix/js/rows.js', 'js', relative=True)
+        self.extra_context['static_filters_row'] = get_static(static_filters_row_path, self.user, self.language, os.path.join(settings.STATIC_URL, 'codenerix/js/rows.js'), 'js', relative=True)
 
         self.extra_context['field_delete'] = getattr(self, 'field_delete', False)
         self.extra_context['field_check'] = getattr(self, 'field_check', None)
@@ -3420,7 +3428,7 @@ class GenDetail(GenBase, DetailView):
                 meta["cannot_update"] = None
 
         # Update context
-        # context.update(self.extra_context)
+        meta['extra_context'] = self.extra_context
 
         ncontext = {
             'meta': meta,

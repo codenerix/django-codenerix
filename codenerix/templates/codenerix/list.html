@@ -31,9 +31,10 @@ limitations under the License.
 {% endblock %}
 
 {% block angular_app_libraries %}
-    <script type="text/javascript" src="{% static "codenerix/js/app.js" %}"></script>
+    <script type="text/javascript" src="{{ static_filters_row }}"></script>
+    <script type="text/javascript" src="{{ static_app_row }}"></script>
     <script type="text/javascript" src="{% static "codenerix/js/controllers.js" %}"></script>
-    <script type="text/javascript" src="{% static static_filters_row %}"></script>
+    {% if static_controllers_row %}<script type="text/javascript" src="{{ static_controllers_row }}"></script>{% endif %}
     {% block angular_app_service %}
         <script type="text/javascript">
             var ws_entry_point="{{ws_entry_point}}";
