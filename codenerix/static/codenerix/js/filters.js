@@ -38,8 +38,17 @@ angular.module('codenerixFilters', [])
         return input;
     } else if (kind=='skype') {
         return "<a ng-click='$event.stopPropagation();' href='tel:"+input+"'>"+input+"</a>";
-    } else if (kind=='image') {
-        return "<img src='"+input+"'  />";
+    } else if (kind.substring(0,5)=='image') {
+        if ((input==null) || (input==undefined) || (input=='')) {
+            return "-";
+        } else {
+            if (kind == 'image'){
+                return "<img src='"+input+"'  />";
+            }else{
+                var style = kind.substring(6);
+                return '<img src="'+input+'" style="'+style+'"  />';
+            }
+        }
     } else if (kind.substring(0,5)=='money') {
         if ((input==null) || (input==undefined) || (input=='')) {
             return "-";
