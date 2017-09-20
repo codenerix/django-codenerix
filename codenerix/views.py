@@ -3300,7 +3300,26 @@ class GenDetail(GenBase, DetailView):
                             verbose_names[field] = _(label_field)
 
                     args = {}
-                    value = getattr(self.object, field, None)
+
+                    value = None
+                    for field_split in field.split('__'):
+                        if value is None:
+                            try:
+                                verbose_names[field] = self.object._meta.get_field(field_split).verbose_name
+                            except AttributeError:
+                                pass
+                            except FieldDoesNotExist:
+                                pass
+
+                            value = getattr(self.object, field_split, None)
+                        else:
+                            try:
+                                verbose_names[field] = value._meta.get_field(field_split).verbose_name
+                            except AttributeError:
+                                pass
+                            except FieldDoesNotExist:
+                                pass
+                            value = getattr(value, field_split, None)
 
                     if callable(value):
                         # if 'request' in value.func_code.co_varnames:
