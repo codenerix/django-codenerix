@@ -1269,6 +1269,18 @@ answer_rendered(element,$q).then(function (element) {
 });
 */
 
+var codenerix_directive_htmlcompile = ['codenerixHtmlCompile', ['$compile', function($compile) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            scope.$watch(attrs.codenerixHtmlCompile, function(newValue, oldValue) {
+                element.html(newValue);
+                $compile(element.contents())(scope);
+            });
+        }
+    }
+}]];
+
 var codenerix_directive_focus = ['codenerixFocus', ['$timeout', function($timeout) {
     return {
         scope: { trigger: '=codenerixFocus' },
@@ -1614,6 +1626,7 @@ function codenerix_builder(libraries, routes) {
     .directive(codenerix_directive_vtable[0], codenerix_directive_vtable[1])
     .directive(codenerix_directive_focus[0], codenerix_directive_focus[1])
     .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
+    .directive(codenerix_directive_htmlcompile[0], codenerix_directive_htmlcompile[1])
     
     // Set routing system
     .run(codenerix_run);
