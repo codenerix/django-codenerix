@@ -389,7 +389,7 @@ class DynamicSelect(forms.widgets.Select):
             html += " ng-disabled='{}' ".format(disabled)
         # Set initial value
         if value:
-            html += u" ng-init=\"{0}={1}\"".format(vmodel, value, vform)
+            html += u" ng-init=\"{0}='{1}'\"".format(vmodel, value, vform)
         html += ">"
         html += '<ui-select'
         if controller:
@@ -399,7 +399,7 @@ class DynamicSelect(forms.widgets.Select):
         if hasattr(self, "multiple") and self.multiple:
             html += ' multiple '
         if value:
-            html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{3}'}},{{'id':{1},'label':'{2}'}}]; $select.selected=options.{0}[1];".format(vmodel, value, escapejs(label), placeholder)
+            html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{3}'}},{{'id':'{1}','label':'{2}'}}]; $select.selected=options.{0}[1];".format(vmodel, value, escapejs(label), placeholder)
             html += u" option_default={}; options.{}=option_default['rows']".format(self.__get_foreign(vurl, vform, vmodel, "'*'"), vmodel)
         else:
             # init options for form modal
@@ -408,7 +408,7 @@ class DynamicSelect(forms.widgets.Select):
 
         html += u" id=\"{0}\"".format(vid)
         html += u" ng-model=\"$parent.{0}\"".format(vmodel)
-        html += u" on-select=\"selectedOptionSelect({0}.{1},{2},{3})\"".format(vform, vmodel, value, change)
+        html += u" on-select=\"selectedOptionSelect({0}.{1},'{2}',{3})\"".format(vform, vmodel, value, change)
         html += ' theme="bootstrap"'
         html += ' ng-disabled="disabled"'
         html += ' reset-search-input="false"'
