@@ -38,6 +38,8 @@ angular.module('codenerixFilters', [])
         return input;
     } else if (kind=='skype') {
         return "<a ng-click='$event.stopPropagation();' href='tel:"+input+"'>"+input+"</a>";
+    } else if (kind=='link') {
+        return "<a ng-click='$event.stopPropagation();' href='"+input+"'><i class='glyphicon glyphicon-download-alt'></i></a>";
     } else if (kind.substring(0,5)=='image') {
         if ((input==null) || (input==undefined) || (input=='')) {
             return "-";
