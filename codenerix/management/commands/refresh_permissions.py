@@ -74,7 +74,7 @@ class Command(BaseCommand, Debugger):
 
         # Remake groups permissions if we have at least one valid user
         if person:
-            self.debug("Refreshing group permissions... ", color='blue', tail=None)
+            self.debug("Refreshing group permissions (it may takes over a minute)... ", color='blue', tail=None)
             person.__class__.group_permissions(person.__class__)
             self.debug("DONE", color='green', header=None)
         else:
