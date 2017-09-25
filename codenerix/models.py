@@ -204,7 +204,7 @@ class GenInterface(CodenerixModelBase):
 
     def __init__(self, *args, **kwards):
         self.CodenerixMeta = CodenerixMetaType()
-        result = super(GenInterface, self).__init__(*args, **kwards)
+        super(GenInterface, self).__init__(*args, **kwards)
 
         # revisamos que esten implementados los metodos indicados
         # we checked that the indicated methods are implemented
@@ -219,9 +219,7 @@ class GenInterface(CodenerixModelBase):
 
 @receiver(pre_delete)
 def codenerixmodel_delete_pre(sender, instance, **kwargs):
-    if not hasattr( instance, "name_models_list") \
-        and hasattr(instance, 'internal_lock_delete') \
-        and callable(instance.internal_lock_delete):
+    if not hasattr(instance, "name_models_list") and hasattr(instance, 'internal_lock_delete') and callable(instance.internal_lock_delete):
         lock_delete = instance.internal_lock_delete()
         if lock_delete is not None:
             raise PermissionDenied(lock_delete)
@@ -552,3 +550,17 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             log.snapshot_txt = instance.__strlog_delete__()
             log.action_flag = action
             log.save()
+
+    class RemoteLog(CodenerixModel):
+        '''
+        RemoteLog system
+        '''
+        user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+        data = models.TextField('Data', blank=False, null=False)
+
+        def __fields__(self, info):
+            fields = []
+            fields.append(('pk', _('ID')))
+            fields.append(('created', _('Created')))
+            fields.append(('user', _('Username')))
+            return fields

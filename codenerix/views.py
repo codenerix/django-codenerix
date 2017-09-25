@@ -46,7 +46,7 @@ from django.utils.translation import ugettext as _  # Before it was , ugettext_l
 from django.utils.encoding import smart_text
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render
 from django.utils.translation import string_concat, gettext
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core import serializers
@@ -548,6 +548,14 @@ class GenBase(object):
                     redir['NotAuthorizedReason'] = _("The view/model definition requires, that this user must be a superuser")
                 return redir
 
+        # Check if user is_staff is required
+        if hasattr(self, 'must_be_staff') and self.must_be_staff:
+            if not self.request.user.is_staff:
+                redir = redirect('not_authorized')
+                if getattr(settings, 'DEBUG', False):
+                    redir['NotAuthorizedReason'] = _("The view/model definition requires, that this user must be from staff")
+                return redir
+
         (authorized, reason) = self.auth_permission(self.action_permission, explained=True)
         if not authorized:
             redir = redirect('not_authorized')
@@ -944,6 +952,7 @@ class GenList(GenBase, ListView):
         model = NewModel
 
         must_be_superuser = True                    # If True it will request to be superuser
+        must_be_staff = True                        # If True it will request to be from staff
 
         permission = 'permission1'                  # Allowed only if user has permission1
         permission = ['perm2', 'perm3', ... ]       # Allowed only if user has perm2 or perm3
@@ -3613,7 +3622,7 @@ class GenForeignKey(GenBase, View):
 # === FORMS ===
 # We don't use log system when PQPRO_CASSANDRA == TRUE
 if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
-    from codenerix.models import Log
+    from codenerix.models import Log, RemoteLog
 
     class LogList(GenList):
         model = Log
@@ -3649,3 +3658,37 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                 ['change_json', 12],
             ),
         ]
+
+    class RemoteLogList(GenList):
+        model = RemoteLog
+        linkadd = False
+        linkedit = True
+        show_details = True
+        show_modal = True
+        extra_context = {'menu': ['manager', 'log'], 'bread': [_('Manager'), _('RemoteLog')]}
+        default_ordering = "-created"
+        must_be_superuser = True
+        must_be_staff = True
+
+    class RemoteLogDetails(GenDetail):
+        model = RemoteLog
+        groups = []
+
+        @method_decorator(login_required)
+        def get(self, request, *args, **kwargs):
+            log = get_object_or_404(RemoteLog, pk=kwargs.get('pk', None))
+            context = {'log': log}
+            return render(request, 'codenerix/remote_log.html', context)
+
+    class RemoteLogCreate(View):
+        @method_decorator(login_required)
+        def post(self, request, *args, **kwargs):
+            # Get POST data
+            datab64 = request.POST.get('data', '')
+            # Decode
+            data = base64.b64decode(datab64).decode('utf-8')
+            # Save
+            obj = RemoteLog(user=request.user, data=data)
+            obj.save()
+            # Return an answer
+            return HttpResponse(json.dumps({'pk': obj.pk}), content_type='application/json')

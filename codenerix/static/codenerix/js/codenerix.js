@@ -1977,7 +1977,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     // Showing details
                     if ($scope.data.meta.show_modal) {
                         // Show in a modal window
-                        modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope);
+                        modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
                         $scope.details(pk);
                     } else {
                         // Show like always

@@ -21,9 +21,13 @@
 from django.conf.urls import url
 
 from codenerix.views import LogList, LogDetails, status
+from codenerix.views import RemoteLogList, RemoteLogDetails, RemoteLogCreate
 
 urlpatterns = [
     url(r'^status/(?P<status>\w+)/(?P<answer>[a-zA-Z0-9+-_/]+)$', status, name='status'),
     url(r'^logs$', LogList.as_view(), name='codenerix_log_list'),
     url(r'^logs/(?P<pk>\w+)$', LogDetails.as_view(), name='codenerix_log_details'),
+    url(r'^remotelogs$', RemoteLogList.as_view(), name='CDNX_remotelog_list'),
+    url(r'^remotelogs/add$', RemoteLogCreate.as_view(), name='CDNX_remotelog_create'),
+    url(r'^remotelogs/(?P<pk>\w+)$', RemoteLogDetails.as_view(), name='CDNX_remotelog_details'),
 ]
