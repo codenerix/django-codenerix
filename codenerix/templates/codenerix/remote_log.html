@@ -30,8 +30,10 @@ limitations under the License.
             <button type="button" class="btn btn-sm btn-danger" ng-click="cancel()">{% trans "Cancel" %}</button>
         </h3>
     </div>
-    <div class="modal-body">
-        {{log.data|safe}}
+    <div class="modal-body" ng-non-bindable>
+        {% if '<!DOCTYPE html>' not in log.data %}<pre>{% endif %}
+            {{log.data|safe}}
+        {% if '<!DOCTYPE html>' not in log.data %}</pre>{% endif %}
     </div>
     <div class="modal-footer">
         <div class="text-center">
