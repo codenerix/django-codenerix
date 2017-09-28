@@ -156,14 +156,14 @@ class CodenerixModel(CodenerixModelBase):
         return ''
 
     def __unicode__(self):
-        func = getattr(self, __str__, None)
+        func = getattr(self, '__str__', None)
         if func:
             return func()
         else:
             return "{} object".format(self._meta.model)
 
     def __str__(self):
-        func = getattr(self, __unicode__, None)
+        func = getattr(self, '__unicode__', None)
         if func:
             return func()
         else:
