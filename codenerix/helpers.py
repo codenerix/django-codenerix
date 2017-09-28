@@ -25,6 +25,7 @@ import random
 from dateutil.tz import tzutc
 import zipfile
 import io
+import json
 from unidecode import unidecode
 
 # Django
@@ -541,3 +542,28 @@ def remove_getdisplay(field_name):
     if str_ini == field_name[0:len(str_ini)] and str_end == field_name[(-1) * len(str_end):]:
         field_name = field_name[len(str_ini):(-1) * len(str_end)]
     return field_name
+
+
+def trace_json_error(struct, path=[]):
+    found = None
+    kind = type(struct)
+    if kind is dict:
+        for key in struct:
+            found = trace_json_error(struct[key], path+[key])
+            if found:
+                break
+    elif kind is list:
+        idx = 0
+        for element in struct:
+            found = trace_json_error(element, path+[str(idx)])
+            if found:
+                break
+            idx += 1
+    else:
+        try:
+            json.dumps(struct)
+        except Exception:
+            found = path
+
+    # Return result
+    return found
