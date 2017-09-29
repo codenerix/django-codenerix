@@ -135,6 +135,26 @@ class CodenerixModel(CodenerixModelBase):
     created = models.DateTimeField(_("Created"), editable=False, auto_now_add=True)
     updated = models.DateTimeField(_("Updated"), editable=False, auto_now=True)
 
+    class Meta:
+        abstract = True
+        default_permissions = ('add', 'change', 'delete', 'view', 'list')
+
+    class CodenerixMeta(object):
+        abstract = None
+
+    def __init__(self, *args, **kwards):
+        self.CodenerixMeta = CodenerixMetaType()
+        return super(CodenerixModel, self).__init__(*args, **kwards)
+
+    def __strlog_add__(self):
+        return ''
+
+    def __strlog_update__(self, newobj):
+        return ''
+
+    def __strlog_delete__(self):
+        return ''
+
     def __limitQ__(self, info):
         return {}
 
@@ -167,26 +187,6 @@ class CodenerixModel(CodenerixModelBase):
             raise ValidationError(self.lock_update())
         else:
             return super(CodenerixModel, self).clean()
-
-    class Meta:
-        abstract = True
-        default_permissions = ('add', 'change', 'delete', 'view', 'list')
-
-    class CodenerixMeta(object):
-        abstract = None
-
-    def __init__(self, *args, **kwards):
-        self.CodenerixMeta = CodenerixMetaType()
-        return super(CodenerixModel, self).__init__(*args, **kwards)
-
-    def __strlog_add__(self):
-        return ''
-
-    def __strlog_update__(self, newobj):
-        return ''
-
-    def __strlog_delete__(self):
-        return ''
 
 
 class GenInterface(CodenerixModelBase):
