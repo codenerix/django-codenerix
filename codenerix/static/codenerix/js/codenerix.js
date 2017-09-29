@@ -722,7 +722,7 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                     if (typeof(formElement.$viewValue) == "object"){
                         var value = [];
                         angular.forEach(formElement.$viewValue, function(val, key){
-                            if (typeof(val.id) !== 'undefined'){
+                            if (val != undefined && typeof(val.id) !== 'undefined'){
                                 value.push(val.id);
                             }
                         });
@@ -932,6 +932,9 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
                         });
                         if (!inlist){
                             // Attach the new element
+                            if (options == undefined){
+                                options = [];
+                            }
                             options.push({'id': answer["__pk__"], 'label': answer["__str__"]});
                         }
                         /*
