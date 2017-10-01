@@ -35,7 +35,7 @@ from codenerix.middleware import get_current_user
 from django.conf import settings
 
 from codenerix.helpers import clean_memcache_item
-from codenerix.models import GenLog
+from codenerix.models import GenLog, CodenerixModel
 
 
 class GenPerson(GenLog, models.Model):  # META: Abstract class
@@ -49,7 +49,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     disabled = models.DateTimeField(_("Disabled from"), null=True, blank=True)
     creator = models.ForeignKey(User, blank=True, null=True, related_name='creators', default=None)
 
-    class Meta:
+    class Meta(CodenerixModel.Meta):
         abstract = True
 
     def __unicode__(self):
@@ -268,9 +268,9 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                                     # preventing a proper execution, I will
                                     # comment it as he has done in our project
                                     # and I will wait for him to validate this lines
-                                    #if perm is None:
+                                    # if perm is None:
                                     #    raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname))
-                                    #else:
+                                    # else:
                                     if perm is not None:
                                         perms.append(perm)
 

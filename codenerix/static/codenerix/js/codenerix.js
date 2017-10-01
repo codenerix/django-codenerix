@@ -51,6 +51,7 @@ var codenerix_libraries = [
     'ngQuill',
     'cfp.hotkeys',
 ];
+var codenerix_debug = true;
 
 // Add the remove method to the Array structure
 Array.prototype.remove = function(from, to) {
@@ -1639,7 +1640,9 @@ function codenerix_builder(libraries, routes) {
         // Create the routing system
         module.config(['$stateProvider', '$urlRouterProvider',
             function($stateProvider, $urlRouterProvider) {
-                $stateProvider
+                if (codenerix_debug == true) {
+                    console.log("Router: default '/'");
+                }
                 $urlRouterProvider.otherwise('/');
             }
         ]);
@@ -1727,7 +1730,7 @@ function codenerix_builder(libraries, routes) {
                 controller: 'SubListCtrl'
             }}]);
         }
-        
+
         // Process known routes
         angular.forEach(known, function(value, key) {
             // Get configuration
@@ -1784,13 +1787,15 @@ function codenerix_builder(libraries, routes) {
                 // Attach the new state
                 module.config(['$stateProvider', '$urlRouterProvider',
                     function($stateProvider, $urlRouterProvider) {
-                        // console.log(state+" - "+JSON.stringify(state_dict));
+                        if (codenerix_debug == true) {
+                             console.log("Router: kwnon '"+state+"' -> "+JSON.stringify(state_dict));
+                        }
                         $stateProvider.state(state, state_dict);
                     }
                 ]);
             }
         });
-        
+
         // Process new routes
         angular.forEach(routes, function(config, state) {
             if (config!==null) { 
@@ -1824,7 +1829,9 @@ function codenerix_builder(libraries, routes) {
                 // Attach the new state
                 module.config(['$stateProvider', '$urlRouterProvider',
                     function($stateProvider, $urlRouterProvider) {
-                        // console.log(state+" - "+JSON.stringify(state_dict));
+                        if (codenerix_debug == true) {
+                             console.log("Router: new '"+state+"' -> "+JSON.stringify(state_dict));
+                        }
                         $stateProvider.state(state, state_dict);
                     }
                 ]);
