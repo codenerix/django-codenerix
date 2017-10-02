@@ -51,7 +51,7 @@ var codenerix_libraries = [
     'ngQuill',
     'cfp.hotkeys',
 ];
-var codenerix_debug = true;
+var codenerix_debug = false;
 
 // Add the remove method to the Array structure
 Array.prototype.remove = function(from, to) {
@@ -1838,6 +1838,11 @@ function codenerix_builder(libraries, routes) {
             }
         });
     }
+
+    if (codenerix_debug == true) {
+         console.info("Router: if the path of the URL doesn't exists, AngularJS will now warn you in anyway, the state will stay with a blank page");
+    }
+
     
     // Add factory
     module.factory("ListMemory",function(){return {};});
