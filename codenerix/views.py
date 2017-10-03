@@ -1235,6 +1235,17 @@ class GenList(GenBase, ListView):
                     fields[field.name] = (field.verbose_name, lambda x, fieldname=field.name: Q(**{'{}'.format(fieldname): x}), 'input')
         return fields
 
+    def autoSearchQ(self, MODELINF, text):
+        fields_show = [x[0] for x in MODELINF.fields()]
+        fields = {}
+        for field in self.model._meta.get_fields():
+            if field.name in fields_show:
+                if type(field) in [models.CharField, models.TextField]:
+                    fields[field.name] = Q(**{'{}__icontains'.format(field.name): text})
+                elif type(field) in [models.IntegerField, models.SmallIntegerField, models.FloatField, ]:
+                    fields[field.name] = Q(**{'{}__icontains'.format(field.name): text})
+        return fields
+
     def get_queryset(self):
         # Call the base implementation
         if not self.haystack:
@@ -1547,8 +1558,14 @@ class GenList(GenBase, ListView):
             if len(search) > 0 and search[-1] == ' ':
                 search = search[:-1]
 
-            # Get fields to search in
-            searchs = MODELINF.searchQ(search)
+
+
+            searchs = {}
+            # Autofilter system
+            if self.autofiltering:
+                searchs.update(self.autoSearchQ(MODELINF, search))
+            # Fields to search in from the MODELINF
+            searchs.update(MODELINF.searchQ(search))
             qobjects = {}
             qobjectsCustom = {}
             for name in searchs:
