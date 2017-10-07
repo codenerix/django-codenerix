@@ -2870,6 +2870,9 @@ class GenModify(object):
         # Check linkback
         context['linkback'] = getattr(self, 'linkback', True)
 
+        # Check linksavenew
+        context['linksavenew'] = getattr(self, 'linksavenew', True)
+
         # Check buttons top/bottom
         context['buttons_top'] = getattr(self, 'buttons_top', True)
         context['buttons_bottom'] = getattr(self, 'buttons_bottom', True)

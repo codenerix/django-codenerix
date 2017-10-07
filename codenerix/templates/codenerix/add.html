@@ -33,8 +33,10 @@ limitations under the License.
     <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
     <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
 
-    <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-    <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+    {% if linksavenew %}
+        <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
+        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+    {% endif %}
 {% endblock %}
 
 {% block buttons_bottom %}
@@ -45,6 +47,8 @@ limitations under the License.
     <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
     <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
 
-    <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-    <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+    {% if linksavenew %}
+        <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
+        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+    {% endif %}
 {% endblock %}

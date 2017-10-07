@@ -743,6 +743,18 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
         .success(function(answer, stat) {
             // If the request was accepted
             if (stat==202) {
+
+                // Call to call back before anything else
+                if (typeof($scope.submit_callback) != 'undefined') {
+                    if (codenerix_debug) {
+                        console.log("Submit Callback found, calling it back!");
+                    }
+                    next = $scope.submit_callback(listid, url, form, next, kind, answer, stat);
+                    if (codenerix_debug) {
+                        console.log("Submit callback said next state is '"+next+"'");
+                    }
+                }
+
                 // Go back to the list
                 if (next=='here') {
                     if (kind=='add') {
@@ -775,7 +787,12 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                     $state.transitionTo('formadd'+listid, {}, { reload: true, inherit: true, notify: true });
                 } else if (next=='details') {
                     $state.go('details'+listid,{'pk':answer.__pk__});
+                } else if (next=='none') {
+                    if (codenerix_debug) {
+                        console.warn("Automatic destination state has been avoided by programmer's request!");
+                    }
                 } else {
+                    // Default state
                     $state.go('list'+listid);
                 }
             } else if (stat==200) {
