@@ -1558,8 +1558,6 @@ class GenList(GenBase, ListView):
             if len(search) > 0 and search[-1] == ' ':
                 search = search[:-1]
 
-
-
             searchs = {}
             # Autofilter system
             if self.autofiltering:
@@ -2929,12 +2927,24 @@ class GenModify(object):
         if form:
             h['bound'] = form.is_bound
 
+        groups = None
         if json_details:
-            groups = getattr(form, "__groups__", None)
+            groups = getattr(self, "form_groups", None)
             if groups:
-                h['groups'] = groups()
+                if type(groups) == list:
+                    h['groups'] = groups
+                else:
+                    h['groups'] = groups()
             else:
-                h['groups'] = None
+                groups = getattr(self, "__groups__", None)
+                if groups:
+                    h['groups'] = groups()
+                else:
+                    groups = getattr(form, "__groups__", None)
+                    if groups:
+                        h['groups'] = groups()
+                    else:
+                        h['groups'] = None
             h['form_name'] = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15))
 
         jc['head'] = h
@@ -2964,6 +2974,18 @@ class GenModify(object):
             for formobj in formlist:
                 # Set language
                 formobj.set_language(self.language)
+
+                # Set requested group to this form
+                selfgroups = getattr(self, "form_groups", None)
+                if selfgroups:
+                    if type(selfgroups) == list:
+                        formobj.__groups__ = lambda: selfgroups
+                    else:
+                        formobj.__groups__ = selfgroups
+                else:
+                    selfgroups = getattr(self, "__groups__", None)
+                    if selfgroups:
+                        formobj.__groups__ = groups
 
                 # Append to the general list of errors
                 if formobj.get_errors():
@@ -3065,6 +3087,27 @@ class GenModify(object):
 
         # Return json_context
         return jc
+
+    def get_form(self, form_class=None):
+        '''
+        Set form groups to the groups specified in the view if defined
+        '''
+        formobj = super(GenModify, self).get_form(form_class)
+
+        # Set requested group to this form
+        selfgroups = getattr(self, "form_groups", None)
+        if selfgroups:
+            if type(selfgroups) == list:
+                formobj.__groups__ = lambda: selfgroups
+            else:
+                formobj.__groups__ = selfgroups
+        else:
+            selfgroups = getattr(self, "__groups__", None)
+            if selfgroups:
+                formobj.__groups__ = groups
+
+        # Return the new updated form
+        return formobj
 
     def render_to_response(self, context, **response_kwargs):
         if self.json_worker:
