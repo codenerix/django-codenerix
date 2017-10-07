@@ -1762,8 +1762,6 @@ function codenerix_builder(libraries, routes) {
                                 state_dict[k] = v;
                             }
                         });
-                        // It is a dict (nw method)
-                        console.log("NEW METHOD");
                     }
                 }
                 // Remove the key from routes

@@ -56,11 +56,12 @@ limitations under the License.
         <input type="submit" value="submit" ng-show="false">
         {% if show_internal_name and formlist|len <= 1 %}
             <div class="col-md-12 internal-name">
-                <h4>{% block form_action %}{% trans "Editing" %}{% endblock %} {{form.get_name}}</h4>
+                <h4>{% if form_title %}{{form_title}}{% else %}{% block form_action %}{% trans "Editing" %}{% endblock %} {{form.get_name}}{% endif %}</h4>
             </div>
         {% endif %}
         
         {# BUTTONS at the top #}
+        {% if buttons_top %}
         <div class="col-md-12 internal-buttons-top {%if formlist|len > 1 %} multiform_top{%endif%}">
             <div class="form-group text-center">
                 {% block buttons_top %}
@@ -95,6 +96,7 @@ limitations under the License.
                 {% endblock %}
             </div>
         </div>
+        {% endif %}
 
         {% for formobj in formlist %}
             {% if formlist|len > 1 and formobj != form and forloop.counter0 == open_tabs %}
@@ -546,6 +548,7 @@ limitations under the License.
         {% endfor %}
         
         {# BUTTONS at the bottom #}
+        {% if buttons_bottom %}
         <div class="col-md-12 internal-buttons-botton {%if formlist|len > 1 %} multiform_top{%endif%}">
             <div class="form-group text-center">
                 {% block buttons_bottom %}
@@ -580,6 +583,7 @@ limitations under the License.
                 {% endblock %}
             </div>
         </div>
+        {% endif %}
         {% block extra_form_bottom%}{% endblock %}
 </div>        
 </form>

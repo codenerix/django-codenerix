@@ -2870,6 +2870,11 @@ class GenModify(object):
         # Check linkback
         context['linkback'] = getattr(self, 'linkback', True)
 
+        # Check buttons top/bottom
+        context['buttons_top'] = getattr(self, 'buttons_top', True)
+        context['buttons_bottom'] = getattr(self, 'buttons_bottom', True)
+        context['form_title'] = getattr(self, 'title', True)
+
         # Check hide_foreignkey_button
         context['hide_foreignkey_button'] = getattr(self, 'hide_foreignkey_button', False)
 
@@ -3104,7 +3109,7 @@ class GenModify(object):
         else:
             selfgroups = getattr(self, "__groups__", None)
             if selfgroups:
-                formobj.__groups__ = groups
+                formobj.__groups__ = selfgroups
 
         # Return the new updated form
         return formobj
