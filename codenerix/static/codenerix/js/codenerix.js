@@ -2683,54 +2683,63 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         alert(msg);
     }
     // Delete this element
-    $scope.delete = function(msg) {
-        if (confirm(msg)) {
-            // Clear cache
-            $templateCache.remove(url);
-            // User confirmed
-            var url = ws+"/"+$stateParams.pk+"/delete";
-            $http.post( url, {}, {} )
-            .success(function(answer, stat) {
+    $scope.delete = function(msg, target, nurl) {
+        if (typeof(nurl) == 'undefined') { var uurl = url; } else { var uurl = nurl; }
+        if ((target == 'submit') || (typeof(target) == 'undefined')) {
+            if (confirm(msg)) {
+                // Clear cache
+                $templateCache.remove(uurl);
+                // Get url
+                if (typeof(nurl) == 'undefined') {
+                    var uurl = ws+"/"+$stateParams.pk+"/delete";
+                } else {
+                    var uurl = nurl;
+                }
+                $http.post( uurl, {}, {} )
+                .success(function(answer, stat) {
 
-                // Check the answer
-                if (stat==202) {
+                    // Check the answer
+                    if (stat==202) {
 
-                    // Call to call back before anything else
-                    var next = "list";
-                    if (typeof($scope.delete_callback) != 'undefined') {
-                        if (codenerix_debug) {
-                            console.log("Delete Callback found, calling it back!");
+                        // Call to call back before anything else
+                        var next = "list";
+                        if (typeof($scope.delete_callback) != 'undefined') {
+                            if (codenerix_debug) {
+                                console.log("Delete Callback found, calling it back!");
+                            }
+                            next = $scope.delete_callback(listid, uurl, $stateParams.pk, next, answer, stat);
+                            if (codenerix_debug) {
+                                console.log("Delete callback said next state is '"+next+"'");
+                            }
                         }
-                        next = $scope.delete_callback(listid, url, $stateParams.pk, next, answer, stat);
-                        if (codenerix_debug) {
-                            console.log("Delete callback said next state is '"+next+"'");
-                        }
-                    }
 
-                    if (next == "list") {
-                        // If the request was accepted go back to the list
-                        $state.go('list'+listid);
-                    } else if (next=='none') {
-                        if (codenerix_debug) {
-                            console.warn("Automatic destination state has been avoided by programmer's request!");
+                        if (next == "list") {
+                            // If the request was accepted go back to the list
+                            $state.go('list'+listid);
+                        } else if (next=='none') {
+                            if (codenerix_debug) {
+                                console.warn("Automatic destination state has been avoided by programmer's request!");
+                            }
+                        } else {
+                            console.error("Unknown destination requested by the programmer, I don't understand next='"+next+"'");
                         }
                     } else {
-                        console.error("Unknown destination requested by the programmer, I don't understand next='"+next+"'");
+                        // Error happened, show an alert
+                        console.log("ERROR "+stat+": "+answer)
+                        alert("ERROR "+stat+": "+answer)
                     }
-                } else {
-                    // Error happened, show an alert
-                    console.log("ERROR "+stat+": "+answer)
-                    alert("ERROR "+stat+": "+answer)
-                }
-            })
-            .error(function(data, status, headers, config) {
-                if (cnf_debug){
-                    alert(data);
-                }else{
-                    alert(cnf_debug_txt)
-                }
-            });
-         }
+                })
+                .error(function(data, status, headers, config) {
+                    if (cnf_debug){
+                        alert(data);
+                    }else{
+                        alert(cnf_debug_txt)
+                    }
+                });
+            }
+        } else {
+            $scope[target](msg, $stateParams.pk);
+        }
     };
     
     // Update this element
@@ -2747,7 +2756,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         if ((target == 'submit') || (typeof(target) == 'undefined')) {
             formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, ulistid, uurl, uform, unext, uaction);
         } else {
-            $scope[target](ulistid, uurl, uform, unext, uaction);
+            $scope[target](ulistid, uurl, uform, unext, uaction, $stateParams.pk);
         }
     };
 

@@ -81,7 +81,7 @@ limitations under the License.
                     <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% else %}
                     <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                    <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}', '{{angular_delete|default:"delete"}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% endif %}
             {% endif %}
         {% endblock %}
@@ -160,7 +160,7 @@ limitations under the License.
                     <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% else %}
                     <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                    <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                    <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}', '{{angular_delete|default:"delete"}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
                 {% endif %}
             {% endif %}
             {% endblock %}
