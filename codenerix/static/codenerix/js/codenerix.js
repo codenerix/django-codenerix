@@ -51,7 +51,7 @@ var codenerix_libraries = [
     'ngQuill',
     'cfp.hotkeys',
 ];
-var codenerix_debug = true;
+var codenerix_debug = false;
 
 // Add the remove method to the Array structure
 Array.prototype.remove = function(from, to) {

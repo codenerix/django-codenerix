@@ -2864,14 +2864,11 @@ class GenModify(object):
         # Check showdetails
         context['show_details'] = getattr(self, 'show_details', False)
 
-        # Check linkdelete
+        # Check links
         context['linkdelete'] = getattr(self, 'linkdelete', True)
-
-        # Check linkback
         context['linkback'] = getattr(self, 'linkback', True)
-
-        # Check linksavenew
         context['linksavenew'] = getattr(self, 'linksavenew', True)
+        context['linksavehere'] = getattr(self, 'linksavehere', True)
 
         # Check buttons top/bottom
         context['buttons_top'] = getattr(self, 'buttons_top', True)
