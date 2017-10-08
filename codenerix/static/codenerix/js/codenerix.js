@@ -2458,15 +2458,21 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     };
     
     // Update this element
-    $scope.submit = function(form, next, target) {
+    $scope.submit = function(form, next, target, nlistid, nurl, nform, nnext, naction) {
         if (form instanceof KeyboardEvent) {
             form = $scope[$scope.form_name];
             next = 'list';
         }
+        if (typeof(nlistid) == 'undefined') { var ulistid = listid; } else { var ulistid = nlistid; }
+        if (typeof(nurl) == 'undefined') { var uurl = url; } else { var uurl = nurl; }
+        if (typeof(nform) == 'undefined') { var uform = form; } else { var uform = nform; }
+        if (typeof(nnext) == 'undefined') { var unext = next; } else { var unext = nnext; }
+        if (typeof(naction) == 'undefined') { var uaction = 'add'; } else { var uaction = naction; }
         if ((target == 'submit') || (typeof(target) == 'undefined')) {
-            formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'add');
+            console.log(uurl);
+            formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, ulistid, uurl, uform, unext, uaction);
         } else {
-            $scope[target](listid, url, form, next, 'add');
+            $scope[target](ulistid, uurl, uform, unext, uaction);
         }
     };
 
@@ -2729,15 +2735,20 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     };
     
     // Update this element
-    $scope.submit = function(form, next) {
+    $scope.submit = function(form, next, target, nlistid, nurl, nform, nnext, naction) {
         if (form instanceof KeyboardEvent) {
             form = $scope[$scope.form_name];
             next = 'list';
         }
+        if (typeof(nlistid) == 'undefined') { var ulistid = listid; } else { var ulistid = nlistid; }
+        if (typeof(nurl) == 'undefined') { var uurl = url; } else { var uurl = nurl; }
+        if (typeof(nform) == 'undefined') { var uform = form; } else { var uform = nform; }
+        if (typeof(nnext) == 'undefined') { var unext = next; } else { var unext = nnext; }
+        if (typeof(naction) == 'undefined') { var uaction = 'edit'; } else { var uaction = naction; }
         if ((target == 'submit') || (typeof(target) == 'undefined')) {
-            formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'edit');
+            formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, ulistid, uurl, uform, unext, uaction);
         } else {
-            $scope[target](listid, url, form, next, 'edit');
+            $scope[target](ulistid, uurl, uform, unext, uaction);
         }
     };
 
