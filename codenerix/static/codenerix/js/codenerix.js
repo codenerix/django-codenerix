@@ -51,7 +51,7 @@ var codenerix_libraries = [
     'ngQuill',
     'cfp.hotkeys',
 ];
-var codenerix_debug = false;
+var codenerix_debug = true;
 
 // Add the remove method to the Array structure
 Array.prototype.remove = function(from, to) {
@@ -1606,15 +1606,21 @@ function codenerix_builder(libraries, routes) {
      *              - If you set <null> to any element in the list URL/Template/Controller will not be added to the route in the router:
      *                  Ex: { 'customState': [ '/custom_url', null, 'customController'] }
      * 
-     * This two sentences works the same:
-     *  'list0': [undefined, get_static('codenerix_products/partials/products_list.html'), undefined]
-     *  'list0': {'': {templateUrl: get_static('codenerix_products/partials/products_list.html')}}
+     * This three sentences works the same:
+     *  'list0': [undefined, get_static('codenerix_products/partials/products_list.html'), undefined]   -> OLD way
+     *  'list0': {templateUrl: get_static('codenerix_products/partials/products_list.html')}            -> NEW way
+     *  'list0': {'views': {'': {templateUrl: get_static('codenerix_products/partials/products_list.html')}}} -> NEW way with several views
      *  
      *  
      * Example custom ui-view name
-     *  'list0': {  '': {...},  // ui-view without name
-     *              'example1': {....}, // ui-view named example1 ->  ui-view='example1'
-     *              'example2': {....},
+     *  'list0': {
+     *              'url': '/.../:pk/...',  // The url that we will use for this state
+     *              'params': {'pk': null}, // Params from the state that we will pass to views
+     *              'views': {
+     *                  '': {...},  // ui-view without name
+     *                  'example1': {....}, // ui-view named example1 ->  ui-view='example1'
+     *                  'example2': {....},
+     *              },
      *           }
      *
      * Notes:
@@ -1803,7 +1809,7 @@ function codenerix_builder(libraries, routes) {
                 module.config(['$stateProvider', '$urlRouterProvider',
                     function($stateProvider, $urlRouterProvider) {
                         if (codenerix_debug == true) {
-                             console.log("Router: kwnon '"+state+"' -> "+JSON.stringify(state_dict));
+                             console.log("Router: known '"+state+"' -> "+JSON.stringify(state_dict));
                         }
                         $stateProvider.state(state, state_dict);
                     }
@@ -1838,7 +1844,8 @@ function codenerix_builder(libraries, routes) {
                 if (k=='') {
                     state_dict=state_dict[''];
                 } else {
-                    state_dict={views: state_dict};
+                    console.log(state);
+                    state_dict=state_dict;
                 }
                 
                 // Attach the new state
