@@ -239,10 +239,14 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback, locke
                     formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, null, ws, form, 'here', 'addmodal');
                 };
                 
+                $scope.internal_submit = function (answer) {
+                    $uibModalInstance.close(answer);
+                }
+                
                 $scope.msg = function(msg){
                     alert(msg);
                 }
-                
+
                 $scope.delete = function(msg,url) {
                     if (confirm(msg)) {
                         // Build url
