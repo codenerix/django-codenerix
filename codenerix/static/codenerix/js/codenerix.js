@@ -2689,7 +2689,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     // Delete this element
     $scope.delete = function(msg, target, nurl) {
         if (typeof(nurl) == 'undefined') { var uurl = url; } else { var uurl = nurl; }
-        if ((target == 'submit') || (typeof(target) == 'undefined')) {
+        if ((target == 'delete') || (typeof(target) == 'undefined')) {
             if (confirm(msg)) {
                 // Clear cache
                 $templateCache.remove(uurl);
