@@ -2469,7 +2469,6 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
         if (typeof(nnext) == 'undefined') { var unext = next; } else { var unext = nnext; }
         if (typeof(naction) == 'undefined') { var uaction = 'add'; } else { var uaction = naction; }
         if ((target == 'submit') || (typeof(target) == 'undefined')) {
-            console.log(uurl);
             formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, ulistid, uurl, uform, unext, uaction);
         } else {
             $scope[target](ulistid, uurl, uform, unext, uaction);
