@@ -2779,10 +2779,18 @@ class GenModify(object):
     get_template_names_key='add'                    Sufix added to all templates when templates name resolution is looking for the template
     show_details = True                             With 'True' it will keep a show_details variable inside the context (by default 'False')
     show_internal_name = False                      Will avoid showing the name of the model on the top of the form (default is 'True')
-    hide_foreignkey_button = True                   With 'True' it will hide the '+' (plus button) from forms for creating new registers
+    hide_foreignkey_button = True                   When 'True' it will hide the '+' (plus button) from forms for creating new registers
 
-    json = True                                     With 'True' it will return a JSON answer
-    json_details = True                             With 'True' it will add details to JSON answer
+    json = True                                     When 'True' it will return a JSON answer (default: True)
+    json_details = True                             When 'True' it will add details to JSON answer (default: True)
+
+    linkdelete = True                               When 'True' it will show "Delete" button on forms (default: True)
+    linkback = True                                 When 'True' it will show "Go back" button on forms (default: True)
+    linksavenew = True                              When 'True' it will show "Save and new" button on forms (default: True)
+    linksavehere = True                             When 'True' it will show "Save here" button on forms (default: True)
+
+    buttons_top = True                              When 'True' it will show form button on the top of the form (default: True)
+    buttons_bottom = True                           When 'True' it will show form button on the bottom of the form (default: True)
     '''
 
     def __init__(self, *args, **kwargs):
