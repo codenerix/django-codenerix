@@ -1844,7 +1844,6 @@ function codenerix_builder(libraries, routes) {
                 if (k=='') {
                     state_dict=state_dict[''];
                 } else {
-                    console.log(state);
                     state_dict=state_dict;
                 }
                 
@@ -2683,10 +2682,32 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
             var url = ws+"/"+$stateParams.pk+"/delete";
             $http.post( url, {}, {} )
             .success(function(answer, stat) {
+
                 // Check the answer
                 if (stat==202) {
-                    // If the request was accepted go back to the list
-                    $state.go('list'+listid);
+
+                    // Call to call back before anything else
+                    var next = "list";
+                    if (typeof($scope.delete_callback) != 'undefined') {
+                        if (codenerix_debug) {
+                            console.log("Delete Callback found, calling it back!");
+                        }
+                        next = $scope.delete_callback(listid, url, $stateParams.pk, next, answer, stat);
+                        if (codenerix_debug) {
+                            console.log("Delete callback said next state is '"+next+"'");
+                        }
+                    }
+
+                    if (next == "list") {
+                        // If the request was accepted go back to the list
+                        $state.go('list'+listid);
+                    } else if (next=='none') {
+                        if (codenerix_debug) {
+                            console.warn("Automatic destination state has been avoided by programmer's request!");
+                        }
+                    } else {
+                        console.error("Unknown destination requested by the programmer, I don't understand next='"+next+"'");
+                    }
                 } else {
                     // Error happened, show an alert
                     console.log("ERROR "+stat+": "+answer)
