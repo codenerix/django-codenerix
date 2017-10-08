@@ -44,7 +44,7 @@ limitations under the License.
     role="form"
     autocomplete="off"
     ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'; subscribers('{{subscriptions|safe}}');"
-    ng-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')">
+    ng-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{submit|default:"submit"}}')">
     <div 
     {% if form.attributes.ngcontroller %}
     ng-controller="{{ form.attributes.ngcontroller }}"
@@ -67,14 +67,14 @@ limitations under the License.
                 {% block buttons_top %}
                 {% if not cannot_update %}
                     <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
                     {% if linksavehere %}
                         <label  class="sr-only"  for="submit_savehere">{% trans "Save here" %}</label>
-                        <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here')" class="btn green btn-sm" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
+                        <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here', '{{submit|default:"submit"}}')" class="btn green btn-sm" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
                     {% endif %}
                     {% if linksavenew %}
                         <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-                        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+                        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
                     {% endif %}
                     <label  class="sr-only"  for="submit_reload">{% trans "Reload" %}</label>
                     <button type="button" id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
@@ -558,14 +558,14 @@ limitations under the License.
                 {% block buttons_bottom %}
                 {% if not cannot_update %}
                     <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
                     {% if linksavehere %}
                         <label  class="sr-only"  for="submit_savehere">{% trans "Save here" %}</label>
-                        <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
+                        <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here', '{{submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
                     {% endif %}
                     {% if linksavenew %}
                         <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-                        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+                        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
                     {% endif %}
                     <label  class="sr-only"  for="submit_reload">{% trans "Reload" %}</label>
                     <button type="button" id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>

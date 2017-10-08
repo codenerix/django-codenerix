@@ -2791,6 +2791,8 @@ class GenModify(object):
 
     buttons_top = True                              When 'True' it will show form button on the top of the form (default: True)
     buttons_bottom = True                           When 'True' it will show form button on the bottom of the form (default: True)
+
+    submit = 'submit'                               Name of the method inside AngularJS scope that will receive submit actions
     '''
 
     def __init__(self, *args, **kwargs):
@@ -2877,6 +2879,9 @@ class GenModify(object):
         context['linkback'] = getattr(self, 'linkback', True)
         context['linksavenew'] = getattr(self, 'linksavenew', True)
         context['linksavehere'] = getattr(self, 'linksavehere', True)
+
+        # Check submit
+        context['submit'] = getattr(self, 'submit', 'submit')
 
         # Check buttons top/bottom
         context['buttons_top'] = getattr(self, 'buttons_top', True)
