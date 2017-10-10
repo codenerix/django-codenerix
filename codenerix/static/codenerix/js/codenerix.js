@@ -1004,6 +1004,10 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
 };
 
 function dynamic_fields(scope) {
+    /*
+    Inside the DynamicSelects will exists $externalScope which refers to the Scope outside the selector
+    */
+
     // Memory for dynamic fields
     scope.dynamicFieldsMemory = {};
 
@@ -1050,7 +1054,11 @@ function dynamic_fields(scope) {
         return false;
     };
     // Control how the selected ui-select field works with pristine/dirty states
-    scope.selectedOptionSelect = function(input, value, ngchange) {
+    scope.selectedOptionSelect = function(input, value, ngchange, externalScope) {
+        if ((typeof(input) == 'undefined') || (input === null)){
+            // Dummy input
+            input={'$setViewValue': function () {}};
+        }
         if (!input.$dirty) {
             input.$dirty=input.$viewValue!=value;
         }
@@ -1144,9 +1152,9 @@ function dynamic_fields(scope) {
                     return;
                 }
             }));
-        }else if (ngchange!==undefined) {
+        } else if (ngchange!==undefined) {
             // Evaluate the expresion
-            scope.$eval(ngchange);
+            scope.$eval(ngchange, {'$externalScope': externalScope});
         }
     };
     
