@@ -688,8 +688,16 @@ function refresh($scope, $timeout, Register, callback, internal) {
             $scope.refresh_callback();
         }
     };
+    // Prepare arguments
+    if (typeof($scope.RegisterParams) == 'undefined') {
+        var register_args = {};
+    } else {
+        var register_args = $scope.RegisterParams;
+    }
+    // Attach json
+    register_args['json'] = $scope.query;
     // Call the service for the data
-    $scope.tempdata = Register.query({'json':$scope.query}, wrapper_callback);
+    $scope.tempdata = Register.query(register_args, wrapper_callback);
 }
 
 function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, url, form, next, kind) {
