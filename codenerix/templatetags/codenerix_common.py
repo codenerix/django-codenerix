@@ -333,3 +333,9 @@ def autofocus(f):
 def replace(value, fromto):
     (f, t) = fromto.split('·')
     return str(value).replace(f, t)
+
+
+@register.filter
+def set_ngmodel(inp, name):
+    inp.field.widget.field_name = name
+    return inp
