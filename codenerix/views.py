@@ -83,6 +83,8 @@ def status(request, status, answer):
     status = status.lower()
     if status == 'accept':
         out = 202     # Accepted
+    elif status == 'conflict':
+        out = 409     # Conflict: everything is fine in the request but the resource can not accept the request because the actual state of the resource itself
     else:
         out = 501     # Not Implemented
     return HttpResponse(answerjson, status=out)
