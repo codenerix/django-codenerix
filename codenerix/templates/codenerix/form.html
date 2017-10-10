@@ -210,7 +210,7 @@ limitations under the License.
                                                         {% else %}
                                                             {% if input|foreignkey:no_render_as_foreign %}
                                                                 {# INPUT IS FOREIGN KEY: INI {{{3 #}
-                                                                {% if hide_foreignkey_button %}
+                                                                {% if hide_foreignkey_button or field.foreign_info is None %}
                                                                     {{input|setattrs:attrs|safe}}
                                                                 {% else %}
                                                                     <div class="input-group input-group-sm">
@@ -291,7 +291,7 @@ limitations under the License.
                                                         {% else %}
                                                             {% if input|foreignkey:no_render_as_foreign %}
                                                                 {# INPUT IS FOREIGN KEY: INI {{{3 #}
-                                                                {% if hide_foreignkey_button %}
+                                                                {% if hide_foreignkey_button or field.foreign_info is None %}
                                                                     {{input|setattrs:attrs|safe}}
                                                                 {% else %}
                                                                     <div class="input-group input-group-sm">
@@ -423,7 +423,7 @@ limitations under the License.
                                                                                 {% else %}
                                                                                     {% if input|foreignkey:no_render_as_foreign %}
                                                                                         {# INPUT IS FOREIGN KEY: INI {{{4 #}
-                                                                                        {% if hide_foreignkey_button %}
+                                                                                        {% if hide_foreignkey_button or field.foreign_info is None %}
                                                                                             {{input|setattrs:attrs|safe}}
                                                                                         {% else %}
                                                                                             <div class="input-group input-group-sm">
