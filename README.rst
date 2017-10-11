@@ -155,6 +155,7 @@ We are thankful to:
 Author                              Module              Contribution
 =================================== =================== =====================================================================================
 Mounir Messelmeni                   Haystack Engines    Contribution with Asciifolding support for Haystack Elasticsearch Engine
+Khanh TO                            ngReallyClick       We added codenerixReallyClick as a version that works with uibModal of ngReallyClick
 =================================== =================== =====================================================================================
 
 Several technologies have been used to build `CODENERIX <http://www.codenerix.com>`_:

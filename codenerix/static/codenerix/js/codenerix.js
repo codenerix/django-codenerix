@@ -1506,6 +1506,60 @@ var codenerix_directive_autofocus = ['codenerixAutofocus', ['$timeout', function
     };
 }]];
 
+// We got the example code from https://stackoverflow.com/users/1957251/khanh-to from Khanh TO
+// We then adapted his version from $modal to $uibModal which is the one we use with CODENERIX
+// and we renamed it to codenerixReallyClick
+var codenerix_directive_reallyclick = ['codenerixReallyClick' , ['$uibModal', function($uibModal) {
+
+      var ModalInstanceCtrl = function($scope, $uibModalInstance) {
+        $scope.ok = function() {
+          $uibModalInstance.close();
+        };
+
+        $scope.cancel = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+      };
+
+      return {
+        restrict: 'A',
+        scope:{
+          codenerixReallyClick:"&",
+          item:"="
+        },
+        link: function(scope, element, attrs) {
+          element.bind('click', function() {
+            var message = attrs.codenerixReallyMessage || "Are you sure ?";
+
+            /*
+            //This works
+            if (message && confirm(message)) {
+              scope.$apply(attrs.codenerixReallyClick);
+            }
+            //*/
+
+            //*This doesn't works
+            var modalHtml = '<div class="modal-body">' + message + '</div>';
+            modalHtml += '<div class="modal-footer"><button class="btn btn-primary" ng-click="ok()">OK</button><button class="btn btn-danger" ng-click="cancel()">Cancel</button></div>';
+
+            var uibModalInstance = $uibModal.open({
+              template: modalHtml,
+              controller: ModalInstanceCtrl
+            });
+
+            uibModalInstance.result.then(function() {
+              scope.codenerixReallyClick({item:scope.item}); //raise an error : $digest already in progress
+            }, function() {
+              //Modal dismissed
+            });
+            //*/
+            
+          });
+
+        }
+      }
+    }
+  ]];
 
 var codenerix_run=['$http','$rootScope','$cookies',
     function ($http,$rootScope,$cookies) {
@@ -1674,6 +1728,7 @@ function codenerix_builder(libraries, routes) {
     .directive(codenerix_directive_focus[0], codenerix_directive_focus[1])
     .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
     .directive(codenerix_directive_htmlcompile[0], codenerix_directive_htmlcompile[1])
+    .directive(codenerix_directive_reallyclick[0], codenerix_directive_reallyclick[1])
     
     // Set routing system
     .run(codenerix_run);
