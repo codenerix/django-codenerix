@@ -276,13 +276,13 @@ class StaticSelect(forms.widgets.Select):
         html += u" id=\"{0}\"".format(vid)
         html += u" ng-model=\"$parent.{0}\"".format(vmodel)
         if is_multiple:
-            html += u" on-select=\"selectedOptionSelect({0}.{1},'{2}',{3})\"".format(vform, vmodel, valuejs, change)
+            html += u" on-select=\"selectedOptionSelect({0}.{1},'{2}',{3}, $parent)\"".format(vform, vmodel, valuejs, change)
         else:
             if value is None:
                 value = "null"
             else:
                 value = "'{}'".format(value)
-            html += u" on-select=\"selectedOptionSelect({0}.{1},{2},{3})\"".format(vform, vmodel, value, change)
+            html += u" on-select=\"selectedOptionSelect({0}.{1},{2},{3}, $parent)\"".format(vform, vmodel, value, change)
         html += u' theme="bootstrap"'
         html += u' ng-disabled="disabled"'
         html += u' reset-search-input="false"'
