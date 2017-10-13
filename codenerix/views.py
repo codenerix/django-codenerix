@@ -1240,12 +1240,20 @@ class GenList(GenBase, ListView):
     def autoSearchQ(self, MODELINF, text):
         fields_show = [x[0] for x in MODELINF.fields()]
         fields = {}
-        for field in self.model._meta.get_fields():
-            if field.name in fields_show:
-                if type(field) in [models.CharField, models.TextField]:
-                    fields[field.name] = Q(**{'{}__icontains'.format(field.name): text})
-                elif type(field) in [models.IntegerField, models.SmallIntegerField, models.FloatField, ]:
-                    fields[field.name] = Q(**{'{}__icontains'.format(field.name): text})
+        for word in text.split(" "):
+            for field in self.model._meta.get_fields():
+                if field.name in fields_show:
+                    if type(field) in [models.CharField, models.TextField]:
+                        qobject = Q(**{'{}__icontains'.format(field.name): word})
+                    elif type(field) in [models.IntegerField, models.SmallIntegerField, models.FloatField, ]:
+                        qobject = Q(**{'{}__icontains'.format(field.name): word})
+                    else:
+                        qobject = None
+                    if qobject:
+                        if field.name in fields:
+                            fields[field.name] = Q(fields[field.name] | qobject)
+                        else:
+                            fields[field.name] = qobject
         return fields
 
     def get_queryset(self):
