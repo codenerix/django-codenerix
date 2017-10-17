@@ -3642,6 +3642,8 @@ class GenForeignKey(GenBase, View):
             objd = obj
             for subkey in key.split("__"):
                 objd = getattr(objd, subkey, None)
+            if callable(objd):
+                objd = objd()
             args.append(objd)
 
         # Return final label
