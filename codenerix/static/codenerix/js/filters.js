@@ -25,7 +25,7 @@ angular.module('codenerixFilters', [])
   return function(input, kind) {
     if ((kind==null) || (kind==undefined)) {
         // No kind defined
-        if ((input==null) || (input==undefined) || (input=='')) {
+        if ((input===null) || (input===undefined) || (input==='')) {
             return "-";
         } else if (input=='True' || input===true) {
             return '<i class="autotrue text-success glyphicon glyphicon-ok"></i>';
