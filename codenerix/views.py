@@ -3680,6 +3680,9 @@ class GenForeignKey(GenBase, View):
         # info['_clear_'] = []
         return info
 
+    def custom_answer(self, answer):
+        return answer
+
     def get(self, request, *args, **kwargs):
 
         # Set class internal variables
@@ -3710,11 +3713,17 @@ class GenForeignKey(GenBase, View):
             answer.append({'id': '', 'label': '...'})
 
         # Convert the answer
-        json_answer = json.dumps({
+        final_answer = {
             "clear": getattr(self, 'clear_fields', []),
             "rows": answer,
             "readonly": getattr(self, 'readonly_fields', [])
-        })
+        }
+
+        # Go throught custom answer
+        custom_answer = self.custom_answer(final_answer)
+
+        # Convert the answer to JSON
+        json_answer = json.dumps(custom_answer)
 
         # Send it
         return HttpResponse(json_answer, content_type='application/json')
