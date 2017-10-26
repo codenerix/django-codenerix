@@ -122,7 +122,11 @@ http://www.centrologic.com/contacto/
 FAQ
 ***
 
-* sudo apt-get install libmysqlclient-dev, when::
+* sudo apt-get install libmysqlclient-dev, when using MySQL::
+
+    EnvironmentError: mysql_config not found, 
+
+* sudo apt-get install default-libmysqlclient-dev, when using Maria DB::
 
     EnvironmentError: mysql_config not found, 
 
