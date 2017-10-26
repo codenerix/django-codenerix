@@ -1256,6 +1256,10 @@ class GenList(GenBase, ListView):
                             fields[field.name] = qobject
         return fields
 
+    def custom_queryset(self, queryset):
+        # Here you can change the queryset before of the pagination
+        return queryset
+
     def get_queryset(self):
         # Call the base implementation
         if not self.haystack:
@@ -1718,10 +1722,10 @@ class GenList(GenBase, ListView):
             get = context['get']
             context['datefilter'] = {}
             # Save the deepness
-            if (deepness_index+1 == len(date_elements)):
+            if deepness_index + 1 == len(date_elements):
                 context['datefilter']['deepness'] = None
             else:
-                context['datefilter']['deepness'] = date_elements[deepness_index+1]
+                context['datefilter']['deepness'] = date_elements[deepness_index + 1]
             context['datefilter']['deepnessback'] = []
             context['datefilter']['deepnessinit'] = []
             for element in get:
@@ -1755,7 +1759,7 @@ class GenList(GenBase, ListView):
                 else:
                     month = '__'
                 if f['hour'][2]:
-                    rightnow = string_concat(grv(f, 'day'), "/", month, "/", grv(f, 'year'), " ", grv(f, 'hour'), ":",  grv(f, 'minute'), ":", grv(f, 'second'))
+                    rightnow = string_concat(grv(f, 'day'), "/", month, "/", grv(f, 'year'), " ", grv(f, 'hour'), ":", grv(f, 'minute'), ":", grv(f, 'second'))
                 else:
                     rightnow = string_concat(grv(f, 'day'), "/", month, "/", grv(f, 'year'))
             context['datefilter']['rightnow'] = rightnow
@@ -2043,6 +2047,8 @@ class GenList(GenBase, ListView):
                 queryset = queryset.annotate(**query_renamed).values(*query_optimizer)
             else:
                 queryset = queryset.values(*query_optimizer)
+        if hasattr(self, 'custom_queryset'):
+            queryset = self.custom_queryset(queryset)
         """
         raise Exception("FOUND: {} -- __foreignkeys: {} -- __columns: {} -- autorules_keys: {} -- \
             query_select_related: {} -- query_renamed: {} -- query_optimizer: {} | use_extra: {}| -- \
