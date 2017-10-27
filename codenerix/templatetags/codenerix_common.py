@@ -323,7 +323,7 @@ def subtraction(value, arg):
 
 @register.filter
 def autofocus(f):
-    if hasattr(f, 'get') and f.get('focus', False):
+    if f.get('focus', False):
         return "autofocus"
     else:
         return ""
