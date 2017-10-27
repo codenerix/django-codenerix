@@ -666,7 +666,11 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
             ngmodel = attrs['ng-model']+'_time'
         # attrs['ng-model'] = attrs['ng-model']+'_time'
         attrs['ng-model'] = ngmodel
-        attributes = ' '.join([x+'="'+y+'"' for x, y in attrs.iteritems()])
+        tmp = []
+        for x in attrs:
+            y = attrs[x]
+            tmp.append(x+'="'+y+'"')
+        attributes = ' '.join(tmp)
         html += '        <input type="text" name="{0}_time" id="id_{0}_time" value="{1}" maxlength="4" {2} />'.format(name, value_time, attributes)
         html += '</div>'
         html += '</div>'
