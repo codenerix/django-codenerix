@@ -399,7 +399,7 @@ limitations under the License.
                                                                         {% else %}
                                                                             {# INPUT PROCESSOR: INI {{{2 #}
                                                                             {% with zi=forloop.revcounter|stringformat:"s" %}
-                                                                            {% with autofocus=input|autofocus %}
+                                                                            {% with autofocus=subfield|autofocus %}
                                                                             {% with zindex="style=z-index:"|add:zi %}
 {% with attrs=input|widgetize|addattr:autofocus|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:subfield.extra|lockattr:cannot_update %}
                                                                             <div class="col-md-{{subfield.columns}}" ng-class="{{form.form_name|invalidator:input}}">
