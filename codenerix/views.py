@@ -490,6 +490,9 @@ def gen_auth_permission(user, action_permission, model_name, appname, permission
 
 
 class GenBase(object):
+    '''
+    public = False                                      # Will not perform permission controls
+    '''
 
     json = False
     search_filter_button = False
