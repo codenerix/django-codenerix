@@ -122,11 +122,16 @@ class StaticSelectMulti(forms.widgets.Select):
             init = "getForeignKeys(http,'{0}',amc_items,{{".format(vurl)
             comma = False
             for field in self.autofill:
+                if ':' in field:
+                    field_filter = field.split(':')[-1]
+                    field = field.split(':')[0]
+                else:
+                    field_filter = field
                 if comma:
                     init += ","
                 else:
                     comma = True
-                init += "'{0}':{1}.{0}".format(field, vform)
+                init += "'{0}':{1}.{2}".format(field, vform, field_filter)
             init += "}},'{0}',{0},$select.search,{1})\"".format(vmodel, self.autofill_deepness)
 
         html = u'<md-chips ng-model="amc_select.{0}" md-autocomplete-snap id="{0}" name="{0}" '.format(vmodel)
@@ -350,11 +355,16 @@ class DynamicSelect(forms.widgets.Select):
         html = "getForeignKeys(http,'{0}',options,{{".format(vurl)
         comma = False
         for field in self.autofill:
+            if ':' in field:
+                field_filter = field.split(':')[-1]
+                field = field.split(':')[0]
+            else:
+                field_filter = field
             if comma:
                 html += ","
             else:
                 comma = True
-            html += "'{0}':{1}.{0}".format(field, vform)
+            html += "'{0}':{1}.{2}".format(field, vform, field_filter)
         html += "}}, '{0}', {1}, {2}, {3});\"".format(vmodel, vmodel, search, self.autofill_deepness)
         return html
 
