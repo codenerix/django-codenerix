@@ -2907,7 +2907,7 @@ class GenModify(object):
         # Check buttons top/bottom
         context['buttons_top'] = getattr(self, 'buttons_top', True)
         context['buttons_bottom'] = getattr(self, 'buttons_bottom', True)
-        context['form_title'] = getattr(self, 'title', True)
+        context['form_title'] = getattr(self, 'title', False)
 
         # Check hide_foreignkey_button
         context['hide_foreignkey_button'] = getattr(self, 'hide_foreignkey_button', False)
