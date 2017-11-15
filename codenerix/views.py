@@ -3698,7 +3698,7 @@ class GenForeignKey(GenBase, View):
         self._setup(request)
 
         # Get data
-        search = kwargs.get('search', '')
+        search = self.request.GET.get('search', kwargs.get('search', ''))
         filterstxt = self.request.GET.get('filter', '{}')
         filters = json.loads(filterstxt)
         self.filters = filters
