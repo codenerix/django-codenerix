@@ -521,7 +521,13 @@ class GenBase(object):
         'Delete': _("Delete"),
         'View': _("View"),
         'Download': _("Download"),
-        }
+        'Save': _('Save'),
+        'Save_here': _("Save here"),
+        "Save_and_new": _("Save & new"),
+        "Reload": _("Reload"),
+        "Go_back": _("Go back"),
+        "Delete": _("Delete"),
+    }
 
     # Default tabs information
     tabs = []
