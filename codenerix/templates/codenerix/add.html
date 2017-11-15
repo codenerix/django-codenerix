@@ -27,28 +27,28 @@ limitations under the License.
 
 {% block buttons_top %}
     {% if linkback %}
-        <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
-        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+        <label  class="sr-only"  for="submit_back">{{gentranslate.Go_back}}</label>
+        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{{gentranslate.Go_back}}</button>
     {% endif %}
-    <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{angular_submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+    <label  class="sr-only"  for="submit_save">{{gentranslate.Save}}</label>
+    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{angular_submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save}}</button>
 
     {% if linksavenew %}
-        <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+        <label  class="sr-only"  for="submit_savenew">{{gentranslate.Save_and_new}}</label>
+        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save_and_new}}</button>
     {% endif %}
 {% endblock %}
 
 {% block buttons_bottom %}
     {% if linkback %}
-        <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
-        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+        <label  class="sr-only"  for="submit_back">{{gentranslate.Go_back}}</label>
+        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{{gentranslate.Go_back}}</button>
     {% endif %}
-    <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}','{{angular_submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+    <label  class="sr-only"  for="submit_save">{{gentranslate.Save}}</label>
+    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}','{{angular_submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save}}</button>
 
     {% if linksavenew %}
-        <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+        <label  class="sr-only"  for="submit_savenew">{{gentranslate.Save_and_new}}</label>
+        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save_and_new}}</button>
     {% endif %}
 {% endblock %}
