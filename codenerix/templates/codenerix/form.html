@@ -66,35 +66,35 @@ limitations under the License.
             <div class="form-group text-center">
                 {% block buttons_top %}
                 {% if not cannot_update %}
-                    <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{angular_submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+                    <label  class="sr-only"  for="submit_save">{{gentranslate.Save}}</label>
+                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{angular_submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save}}</button>
                     {% if linksavehere %}
-                        <label  class="sr-only"  for="submit_savehere">{% trans "Save here" %}</label>
-                        <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here', '{{angular_submit|default:"submit"}}')" class="btn green btn-sm" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
+                        <label  class="sr-only"  for="submit_savehere">{{gentranslate.Save_here}}</label>
+                        <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here', '{{angular_submit|default:"submit"}}')" class="btn green btn-sm" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save_here}}</button>
                     {% endif %}
                     {% if linksavenew %}
-                        <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-                        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+                        <label  class="sr-only"  for="submit_savenew">{{gentranslate.Save_and_new}}</label>
+                        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save_and_new}}</button>
                     {% endif %}
-                    <label  class="sr-only"  for="submit_reload">{% trans "Reload" %}</label>
-                    <button type="button" id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
+                    <label  class="sr-only"  for="submit_reload">{{gentranslate.Reload}}</label>
+                    <button type="button" id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Reload}}</button>
                 {% endif %}
                 {% if linkback %}
                     {% if show_details %}
-                        <label  class="sr-only"  for="submit_details">{% trans "Go back" %}</label>
-                        <button type="button" id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                        <label  class="sr-only"  for="submit_details">{{gentranslate.Go_back}}</label>
+                        <button type="button" id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{{gentranslate.Go_back}}</button>
                     {% else %}
-                        <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
-                        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                        <label  class="sr-only"  for="submit_back">{{gentranslate.Go_back}}</label>
+                        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{{gentranslate.Go_back}}</button>
                     {% endif %}
                 {% endif %}
                 {% if linkdelete %}
                     {% if cannot_delete %}
-                        <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                        <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                        <label  class="sr-only"  for="submit_delete">{{gentranslate.Delete}}</label>
+                        <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{{gentranslate.Delete}}</button>
                     {% else %}
-                        <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                        <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}', '{{angular_delete|default:"delete"}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                        <label  class="sr-only"  for="submit_delete">{{gentranslate.Delete}}</label>
+                        <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}', '{{angular_delete|default:"delete"}}')" class="btn btn-sm btn-danger">{{gentranslate.Delete}}</button>
                     {% endif %}
                 {% endif %}
                 {% endblock %}
@@ -272,7 +272,7 @@ limitations under the License.
                                                         {# FIELD: END }}}2 #}
                                                     {% endif %}
                                                     {# === END INPUT INLINE WITH LABEL #}
-                                                    {%if field.label%}{{field.label}}{%else%}&nbsp;{%endif%}
+                                                    {%if field.label%}{{field.label|safe}}{%else%}&nbsp;{%endif%}
                                                     {%if input.help_text %}
                                                         <label class="glyphicon glyphicon-question-sign" 
                                                             ng-init="text='{{field.input.help_text}}'"
@@ -404,7 +404,7 @@ limitations under the License.
 {% with attrs=input|widgetize|addattr:autofocus|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:subfield.extra|lockattr:cannot_update %}
                                                                             <div class="col-md-{{subfield.columns}}" ng-class="{{form.form_name|invalidator:input}}">
                                                                                 {# FIELD: INI {{{3 #}
-                                                                                <label for="{{input.id_for_label}}"{{field|headstyle}}>{%if subfield.label%}{{subfield.label}}{%else%}&nbsp;{%endif%}
+                                                                                <label for="{{input.id_for_label}}"{{field|headstyle}}>{%if subfield.label%}{{subfield.label|safe}}{%else%}&nbsp;{%endif%}
                                                                                 {%if input.help_text %}
                                                                                     <label class="glyphicon glyphicon-question-sign" 
                                                                                         ng-init="text='{{field.input.help_text}}'"
@@ -557,35 +557,35 @@ limitations under the License.
             <div class="form-group text-center">
                 {% block buttons_bottom %}
                 {% if not cannot_update %}
-                    <label  class="sr-only"  for="submit_save">{% trans "Save" %}</label>
-                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{angular_submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save" %}</button>
+                    <label  class="sr-only"  for="submit_save">{{gentranslate.Save}}</label>
+                    <button type="button" id="submit_save" ng-click="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{angular_submit|default:"submit"}}')" class="btn btn-sm btn-info" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save}}</button>
                     {% if linksavehere %}
-                        <label  class="sr-only"  for="submit_savehere">{% trans "Save here" %}</label>
-                        <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save here" %}</button>
+                        <label  class="sr-only"  for="submit_savehere">{{gentranslate.Save_here}}</label>
+                        <button type="button" id="submit_savehere" ng-click="submit({{form.form_name}},'here', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save_here}}</button>
                     {% endif %}
                     {% if linksavenew %}
-                        <label  class="sr-only"  for="submit_savenew">{% trans "Save & new" %}</label>
-                        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{% trans "Save & new" %}</button>
+                        <label  class="sr-only"  for="submit_savenew">{{gentranslate.Save_and_new}}</label>
+                        <button type="button" id="submit_savenew" ng-click="submit({{form.form_name}},'new', '{{angular_submit|default:"submit"}}')" class="btn btn-sm green" ng-disabled="{{ form.form_name }}.$invalid" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Save_and_new}}</button>
                     {% endif %}
-                    <label  class="sr-only"  for="submit_reload">{% trans "Reload" %}</label>
-                    <button type="button" id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{% trans "Reload" %}</button>
+                    <label  class="sr-only"  for="submit_reload">{{gentranslate.Reload}}</label>
+                    <button type="button" id="submit_reload" ng-click="reload('{% trans "You will loose all your changes, are you sure?" %}')" class="btn btn-sm btn-warning" ng-if="{{form.form_name}}.$dirty">{{gentranslate.Reload}}</button>
                 {% endif %}
                 {% if linkback %}
                     {% if show_details %}
-                        <label  class="sr-only"  for="submit_details">{% trans "Go back" %}</label>
-                        <button type="button" id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                        <label  class="sr-only"  for="submit_details">{{gentranslate.Go_back}}</label>
+                        <button type="button" id="submit_details" ng-click="gotodetails()" class="btn btn-sm grey-cascade">{{gentranslate.Go_back}}</button>
                     {% else %}
-                        <label  class="sr-only"  for="submit_back">{% trans "Go back" %}</label>
-                        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
+                        <label  class="sr-only"  for="submit_back">{{gentranslate.Go_back}}</label>
+                        <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{{gentranslate.Go_back}}</button>
                     {% endif %}
                 {% endif %}
                 {% if linkdelete %}
                     {% if cannot_delete %}
-                        <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                        <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                        <label  class="sr-only"  for="submit_delete">{{gentranslate.Delete}}</label>
+                        <button type="button" id="submit_delete" ng-click="msg('{{cannot_delete}}')" class="btn btn-sm btn-danger">{{gentranslate.Delete}}</button>
                     {% else %}
-                        <label  class="sr-only"  for="submit_delete">{% trans "Delete" %}</label>
-                        <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}', '{{angular_delete|default:"delete"}}')" class="btn btn-sm btn-danger">{% trans "Delete" %}</button>
+                        <label  class="sr-only"  for="submit_delete">{{gentranslate.Delete}}</label>
+                        <button type="button" id="submit_delete" ng-click="delete('{% trans "Are you sure you would like to delete this register?" %}', '{{angular_delete|default:"delete"}}')" class="btn btn-sm btn-danger">{{gentranslate.Delete}}</button>
                     {% endif %}
                 {% endif %}
                 {% endblock %}
