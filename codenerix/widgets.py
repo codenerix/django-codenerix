@@ -894,8 +894,15 @@ class GenReCaptchaInput(ReCaptcha):
     legacy = False
 
     def __init__(self, *args, **kwargs):
-        self.recaptcha_response_name = 'g-recaptcha-response'
-        self.recaptcha_challenge_name = 'g-recaptcha-response'
+        # Decide name of the field in the POST
+        if 'fieldname' in kwargs:
+            fieldname = kwargs.pop('fieldname')
+        else:
+            fieldname = 'g-recaptcha-response'
+        self.recaptcha_response_name = fieldname
+        self.recaptcha_challenge_name = fieldname
+
+        # Keep going as usually
         return super(GenReCaptchaInput, self).__init__(*args, **kwargs)
 
 #    def __init__(self, public_key=None, use_ssl=None, attrs={}, *args, **kwargs):
