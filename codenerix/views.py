@@ -987,6 +987,7 @@ class GenList(GenBase, ListView):
         }
 
         default_ordering = '-name'                  # Set a default ordering (Example: descent order by name)
+        default_ordering = ['-name', 'date', '-xz'] # Set a default ordering (Example: descent order by name, ascendent order by date & descendent order by xz)
 
         # compact_rows = ( compact_field, compact_subelements ) # NO IDEA ?????? It looks outdated to me -> Already deprecated in the source code
 

@@ -121,7 +121,7 @@ class GenReCaptchaField(forms.CharField):
         'captcha_error': _('Error verifying input, please try again.'),
     }
 
-    def __init__(self, public_key=None, private_key=None, use_ssl=None, attrs={}, *args, **kwargs):
+    def __init__(self, fieldname=None, public_key=None, private_key=None, use_ssl=None, attrs={}, *args, **kwargs):
         """
         ReCaptchaField can accepts attributes which is a dictionary of
         attributes to be passed to the ReCaptcha widget class. The widget will
@@ -139,7 +139,7 @@ class GenReCaptchaField(forms.CharField):
         self.use_ssl = use_ssl if use_ssl is not None else getattr(
             settings, 'RECAPTCHA_USE_SSL', False)
 
-        self.widget = GenReCaptchaInput(public_key=public_key, use_ssl=self.use_ssl, attrs=attrs)
+        self.widget = GenReCaptchaInput(fieldname=fieldname, public_key=public_key, use_ssl=self.use_ssl, attrs=attrs)
         self.required = True
         return super(GenReCaptchaField, self).__init__(*args, **kwargs)
 
