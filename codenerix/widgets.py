@@ -825,6 +825,9 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
         html += '<div ng-show="block.deleted"><p class="text-danger">{}</p></div>'.format(_("Field deleted in the template"))
         html += self.render_wysiwyg(ngmodel='block.value', extraif="block.type==\"string\" && ", attrs=attrs)
         html += "</div>"
+        html += "-{"+"{"
+        html += " {}".format(vmodel)
+        html += "}"+"}-"
 
         # Return result
         return html
