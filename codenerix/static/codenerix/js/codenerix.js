@@ -730,12 +730,6 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
             }
         });
 
-        /*  
-            2016-07-15
-            Se quita porque los angular material chip no son elementos html por lo que no estan en el formulario
-            2016-10-17
-            Se vuelve a descomentar para ser compatible con las directivas dinamicas (iberosime) y con los multiselect dinamicos
-        */
         angular.forEach( form , function ( formElement , fieldName ) {
             // If the fieldname starts with a '$' sign, it means it's an Angular property or function. Skip those items.
             if ( fieldName[0] === '$' ) {
@@ -758,8 +752,10 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                 }
             }
         });
+
         // Clear cache
         $templateCache.remove(url);
+
         // POST
         $http.post( url, in_data, { headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} } )
         .success(function(answer, stat) {
