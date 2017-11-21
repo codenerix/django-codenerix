@@ -1096,7 +1096,8 @@ function dynamic_fields(scope) {
                             scope.options[key].push(info);
                             element.$setViewValue(value[0]);
                         }else if ('__JSON_DATA__' in value){
-                            scope[key] = value;
+                            element.$setViewValue(value);   // Update form elements
+                            scope[key] = value;             // Update scope slements (it doesn't connect properly scope with children scopes)
                         }
                     }else{
                         element.$setViewValue(value);
