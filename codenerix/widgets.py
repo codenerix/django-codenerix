@@ -918,5 +918,6 @@ class GenReCaptchaInput(ReCaptcha):
         if self.legacy:
             html = super(GenReCaptchaInput, self).render(name, value, attrs)
         else:
-            html = '<div vc-recaptcha key="\'{}\'" ng-model="{}"></div>'.format(self.public_key, name)
+            html = '<input ng-model="{0}" name="{0}" id="id_{0}" type="hidden" ng-required="true">'.format(name)
+            html+= '<div vc-recaptcha key="\'{}\'" ng-model="{}"></div>'.format(self.public_key, name)
         return html
