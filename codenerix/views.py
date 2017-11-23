@@ -526,7 +526,6 @@ class GenBase(object):
         "Save_and_new": _("Save & new"),
         "Reload": _("Reload"),
         "Go_back": _("Go back"),
-        "Delete": _("Delete"),
     }
 
     # Default tabs information
@@ -1022,6 +1021,7 @@ class GenList(GenBase, ListView):
         search_filter_button = True                 # Enable filtering system by default
         autofiltering = False                       # Disable autofiltering system
         haystack = True                             # Enable Haystack support
+        onlybase = True                             # Will set the GenList to work only as a Base render for another View but not as a List itself
 
     Templates will be selected using the next process:
     Grammar: <path>/<filename>[.<profile>][.<language>].html for this example we use 'seller' profile and 'es' language (spanish)
@@ -1139,24 +1139,30 @@ class GenList(GenBase, ListView):
         Entry point for this class, here we decide basic stuff
         '''
 
-        # Check if this is a REST query to pusth the answer to responde in JSON
-        if bool(self.request.META.get('HTTP_X_REST', False)):
-            self.json = True
-            if self.request.GET.get('json', self.request.POST.get('json', None)) is None:
-                newget = {}
-                newget['json'] = "{}"
-                for key in self.request.GET:
-                    newget[key] = self.request.GET[key]
-                self.request.GET = QueryDict('').copy()
-                self.request.GET.update(newget)
+        # Get if this class is working as only a base render and List funcionality shouldn't be enabled
+        onlybase = getattr(self, "onlybase", False)
 
-#                return HttpResponseBadRequest(_("The service requires you to set a GET argument named json={} which will contains all the filters you can apply to a list"))
+        # REST not available when onlybase is enabled
+        if not onlybase:
 
-        # Check if this is a REST query to add an element
-        if self.request.method == 'POST':
-            target = get_class(resolve("{}/add".format(self.request.META.get("REQUEST_URI"))).func)
-            target.json = True
-            return target.as_view()(self.request)
+            # Check if this is a REST query to pusth the answer to responde in JSON
+            if bool(self.request.META.get('HTTP_X_REST', False)):
+                self.json = True
+                if self.request.GET.get('json', self.request.POST.get('json', None)) is None:
+                    newget = {}
+                    newget['json'] = "{}"
+                    for key in self.request.GET:
+                        newget[key] = self.request.GET[key]
+                    self.request.GET = QueryDict('').copy()
+                    self.request.GET.update(newget)
+
+    #                return HttpResponseBadRequest(_("The service requires you to set a GET argument named json={} which will contains all the filters you can apply to a list"))
+
+            # Check if this is a REST query to add an element
+            if self.request.method == 'POST':
+                target = get_class(resolve("{}/add".format(self.request.META.get("REQUEST_URI"))).func)
+                target.json = True
+                return target.as_view()(self.request)
 
         # Set class internal variables
         self._setup(self.request)
@@ -1218,6 +1224,11 @@ class GenList(GenBase, ListView):
                 self.render_to_response = lambda context, **response_kwargs: super(GenList, self).render_to_response(context, **response_kwargs)
                 # Call the base implementation and finish execution here
                 return super(GenList, self).dispatch(*args, **kwargs)
+
+        # The systems is requesting a list, we are not allowed
+        if onlybase:
+            json_answer = {"error": True, "errortxt": _("Not allowed, this kind of requests has been prohibited for this view!")}
+            return HttpResponse(json.dumps(json_answer), content_type='application/json')
 
         # Initialize a default context
         self.__kwargs = kwargs
