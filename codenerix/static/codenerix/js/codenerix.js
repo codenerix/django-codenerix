@@ -52,6 +52,7 @@ var codenerix_libraries = [
     'cfp.hotkeys',
 ];
 var codenerix_debug = false;
+var codenerix_hotkeys = true;
 
 // Add the remove method to the Array structure
 Array.prototype.remove = function(from, to) {
@@ -1660,7 +1661,7 @@ if (typeof(get_static)=="undefined") {
     };
 }
 
-function codenerix_builder(libraries, routes) {
+function codenerix_builder(libraries, routes, redirects) {
     /*
      * libraries:
      *      - It is a list of mosules to be added or removed from the loader of the controller.
@@ -1673,7 +1674,7 @@ function codenerix_builder(libraries, routes) {
      *         { 'state': [ 'url', 'template path', 'controller' ], 
      *           'state': null }
      *          Description:
-     *              state: state name
+     *              state: state name (it can be 'otherwise' meaning the default or otherwise method from urlRouterProvider)
      *              url: Angular url
      *              template path: URI path to the template
      *              controller: name of the controller to use for this state
@@ -1688,6 +1689,26 @@ function codenerix_builder(libraries, routes) {
      *              - You can add any custom state to the router dictionary
      *              - If you set <null> to any element in the list URL/Template/Controller will not be added to the route in the router:
      *                  Ex: { 'customState': [ '/custom_url', null, 'customController'] }
+     *
+     * redirects: [ list of redirects (tuple of 2 elements [what, handler] ) ] by default it will add otherwise to '/' if no other configuration is set.
+     *  - what: String | RegExp | UrlMatcher | otherwise
+     *  - handler: String | Function
+     *  - Examples:
+     *      [ '', '/add' ]          // Blank route to /add
+     *      [ '/', '/add' ]         // route list "/" to /add
+     *      [ '/add', '/edit' ]     // route add "/add" to /edit
+     *      [ /aspx/i, '/index' ]   // Redirect to /index using a regex
+     *      [ 'complex',            // Complex redirection
+     *          ['$match', '$stateParams', function ($match, $stateParams) {
+     *              if ($state.$current.navigable != state || !equalForKeys($match, $stateParams)) {
+     *                  $state.transitionTo(state, $match, false);
+     *              }
+     *          }]
+     *      ]
+     *      [undefined, '/index'] // Otherwise redirect to /index
+     *      [undefined, function($injector, $location) {
+     *          ... some advanced code...
+     *      }] // Otherwise redirect as function says
      * 
      * This three sentences works the same:
      *  'list0': [undefined, get_static('codenerix_products/partials/products_list.html'), undefined]   -> OLD way
@@ -1745,12 +1766,47 @@ function codenerix_builder(libraries, routes) {
     // Decide about routing
     if (routes!==null) {
         // Create the routing system
-        module.config(['$stateProvider', '$urlRouterProvider',
-            function($stateProvider, $urlRouterProvider) {
-                if (codenerix_debug == true) {
-                    console.log("Router: default '/'");
+        module.config(['$urlRouterProvider',
+            function($urlRouterProvider) {
+                var otherwise = false;
+                if (typeof(redirects) != 'undefined') {
+                    angular.forEach(redirects, function(value, key) {
+                        if (value.length==2) {
+                            var what = value[0];
+                            var handler = value[1];
+                            
+                            if (what==undefined) {
+                                // We are setting an otherwise
+                                otherwise = true;
+                                // Check we have a handler
+                                if (handler!==null) {
+                                    if (codenerix_debug == true) {
+                                        console.log("Router: default '"+handler+"'");
+                                    }
+                                    $urlRouterProvider.otherwise(handler);
+                                } else {
+                                    // We do not have a handler
+                                    if (codenerix_debug == true) {
+                                        console.log("Router: no default route set!");
+                                    }
+                                }
+                            } else {
+                                if (codenerix_debug == true) {
+                                    console.log("Router: redirect '"+what+"' to '"+handler+"'");
+                                }
+                                $urlRouterProvider.when(what, handler);
+                            }
+                        } else {
+                            console.error("Detected redirect with wrong rule, they should be Array(2)");
+                        }
+                    });
                 }
-                $urlRouterProvider.otherwise('/');
+                if (!otherwise) {
+                    if (codenerix_debug == true) {
+                        console.log("Router: default '/'");
+                    }
+                    $urlRouterProvider.otherwise('/');
+                }
             }
         ]);
         
@@ -2488,7 +2544,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     };
 
     // Startup hotkey system
-    if (hotkeys!==undefined) {
+    if (codenerix_hotkeys && hotkeys!==undefined) {
         var hotkeysrv = hotkeys.bindTo($scope);
         hotkeysrv.add({combo: '+', description: 'Add new row', callback: $scope.addnew});
         hotkeysrv.add({combo: 'ctrl+up', description: 'Select previous row', callback: $scope.goto_row_previous});
@@ -2597,7 +2653,7 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     };
     
     // Startup hotkey system
-    if (hotkeys!==undefined) {
+    if (codenerix_hotkeys && hotkeys!==undefined) {
         var hotkeysrv = hotkeys.bindTo($scope);
         hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
         hotkeysrv.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit});
@@ -2666,7 +2722,7 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
     $scope.subscribers = function (subsjsb64) { subscribers_worker($scope, subsjsb64) };
 
     // Startup hotkey system
-    if (hotkeys!==undefined) {
+    if (codenerix_hotkeys && hotkeys!==undefined) {
         var hotkeysrv = hotkeys.bindTo($scope);
         hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
         hotkeysrv.add({combo: 'e', description: 'Edit', callback: $scope.edit});
@@ -2858,7 +2914,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     };
     
     // Startup hotkey system
-    if (hotkeys!==undefined) {
+    if (codenerix_hotkeys && hotkeys!==undefined) {
         var hotkeysrv = hotkeys.bindTo($scope);
         hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
         hotkeysrv.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit});
