@@ -29,6 +29,7 @@ import json
 from unidecode import unidecode
 
 # Django
+from django.db.models import Q
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from django.template import TemplateDoesNotExist
@@ -567,3 +568,31 @@ def trace_json_error(struct, path=[]):
 
     # Return result
     return found
+
+
+def qobject_builder_string_search(valid_fields, text, conditions='icontains'):
+    fields = None
+    for word in text.split(" "):
+        if word and word[0] == '-':
+            word = word[1:]
+            neg = True
+        else:
+            neg = False
+        
+        temp = None
+        for field in valid_fields:
+            qobject = Q(**{'{}__{}'.format(field, conditions): word})
+            if temp:
+                temp |= qobject
+            else:
+                temp = qobject
+
+        if temp:
+            if neg:
+                temp = ~Q(temp)
+
+            if fields:
+                fields &= temp
+            else:
+                fields = temp
+    return fields
