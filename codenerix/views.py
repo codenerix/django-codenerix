@@ -48,7 +48,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, get_object_or_404, render
 from django.utils.translation import string_concat, gettext
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError, FieldError
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -70,7 +70,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, PatternFill, Color  # , Alignment
 from openpyxl.writer.excel import save_virtual_workbook
 
-from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter, trace_json_error
+from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter, trace_json_error, qobject_builder_string_search
 from codenerix.templatetags.codenerix_lists import unlist
 
 # Import only when defined by the user and there is something we can work with
@@ -1260,22 +1260,20 @@ class GenList(GenBase, ListView):
 
     def autoSearchQ(self, MODELINF, text):
         fields_show = [x[0] for x in MODELINF.fields()]
-        fields = {}
-        for word in text.split(" "):
-            for field in self.model._meta.get_fields():
-                if field.name in fields_show:
-                    if type(field) in [models.CharField, models.TextField]:
-                        qobject = Q(**{'{}__icontains'.format(field.name): word})
-                    elif type(field) in [models.IntegerField, models.SmallIntegerField, models.FloatField, ]:
-                        qobject = Q(**{'{}__icontains'.format(field.name): word})
-                    else:
-                        qobject = None
-                    if qobject:
-                        if field.name in fields:
-                            fields[field.name] = Q(fields[field.name] | qobject)
-                        else:
-                            fields[field.name] = qobject
-        return fields
+        valid_fields = []
+        for field in fields_show:
+            try:
+                self.model.objects.filter(**{field: None}).query
+                valid_fields.append(field)
+            except FieldError:
+                pass
+
+        fields = qobject_builder_string_search(valid_fields, text)
+        if fields:
+            result = {'autoSearchQ': fields}
+        else:
+            result = {}
+        return result
 
     def custom_queryset(self, queryset):
         # Here you can change the queryset before of the pagination
@@ -1597,8 +1595,13 @@ class GenList(GenBase, ListView):
             # Autofilter system
             if self.autofiltering:
                 searchs.update(self.autoSearchQ(MODELINF, search))
+
             # Fields to search in from the MODELINF
-            searchs.update(MODELINF.searchQ(search))
+            tmp_search = MODELINF.searchQ(search)
+            if type(tmp_search) == dict:
+                searchs.update(tmp_search)
+            else:
+                searchs['autoSearchQ'] &= tmp_search
             qobjects = {}
             qobjectsCustom = {}
             for name in searchs:
