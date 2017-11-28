@@ -1263,9 +1263,11 @@ class GenList(GenBase, ListView):
         valid_fields = []
         for field in fields_show:
             try:
-                self.model.objects.filter(**{field: None}).query
+                self.model.objects.filter(**{"{}__icontains".format(field): ''}).query
                 valid_fields.append(field)
             except FieldError:
+                pass
+            except TypeError:
                 pass
 
         fields = qobject_builder_string_search(valid_fields, text)
