@@ -52,7 +52,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     class Meta(CodenerixModel.Meta):
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         if self.name and self.surname:
             output = '%s %s' % (smart_text(self.name), smart_text(self.surname))
         elif self.name:
@@ -63,8 +63,8 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             output = "%s*" % (self.user)
         return smart_text(output)
 
-    def __str__(self):
-        return self.__unicode__()
+    def __unicode__(self):
+        return self.__str__()
 
     def __fields__(self, info):
         fields = []
