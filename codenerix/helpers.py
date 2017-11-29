@@ -39,6 +39,9 @@ from django.conf import settings
 from django.views.generic.base import View
 from django.core.cache import cache
 from django.utils import dateparse
+from django.http import HttpResponseRedirect
+from django.utils.http import urlsafe_base64_encode
+from django.core.urlresolvers import reverse_lazy
 
 
 def epochdate(timestamp):
@@ -578,7 +581,7 @@ def qobject_builder_string_search(valid_fields, text, conditions='icontains'):
             neg = True
         else:
             neg = False
-        
+
         temp = None
         for field in valid_fields:
             qobject = Q(**{'{}__{}'.format(field, conditions): word})
@@ -596,3 +599,20 @@ def qobject_builder_string_search(valid_fields, text, conditions='icontains'):
             else:
                 fields = temp
     return fields
+
+
+def form_answer(status, answer):
+    # Normalize answer
+    if '__pk__' not in answer:
+        answer['__pk__'] = None
+    if '__str__' not in answer:
+        answer['__str__'] = 'OK'
+
+    # Encode answer
+    answer_encoded = urlsafe_base64_encode(str.encode(json.dumps(answer)))
+
+    # Build success URL
+    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': answer_encoded})
+
+    # Return response
+    return HttpResponseRedirect(success_url)
