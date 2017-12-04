@@ -36,6 +36,7 @@ import io
 import pytz
 import base64
 from dateutil import tz
+from dateutil.parser import parse
 
 # Django
 from django.db import models
@@ -67,7 +68,7 @@ from django.db.models import Q, F, FieldDoesNotExist
 
 # Export to Excel
 from openpyxl import Workbook
-from openpyxl.styles import Font, Border, Side, PatternFill, Color  # , Alignment
+from openpyxl.styles import Font, Border, Side, PatternFill, Color, Style
 from openpyxl.writer.excel import save_virtual_workbook
 
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter, trace_json_error, qobject_builder_string_search
@@ -1281,6 +1282,23 @@ class GenList(GenBase, ListView):
         # Here you can change the queryset before of the pagination
         return queryset
 
+    def get_type_field(self, name, obj=None):
+        names = remove_getdisplay(name).split('__')
+        if obj is None:
+            obj = self.model
+
+        field = obj._meta.get_field(names[0])
+        if field.is_relation:
+            new_name = "__".join(names[1:])
+            if new_name:
+                return self.get_type_field(new_name, field.related_model)
+            else:
+                # Foreign, ManytoMany
+                return None
+        else:
+            t = type(field)
+            return str(t).split("'")[1].split('.')[-1]
+
     def get_queryset(self):
         # Call the base implementation
         if not self.haystack:
@@ -1856,11 +1874,13 @@ class GenList(GenBase, ListView):
             if value[0]:
                 name = value[0].split(":")[0]
                 order_key = name
+                type_field = self.get_type_field(value[0].split(":")[-1])
             else:
                 name = value[0]
                 # not usable fields, example: fields.append((None, _('Selector'))) in airportslist
                 hash_key = hashlib.md5(value[1].encode()).hexdigest()
                 order_key = "#{}".format(hash_key)
+                type_field = None
 
             publicname = value[1]
             if len(value) > 2:
@@ -1905,6 +1925,8 @@ class GenList(GenBase, ListView):
             sort[order_key]['id'] = name
             sort[order_key]['name'] = publicname
             sort[order_key]['align'] = align
+            sort[order_key]['type'] = type_field
+
             if filter_column:
                 sort[order_key]['filter'] = filter_column
 
@@ -2738,6 +2760,14 @@ class GenList(GenBase, ListView):
         else:
             return super(GenList, self).render_to_response(context, **response_kwargs)
 
+    def __cell_format(self, key_column, row, format=None):
+        string = ""
+        while key_column > 0:
+            key_column, remainder = divmod(key_column - 1, 26)
+            string = chr(65 + remainder) + string
+        cell = '{}{}'.format(string, row)
+        return cell
+
     def response_to_xls(self, answer, **response_kwargs):
         wb = Workbook()
 
@@ -2746,9 +2776,11 @@ class GenList(GenBase, ListView):
 
         columns = []
         tmp = []
+        types = []
         for col in answer['table']['head']['columns']:
             tmp.append(col['name'])
             columns.append(col['id'])
+            types.append(col['type'])
         ws1.append(tmp)
 
         for col in range(len(columns)):
@@ -2756,13 +2788,35 @@ class GenList(GenBase, ListView):
             ws1.cell(row=1, column=(col + 1)).font = self.xls_style['head']['font']
             ws1.cell(row=1, column=(col + 1)).fill = self.xls_style['head']['fill']
 
-        for col in answer['table']['body']:
+        cells = {
+            'DateTimeField': [],
+            'DateField': [],
+        }
+        for key_row, row in enumerate(answer['table']['body']):
             tmp = []
-            for id in columns:
-                if type(col[id]) != list:
-                    tmp.append(col[id])
+            for key_col, id in enumerate(columns):
+                print (key_row, key_col)
+                if type(row[id]) != list:
+                    cell = self.__cell_format(key_col + 1, key_row + 2, '{}')
+
+                    if row[id]:
+                        try:
+                            t = parse(row[id])
+                            if types[key_col] == 'DateTimeField':
+                                cells['DateTimeField'].append(cell)
+                            elif type(t) == 'DateField':
+                                cells['DateTimeField'].append(cell)
+                            else:
+                                t = row[id]
+                        except OverflowError:
+                            t = row[id]
+                        except ValueError:
+                            t = row[id]
+                    else:
+                        t = row[id]
+                    tmp.append(t)
                 else:
-                    tmp.append("\n".join(col[id]))
+                    tmp.append("\n".join(row[id]))
             ws1.append(tmp)
 
         # Autoajust columns
@@ -2770,12 +2824,29 @@ class GenList(GenBase, ListView):
         head_deviation = self.xls_style['head']['deviation']
         for row in ws1.rows:
             for cell in row:
-                if cell.value:
+                try:
+                    value = cell.value
+                except TypeError:
+                    value = None
+                if value:
                     dims[cell.column] = max((dims.get(cell.column, 0), len(smart_text(cell.value)))) * head_deviation
             # Deviation only accepts to first row
             head_deviation = 1.0
         for col, value in dims.items():
             ws1.column_dimensions[col].width = value
+
+        # Formating cells
+        for cell in cells['DateTimeField']:
+            wbcell = wb.active[cell]
+            wbcell.style = Style()
+            wbcell.data_type = wbcell.TYPE_NUMERIC
+            wbcell.style = Style(number_format="DD/MM/YYYY HH:MM")
+
+        for cell in cells['DateField']:
+            wbcell = wb.active[cell]
+            wbcell.style = Style()
+            wbcell.data_type = wbcell.TYPE_NUMERIC
+            wbcell.style = Style(number_format="DD/MM/YYYY")
 
         # Prepare output
         data_output = io.BytesIO(save_virtual_workbook(wb))
