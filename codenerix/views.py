@@ -68,7 +68,7 @@ from django.db.models import Q, F, FieldDoesNotExist
 
 # Export to Excel
 from openpyxl import Workbook
-from openpyxl.styles import Font, Border, Side, PatternFill, Color, Style
+from openpyxl.styles import Font, Border, Side, PatternFill, Color, NamedStyle
 from openpyxl.writer.excel import save_virtual_workbook
 
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter, trace_json_error, qobject_builder_string_search
@@ -2838,15 +2838,15 @@ class GenList(GenBase, ListView):
         # Formating cells
         for cell in cells['DateTimeField']:
             wbcell = wb.active[cell]
-            wbcell.style = Style()
+            # wbcell.style = Style()
             wbcell.data_type = wbcell.TYPE_NUMERIC
-            wbcell.style = Style(number_format="DD/MM/YYYY HH:MM")
+            wbcell.style = NamedStyle(number_format="DD/MM/YYYY HH:MM")
 
         for cell in cells['DateField']:
             wbcell = wb.active[cell]
-            wbcell.style = Style()
+            # wbcell.style = Style()
             wbcell.data_type = wbcell.TYPE_NUMERIC
-            wbcell.style = Style(number_format="DD/MM/YYYY")
+            wbcell.style = NamedStyle(number_format="DD/MM/YYYY")
 
         # Prepare output
         data_output = io.BytesIO(save_virtual_workbook(wb))
