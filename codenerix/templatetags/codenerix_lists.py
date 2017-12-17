@@ -26,7 +26,7 @@ from django.core.exceptions import ValidationError
 from django.utils import formats
 from django.conf import settings
 
-from djng.forms.angular_base import TupleErrorList
+from codenerix.djng.angular_base import TupleErrorList
 
 from codenerix.helpers import model_inspect
 
