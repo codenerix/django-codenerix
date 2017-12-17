@@ -106,7 +106,7 @@ class LimitedAuthMiddleware(object):
 
     def process_request(self, request):
         # If the user is authenticated and shouldn't be
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
 
             # If the user doesn't pass the check_auth test
             if not check_auth(request.user):

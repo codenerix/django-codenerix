@@ -609,7 +609,7 @@ def form_answer(status, answer):
         answer['__str__'] = 'OK'
 
     # Encode answer
-    answer_encoded = urlsafe_base64_encode(str.encode(json.dumps(answer)))
+    answer_encoded = urlsafe_base64_encode(str.encode(json.dumps(answer))).decode()
 
     # Build success URL
     success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': answer_encoded})

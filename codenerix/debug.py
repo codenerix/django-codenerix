@@ -19,6 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django import VERSION
+
 DEBUG_TOOLBAR_DEFAULT_PANELS = (
     'debug_toolbar.panels.version.VersionDebugPanel',
     'debug_toolbar.panels.timer.TimerDebugPanel',
@@ -55,13 +57,13 @@ def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=F
         EXTRA_MIDDLEWARES.append('snippetscream.ProfileMiddleware')
     if DEBUG and GRAPH_MODELS:
         INSTALLED_APPS += ('django_extensions',)
-    
+
     # Attach new middlewares
     if type(MIDDLEWARE)==tuple:
         MIDDLEWARE+=tuple(EXTRA_MIDDLEWARES)
     else:
         MIDDLEWARE+=list(EXTRA_MIDDLEWARES)
-    
+
     # Return final results
     return (INSTALLED_APPS, MIDDLEWARE)
 
@@ -70,7 +72,7 @@ def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI):
     from django.conf.urls import include, url
     if ROSETTA:
         URLPATTERNS += [url(r'^rosetta/', include('rosetta.urls'))]
-    if ADMINSITE:
+    if VERSION[0] < 2 and ADMINSITE:
         from django.contrib import admin
         URLPATTERNS += [url(r'^admin', include(admin.site.urls))]
         URLPATTERNS += [url(r'^admin/', include(admin.site.urls))]
@@ -130,7 +132,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.uk.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-TW.js"></script> '
-    
+
     CODENERIX_CSS_DEBUG = ' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
@@ -256,7 +258,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-quill/ng-quill.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.js"></script> \
     ' + locales
-    
+
     # Load CODENERIX CSS
     if DEBUG:
         CODENERIX_CSS = CODENERIX_CSS_DEBUG
