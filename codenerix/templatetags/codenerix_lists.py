@@ -19,7 +19,7 @@
 # limitations under the License.
 
 from django.template import Library
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ValidationError

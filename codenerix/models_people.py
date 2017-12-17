@@ -43,11 +43,11 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     Defines a person
     '''
     # Control fields
-    user = models.OneToOneField(User, blank=True, null=True, related_name='person')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name='person')
     name = models.CharField(_("Name"), max_length=45, blank=False, null=False)
     surname = models.CharField(_("Surname"), max_length=90, blank=False, null=False)
     disabled = models.DateTimeField(_("Disabled from"), null=True, blank=True)
-    creator = models.ForeignKey(User, blank=True, null=True, related_name='creators', default=None)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='creators', default=None)
 
     class Meta(CodenerixModel.Meta):
         abstract = True

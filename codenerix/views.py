@@ -55,7 +55,7 @@ from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpRespon
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.core.urlresolvers import reverse_lazy, resolve, reverse
+from django.urls import reverse_lazy, resolve, reverse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.cache import cache
 from django.utils import formats

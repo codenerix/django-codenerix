@@ -27,7 +27,7 @@ import json
 import imghdr
 
 from django import forms
-from django.core.urlresolvers import reverse, resolve
+from django.urls import reverse, resolve
 from django.utils.translation import ugettext as _
 from django.core.files.base import File
 from django.utils import formats
