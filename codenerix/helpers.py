@@ -41,7 +41,7 @@ from django.core.cache import cache
 from django.utils import dateparse
 from django.http import HttpResponseRedirect
 from django.utils.http import urlsafe_base64_encode
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 
 
 def epochdate(timestamp):

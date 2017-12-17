@@ -240,8 +240,9 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         Control the possible log
         '''
         action_time = models.DateTimeField('Date', auto_now=True)
-        user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
-        content_type = models.ForeignKey(ContentType, blank=True, null=True)
+        user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, blank=True, null=True)
+        username = models.CharField('Username', max_length=200, blank=True, null=False, default="")
+        content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, blank=True, null=True)
         object_id = models.TextField('Object id', blank=True, null=True)
         object_repr = models.CharField('Object repr', max_length=200)
         action_flag = models.PositiveSmallIntegerField(_("Action"), choices=TYPE_ACTION)
@@ -296,7 +297,8 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         def __fields__(self, info):
             fields = []
             fields.append(('action_time', _('Date')))
-            fields.append(('user__username', _('User')))
+            fields.append(('user__username', _('Actual user')))
+            fields.append(('username', _('Original user')))
             fields.append(('get_action_flag_display', _('Action')))
             # fields.append(('content_type__name', _('APP Name')))
             fields.append(('content_type', _('APP Name')))
@@ -310,6 +312,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         def __searchQ__(self, info, text):
             tf = {}
             tf['user'] = Q(user__username__icontains=text)
+            tf['username'] = Q(username__icontains=text)
             # Flag
             if (text.lower() == 'add') or (text.lower() == 'addition') or (text.lower() == _('add')) or (text.lower() == _('addition')):
                 tf['action_flag'] = Q(action_flag=ADDITION)
@@ -330,7 +333,8 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             tf['action_time'] = (_('Date'), lambda x: Q(**daterange_filter(x, 'action_time')), 'daterange')
             tf['get_action_flag_display'] = (_('Action'), lambda x: Q(action_flag=x), list(TYPE_ACTION))
             tf['object_id'] = (_('ID'), lambda x: Q(object_id=x), 'input')
-            tf['user__username'] = (_('User'), lambda x: Q(user__username__icontains=x), 'input')
+            tf['user__username'] = (_('Actual user'), lambda x: Q(user__username__icontains=x), 'input')
+            tf['username'] = (_('Original user'), lambda x: Q(username__icontains=x), 'input')
             tf['content_type__app_label'] = (_('APP Label'), lambda x: Q(content_type__app_label__icontains=x), 'input')
             # tf['users']=(_('User'),lambda x: Q(user__username=x),[('M','M*'),('S','S*')])
             return tf
@@ -348,8 +352,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             user = get_current_user()
             if user:
                 user_id = user.pk
+                username = user.username
             else:
                 user_id = None
+                username = ""
 
             model = apps.get_model(self._meta.app_label, self.__class__.__name__)
             isnew = True
@@ -453,6 +459,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
 
             log = Log()
             log.user_id = user_id
+            log.username = username
             log.content_type_id = ContentType.objects.get_for_model(self).pk
             log.object_id = pk
             log.object_repr = force_text(self, errors="replace")
@@ -491,8 +498,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             user = get_current_user()
             if user:
                 user_id = user.pk
+                username = user.username
             else:
                 user_id = None
+                username = "*Unknown*"
             action = DELETION
 
             attrs = {}
@@ -542,6 +551,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
 
             log = Log()
             log.user_id = user_id
+            log.username = username
             log.content_type_id = ContentType.objects.get_for_model(instance).pk
             log.object_id = instance.pk
             log.object_repr = force_text(instance)
@@ -555,12 +565,19 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         '''
         RemoteLog system
         '''
-        user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+        user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, blank=True, null=True)
+        username = models.CharField('Username', max_length=200, blank=True, null=False, default="")
         data = models.TextField('Data', blank=False, null=False)
 
         def __fields__(self, info):
             fields = []
             fields.append(('pk', _('ID')))
             fields.append(('created', _('Created')))
-            fields.append(('user', _('Username')))
+            fields.append(('user', _('Actual user')))
+            fields.append(('username', _('Original user')))
             return fields
+
+        def save(self, **kwargs):
+            if self.user:
+                self.username = self.user.username
+            super(RemoteLog, self).__init__(**kwargs)
