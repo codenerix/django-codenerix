@@ -44,7 +44,7 @@ def txt2img(text, FontSize=14, bg="#ffffff", fg="#000000", font="FreeMono.ttf"):
         img_name_encode = hashlib.md5(img_name_temp).hexdigest()
 
     img_name = "%s.jpg" % (img_name_encode)
-    
+
     if path.exists(font_dir + img_name):   # Make sure img doesn't exist already
         pass
     else:
@@ -74,16 +74,16 @@ def ifusergroup(parser, token):
         groups+=tokensp[1:]
     except ValueError:
         raise template.TemplateSyntaxError("Tag 'ifusergroup' requires at least 1 argument.")
-    
+
     nodelist_true = parser.parse(('else', 'endifusergroup'))
     token = parser.next_token()
-    
+
     if token.contents == 'else':
         nodelist_false = parser.parse(tuple(['endifusergroup',]))
         parser.delete_first_token()
     else:
         nodelist_false = NodeList()
-    
+
     return GroupCheckNode(groups, nodelist_true, nodelist_false)
 
 
@@ -94,21 +94,21 @@ class GroupCheckNode(template.Node):
         self.nodelist_false = nodelist_false
     def render(self, context):
         user = Variable('user').resolve(context)
-        
-        if not user.is_authenticated():
+
+        if not user.is_authenticated:
             return self.nodelist_false.render(context)
-        
+
         allowed=False
         for checkgroup in self.groups:
             try:
                 group = Group.objects.get(name=checkgroup)
             except Group.DoesNotExist:
                 break
-                
+
             if group in user.groups.all():
                 allowed=True
                 break
-        
+
         if allowed:
             return self.nodelist_true.render(context)
         else:

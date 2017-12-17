@@ -139,7 +139,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def clean_memcache(self):
         if self.pk:
             prefix = hashlib.md5()
-            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')))
+            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')).decode())
             clean_memcache_item("person:{}".format(self.pk), prefix.hexdigest())
 
     def get_grouppermit(self):

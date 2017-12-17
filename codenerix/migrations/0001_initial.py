@@ -23,8 +23,8 @@ class Migration(migrations.Migration):
                 ('action_flag', models.PositiveSmallIntegerField(verbose_name='Acci\xf3n')),
                 ('change_json', models.TextField(verbose_name='Json', blank=True)),
                 ('change_txt', models.TextField(verbose_name='Txt', blank=True)),
-                ('content_type', models.ForeignKey(blank=True, to='contenttypes.ContentType', null=True)),
-                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('content_type', models.ForeignKey(on_delete=models.DO_NOTHING, blank=True, to='contenttypes.ContentType', null=True)),
+                ('user', models.ForeignKey(on_delete=models.DO_NOTHING, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'permissions': (('list_log', 'Can list log'), ('detail_log', 'Can view log')),

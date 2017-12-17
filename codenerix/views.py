@@ -497,6 +497,7 @@ class GenBase(object):
 
     json = False
     search_filter_button = False
+    extra_context = {}
 
     # Translations
     gentranslate = {
@@ -617,10 +618,6 @@ class GenBase(object):
 
         # Get language
         self.language = get_language()
-
-        # Build extracontext
-        if not hasattr(self, 'extra_context'):
-            self.extra_context = {}
 
         # Default value for no foreign key attribute
         if 'no_render_as_foreign' not in self.extra_context:
@@ -2795,7 +2792,7 @@ class GenList(GenBase, ListView):
         for key_row, row in enumerate(answer['table']['body']):
             tmp = []
             for key_col, id in enumerate(columns):
-                print (key_row, key_col)
+                # print(key_row, key_col)
                 if type(row[id]) != list:
                     cell = self.__cell_format(key_col + 1, key_row + 2, '{}')
 
@@ -2975,7 +2972,7 @@ class GenModify(object):
                     attr['__obj__'] = api_obj
 
         # Set the pk in the success url
-        self.success_url.__dict__['_proxy____kw']['kwargs']['answer'] = urlsafe_base64_encode(str.encode(json.dumps(attr)))
+        self.success_url.__dict__['_proxy____kw']['kwargs']['answer'] = urlsafe_base64_encode(str.encode(json.dumps(attr))).decode()
         # Let the system decide next step
         return super(GenModify, self).get_success_url()
 
@@ -3023,7 +3020,7 @@ class GenModify(object):
                 context["cannot_delete"] = self.object.internal_lock_delete()
 
         # Subscribers
-        context['subscriptions'] = base64.b64encode(json.dumps(getattr(self.form_class.Meta, 'subscriptions', None)).encode('utf-8'))
+        context['subscriptions'] = base64.b64encode(json.dumps(getattr(self.form_class.Meta, 'subscriptions', None)).encode('utf-8')).decode()
 
         # Update context
         context.update(self.extra_context)
