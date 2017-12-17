@@ -9,7 +9,6 @@ __authors__ = [
 __requirements__ = {
     'all': [
         "pymongo",
-        "django-angular==0.8.4",
         "python-dateutil",
         "django-recaptcha>=1.2.1,<1.3",
         "django-rosetta",
