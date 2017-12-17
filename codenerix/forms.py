@@ -18,8 +18,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from djng.forms.angular_model import NgModelFormMixin
-from djng.forms import NgFormValidationMixin, NgForm, NgModelForm
+from codenerix.djng.angular_model import NgModelFormMixin
+from codenerix.djng import NgFormValidationMixin, NgForm, NgModelForm
 
 from django.utils.translation import ugettext as _
 from django.forms.widgets import Select, CheckboxInput
