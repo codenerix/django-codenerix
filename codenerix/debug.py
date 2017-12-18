@@ -35,19 +35,21 @@ DEBUG_TOOLBAR_DEFAULT_PANELS = (
 DEBUG_TOOLBAR_DEFAULT_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
+
+
 # Autoload
 def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=False, ADMINSITE=False, DEBUG_TOOLBAR=False, DEBUG_PANEL=False, SNIPPET_SCREAM=False, GRAPH_MODELS=False, CODENERIX_DISABLE_LOG=False):
-    EXTRA_MIDDLEWARES=[]
+    EXTRA_MIDDLEWARES = []
     if DEBUG and SPAGHETTI:
         INSTALLED_APPS += ('django_spaghetti',)
     if DEBUG and ROSETTA:
-        INSTALLED_APPS+=('rosetta',)
+        INSTALLED_APPS += ('rosetta',)
     if 'django.contrib.admin' not in INSTALLED_APPS and not CODENERIX_DISABLE_LOG:
-        INSTALLED_APPS+=('django.contrib.admin',)
+        INSTALLED_APPS += ('django.contrib.admin',)
     if DEBUG and ADMINSITE and not CODENERIX_DISABLE_LOG:
         EXTRA_MIDDLEWARES.append('django.contrib.messages.middleware.MessageMiddleware')
     if DEBUG and DEBUG_TOOLBAR:
-        INSTALLED_APPS+=('debug_toolbar',)
+        INSTALLED_APPS += ('debug_toolbar',)
         if DEBUG_PANEL:
             INSTALLED_APPS += ('debug_panel',)
             EXTRA_MIDDLEWARES.append('debug_panel.middleware.DebugPanelMiddleware')
@@ -59,23 +61,31 @@ def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=F
         INSTALLED_APPS += ('django_extensions',)
 
     # Attach new middlewares
-    if type(MIDDLEWARE)==tuple:
-        MIDDLEWARE+=tuple(EXTRA_MIDDLEWARES)
+    if type(MIDDLEWARE) == tuple:
+        MIDDLEWARE += tuple(EXTRA_MIDDLEWARES)
     else:
-        MIDDLEWARE+=list(EXTRA_MIDDLEWARES)
+        MIDDLEWARE += list(EXTRA_MIDDLEWARES)
 
     # Return final results
     return (INSTALLED_APPS, MIDDLEWARE)
 
+
 # Autourl
 def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI):
     from django.conf.urls import include, url
+
     if ROSETTA:
         URLPATTERNS += [url(r'^rosetta/', include('rosetta.urls'))]
-    if VERSION[0] < 2 and ADMINSITE:
+
+    if ADMINSITE:
         from django.contrib import admin
-        URLPATTERNS += [url(r'^admin', include(admin.site.urls))]
-        URLPATTERNS += [url(r'^admin/', include(admin.site.urls))]
+        if VERSION[0] < 2 and ADMINSITE:
+            URLPATTERNS += [url(r'^admin', include(admin.site.urls))]
+            URLPATTERNS += [url(r'^admin/', include(admin.site.urls))]
+        else:
+            from django.urls import path
+            URLPATTERNS += [path('admin', admin.site.urls, )]
+            URLPATTERNS += [path('admin/', admin.site.urls, )]
     if DEBUG and SPAGHETTI:
         URLPATTERNS += [url(r'^plate/', include('django_spaghetti.urls'))]
     return URLPATTERNS
