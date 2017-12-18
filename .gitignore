@@ -88,3 +88,4 @@ ENV/
 
 # CODENERIX files
 /django_codenerix*.egg-info
+node_modules/
