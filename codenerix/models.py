@@ -51,12 +51,12 @@ class CodenerixMetaType(dict):
         super(CodenerixMetaType, self).__init__(*args, **kwargs)
         for arg in args:
             if isinstance(arg, dict):
-                for k, v in arg.iteritems():
-                    self[k] = v
+                for k in arg:
+                    self[k] = arg[k]
 
         if kwargs:
-            for k, v in kwargs.iteritems():
-                self[k] = v
+            for k in kwargs:
+                self[k] = kwargs[k]
 
     def __getattr__(self, attr):
         return self.get(attr)
@@ -127,14 +127,34 @@ class CodenerixModel(CodenerixModelBase):
             Example 3:  fields.append(('title',_('Title'),None,'center'))   # We don't want to define the size but we want to define the alignment
             Example 4:  fields.append((None,_('Title')))                    # We don't want any ordering in the field Title
             Example 5:  fields.append(('user__username',_('Username')))     # You can define here relationships as well
-        
+
         __limitQ__:
         __searchQ__:
         __searchF__:
     '''
     created = models.DateTimeField(_("Created"), editable=False, auto_now_add=True)
     updated = models.DateTimeField(_("Updated"), editable=False, auto_now=True)
-    
+
+    class Meta:
+        abstract = True
+        default_permissions = ('add', 'change', 'delete', 'view', 'list')
+
+    class CodenerixMeta(object):
+        abstract = None
+
+    def __init__(self, *args, **kwards):
+        self.CodenerixMeta = CodenerixMetaType()
+        return super(CodenerixModel, self).__init__(*args, **kwards)
+
+    def __strlog_add__(self):
+        return ''
+
+    def __strlog_update__(self, newobj):
+        return ''
+
+    def __strlog_delete__(self):
+        return ''
+
     def __limitQ__(self, info):
         return {}
 
@@ -160,24 +180,13 @@ class CodenerixModel(CodenerixModelBase):
 
     def lock_delete(self, request=None):
         return None
-    
+
     # check lock update
     def clean(self):
         if self.lock_update() is not None:
             raise ValidationError(self.lock_update())
         else:
             return super(CodenerixModel, self).clean()
-
-    class Meta:
-        abstract = True
-        default_permissions = ('add', 'change', 'delete', 'view', 'list')
-
-    class CodenerixMeta(object):
-        abstract = None
-
-    def __init__(self, *args, **kwards):
-        self.CodenerixMeta = CodenerixMetaType()
-        return super(CodenerixModel, self).__init__(*args, **kwards)
 
 
 class GenInterface(CodenerixModelBase):
@@ -192,10 +201,10 @@ class GenInterface(CodenerixModelBase):
         force_methods = {'alias': ('method_name', 'Description'), }
         """
         pass
-    
+
     def __init__(self, *args, **kwards):
         self.CodenerixMeta = CodenerixMetaType()
-        result = super(GenInterface, self).__init__(*args, **kwards)
+        super(GenInterface, self).__init__(*args, **kwards)
 
         # revisamos que esten implementados los metodos indicados
         # we checked that the indicated methods are implemented
@@ -210,9 +219,7 @@ class GenInterface(CodenerixModelBase):
 
 @receiver(pre_delete)
 def codenerixmodel_delete_pre(sender, instance, **kwargs):
-    if not hasattr( instance, "name_models_list") \
-        and hasattr(instance, 'internal_lock_delete') \
-        and callable(instance.internal_lock_delete):
+    if not hasattr(instance, "name_models_list") and hasattr(instance, 'internal_lock_delete') and callable(instance.internal_lock_delete):
         lock_delete = instance.internal_lock_delete()
         if lock_delete is not None:
             raise PermissionDenied(lock_delete)
@@ -233,20 +240,22 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         Control the possible log
         '''
         action_time = models.DateTimeField('Date', auto_now=True)
-        user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
-        content_type = models.ForeignKey(ContentType, blank=True, null=True)
+        user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, blank=True, null=True)
+        username = models.CharField('Username', max_length=200, blank=True, null=False, default="")
+        content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING, blank=True, null=True)
         object_id = models.TextField('Object id', blank=True, null=True)
         object_repr = models.CharField('Object repr', max_length=200)
         action_flag = models.PositiveSmallIntegerField(_("Action"), choices=TYPE_ACTION)
         change_json = models.TextField('Json', blank=True, null=False)
         change_txt = models.TextField('Txt', blank=True, null=False)
-        
+        snapshot_txt = models.TextField('Snapshot Txt', blank=True, null=False)
+
         class Meta:
             permissions = (
                 ("list_log", "Can list log"),
                 ("detail_log", "Can view log"),
             )
-        
+
         def show(self, view='html'):
             text = []
             if self.change_txt:
@@ -284,11 +293,12 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                 answer = "?"
             # Return answer
             return answer
-        
+
         def __fields__(self, info):
             fields = []
             fields.append(('action_time', _('Date')))
-            fields.append(('user__username', _('User')))
+            fields.append(('user__username', _('Actual user')))
+            fields.append(('username', _('Original user')))
             fields.append(('get_action_flag_display', _('Action')))
             # fields.append(('content_type__name', _('APP Name')))
             fields.append(('content_type', _('APP Name')))
@@ -302,6 +312,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         def __searchQ__(self, info, text):
             tf = {}
             tf['user'] = Q(user__username__icontains=text)
+            tf['username'] = Q(username__icontains=text)
             # Flag
             if (text.lower() == 'add') or (text.lower() == 'addition') or (text.lower() == _('add')) or (text.lower() == _('addition')):
                 tf['action_flag'] = Q(action_flag=ADDITION)
@@ -316,13 +327,14 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             tf['object_repr'] = Q(object_repr__icontains=text)
             tf['action_time'] = 'datetime'
             return tf
-        
+
         def __searchF__(self, info):
             tf = {}
             tf['action_time'] = (_('Date'), lambda x: Q(**daterange_filter(x, 'action_time')), 'daterange')
             tf['get_action_flag_display'] = (_('Action'), lambda x: Q(action_flag=x), list(TYPE_ACTION))
             tf['object_id'] = (_('ID'), lambda x: Q(object_id=x), 'input')
-            tf['user__username'] = (_('User'), lambda x: Q(user__username__icontains=x), 'input')
+            tf['user__username'] = (_('Actual user'), lambda x: Q(user__username__icontains=x), 'input')
+            tf['username'] = (_('Original user'), lambda x: Q(username__icontains=x), 'input')
             tf['content_type__app_label'] = (_('APP Label'), lambda x: Q(content_type__app_label__icontains=x), 'input')
             # tf['users']=(_('User'),lambda x: Q(user__username=x),[('M','M*'),('S','S*')])
             return tf
@@ -331,14 +343,20 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
 
         class CodenerixMeta(CodenerixModel.CodenerixMeta):
             log_full = False
-        
+
+        def post_save(self, log):
+            # custom post save from application
+            pass
+
         def save(self, **kwargs):
             user = get_current_user()
             if user:
                 user_id = user.pk
+                username = user.username
             else:
                 user_id = None
-                
+                username = ""
+
             model = apps.get_model(self._meta.app_label, self.__class__.__name__)
             isnew = True
             if self.pk is not None:
@@ -369,7 +387,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                     else:
                         value = getattr(obj, key, None)
                     attrs_bd[key] = value
-            
+
             # comparison attributes
             # for key in self._meta.get_fields():
             aux = None
@@ -384,7 +402,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                     field = None
                 else:
                     field = getattr(self, key, None)
-                
+
                 if key in list_fields:
                     # if (not attrs_bd.has_key(key)) or (field != attrs_bd[key]):
                     if (key not in attrs_bd) or (field != attrs_bd[key]):
@@ -395,7 +413,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                 field_txt = '---'
                             if isinstance(field, CodenerixModel):
                                 field = field.pk
-                                      
+
                             try:
                                 json.dumps(field, default=json_util.default)
                                 if key not in attrs_bd or not self.CodenerixMeta.log_full:
@@ -405,7 +423,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                         attrs[key] = (attrs_bd[key].pk, field, )
                                     else:
                                         attrs[key] = (attrs_bd[key], field, )
-                            except:
+                            except Exception:
                                 # If related, we don't do anything
                                 if getattr(field, 'all', None) is None:
                                     field = str(field)
@@ -413,7 +431,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                         attrs[key] = field
                                     else:
                                         attrs[key] = (attrs_bd[key], field, )
-                            
+
                             if hasattr(ffield, "verbose_name"):
                                 try:
                                     string_checks = [unicode, str]
@@ -438,9 +456,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                             force_text(field_txt, errors='replace')
                                         )
                                     )
-                        
+
             log = Log()
             log.user_id = user_id
+            log.username = username
             log.content_type_id = ContentType.objects.get_for_model(self).pk
             log.object_id = pk
             log.object_repr = force_text(self, errors="replace")
@@ -453,34 +472,44 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             except UnicodeDecodeError:
                 log.change_txt = json.dumps({'error': '*JSON_ENCODE_ERROR*'}, default=json_util.default)
             log.action_flag = action
-            
+            if pk is None:
+                log.snapshot_txt = self.__strlog_add__()
+            else:
+                log.snapshot_txt = obj.__strlog_update__(self)
+
             aux = super(GenLog, self).save(**kwargs)
             if pk is None:
                 # if new element, get pk
                 log.object_id = self.pk
             log.save()
+
+            # custom post save from application
+            self.post_save(log)
+
             return aux
-    
+
     class GenLogFull(GenLog):
         class CodenerixMeta(CodenerixModel.CodenerixMeta):
             log_full = True
-    
+
     @receiver(post_delete)
     def codenerixmodel_delete_post(sender, instance, **kwargs):
         if not hasattr(instance, "name_models_list") and issubclass(sender, GenLog):
             user = get_current_user()
             if user:
                 user_id = user.pk
+                username = user.username
             else:
                 user_id = None
+                username = "*Unknown*"
             action = DELETION
-            
+
             attrs = {}
             attrs_txt = {}
 
             # ._meta.get_fields() return all fields include related name
             # ._meta.fields return all fields of models
-            
+
             # list_fields = [x.name for x in instance._meta.get_fields()]
             for ffield in instance._meta.get_fields():
                 key = ffield.name
@@ -519,13 +548,36 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                         ffield_verbose_name = str(ffield.verbose_name)
 
                     attrs_txt[ffield_verbose_name] = force_text(field, errors='replace')
-            
+
             log = Log()
             log.user_id = user_id
+            log.username = username
             log.content_type_id = ContentType.objects.get_for_model(instance).pk
             log.object_id = instance.pk
             log.object_repr = force_text(instance)
             log.change_json = json.dumps(attrs, default=json_util.default)
             log.change_txt = json.dumps(attrs_txt, default=json_util.default)
+            log.snapshot_txt = instance.__strlog_delete__()
             log.action_flag = action
             log.save()
+
+    class RemoteLog(CodenerixModel):
+        '''
+        RemoteLog system
+        '''
+        user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, blank=True, null=True)
+        username = models.CharField('Username', max_length=200, blank=True, null=False, default="")
+        data = models.TextField('Data', blank=False, null=False)
+
+        def __fields__(self, info):
+            fields = []
+            fields.append(('pk', _('ID')))
+            fields.append(('created', _('Created')))
+            fields.append(('user', _('Actual user')))
+            fields.append(('username', _('Original user')))
+            return fields
+
+        def save(self, **kwargs):
+            if self.user:
+                self.username = self.user.username
+            super(RemoteLog, self).__init__(**kwargs)

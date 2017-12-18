@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-28 14:33+0000\n"
+"POT-Creation-Date: 2017-07-12 16:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,119 +105,119 @@ msgstr ""
 msgid "Cubic yard"
 msgstr ""
 
-#: codenerix/context.py:39
+#: codenerix/context.py:34
 msgid ""
 "WARNING: No version set to this code, add VERSION contant to your "
 "configuration"
 msgstr ""
 
-#: codenerix/context.py:67
+#: codenerix/context.py:62
 msgid "WARNING: CODENERIX_CSS is not set in your configuration!!!"
 msgstr ""
 
-#: codenerix/context.py:68
+#: codenerix/context.py:63
 msgid "WARNING: CODENERIX_JS is not set in your configuration!!!"
 msgstr ""
 
-#: codenerix/context.py:74
+#: codenerix/context.py:69
 msgid " WARNING: DATERANGEPICKER_OPTIONS is not set in your configuration!!! "
 msgstr ""
 
-#: codenerix/context.py:76
+#: codenerix/context.py:71
 msgid " WARNING: DATETIME_RANGE_FORMAT is not set in your configuration!!! "
 msgstr ""
 
-#: codenerix/context.py:82
+#: codenerix/context.py:77
 msgid "From"
 msgstr ""
 
-#: codenerix/context.py:83
+#: codenerix/context.py:78
 msgid "To"
 msgstr ""
 
-#: codenerix/context.py:84
+#: codenerix/context.py:79
 msgid "Apply"
 msgstr ""
 
-#: codenerix/context.py:85 codenerix/templates/codenerix/addmodal.html:43
+#: codenerix/context.py:80 codenerix/templates/codenerix/addmodal.html:43
 #: codenerix/templates/codenerix/addmodal.html:44
-#: codenerix/templates/codenerix/formmodal.html:73 codenerix/views.py:441
+#: codenerix/templates/codenerix/formmodal.html:73 codenerix/views.py:513
 msgid "Cancel"
 msgstr ""
 
-#: codenerix/context.py:86
+#: codenerix/context.py:81
 msgid "Su"
 msgstr ""
 
-#: codenerix/context.py:87
+#: codenerix/context.py:82
 msgid "Mo"
 msgstr ""
 
-#: codenerix/context.py:88
+#: codenerix/context.py:83
 msgid "Tu"
 msgstr ""
 
-#: codenerix/context.py:89
+#: codenerix/context.py:84
 msgid "We"
 msgstr ""
 
-#: codenerix/context.py:90
+#: codenerix/context.py:85
 msgid "Th"
 msgstr ""
 
-#: codenerix/context.py:91
+#: codenerix/context.py:86
 msgid "Fr"
 msgstr ""
 
-#: codenerix/context.py:92
+#: codenerix/context.py:87
 msgid "Sa"
 msgstr ""
 
-#: codenerix/context.py:93 codenerix/helpers.py:97
+#: codenerix/context.py:88 codenerix/helpers.py:108
 msgid "January"
 msgstr ""
 
-#: codenerix/context.py:94 codenerix/helpers.py:98
+#: codenerix/context.py:89 codenerix/helpers.py:110
 msgid "February"
 msgstr ""
 
-#: codenerix/context.py:95 codenerix/helpers.py:99
+#: codenerix/context.py:90 codenerix/helpers.py:112
 msgid "March"
 msgstr ""
 
-#: codenerix/context.py:96 codenerix/helpers.py:100
+#: codenerix/context.py:91 codenerix/helpers.py:114
 msgid "April"
 msgstr ""
 
-#: codenerix/context.py:97 codenerix/helpers.py:101
+#: codenerix/context.py:92 codenerix/helpers.py:116
 msgid "May"
 msgstr ""
 
-#: codenerix/context.py:98 codenerix/helpers.py:102
+#: codenerix/context.py:93 codenerix/helpers.py:118
 msgid "June"
 msgstr ""
 
-#: codenerix/context.py:99 codenerix/helpers.py:103
+#: codenerix/context.py:94 codenerix/helpers.py:120
 msgid "July"
 msgstr ""
 
-#: codenerix/context.py:100 codenerix/helpers.py:104
+#: codenerix/context.py:95 codenerix/helpers.py:122
 msgid "August"
 msgstr ""
 
-#: codenerix/context.py:101 codenerix/helpers.py:105
+#: codenerix/context.py:96 codenerix/helpers.py:124
 msgid "September"
 msgstr ""
 
-#: codenerix/context.py:102
+#: codenerix/context.py:97
 msgid "October"
 msgstr ""
 
-#: codenerix/context.py:103 codenerix/helpers.py:107
+#: codenerix/context.py:98 codenerix/helpers.py:128
 msgid "November"
 msgstr ""
 
-#: codenerix/context.py:104 codenerix/helpers.py:108
+#: codenerix/context.py:99 codenerix/helpers.py:130
 msgid "December"
 msgstr ""
 
@@ -245,161 +245,159 @@ msgstr ""
 msgid "Invalid color"
 msgstr ""
 
-#: codenerix/helpers.py:106
+#: codenerix/helpers.py:126
 msgid "Octuber"
 msgstr ""
 
-#: codenerix/models.py:126 codenerix/models_people.py:69
+#: codenerix/helpers.py:397
+msgid "ERROR: dic has repeated elements"
+msgstr ""
+
+#: codenerix/models.py:135 codenerix/models_people.py:74
 msgid "Created"
 msgstr ""
 
-#: codenerix/models.py:127
+#: codenerix/models.py:136
 msgid "Updated"
 msgstr ""
 
-#: codenerix/models.py:143
+#: codenerix/models.py:157
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
 msgstr ""
 
-#: codenerix/models.py:251 codenerix/views.py:439
+#: codenerix/models.py:226 codenerix/models.py:278 codenerix/views.py:511
 msgid "Add"
 msgstr ""
 
-#: codenerix/models.py:253 codenerix/models.py:296 codenerix/views.py:445
+#: codenerix/models.py:227 codenerix/models.py:280 codenerix/views.py:529
 msgid "Change"
 msgstr ""
 
-#: codenerix/models.py:255 codenerix/templates/codenerix/details.html:78
-#: codenerix/templates/codenerix/details.html:79
+#: codenerix/models.py:228 codenerix/models.py:282
+#: codenerix/templates/codenerix/details.html:80
 #: codenerix/templates/codenerix/details.html:81
-#: codenerix/templates/codenerix/details.html:82
-#: codenerix/templates/codenerix/details.html:148
-#: codenerix/templates/codenerix/details.html:149
-#: codenerix/templates/codenerix/details.html:151
-#: codenerix/templates/codenerix/details.html:152
-#: codenerix/templates/codenerix/form.html:85
-#: codenerix/templates/codenerix/form.html:86
+#: codenerix/templates/codenerix/details.html:83
+#: codenerix/templates/codenerix/details.html:84
+#: codenerix/templates/codenerix/details.html:159
+#: codenerix/templates/codenerix/details.html:160
+#: codenerix/templates/codenerix/details.html:162
+#: codenerix/templates/codenerix/details.html:163
 #: codenerix/templates/codenerix/form.html:88
 #: codenerix/templates/codenerix/form.html:89
-#: codenerix/templates/codenerix/form.html:550
-#: codenerix/templates/codenerix/form.html:551
-#: codenerix/templates/codenerix/form.html:553
-#: codenerix/templates/codenerix/form.html:554
+#: codenerix/templates/codenerix/form.html:91
+#: codenerix/templates/codenerix/form.html:92
+#: codenerix/templates/codenerix/form.html:559
+#: codenerix/templates/codenerix/form.html:560
+#: codenerix/templates/codenerix/form.html:562
+#: codenerix/templates/codenerix/form.html:563
 #: codenerix/templates/codenerix/formmodal.html:62
 #: codenerix/templates/codenerix/formmodal.html:63
 #: codenerix/templates/codenerix/formmodal.html:65
-#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:446
+#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:530
 msgid "Delete"
 msgstr ""
 
-#: codenerix/models.py:263 codenerix/models.py:295 codenerix/views.py:993
-#: codenerix_reviews/models.py:32
-msgid "Date"
-msgstr ""
-
-#: codenerix/models.py:264 codenerix/models.py:298
-#: codenerix/models_people.py:65
-msgid "User"
-msgstr ""
-
-#: codenerix/models.py:265 codenerix/models.py:296
+#: codenerix/models.py:240 codenerix/models.py:292 codenerix/models.py:323
 msgid "Action"
 msgstr ""
 
-#: codenerix/models.py:267
+#: codenerix/models.py:290 codenerix/models.py:322 codenerix/views.py:521
+msgid "Date"
+msgstr ""
+
+#: codenerix/models.py:291 codenerix/models.py:325
+#: codenerix/models_people.py:70
+msgid "User"
+msgstr ""
+
+#: codenerix/models.py:294
 msgid "APP Name"
 msgstr ""
 
-#: codenerix/models.py:268 codenerix/models.py:299
+#: codenerix/models.py:295 codenerix/models.py:326
 msgid "APP Label"
 msgstr ""
 
-#: codenerix/models.py:269
+#: codenerix/models.py:296
 msgid "APP Model"
 msgstr ""
 
-#: codenerix/models.py:270 codenerix/models.py:297
+#: codenerix/models.py:297 codenerix/models.py:324
 msgid "ID"
 msgstr ""
 
-#: codenerix/models.py:272
+#: codenerix/models.py:299
 msgid "Txt"
 msgstr ""
 
-#: codenerix/models.py:279
+#: codenerix/models.py:306
 msgid "add"
 msgstr ""
 
-#: codenerix/models.py:279
+#: codenerix/models.py:306
 msgid "addition"
 msgstr ""
 
-#: codenerix/models.py:281
+#: codenerix/models.py:308
 msgid "change"
 msgstr ""
 
-#: codenerix/models.py:281
+#: codenerix/models.py:308
 msgid "changed"
 msgstr ""
 
-#: codenerix/models.py:283
+#: codenerix/models.py:310
 msgid "edit"
 msgstr ""
 
-#: codenerix/models.py:283
+#: codenerix/models.py:310
 msgid "edition"
 msgstr ""
 
-#: codenerix/models.py:285
+#: codenerix/models.py:312
 msgid "delete"
 msgstr ""
 
-#: codenerix/models.py:285
+#: codenerix/models.py:312
 msgid "deleted"
 msgstr ""
 
-#: codenerix/models.py:296
-msgid "Addition"
-msgstr ""
-
-#: codenerix/models.py:296
-msgid "Deletion"
-msgstr ""
-
-#: codenerix/models_people.py:44 codenerix/models_people.py:66
+#: codenerix/models_people.py:46 codenerix/models_people.py:71
 msgid "Name"
 msgstr ""
 
-#: codenerix/models_people.py:45 codenerix/models_people.py:67
+#: codenerix/models_people.py:47 codenerix/models_people.py:72
 msgid "Surname"
 msgstr ""
 
-#: codenerix/models_people.py:46 codenerix/models_people.py:71
+#: codenerix/models_people.py:48 codenerix/models_people.py:76
 msgid "Disabled from"
 msgstr ""
 
-#: codenerix/models_people.py:68
+#: codenerix/models_people.py:73
 msgid "Email"
 msgstr ""
 
-#: codenerix/models_people.py:70 codenerix/models_people.py:90
+#: codenerix/models_people.py:75 codenerix/models_people.py:95
 msgid "Active"
 msgstr ""
 
-#: codenerix/models_people.py:90 codenerix/templatetags_common.py:96
+#: codenerix/models_people.py:95
+#: codenerix/templatetags/codenerix_common.py:122 codenerix/views.py:1201
 msgid "Yes"
 msgstr ""
 
-#: codenerix/models_people.py:90 codenerix/templatetags_common.py:98
+#: codenerix/models_people.py:95
+#: codenerix/templatetags/codenerix_common.py:124 codenerix/views.py:1201
 msgid "No"
 msgstr ""
 
-#: codenerix/models_people.py:115
+#: codenerix/models_people.py:120
 msgid "Administrator"
 msgstr ""
 
-#: codenerix/models_people.py:127
+#: codenerix/models_people.py:132
 msgid "Cannot delete to yourself"
 msgstr ""
 
@@ -410,85 +408,96 @@ msgstr ""
 
 #: codenerix/templates/codenerix/add.html:30
 #: codenerix/templates/codenerix/add.html:31
-#: codenerix/templates/codenerix/add.html:39
-#: codenerix/templates/codenerix/add.html:40
-#: codenerix/templates/codenerix/details.html:74
-#: codenerix/templates/codenerix/details.html:143
-#: codenerix/templates/codenerix/details.html:144
+#: codenerix/templates/codenerix/add.html:42
+#: codenerix/templates/codenerix/add.html:43
+#: codenerix/templates/codenerix/details.html:76
+#: codenerix/templates/codenerix/details.html:154
+#: codenerix/templates/codenerix/details.html:155
 #: codenerix/templates/codenerix/detailsmodal_log.html:42
 #: codenerix/templates/codenerix/detailsmodal_log.html:97
 #: codenerix/templates/codenerix/detailsmodal_log.html:98
-#: codenerix/templates/codenerix/form.html:76
-#: codenerix/templates/codenerix/form.html:77
 #: codenerix/templates/codenerix/form.html:79
 #: codenerix/templates/codenerix/form.html:80
-#: codenerix/templates/codenerix/form.html:541
-#: codenerix/templates/codenerix/form.html:542
-#: codenerix/templates/codenerix/form.html:544
-#: codenerix/templates/codenerix/form.html:545
+#: codenerix/templates/codenerix/form.html:82
+#: codenerix/templates/codenerix/form.html:83
+#: codenerix/templates/codenerix/form.html:550
+#: codenerix/templates/codenerix/form.html:551
+#: codenerix/templates/codenerix/form.html:553
+#: codenerix/templates/codenerix/form.html:554
 msgid "Go back"
 msgstr ""
 
 #: codenerix/templates/codenerix/add.html:33
 #: codenerix/templates/codenerix/add.html:34
-#: codenerix/templates/codenerix/add.html:42
-#: codenerix/templates/codenerix/add.html:43
+#: codenerix/templates/codenerix/add.html:45
+#: codenerix/templates/codenerix/add.html:46
 #: codenerix/templates/codenerix/addmodal.html:41
 #: codenerix/templates/codenerix/addmodal.html:42
-#: codenerix/templates/codenerix/form.html:67
 #: codenerix/templates/codenerix/form.html:68
-#: codenerix/templates/codenerix/form.html:532
-#: codenerix/templates/codenerix/form.html:533
+#: codenerix/templates/codenerix/form.html:69
+#: codenerix/templates/codenerix/form.html:539
+#: codenerix/templates/codenerix/form.html:540
 #: codenerix/templates/codenerix/formmodal.html:70
 #: codenerix/templates/codenerix/formmodal.html:71
 msgid "Save"
 msgstr ""
 
-#: codenerix/templates/codenerix/details.html:64
-#: codenerix/templates/codenerix/details.html:65
-#: codenerix/templates/codenerix/details.html:134
-#: codenerix/templates/codenerix/details.html:135 codenerix/views.py:440
+#: codenerix/templates/codenerix/add.html:36
+#: codenerix/templates/codenerix/add.html:37
+#: codenerix/templates/codenerix/add.html:48
+#: codenerix/templates/codenerix/add.html:49
+#: codenerix/templates/codenerix/form.html:72
+#: codenerix/templates/codenerix/form.html:73
+#: codenerix/templates/codenerix/form.html:543
+#: codenerix/templates/codenerix/form.html:544
+msgid "Save & new"
+msgstr ""
+
+#: codenerix/templates/codenerix/details.html:66
+#: codenerix/templates/codenerix/details.html:67
+#: codenerix/templates/codenerix/details.html:145
+#: codenerix/templates/codenerix/details.html:146 codenerix/views.py:512
 msgid "Edit"
 msgstr ""
 
-#: codenerix/templates/codenerix/details.html:73
+#: codenerix/templates/codenerix/details.html:75
 #: codenerix/templates/codenerix/detailsmodal_log.html:41
 msgid "Go to back"
 msgstr ""
 
-#: codenerix/templates/codenerix/details.html:82
-#: codenerix/templates/codenerix/details.html:152
-#: codenerix/templates/codenerix/form.html:89
-#: codenerix/templates/codenerix/form.html:554
+#: codenerix/templates/codenerix/details.html:84
+#: codenerix/templates/codenerix/details.html:163
+#: codenerix/templates/codenerix/form.html:92
+#: codenerix/templates/codenerix/form.html:563
 #: codenerix/templates/codenerix/formmodal.html:66
 msgid "Are you sure you would like to delete this register?"
 msgstr ""
 
-#: codenerix/templates/codenerix/form.html:58
+#: codenerix/templates/codenerix/form.html:59
 #: codenerix/templates/codenerix/formmodal.html:27
 msgid "Editing"
 msgstr ""
 
-#: codenerix/templates/codenerix/form.html:69
 #: codenerix/templates/codenerix/form.html:70
-#: codenerix/templates/codenerix/form.html:534
-#: codenerix/templates/codenerix/form.html:535
+#: codenerix/templates/codenerix/form.html:71
+#: codenerix/templates/codenerix/form.html:541
+#: codenerix/templates/codenerix/form.html:542
 msgid "Save here"
 msgstr ""
 
-#: codenerix/templates/codenerix/form.html:71
-#: codenerix/templates/codenerix/form.html:72
-#: codenerix/templates/codenerix/form.html:536
-#: codenerix/templates/codenerix/form.html:537
+#: codenerix/templates/codenerix/form.html:74
+#: codenerix/templates/codenerix/form.html:75
+#: codenerix/templates/codenerix/form.html:545
+#: codenerix/templates/codenerix/form.html:546
 msgid "Reload"
 msgstr ""
 
-#: codenerix/templates/codenerix/form.html:72
-#: codenerix/templates/codenerix/form.html:537
+#: codenerix/templates/codenerix/form.html:75
+#: codenerix/templates/codenerix/form.html:546
 msgid "You will loose all your changes, are you sure?"
 msgstr ""
 
-#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:2510
+#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:2634
 msgid "List"
 msgstr ""
 
@@ -497,180 +506,155 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: codenerix/templatetags_common.py:195
+#: codenerix/templatetags/codenerix_common.py:237
 msgid "True"
 msgstr ""
 
-#: codenerix/templatetags_common.py:197
+#: codenerix/templatetags/codenerix_common.py:239
 msgid "False"
 msgstr ""
 
-#: codenerix/views.py:442
+#: codenerix/views.py:514
 msgid "Search"
 msgstr ""
 
-#: codenerix/views.py:443 codenerix/views.py:991
+#: codenerix/views.py:515
+msgid "Filters"
+msgstr ""
+
+#: codenerix/views.py:516
+msgid "Rows per page"
+msgstr ""
+
+#: codenerix/views.py:517
+msgid "Page number"
+msgstr ""
+
+#: codenerix/views.py:518
+msgid "registers"
+msgstr ""
+
+#: codenerix/views.py:519
 msgid "Clean filters"
 msgstr ""
 
-#: codenerix/views.py:444 codenerix/views.py:992
+#: codenerix/views.py:520
 msgid "Print Excel"
 msgstr ""
 
-#: codenerix/views.py:447
+#: codenerix/views.py:522 codenerix/views.py:2293
+msgid "Year"
+msgstr ""
+
+#: codenerix/views.py:523 codenerix/views.py:2294
+msgid "Month"
+msgstr ""
+
+#: codenerix/views.py:524 codenerix/views.py:2295
+msgid "Day"
+msgstr ""
+
+#: codenerix/views.py:525
+msgid "Time"
+msgstr ""
+
+#: codenerix/views.py:526 codenerix/views.py:2296 codenerix/widgets.py:620
+msgid "Hour"
+msgstr ""
+
+#: codenerix/views.py:527 codenerix/views.py:2297
+msgid "Minute"
+msgstr ""
+
+#: codenerix/views.py:528 codenerix/views.py:2298
+msgid "Second"
+msgstr ""
+
+#: codenerix/views.py:531
 msgid "View"
 msgstr ""
 
-#: codenerix/views.py:448
+#: codenerix/views.py:532
 msgid "Download"
 msgstr ""
 
-#: codenerix/views.py:770
+#: codenerix/views.py:562
+msgid "The view/model definition requires, that this user must be a superuser"
+msgstr ""
+
+#: codenerix/views.py:849
 msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
 msgstr ""
 
-#: codenerix/views.py:988
-msgid "Rows per page"
-msgstr ""
-
-#: codenerix/views.py:989
-msgid "Page number"
-msgstr ""
-
-#: codenerix/views.py:990
-msgid "registers"
-msgstr ""
-
-#: codenerix/views.py:994 codenerix/views.py:2158
-msgid "Year"
-msgstr ""
-
-#: codenerix/views.py:995 codenerix/views.py:2159
-msgid "Month"
-msgstr ""
-
-#: codenerix/views.py:996 codenerix/views.py:2160
-msgid "Day"
-msgstr ""
-
-#: codenerix/views.py:997
-msgid "Time"
-msgstr ""
-
-#: codenerix/views.py:998 codenerix/views.py:2161 codenerix/widgets.py:591
-msgid "Hour"
-msgstr ""
-
-#: codenerix/views.py:999 codenerix/views.py:2162
-msgid "Minute"
-msgstr ""
-
-#: codenerix/views.py:1000 codenerix/views.py:2163
-msgid "Second"
-msgstr ""
-
-#: codenerix/views.py:1264 codenerix/views.py:1277 codenerix/views.py:1887
-#: codenerix/views.py:1933
+#: codenerix/views.py:1386 codenerix/views.py:1399 codenerix/views.py:2026
+#: codenerix/views.py:2073
 msgid "All"
 msgstr ""
 
-#: codenerix/views.py:2164
+#: codenerix/views.py:2299
 msgid "Unknown"
 msgstr ""
 
-#: codenerix/views.py:2540
+#: codenerix/views.py:2681
 msgid ""
 "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in "
 "Megabytes) of the config"
 msgstr ""
 
-#: codenerix/views.py:2824
+#: codenerix/views.py:2956
 msgid "This shouldn't happen, state is not $dirty or $pristine"
 msgstr ""
 
-#: codenerix/views.py:3420
+#: codenerix/views.py:3552
 msgid "Manager"
 msgstr ""
 
-#: codenerix/views.py:3420
+#: codenerix/views.py:3552
 msgid "Log"
 msgstr ""
 
-#: codenerix/views.py:3433
+#: codenerix/views.py:3565
 msgid "Identification"
 msgstr ""
 
-#: codenerix/views.py:3441
+#: codenerix/views.py:3573
 msgid "Changes"
 msgstr ""
 
-#: codenerix/widgets.py:75
+#: codenerix/widgets.py:80
 msgid "Press * and select an option"
 msgstr ""
 
-#: codenerix/widgets.py:77 codenerix/widgets.py:360
+#: codenerix/widgets.py:82 codenerix/widgets.py:372
 msgid "Press * or start typing"
 msgstr ""
 
-#: codenerix/widgets.py:187
+#: codenerix/widgets.py:195
 msgid "Select an option"
 msgstr ""
 
-#: codenerix/widgets.py:675
+#: codenerix/widgets.py:704
 msgid "NG Quill"
 msgstr ""
 
-#: codenerix/widgets.py:676
+#: codenerix/widgets.py:705
 msgid "Text Angular"
 msgstr ""
 
-#: codenerix/widgets.py:677
+#: codenerix/widgets.py:706
 msgid "Source code"
 msgstr ""
 
-#: codenerix/widgets.py:678
+#: codenerix/widgets.py:707
 msgid "Preview"
 msgstr ""
 
-#: codenerix/widgets.py:769
+#: codenerix/widgets.py:787
+msgid "Field deleted in the template"
+msgstr ""
+
+#: codenerix/widgets.py:800
 msgid "We are working on this plugin, it will be ready for next version"
-msgstr ""
-
-#: codenerix_reviews/forms.py:14 codenerix_reviews/forms.py:28
-msgid "Details"
-msgstr ""
-
-#: codenerix_reviews/models.py:17 codenerix_reviews/models.py:30
-msgid "Customer"
-msgstr ""
-
-#: codenerix_reviews/models.py:18 codenerix_reviews/models.py:31
-msgid "Product"
-msgstr ""
-
-#: codenerix_reviews/models.py:19 codenerix_reviews/models.py:33
-msgid "Stars"
-msgstr ""
-
-#: codenerix_reviews/models.py:20 codenerix_reviews/models.py:34
-#: codenerix_reviews/views.py:22 codenerix_reviews/views.py:72
-msgid "Reviews"
-msgstr ""
-
-#: codenerix_reviews/models.py:21 codenerix_reviews/models.py:36
-msgid "Validate"
-msgstr ""
-
-#: codenerix_reviews/models.py:23
-msgid "Language"
-msgstr ""
-
-#: codenerix_reviews/models.py:35
-msgid "Lang"
-msgstr ""
-
-#: codenerix_reviews/views.py:22 codenerix_reviews/views.py:72
-msgid "People"
 msgstr ""

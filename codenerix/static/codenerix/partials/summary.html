@@ -28,7 +28,8 @@ limitations under the License.
         <li ng-repeat="info in row[column.id]">{{info}}</li>
     </ul>
     <span ng-switch-when="false">
-        <span codenerix-html-compile='row[column.id]|codenerix:column.filter'>
+        <span ng-bind-html='row[column.id]|codenerix:column.filter'>
+            {{row[column.id]|codenerix:column.filter}}
         </span>
     </span>
 </td>

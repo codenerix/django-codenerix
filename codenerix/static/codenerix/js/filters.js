@@ -19,17 +19,51 @@
  * limitations under the License.
  */
 
- angular.module('codenerixFilters', [])
+angular.module('codenerixFilters', [])
 
 .filter('codenerix', function() {
   return function(input, kind) {
     if ((kind==null) || (kind==undefined)) {
         // No kind defined
+        if ((input===null) || (input===undefined) || (input==='')) {
+            return "-";
+        } else if (input=='True' || input===true) {
+            return '<i class="autotrue text-success glyphicon glyphicon-ok"></i>';
+        } else if (input=='False' || input===false) {
+            return '<i class="autofalse text-danger glyphicon glyphicon-remove"></i>';
+        } else {
+            return input;
+        }
+    } else if ((kind=='none') || (kind=='')) {
         return input;
     } else if (kind=='skype') {
         return "<a ng-click='$event.stopPropagation();' href='tel:"+input+"'>"+input+"</a>";
-    } else if (kind=='image') {
-        return "<img src='"+input+"'  />";
+    } else if (kind=='link') {
+        return "<a ng-click='$event.stopPropagation();' href='"+input+"'><i class='glyphicon glyphicon-download-alt'></i></a>";
+    } else if (kind.substring(0,5)=='image') {
+        if ((input==null) || (input==undefined) || (input=='')) {
+            return "-";
+        } else {
+            if (kind == 'image'){
+                return "<img src='"+input+"'  />";
+            }else{
+                var style = kind.substring(6);
+                return '<img src="'+input+'" style="'+style+'"  />';
+            }
+        }
+    } else if (kind.substring(0,5)=='money') {
+        if ((input==null) || (input==undefined) || (input=='')) {
+            return "-";
+        } else {
+            var kind = kind.substring(6);
+            if (kind=='euro')           { return "" +Math.round(input * 100) / 100 +"€";
+            } else if (kind=='dollar')  { return "$"+Math.round(input * 100) / 100;
+            } else if (kind=='pound')   { return "£"+Math.round(input * 100) / 100;
+            } else if (kind=='yuan')    { return "¥"+Math.round(input * 100) / 100;
+            } else if (kind=='bitcoin') { return "" +Math.round(input * 100) / 100+"<span class='fa fa-btc'></span>";
+            } else { return input+"?";
+            }
+        }
     } else {
         console.error("AngularJS filter 'codenerix' got a wrong kind named '"+kind+"'");
         return input;
@@ -61,37 +95,13 @@
         return input.split(splitChar)[splitIndex];
     }
 })
+
 .filter('highlightRow', function() {
-    return function(input, txt) {
-        var result = '';
-        if (txt!==undefined){
-            txt = String(txt).trim()
-            var index = 0;
-            var search = -1;
-            var search_old = -1;
-            var len = txt.length;
-
-            var txt_m = txt.toUpperCase();
-            var input_m = input.toUpperCase()
-
-            if (len!=0 && txt!="" && input.length>0){
-                while ((search=input_m.indexOf(txt_m, index) )!=-1){
-                    if (search==search_old){
-                        break;
-                    }
-                    result=result+input.substring(index, search);
-                    result=result+'<span class="standout">'+input.substring(result.length, result.length+len)+'</span>';
-                    index=search+len;
-                    search_old = search;
-                }
-            }
+    return function(text, search) {
+        if (!search) {
+            return text;
         }
-        if (result == ''){
-            result = input;
-        }else if(index<input.length){
-            result=result+input.substring(search_old+len);
-        }
-        return result;
+        return text.replace(new RegExp(search, 'gi'), '<mark>$&</mark>');
     }
 })
 

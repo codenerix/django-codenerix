@@ -80,20 +80,14 @@ class Command(BaseCommand, Debugger):
         appname=settings.ROOT_URLCONF.split(".")[0]
         basedir=settings.BASE_DIR
         appdir = os.path.abspath("{}/{}".format(basedir,appname))
-        print(appdir)
         noauto=options['noauto']
         
         # Check user selection
         if not options['noguess']:
-            cmd = "ls -lR {} | grep www-data".format(appdir)
+            cmd = "find {} -name 'locale' -exec ls -lR {{}} \; | grep www-data".format(appdir)
             status, output = getstatusoutput(cmd)
             if status:
-                cmd = "ls -lR {} | grep www-data".format(appdir)
-                status, output = getstatusoutput(cmd)
-                if status:
-                    guess="suexec"
-                else:
-                    guess="apache"
+                guess="suexec"
             else:
                 guess="wwwdata"
             if guess!=mode:
@@ -203,7 +197,7 @@ class Command(BaseCommand, Debugger):
                 raise CommandError("Wrong mode for sudo '{}'".format(mode))
             for app in ['']+apps:
                 testpath = os.path.abspath("{}/{}/locale".format(appdir,app).replace("//","/"))
-                cmd="sudo chown {}.{} {}/* -R".format(user,user,testpath)
+                cmd="sudo chown {}.{} {}/ -R".format(user,user,testpath)
                 status, output = getstatusoutput(cmd)
                 if status: raise CommandError(output)
 

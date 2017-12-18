@@ -8,7 +8,6 @@ __pycache__/
 env/
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -89,3 +88,5 @@ ENV/
 
 # CODENERIX files
 /django_codenerix*.egg-info
+node_modules/
+dist/

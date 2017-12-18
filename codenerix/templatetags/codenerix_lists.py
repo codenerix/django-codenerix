@@ -19,14 +19,14 @@
 # limitations under the License.
 
 from django.template import Library
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ValidationError
 from django.utils import formats
 from django.conf import settings
 
-from djng.forms.angular_base import TupleErrorList
+from codenerix.djng.angular_base import TupleErrorList
 
 from codenerix.helpers import model_inspect
 
@@ -36,7 +36,7 @@ register = Library()
 def widgetize(i):
     # Initialize structure
     attrs = i.__dict__.get("field", {}).__dict__.get("widget", {}).__dict__.get('attrs', {})
-    
+
     # Select
     # if 'choices' in i.field.widget.__dict__:
     #
@@ -155,12 +155,14 @@ def date2timewidget(i, langcode):
 
 
 @register.filter
-def datewidget(i, langcode, kindtype='datetime'):
+def datewidget(i, langcode, kindtype='datetime', kind=None):
     # Initialization
     final = {}
     form = formats.get_format('DATETIME_INPUT_FORMATS', lang=langcode)[0].replace("%", "").replace('d', 'dd').replace('m', 'mm').replace('Y', 'yyyy').replace('H', 'hh').replace('M', 'ii').replace('S', 'ss')
 
-    kind = istype(i, kindtype)
+    if kind is None:
+        kind = istype(i, kindtype)
+
     if kind == 'DATETIME_INPUT_FORMATS':
         final['format'] = form
         final['startview'] = 2
@@ -232,7 +234,7 @@ def foreignkey(element, exceptions):
 def headstyle(group):
     # Initialize
     style = ""
-    
+
     # Decide about colors
     if 'color' in group and group['color']:
         style += "color:{0};".format(group['color'])
@@ -240,7 +242,7 @@ def headstyle(group):
         style += "background-color:{0};".format(group['bgcolor'])
     if 'textalign' in group and group['textalign']:
         style += "text-align:{0};".format(group['textalign'])
-    
+
     # Check if we have some style
     if style:
         return "style={0}".format(style)
@@ -278,10 +280,17 @@ def add_columns(obj, columns):
 
 
 @register.filter
-def linkedinfo(element):
+def linkedinfo(element, info_input={}):
     info = model_inspect(element.field._get_queryset().model())
+    info.update(info_input)
+
     ngmodel = element.html_name  # field.widget.attrs['ng-model']
-    return mark_safe("'{0}','{1}','{2}', '{3}s'".format(getattr(settings, 'BASE_URL', ''), ngmodel, info['appname'], info['modelname'].lower()))
+    return mark_safe("'{0}','{1}','{2}', '{3}s'".format(
+        getattr(settings, 'BASE_URL', ''),
+        ngmodel,
+        info['appname'],
+        info['modelname'].lower())
+    )
 
 
 # DEPRECATED: 2017-02-14

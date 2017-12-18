@@ -47,97 +47,99 @@ class MultiForm(object):
         if 'field_prefix' in self.__dict__:
             kwargs['scope_prefix'] = self.field_prefix
         return kwargs
-    
+
     def get(self, request, *args, **kwargs):
         """
         Handles GET requests and instantiates blank versions of the form and its inline formsets.
         """
-        
+
         # Prepare base
         if 'pk' in kwargs:
             self.object = self.get_object()
         else:
             self.object = None
         form_class = self.get_form_class()
-        
+
         # Get prefix
         if 'field_prefix' in form_class.Meta.__dict__:
             # Get name from the form
             field_prefix = form_class.Meta.field_prefix
         else:
             # Get name from the class
-            field_prefix=str(form_class).split("'")[1].split(".")[-1]
-        self.field_prefix=field_prefix
-        
+            field_prefix = str(form_class).split("'")[1].split(".")[-1]
+        self.field_prefix = field_prefix
+
         # Build form
         form = self.get_form(form_class)
-        
+
         # Find groups
         if 'groups' in dir(self):
             # Save groups
-            groups=self.groups
+            groups = self.groups
             # Redefine groups inside the form
-            form.__groups__ = lambda : groups
+            form.__groups__ = lambda: groups
             # Initialize list of fields
             fields = []
         else:
-            groups=None
-        
+            groups = None
+
         # Add special prefix support to properly support form independency
         form.add_prefix = lambda fields_name, field_prefix=field_prefix: "%s_%s" % (field_prefix, fields_name)
         if 'autofill' not in dir(form.Meta):
-            form.Meta.autofill={}
-        
+            form.Meta.autofill = {}
+
         # For every extra form
         forms = []
         position_form_default = 0
-        for (formelement,linkerfield,modelfilter) in self.forms:
+        for (formelement, linkerfield, modelfilter) in self.forms:
             if formelement is None:
-                formobj=form
+                formobj = form
                 position_form_default = len(forms)
             else:
                 # Locate linked element
                 if self.object:
                     related_name = formelement._meta.model._meta.get_field(linkerfield).related_query_name()
-                    queryset=getattr(self.object,related_name)
+                    queryset = getattr(self.object, related_name)
                     if modelfilter:
-                        queryset=queryset.filter(eval("Q(%s)" % (modelfilter)))
+                        queryset = queryset.filter(eval("Q(%s)" % (modelfilter)))
                     get_method = getattr(queryset, 'get', None)
                     if get_method:
-                        instance=queryset.get()
+                        instance = queryset.get()
                     else:
-                        instance=queryset
+                        instance = queryset
                 else:
-                    instance=None
+                    instance = None
 
                 if 'autofill' in dir(formelement.Meta):
-                    form.Meta.autofill.update(formelement.Meta.autofill)
-                
+                    formname = str(formelement).split('.')[-1].split("'")[0]
+                    for key in formelement.Meta.autofill:
+                        form.Meta.autofill['{}_{}'.format(formname, key)] = formelement.Meta.autofill[key]
+
                 # Get prefix
                 if 'field_prefix' in formelement.Meta.__dict__:
                     # Get name from the form
                     field_prefix = formelement.Meta.field_prefix
                 else:
                     # Get name from the class
-                    field_prefix=str(formelement).split("'")[1].split(".")[-1]
-                self.field_prefix=field_prefix
-                
+                    field_prefix = str(formelement).split("'")[1].split(".")[-1]
+                self.field_prefix = field_prefix
+
                 # Prepare form
-                formobj=formelement(instance=instance)
+                formobj = formelement(instance=instance)
                 formobj.form_name = form.form_name
-                
+
                 # Excluded fields
                 if 'exclude' not in formobj.Meta.__dict__:
-                    formobj.Meta.exclude=[linkerfield]
+                    formobj.Meta.exclude = [linkerfield]
                 elif linkerfield not in formobj.Meta.exclude:
                     formobj.Meta.exclude.append(linkerfield)
                 if linkerfield in formobj.fields:
                     del(formobj.fields[linkerfield])
-                
+
                 # Add special prefix support to properly support form independency
                 formobj.add_prefix = lambda fields_name, field_prefix=field_prefix: "%s_%s" % (field_prefix, fields_name)
                 formobj.scope_prefix = field_prefix
-            
+
             # Save fields to the list
             if groups:
                 for field in formobj:
@@ -145,30 +147,30 @@ class MultiForm(object):
             else:
                 # Add the form to the list of forms
                 forms.append(formobj)
-        
+
         if position_form_default == 0:
             open_tabs = 1
         else:
             open_tabs = 0
         # Remember list of fields
         if groups:
-            form.list_fields=fields
-        
+            form.list_fields = fields
+
         # Add context and return new context
-        return self.render_to_response( self.get_context_data( form=form, forms = forms, open_tabs=open_tabs, position_form_default=position_form_default ) )
-    
+        return self.render_to_response(self.get_context_data(form=form, forms=forms, open_tabs=open_tabs, position_form_default=position_form_default))
+
     def post(self, request, *args, **kwargs):
         """
         andles POST requests, instantiating a form instance and its inline formsets with the passed POST variables and then checking them for validity.
         """
-        
+
         # Prepare base
         if 'pk' in kwargs:
             self.object = self.get_object()
         else:
             self.object = None
         form_class = self.get_form_class()
-        
+
         # Get prefix
         if 'field_prefix' in form_class.Meta.__dict__:
             # Get name from the form
@@ -176,30 +178,30 @@ class MultiForm(object):
             # Initialize list of fields
         else:
             # Get name from the class
-            field_prefix=str(form_class).split("'")[1].split(".")[-1]
-        self.field_prefix=field_prefix
-        
+            field_prefix = str(form_class).split("'")[1].split(".")[-1]
+        self.field_prefix = field_prefix
+
         # Build the form
         form = self.get_form(form_class)
-        
+
         # Find groups
         if 'groups' in dir(self):
             # Save groups
-            groups=self.groups
+            groups = self.groups
             # Redefine groups inside the form
-            form.__groups__ = lambda : groups
+            form.__groups__ = lambda: groups
             # Initialize list of fields
             fields = []
         else:
-            groups=None
-        
+            groups = None
+
         # Add special prefix support to properly support form independency
         form.add_prefix = lambda fields_name, field_prefix=field_prefix: "%s_%s" % (field_prefix, fields_name)
-        
+
         # Check validation
         valid = form.is_valid()
         if (not valid) and ('non_field_errors' in dir(self)):
-            errors = [element[5] for element in self.non_field_errors()[:-1]]
+            errors = [element[5] for element in list(self.non_field_errors())[:-1]]
         elif form.errors.as_data():
             errors = []
             for element in form.errors.as_data():
@@ -207,91 +209,91 @@ class MultiForm(object):
                     errors.append(err)
         else:
             errors = []
-        
+
         # For every extra form
         temp_forms = []
         position_form_default = 0
-        for (formelement,linkerfield,modelfilter) in self.forms:
+        for (formelement, linkerfield, modelfilter) in self.forms:
             if formelement is None:
-                formobj=form
+                formobj = form
                 position_form_default = len(temp_forms)
             else:
                 # Locate linked element
                 if self.object:
                     related_name = formelement._meta.model._meta.get_field(linkerfield).related_query_name()
-                    queryset=getattr(self.object,related_name)
+                    queryset = getattr(self.object, related_name)
                     if modelfilter:
-                        queryset=queryset.filter(eval("Q(%s)" % (modelfilter)))
+                        queryset = queryset.filter(eval("Q(%s)" % (modelfilter)))
                     get_method = getattr(queryset, 'get', None)
                     if get_method:
-                        instance=queryset.get()
+                        instance = queryset.get()
                     else:
-                        instance=queryset
+                        instance = queryset
                 else:
-                    instance=None
-                
+                    instance = None
+
                 # Get prefix
                 if 'field_prefix' in formelement.Meta.__dict__:
                     # Get name from the form
                     field_prefix = formelement.Meta.field_prefix
                 else:
                     # Get name from the class
-                    field_prefix=str(formelement).split("'")[1].split(".")[-1]
-                self.field_prefix=field_prefix
-                
+                    field_prefix = str(formelement).split("'")[1].split(".")[-1]
+                self.field_prefix = field_prefix
+
                 # Prepare form
-                formobj=formelement(instance=instance,data=self.request.POST)
+                formobj = formelement(instance=instance, data=self.request.POST)
                 formobj.form_name = form.form_name
-                
+
                 # Excluded fields
                 if 'exclude' not in formobj.Meta.__dict__:
-                    formobj.Meta.exclude=[linkerfield]
+                    formobj.Meta.exclude = [linkerfield]
                 elif linkerfield not in formobj.Meta.exclude:
                     formobj.Meta.exclude.append(linkerfield)
                 if linkerfield in formobj.fields:
                     del(formobj.fields[linkerfield])
-                
+
                 # Link it to the main model
                 formobj.add_prefix = lambda fields_name, field_prefix=field_prefix: "%s_%s" % (field_prefix, fields_name)
-                
+
                 # Validate
-                valid*=formobj.is_valid()
-                
+                valid *= formobj.is_valid()
+
                 # append error
-                if not formobj.is_valid():
-                    errors+=list([element[5] for element in formobj.non_field_errors()[:-1]])
-            
+                if not formobj.is_valid() and ('non_field_errors' in dir(formobj)):
+                    errors += [element[5] for element in list(formobj.non_field_errors())[:-1]]
+
             # Save fields to the list
             if groups:
                 for field in formobj:
-                    #raise Exception (field.__dict__)
+                    # raise Exception (field.__dict__)
                     if 'unblock_t2ime' in field.html_name:
-                        raise Exception (field.field.__dict__)
+                        raise Exception(field.field.__dict__)
                     fields.append(field)
-            
+
             # Add a new form
-            temp_forms.append((formobj,linkerfield))
-        
+            temp_forms.append((formobj, linkerfield))
+
         # execute validation specified
-        validate_forms=None
+        validate_forms = None
         if valid and ("validate" in dir(self)):
-            validate_forms=[tform[0] for tform in temp_forms]
+            validate_forms = [tform[0] for tform in temp_forms]
             errors = self.validate(*validate_forms)
-            #valid = len(errors) == 0
+            # valid = len(errors) == 0
             valid = False
             if errors is None or len(errors) == 0:
                 valid = True
-        
+
         # Remember list of fields
         if groups:
-            form.list_fields=fields
-            forms=[]
+            form.list_fields = fields
+            forms = []
         else:
             if validate_forms:
-                forms=validate_forms
+                forms = validate_forms
             else:
-                forms=[tform[0] for tform in temp_forms]
-        
+                forms = [tform[0] for tform in temp_forms]
+
         if position_form_default == 0:
             open_tabs = 1
         else:
@@ -305,7 +307,7 @@ class MultiForm(object):
             # Something went wrong, attach error and call invalid
             form.list_errors = errors
             return self.form_invalid(form, forms, open_tabs, position_form_default)
-    
+
     @transaction.atomic
     def form_valid(self, form, forms):
         """
@@ -313,21 +315,20 @@ class MultiForm(object):
         """
         if self.object:
             form.save()
-            for (formobj,linkerfield) in forms:
-                if form!=formobj:
+            for (formobj, linkerfield) in forms:
+                if form != formobj:
                     formobj.save()
         else:
             self.object = form.save()
-            for (formobj,linkerfield) in forms:
-                if form!=formobj:
-                    setattr(formobj.instance,linkerfield,self.object)
+            for (formobj, linkerfield) in forms:
+                if form != formobj:
+                    setattr(formobj.instance, linkerfield, self.object)
                     formobj.save()
         return HttpResponseRedirect(self.get_success_url())
-    
+
     def form_invalid(self, form, forms, open_tabs, position_form_default):
         """
         Called if a form is invalid. Re-renders the context data with the data-filled forms and errors.
         """
         # return self.render_to_response( self.get_context_data( form = form, forms = forms ) )
         return self.render_to_response(self.get_context_data(form=form, forms=forms, open_tabs=open_tabs, position_form_default=position_form_default))
-

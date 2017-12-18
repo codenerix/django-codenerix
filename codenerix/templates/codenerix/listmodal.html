@@ -27,11 +27,12 @@ limitations under the License.
 {% block angular_app_libraries %}
     <script type="text/javascript" src="{% static "codenerix/js/app.js" %}"></script>
     <script type="text/javascript" src="{% static "codenerix/js/controllers.js" %}"></script>
-    <script type="text/javascript" src="{% static static_filters_row %}"></script>
+    <script type="text/javascript" src="{{ static_filters_row }}"></script>
     {% block angular_app_service %}
         <script type="text/javascript">
             var ws_entry_point="{{ws_entry_point}}";
             var static_partial_row="{{static_partial_row}}";
+            var static_partial_summary="{{static_partial_summary}}";
             angular.module('gestdocumentServices', ['ngResource'])
             .factory('Register', ['$resource', function($resource){
                 return $resource('/{{ws_entry_point}}/:pk/:action', { json:'{}', pk:null, action:null },{

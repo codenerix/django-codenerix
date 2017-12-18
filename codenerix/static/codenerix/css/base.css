@@ -430,3 +430,7 @@ ul.djng-field-errors li.invalid:hover{
     border: 1px solid #ccc;
     border-radius: 4px 0 0 4px;
 }
+
+.modal-xlg {
+    width: 1130px !important;
+}

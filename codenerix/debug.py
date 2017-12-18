@@ -19,6 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django import VERSION
+
 DEBUG_TOOLBAR_DEFAULT_PANELS = (
     'debug_toolbar.panels.version.VersionDebugPanel',
     'debug_toolbar.panels.timer.TimerDebugPanel',
@@ -33,18 +35,21 @@ DEBUG_TOOLBAR_DEFAULT_PANELS = (
 DEBUG_TOOLBAR_DEFAULT_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
+
+
 # Autoload
 def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=False, ADMINSITE=False, DEBUG_TOOLBAR=False, DEBUG_PANEL=False, SNIPPET_SCREAM=False, GRAPH_MODELS=False, CODENERIX_DISABLE_LOG=False):
-    EXTRA_MIDDLEWARES=[]
+    EXTRA_MIDDLEWARES = []
     if DEBUG and SPAGHETTI:
         INSTALLED_APPS += ('django_spaghetti',)
     if DEBUG and ROSETTA:
-        INSTALLED_APPS+=('rosetta',)
-    if DEBUG and ADMINSITE and 'django.contrib.admin' not in INSTALLED_APPS and not CODENERIX_DISABLE_LOG:
-        INSTALLED_APPS+=('django.contrib.admin',)
+        INSTALLED_APPS += ('rosetta',)
+    if 'django.contrib.admin' not in INSTALLED_APPS and not CODENERIX_DISABLE_LOG:
+        INSTALLED_APPS += ('django.contrib.admin',)
+    if DEBUG and ADMINSITE and not CODENERIX_DISABLE_LOG:
         EXTRA_MIDDLEWARES.append('django.contrib.messages.middleware.MessageMiddleware')
     if DEBUG and DEBUG_TOOLBAR:
-        INSTALLED_APPS+=('debug_toolbar',)
+        INSTALLED_APPS += ('debug_toolbar',)
         if DEBUG_PANEL:
             INSTALLED_APPS += ('debug_panel',)
             EXTRA_MIDDLEWARES.append('debug_panel.middleware.DebugPanelMiddleware')
@@ -54,25 +59,33 @@ def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=F
         EXTRA_MIDDLEWARES.append('snippetscream.ProfileMiddleware')
     if DEBUG and GRAPH_MODELS:
         INSTALLED_APPS += ('django_extensions',)
-    
+
     # Attach new middlewares
-    if type(MIDDLEWARE)==tuple:
-        MIDDLEWARE+=tuple(EXTRA_MIDDLEWARES)
+    if type(MIDDLEWARE) == tuple:
+        MIDDLEWARE += tuple(EXTRA_MIDDLEWARES)
     else:
-        MIDDLEWARE+=list(EXTRA_MIDDLEWARES)
-    
+        MIDDLEWARE += list(EXTRA_MIDDLEWARES)
+
     # Return final results
     return (INSTALLED_APPS, MIDDLEWARE)
+
 
 # Autourl
 def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI):
     from django.conf.urls import include, url
+
     if ROSETTA:
         URLPATTERNS += [url(r'^rosetta/', include('rosetta.urls'))]
+
     if ADMINSITE:
         from django.contrib import admin
-        URLPATTERNS += [url(r'^admin', include(admin.site.urls))]
-        URLPATTERNS += [url(r'^admin/', include(admin.site.urls))]
+        if VERSION[0] < 2 and ADMINSITE:
+            URLPATTERNS += [url(r'^admin', include(admin.site.urls))]
+            URLPATTERNS += [url(r'^admin/', include(admin.site.urls))]
+        else:
+            from django.urls import path
+            URLPATTERNS += [path('admin', admin.site.urls, )]
+            URLPATTERNS += [path('admin/', admin.site.urls, )]
     if DEBUG and SPAGHETTI:
         URLPATTERNS += [url(r'^plate/', include('django_spaghetti.urls'))]
     return URLPATTERNS
@@ -129,7 +142,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.uk.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-TW.js"></script> '
-    
+
     CODENERIX_CSS_DEBUG = ' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
@@ -145,6 +158,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/css/lists.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-vertical-grid.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/fontawesome/css/font-awesome.css" rel="stylesheet"> \
+    <link href="{STATIC_URL}codenerix/lib/fontawesome-animation/font-awesome-animation.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/textAngular/textAngular.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.css" rel="stylesheet"> \
@@ -164,6 +178,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/css/lists.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-vertical-grid.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/fontawesome/css/font-awesome.min.css" rel="stylesheet"> \
+    <link href="{STATIC_URL}codenerix/lib/fontawesome-animation/font-awesome-animation.min.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/textAngular/textAngular.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.css" rel="stylesheet"> \
@@ -253,7 +268,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-quill/ng-quill.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.js"></script> \
     ' + locales
-    
+
     # Load CODENERIX CSS
     if DEBUG:
         CODENERIX_CSS = CODENERIX_CSS_DEBUG

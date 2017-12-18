@@ -51,6 +51,8 @@ var codenerix_libraries = [
     'ngQuill',
     'cfp.hotkeys',
 ];
+var codenerix_debug = false;
+var codenerix_hotkeys = true;
 
 // Add the remove method to the Array structure
 Array.prototype.remove = function(from, to) {
@@ -65,6 +67,113 @@ function multi_dynamic_select_dict(arg, form){
         dict[value] = form+"."+value;
     });
     return dict;
+}
+
+function subscribers_worker(scope, subsjsb64) {
+    var subsjs = atob(subsjsb64);
+    if (subsjs) {
+        if (subsjs) {
+            try {
+                var subs = JSON.parse(subsjs);
+            } catch (e) {
+                var subs = null;
+            }
+            if (subs) {
+                if (typeof(CodenerixSubscribersWebsocket) != 'undefined') {
+                    var ws = CodenerixSubscribersWebsocket();
+
+                    if (ws) {
+                        // Define opener
+                        ws.opened = function () {
+                            ws.debug("Requesting config");
+                            ws.send({'action': 'get_config', 'uuid': ws.uuid}, null);
+                            angular.forEach(subs, (function (value, key) {
+                                ws.debug("Subscribe "+key);
+                                ws.send({'action': 'subscribe', 'uuid': key}, null);
+                            }));
+                        };
+
+                        // Define receiver
+                        ws.recv = function(message, ref, uuid) {
+                            ws.debug("Got message from '"+uuid+"': " + JSON.stringify(message) + " (REF: "+ref+")");
+                            
+                            var action = message.action;
+
+                            if (action == 'ping') {
+                                ws.debug("Sending PONG "+message.ref+" (ref:"+ref+")");
+                                ws.send({'action': 'pong'}, ref);
+                            } else if (action == 'config') {
+                                ws.debug("Got config: "+JSON.stringify(message)+" (ref:"+ref+")");
+                            } else if (action == 'subscription') {
+                                if (typeof(subs[uuid]) != 'undefined') {
+                                    ws.debug("Got subscription message: "+JSON.stringify(message));
+                                    angular.forEach(subs[uuid], (function (configtuple, key) {
+                                        // Get subscription configuration
+                                        var pkgkey = configtuple[0];
+                                        var config = configtuple[1];
+                                        if (typeof(config) == 'undefined') {
+                                            config = {'default':''}
+                                        }
+                                        
+                                        // If message brings data for our field
+                                        var msgdata = message.data[pkgkey];
+                                        if (typeof(msgdata) != 'undefined') {
+                                            // Fill the field with package information
+                                            if (typeof(config.mapper) == 'undefined') {
+                                                var newvalue = msgdata;
+                                            } else {
+                                                var newvalue = new Function('value', config.mapper)(msgdata);
+                                            }
+                                        } else {
+                                            // Fill the field with default information from subscription system
+                                            if (typeof(config.default) == 'undefined') {
+                                                var newvalue = '';
+                                            } else {
+                                                if (typeof(config.default.mapper) == 'undefined') {
+                                                    var newvalue = config.default;
+                                                } else {
+                                                    var newvalue = new Function('value', config.default.mapper)();
+                                                }
+                                            }
+                                        }
+                                        scope[scope.form_name][key].$setViewValue(newvalue);
+                                        scope[scope.form_name][key].$pristine = false;
+                                        scope[scope.form_name][key].$dirty = true;
+                                        scope[scope.form_name][key].$render();
+                                    }));
+                                    scope[scope.form_name].$pristine = false;
+                                    scope[scope.form_name].$dirty = true;
+                                    scope.$apply();
+                                } else {
+                                ws.error("Got message from unknown UUID '"+uuid+"': "+JSON.stringify(message));
+                                }
+                            } else if (action == 'error') {
+                                if ((typeof(message.error) == 'undefined') || (message.error == null)) {
+                                    var error = "No error";
+                                } else {
+                                    var error = message.error;
+                                }
+                                ws.error("Got an error from server: "+error);
+                            } else {
+                                ws.send_error("Unknown action '"+action+"'", ref);
+                            }
+                        };
+
+                        ws.closed = function() {
+                            if (typeof(uuid) == 'undefined') {
+                                ws.warning("We are not online! ");
+                            } else {
+                                ws.warning("We are not online! "+uuid);
+                            }
+                        }
+
+                        // Start websocket
+                        ws.start();
+                    }
+                }
+            }
+        }
+    }
 }
 
 // delete item form sublist in details view
@@ -105,7 +214,7 @@ function del_item_sublist(id, msg, url, scope, $http){
     }
 }
 
-function openmodal($scope, $timeout, $uibModal, size, functions, callback, locked) {
+function openmodal($scope, $timeout, $uibModal, size, functions, callback, locked, callback_cancel) {
     var ngmodel=null;
     // Define the modal window
     $scope.build_modal = function (inline) {
@@ -131,43 +240,62 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback, locke
                     formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, null, ws, form, 'here', 'addmodal');
                 };
                 
+                $scope.internal_submit = function (answer) {
+                    $uibModalInstance.close(answer);
+                }
+                
                 $scope.msg = function(msg){
                     alert(msg);
                 }
-                
-                $scope.delete = function(msg,url) {
-                    if (confirm(msg)) {
-                        // Build url
-                        if (url==undefined) {
-                            url = ws+"/../delete";
-                        }
-                        // Clear cache
-                        $templateCache.remove(url);
-                        // User confirmed
-                        $http.post( url, {}, {} )
-                        .success(function(answer, stat) {
-                            // Check the answer
-                            if (stat==202) {
-                                // Everything OK, close the window
-                                $uibModalInstance.close(answer);
+
+                $scope.delete = function(msg, target, nurl) {
+                    if (typeof(nurl) == 'undefined'){
+                        var uurl = $scope.url;
+                    } else {
+                        var uurl = nurl;
+                    }
+                    
+                    if ((target == 'delete') || (typeof(target) == 'undefined')) {
+                        if (confirm(msg)) {
+                            // Clear cache
+                            $templateCache.remove(uurl);
+                            // Get url
+                            if (typeof(nurl) == 'undefined') {
+                                var uurl = uurl + "/../delete";
                             } else {
-                                // Error happened, show an alert
-                                console.log("ERROR "+stat+": "+answer)
-                                alert("ERROR "+stat+": "+answer)
+                                var uurl = nurl;
                             }
-                        })
-                        .error(function(data, status, headers, config) {
-                            if (cnf_debug){
-                                alert(data);
-                            }else{
-                                alert(cnf_debug_txt)
-                            }
-                        });
-                     }
+                            console.log(uurl);
+                            $http.post( uurl, {}, {} )
+                            .success(function(answer, stat) {
+                                // Check the answer
+                                if (stat==202) {
+                                    // Everything OK, close the window
+                                    $uibModalInstance.close(answer);
+                                } else {
+                                    // Error happened, show an alert
+                                    console.log("ERROR "+stat+": "+answer)
+                                    alert("ERROR "+stat+": "+answer)
+                                }
+                            })
+                            .error(function(data, status, headers, config) {
+                                if (cnf_debug){
+                                    alert(data);
+                                }else{
+                                    alert(cnf_debug_txt)
+                                }
+                            });
+                        }
+                    }
                 };
                 
                 // Set cancel function
-                $scope.cancel = function () { $uibModalInstance.dismiss('cancel'); };
+                $scope.cancel = function () {
+                    if (callback_cancel != undefined) {
+                        callback_cancel($scope);
+                    }
+                    $uibModalInstance.dismiss('cancel');
+                };
                 
                 // Enable dynamic select 
                 $scope.http = $http;
@@ -175,8 +303,11 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback, locke
                 angularmaterialchip($scope);
                 if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
 
+                // Set dynamic scope filling with subscribers
+                $scope.subscribers = function (subsjsb64) { subscribers_worker($scope, subsjsb64) };
+
                 // Add linked element
-                $scope.linked=function (ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl) {
+                $scope.linked=function (base_url, ngmodel, appname, modelname, formobj, formname, id, wsbaseurl) {
                     inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, null, ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl, $timeout);
                 }
 
@@ -205,7 +336,7 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback, locke
                 
                 // Execute call back is requested
                 if (callback!=undefined) {
-                    callback($scope);
+                    callback($scope, answer);
                 }
                 
                 // Select the new created item
@@ -568,8 +699,16 @@ function refresh($scope, $timeout, Register, callback, internal) {
             $scope.refresh_callback();
         }
     };
+    // Prepare arguments
+    if (typeof($scope.RegisterParams) == 'undefined') {
+        var register_args = {};
+    } else {
+        var register_args = $scope.RegisterParams;
+    }
+    // Attach json
+    register_args['json'] = $scope.query;
     // Call the service for the data
-    $scope.tempdata = Register.query({'json':$scope.query}, wrapper_callback);
+    $scope.tempdata = Register.query(register_args, wrapper_callback);
 }
 
 function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, url, form, next, kind) {
@@ -592,12 +731,6 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
             }
         });
 
-        /*  
-            2016-07-15
-            Se quita porque los angular material chip no son elementos html por lo que no estan en el formulario
-            2016-10-17
-            Se vuelve a descomentar para ser compatible con las directivas dinamicas (iberosime) y con los multiselect dinamicos
-        */
         angular.forEach( form , function ( formElement , fieldName ) {
             // If the fieldname starts with a '$' sign, it means it's an Angular property or function. Skip those items.
             if ( fieldName[0] === '$' ) {
@@ -607,7 +740,7 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                     if (typeof(formElement.$viewValue) == "object"){
                         var value = [];
                         angular.forEach(formElement.$viewValue, function(val, key){
-                            if (typeof(val.id) !== 'undefined'){
+                            if (val != undefined && typeof(val.id) !== 'undefined'){
                                 value.push(val.id);
                             }
                         });
@@ -620,13 +753,27 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                 }
             }
         });
+
         // Clear cache
         $templateCache.remove(url);
+
         // POST
         $http.post( url, in_data, { headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'} } )
         .success(function(answer, stat) {
             // If the request was accepted
             if (stat==202) {
+
+                // Call to call back before anything else
+                if (typeof($scope.submit_callback) != 'undefined') {
+                    if (codenerix_debug) {
+                        console.log("Submit Callback found, calling it back!");
+                    }
+                    next = $scope.submit_callback(listid, url, form, next, kind, answer, stat);
+                    if (codenerix_debug) {
+                        console.log("Submit callback said next state is '"+next+"'");
+                    }
+                }
+
                 // Go back to the list
                 if (next=='here') {
                     if (kind=='add') {
@@ -659,7 +806,12 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
                     $state.transitionTo('formadd'+listid, {}, { reload: true, inherit: true, notify: true });
                 } else if (next=='details') {
                     $state.go('details'+listid,{'pk':answer.__pk__});
+                } else if (next=='none') {
+                    if (codenerix_debug) {
+                        console.warn("Automatic destination state has been avoided by programmer's request!");
+                    }
                 } else {
+                    // Default state
                     $state.go('list'+listid);
                 }
             } else if (stat==200) {
@@ -733,6 +885,38 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
                     // Submit the form control
                     formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, $uibModalInstance, listid, ws, form, 'here', action);
                 };
+                // Set delete function
+                $scope.delete = function(msg,url) {
+                    if (confirm(msg)) {
+                        // Build url
+                        if (url==undefined) {
+                            url = ws+"/../delete";
+                        }
+                        // Clear cache
+                        $templateCache.remove(url);
+                        // User confirmed
+                        $http.post( url, {}, {} )
+                        .success(function(answer, stat) {
+                            // Check the answer
+                            if (stat==202) {
+                                // Everything OK, close the window
+                                answer['delete'] = true;
+                                $uibModalInstance.close(answer);
+                            } else {
+                                // Error happened, show an alert
+                                console.log("ERROR "+stat+": "+answer)
+                                alert("ERROR "+stat+": "+answer)
+                            }
+                        })
+                        .error(function(data, status, headers, config) {
+                            if (cnf_debug){
+                                alert(data);
+                            }else{
+                                alert(cnf_debug_txt)
+                            }
+                        });
+                     }
+                };
                 // Set cancel function
                 $scope.cancel = function () { $uibModalInstance.dismiss('cancel'); };
             }],
@@ -749,8 +933,26 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
             if (answer) {
                 var options = $scope.options[ngmodel];
                 if (answer['__pk__']) {
-                    // Select the new created item
-                    if (ngmodel) {
+                    if ('delete' in answer && answer['delete'] == true){
+                        // Delete item
+                        var set_view_value = true;
+                        if (options == undefined){
+                            // multiselect
+                            options = $scope.amc_items[ngmodel]
+                            set_view_value = false;
+                        }
+                        var new_options = [];
+                        angular.forEach(options, function(key, value){
+                            // Update element
+                            if (options[value]["id"] != answer["__pk__"]){
+                                new_options[value] = options[value]
+                            }
+                        });
+                        $scope.options[ngmodel] = new_options;
+                        formobj[ngmodel].$setViewValue(null);
+
+                    }else if (ngmodel) {
+                        // Select the new created item
                         var set_view_value = true;
                         if (options == undefined){
                             // multiselect
@@ -767,6 +969,9 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
                         });
                         if (!inlist){
                             // Attach the new element
+                            if (options == undefined){
+                                options = [];
+                            }
                             options.push({'id': answer["__pk__"], 'label': answer["__str__"]});
                         }
                         /*
@@ -814,6 +1019,10 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
 };
 
 function dynamic_fields(scope) {
+    /*
+    Inside the DynamicSelects will exists $externalScope which refers to the Scope outside the selector
+    */
+
     // Memory for dynamic fields
     scope.dynamicFieldsMemory = {};
 
@@ -860,7 +1069,11 @@ function dynamic_fields(scope) {
         return false;
     };
     // Control how the selected ui-select field works with pristine/dirty states
-    scope.selectedOptionSelect = function(input, value, ngchange) {
+    scope.selectedOptionSelect = function(input, value, ngchange, externalScope) {
+        if ((typeof(input) == 'undefined') || (input === null)){
+            // Dummy input
+            input={'$setViewValue': function () {}};
+        }
         if (!input.$dirty) {
             input.$dirty=input.$viewValue!=value;
         }
@@ -877,11 +1090,18 @@ function dynamic_fields(scope) {
                 if (scope[scope.form_name] != undefined && scope[scope.form_name][key] != undefined){
                     var element = scope[scope.form_name][key];
                     if (typeof(value) == "object"){
-                        var info = [];
-                        info['id']= value[0];
-                        info['label']= value[1];
-                        scope.options[key].push(info);
-                        element.$setViewValue(value[0]);
+                        if (scope.options != undefined && key in scope.options){
+                            var info = [];
+                            info['id']= value[0];
+                            info['label']= value[1];
+                            scope.options[key].push(info);
+                            element.$setViewValue(value[0]);
+                        }else if ('__JSON_DATA__' in value){
+                            element.$setViewValue(value);   // Update form elements
+                            if (key in scope){
+                                scope[key] = value;             // Update scope slements (it doesn't connect properly scope with children scopes)
+                            }
+                        }
                     }else{
                         element.$setViewValue(value);
                     }
@@ -913,15 +1133,17 @@ function dynamic_fields(scope) {
                     scope.resetAutoComplete();
                     angular.forEach(value2, (function (value3, key){
                         var async = true;
+                        var kind = undefined;
                         if (key && key!="label" && key!="id" && key[0]!='$') {
                             var keysp = key.split(":")
                             if (keysp.length>=2) {
                                 key = keysp[0];
-                                var kind = keysp[1];
+                                kind = keysp[1];
                                 if (kind=='__JSON_DATA__') {
                                     try {
                                         value3={'__JSON_DATA__':angular.fromJson(value3)};
                                     } catch(e) {
+                                        value3=undefined;
                                         console.log("ERROR: "+e);
                                     }
                                 } else if (kind=='__SCOPE_CALL__') {
@@ -948,6 +1170,9 @@ function dynamic_fields(scope) {
                     return;
                 }
             }));
+        } else if (ngchange!==undefined) {
+            // Evaluate the expresion
+            scope.$eval(ngchange, {'$externalScope': externalScope});
         }
     };
     
@@ -1094,6 +1319,18 @@ answer_rendered(element,$q).then(function (element) {
         console.log(message);
 });
 */
+
+var codenerix_directive_htmlcompile = ['codenerixHtmlCompile', ['$compile', function($compile) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            scope.$watch(attrs.codenerixHtmlCompile, function(newValue, oldValue) {
+                element.html(newValue);
+                $compile(element.contents())(scope);
+            });
+        }
+    }
+}]];
 
 var codenerix_directive_focus = ['codenerixFocus', ['$timeout', function($timeout) {
     return {
@@ -1279,6 +1516,60 @@ var codenerix_directive_autofocus = ['codenerixAutofocus', ['$timeout', function
     };
 }]];
 
+// We got the example code from https://stackoverflow.com/users/1957251/khanh-to from Khanh TO
+// We then adapted his version from $modal to $uibModal which is the one we use with CODENERIX
+// and we renamed it to codenerixReallyClick
+var codenerix_directive_reallyclick = ['codenerixReallyClick' , ['$uibModal', function($uibModal) {
+
+      var ModalInstanceCtrl = function($scope, $uibModalInstance) {
+        $scope.ok = function() {
+          $uibModalInstance.close();
+        };
+
+        $scope.cancel = function() {
+          $uibModalInstance.dismiss('cancel');
+        };
+      };
+
+      return {
+        restrict: 'A',
+        scope:{
+          codenerixReallyClick:"&",
+          item:"="
+        },
+        link: function(scope, element, attrs) {
+          element.bind('click', function() {
+            var message = attrs.codenerixReallyMessage || "Are you sure ?";
+
+            /*
+            //This works
+            if (message && confirm(message)) {
+              scope.$apply(attrs.codenerixReallyClick);
+            }
+            //*/
+
+            //*This doesn't works
+            var modalHtml = '<div class="modal-body">' + message + '</div>';
+            modalHtml += '<div class="modal-footer"><button class="btn btn-primary" ng-click="ok()">OK</button><button class="btn btn-danger" ng-click="cancel()">Cancel</button></div>';
+
+            var uibModalInstance = $uibModal.open({
+              template: modalHtml,
+              controller: ModalInstanceCtrl
+            });
+
+            uibModalInstance.result.then(function() {
+              scope.codenerixReallyClick({item:scope.item}); //raise an error : $digest already in progress
+            }, function() {
+              //Modal dismissed
+            });
+            //*/
+            
+          });
+
+        }
+      }
+    }
+  ]];
 
 var codenerix_run=['$http','$rootScope','$cookies',
     function ($http,$rootScope,$cookies) {
@@ -1370,7 +1661,7 @@ if (typeof(get_static)=="undefined") {
     };
 }
 
-function codenerix_builder(libraries, routes) {
+function codenerix_builder(libraries, routes, redirects) {
     /*
      * libraries:
      *      - It is a list of mosules to be added or removed from the loader of the controller.
@@ -1383,7 +1674,7 @@ function codenerix_builder(libraries, routes) {
      *         { 'state': [ 'url', 'template path', 'controller' ], 
      *           'state': null }
      *          Description:
-     *              state: state name
+     *              state: state name (it can be 'otherwise' meaning the default or otherwise method from urlRouterProvider)
      *              url: Angular url
      *              template path: URI path to the template
      *              controller: name of the controller to use for this state
@@ -1398,6 +1689,43 @@ function codenerix_builder(libraries, routes) {
      *              - You can add any custom state to the router dictionary
      *              - If you set <null> to any element in the list URL/Template/Controller will not be added to the route in the router:
      *                  Ex: { 'customState': [ '/custom_url', null, 'customController'] }
+     *
+     * redirects: [ list of redirects (tuple of 2 elements [what, handler] ) ] by default it will add otherwise to '/' if no other configuration is set.
+     *  - what: String | RegExp | UrlMatcher | otherwise
+     *  - handler: String | Function
+     *  - Examples:
+     *      [ '', '/add' ]          // Blank route to /add
+     *      [ '/', '/add' ]         // route list "/" to /add
+     *      [ '/add', '/edit' ]     // route add "/add" to /edit
+     *      [ /aspx/i, '/index' ]   // Redirect to /index using a regex
+     *      [ 'complex',            // Complex redirection
+     *          ['$match', '$stateParams', function ($match, $stateParams) {
+     *              if ($state.$current.navigable != state || !equalForKeys($match, $stateParams)) {
+     *                  $state.transitionTo(state, $match, false);
+     *              }
+     *          }]
+     *      ]
+     *      [undefined, '/index'] // Otherwise redirect to /index
+     *      [undefined, function($injector, $location) {
+     *          ... some advanced code...
+     *      }] // Otherwise redirect as function says
+     * 
+     * This three sentences works the same:
+     *  'list0': [undefined, get_static('codenerix_products/partials/products_list.html'), undefined]   -> OLD way
+     *  'list0': {templateUrl: get_static('codenerix_products/partials/products_list.html')}            -> NEW way
+     *  'list0': {'views': {'': {templateUrl: get_static('codenerix_products/partials/products_list.html')}}} -> NEW way with several views
+     *  
+     *  
+     * Example custom ui-view name
+     *  'list0': {
+     *              'url': '/.../:pk/...',  // The url that we will use for this state
+     *              'params': {'pk': null}, // Params from the state that we will pass to views
+     *              'views': {
+     *                  '': {...},  // ui-view without name
+     *                  'example1': {....}, // ui-view named example1 ->  ui-view='example1'
+     *                  'example2': {....},
+     *              },
+     *           }
      *
      * Notes:
      *      - If libraries is not set (it is undefined), libraries will become an empty list [] by default
@@ -1429,6 +1757,8 @@ function codenerix_builder(libraries, routes) {
     .directive(codenerix_directive_vtable[0], codenerix_directive_vtable[1])
     .directive(codenerix_directive_focus[0], codenerix_directive_focus[1])
     .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
+    .directive(codenerix_directive_htmlcompile[0], codenerix_directive_htmlcompile[1])
+    .directive(codenerix_directive_reallyclick[0], codenerix_directive_reallyclick[1])
     
     // Set routing system
     .run(codenerix_run);
@@ -1436,10 +1766,47 @@ function codenerix_builder(libraries, routes) {
     // Decide about routing
     if (routes!==null) {
         // Create the routing system
-        module.config(['$stateProvider', '$urlRouterProvider',
-            function($stateProvider, $urlRouterProvider) {
-                $stateProvider
-                $urlRouterProvider.otherwise('/');
+        module.config(['$urlRouterProvider',
+            function($urlRouterProvider) {
+                var otherwise = false;
+                if (typeof(redirects) != 'undefined') {
+                    angular.forEach(redirects, function(value, key) {
+                        if (value.length==2) {
+                            var what = value[0];
+                            var handler = value[1];
+                            
+                            if (what==undefined) {
+                                // We are setting an otherwise
+                                otherwise = true;
+                                // Check we have a handler
+                                if (handler!==null) {
+                                    if (codenerix_debug == true) {
+                                        console.log("Router: default '"+handler+"'");
+                                    }
+                                    $urlRouterProvider.otherwise(handler);
+                                } else {
+                                    // We do not have a handler
+                                    if (codenerix_debug == true) {
+                                        console.log("Router: no default route set!");
+                                    }
+                                }
+                            } else {
+                                if (codenerix_debug == true) {
+                                    console.log("Router: redirect '"+what+"' to '"+handler+"'");
+                                }
+                                $urlRouterProvider.when(what, handler);
+                            }
+                        } else {
+                            console.error("Detected redirect with wrong rule, they should be Array(2)");
+                        }
+                    });
+                }
+                if (!otherwise) {
+                    if (codenerix_debug == true) {
+                        console.log("Router: default '/'");
+                    }
+                    $urlRouterProvider.otherwise('/');
+                }
             }
         ]);
         
@@ -1449,100 +1816,194 @@ function codenerix_builder(libraries, routes) {
         }
         // Build known
         var known=Array();
-        known.push(['list0',            '/',        get_static('codenerix/partials/list.html'),                                   'ListCtrl']);
+        // List base
+        known.push(['list0', {'': {
+            url: '/',
+            templateUrl: get_static('codenerix/partials/list.html'),
+            controller: 'ListCtrl'
+        }}]);
+        // List rows and summary
+        var rows_dict = {};
         if (typeof(static_partial_row)!='undefined') {
-            known.push(['list0.rows',   null,       static_partial_row,                                          null]);
+            rows_dict[''] = {templateUrl: static_partial_row};
         }
+        if (typeof(static_partial_summary)!='undefined') {
+            rows_dict['summary'] = {templateUrl: static_partial_summary};
+        }
+        if (rows_dict) {
+           known.push(['list0.rows', rows_dict]);
+        }
+        // If we are in a from (ws_entry_point exists)
         if (typeof(ws_entry_point)!='undefined') {
-            known.push(['formadd0',     '/add',     function(params) { return '/'+ws_entry_point+'/add'; },                 'FormAddCtrl']);
-            known.push(['formedit0',    '/:pk/edit',function(params) { return '/'+ws_entry_point+'/'+params.pk+'/edit'; },  'FormEditCtrl']);
-            known.push(['details0',     '/:pk',     function(params) { return '/'+ws_entry_point+'/'+params.pk; },          'DetailsCtrl']);
+            // Form add
+            known.push(['formadd0', {'': {
+                url: '/add',
+                templateUrl: function(params) { return '/'+ws_entry_point+'/add'; },
+                controller: 'FormAddCtrl'
+            }}]);
+            // Form edit
+            known.push(['formedit0', {'': {
+                url: '/:pk/edit',
+                templateUrl: function(params) { return '/'+ws_entry_point+'/'+params.pk+'/edit'; },
+                controller: 'FormEditCtrl'
+            }}]);
+            // Details
+            known.push(['details0', {'': {
+                url: '/:pk',
+                templateUrl: function(params) { return '/'+ws_entry_point+'/'+params.pk; },
+                controller: 'DetailsCtrl'
+            }}]);
             
+            // Sublists
             var tag='';
             var controller='';
+            // If we have tabs (sublists) to render
             if (typeof(tabs_js)!='undefined') {
+                // For every tab
                 angular.forEach(tabs_js, function(tab, i){
+                    // Decide wether this is static or autogenerated sublist (STATIC sublists are deprecated)
                     if (tab.auto) {
                         controller='SubListCtrl';
                     } else {
                         controller='SubListStaticCtrl';
                     }
-                    known.push(['details0.sublist'+tab.internal_id+'', '/sublist'+tab.internal_id+'/:listid/', get_static('codenerix/partials/list.html'), controller]);
-                    if (typeof(tab.static_partial_row)!="undefined"){
-                        known.push(['details0.sublist'+tab.internal_id+'.rows', null, tab.static_partial_row, null]);
+                    // Sublist
+                    known.push(['details0.sublist'+tab.internal_id+'', {'': {
+                        url: '/sublist'+tab.internal_id+'/:listid/',
+                        templateUrl: get_static('codenerix/partials/list.html'),
+                        controller: controller
+                    }}]);
+                    // Sublist rows and summary
+                    var rows_dict = {};
+                    if (typeof(tab.static_partial_row)!='undefined') {
+                        rows_dict[''] = {'templateUrl': tab.static_partial_row};
+                    }
+                    if (typeof(tab.static_partial_summary)!='undefined') {
+                        rows_dict['summary'] = {templateUrl: tab.static_partial_summary};
+                    }
+                    if (rows_dict) {
+                       known.push(['details0.sublist'+tab.internal_id+'.rows', rows_dict]);
                     }
                 });
             }
-            known.push(['details0.sublist', '/sublist/0/', get_static('codenerix/partials/list.html'), 'SubListCtrl']);
+            // Add sublist0 at the end as a default option
+            known.push(['details0.sublist', {'': {
+                url: '/sublist/0/',
+                templateUrl: get_static('codenerix/partials/list.html'),
+                controller: 'SubListCtrl'
+            }}]);
         }
-        
+
         // Process known routes
-        angular.forEach(known, function(name, key) {
+        angular.forEach(known, function(value, key) {
             // Get configuration
-            var state=name[0];
-            var url=name[1];
-            var template=name[2];
-            var ctrl=name[3];
-            
-            // Process each route
+            var state=value[0];
+            var state_dict = value[1];
             if (state in routes) {
-                if (routes[state]===null) {
+                var route = routes[state];
+                if (route===null) {
                     // Remove actual state, we will not process it
                     state=null;
                 } else {
                     // Get information
-                    var url2        = routes[state][0];
-                    var template2   = routes[state][1];
-                    var ctrl2       = routes[state][2];
-                    // Set configuration
-                    if (url2!==undefined)        { url=url2; };
-                    if (template2!==undefined)   { template=template2; };
-                    if (ctrl2!==undefined)       { ctrl=ctrl2; };
+                    if (typeof(route.length) == 'number') {
+                        // It is a list (old method)
+                        angular.forEach(['url', 'templateUrl', 'controller'], function(key, value) {
+                            if (route[value]===null) {
+                                delete state_dict[''][key];
+                            } else if (route[value]!==undefined) {
+                                state_dict[''][key] = route[value];
+                            }
+                        });
+                    } else {
+                        angular.forEach(route, function(v, k){
+                            if (k == ''){
+                                angular.forEach(route[''], function(v2, k2){
+                                    state_dict[''][k2] = v2;
+                                });
+                            }else{
+                                state_dict[k] = v;
+                            }
+                        });
+                    }
                 }
                 // Remove the key from routes
                 delete routes[state];
             }
-            
+
+            // Set state_dict to final stage
+            for (var k in state_dict) {
+                if (k!='') {
+                    break;
+                }
+            }
+            if (k=='') {
+                state_dict=state_dict[''];
+            } else {
+                state_dict={views: state_dict};
+            }
+
             // Check if we have an state to process (the user maybe defined it as null, what means it wants to remove this state)
             if (state!==null) {
-                // Build the state dictionary
-                var state_dict={};
-                if (url!==null) {        state_dict['url']=url;              }
-                if (template!==null) {   state_dict['templateUrl']=template; }
-                if (ctrl!==null) {       state_dict['controller']=ctrl;      }
-                
                 // Attach the new state
                 module.config(['$stateProvider', '$urlRouterProvider',
                     function($stateProvider, $urlRouterProvider) {
+                        if (codenerix_debug == true) {
+                             console.log("Router: known '"+state+"' -> "+JSON.stringify(state_dict));
+                        }
                         $stateProvider.state(state, state_dict);
                     }
                 ]);
             }
         });
-        
+
         // Process new routes
         angular.forEach(routes, function(config, state) {
-            if (config!==null) {
-                // Get configuration
-                var url = config[0];
-                var template = config[1];
-                var ctrl = config[2];
-                
-                // Build the state dictionary
-                var state_dict={};
-                if (url!==null) {        state_dict['url']=url;              }
-                if (template!==null) {   state_dict['templateUrl']=template; }
-                if (ctrl!==null) {       state_dict['controller']=ctrl;      }
+            if (config!==null) { 
+                if (typeof(config.length) == 'number') {
+                    // Get configuration
+                    var url = config[0];
+                    var template = config[1];
+                    var ctrl = config[2];
+                    
+                    // Build the state dictionary
+                    var state_dict={};
+                    if (url!==null) {        state_dict['url']=url;              }
+                    if (template!==null) {   state_dict['templateUrl']=template; }
+                    if (ctrl!==null) {       state_dict['controller']=ctrl;      }
+                } else {
+                    var state_dict = config;
+                }
+
+                // Set state_dict to final stage
+                for (var k in state_dict) {
+                    if (k!='') {
+                        break;
+                    }
+                }
+                if (k=='') {
+                    state_dict=state_dict[''];
+                } else {
+                    state_dict=state_dict;
+                }
                 
                 // Attach the new state
                 module.config(['$stateProvider', '$urlRouterProvider',
                     function($stateProvider, $urlRouterProvider) {
+                        if (codenerix_debug == true) {
+                             console.log("Router: new '"+state+"' -> "+JSON.stringify(state_dict));
+                        }
                         $stateProvider.state(state, state_dict);
                     }
                 ]);
             }
         });
     }
+
+    if (codenerix_debug == true) {
+         console.info("Router: if the path of the URL doesn't exists, AngularJS will now warn you in anyway, the state will stay with a blank page");
+    }
+
     
     // Add factory
     module.factory("ListMemory",function(){return {};});
@@ -1611,6 +2072,10 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     dynamic_fields($scope);
     angularmaterialchip($scope);
     if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
+
+    // Set dynamic scope filling with subscribers
+    $scope.subscribers = function (subsjsb64) { subscribers_worker($scope, subsjsb64) };
+
     
     // Memory
     if (l.mem==undefined) {
@@ -1688,7 +2153,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                     // Showing details
                     if ($scope.data.meta.show_modal) {
                         // Show in a modal window
-                        modal_manager($scope, $timeout, $uibModal, $templateCache, $http, scope);
+                        modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
                         $scope.details(pk);
                     } else {
                         // Show like always
@@ -1974,67 +2439,6 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         $scope.base_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);//, callback);
 
     };
-
-    // DEPRECATED: 2017-02-14
-    $scope.removedocinput = function(id, msg){
-        if (confirm(msg)){
-            var url = $scope.wsbase+id+"/delete";
-            //$scope.ws= $scope.wsbase+id_parent+"/modal";
-                
-            
-            $http.post( url, {}, {} )
-            .success(function(answer, stat) {
-                // Check the answer
-                if (stat==200 || stat ==202) {
-                    refresh($scope,$timeout,Register, callback);
-                } else {
-                    // Error happened, show an alert
-                    console.log("ERROR "+stat+": "+answer)
-                    console.log(answer);
-                    alert("ERROR "+stat+": "+answer)
-                }
-            })
-            .error(function(data, status, headers, config) {
-                if (cnf_debug){
-                    alert(data);
-                }else{
-                    alert(cnf_debug_txt)
-                }
-            });
-        }
-    };
-    // DEPRECATED: 2017-02-14
-    $scope.relationdocinput = function(id){
-        id = String(id);
-        $scope.wsbase = ws+"/";
-        // Base window
-        $scope.ws=$scope.wsbase+id+"/relationship";
-        $scope.relationship(id);
-    };
-    // DEPRECATED: 2017-02-14
-    $scope.relationdocoutput = function(id){
-        id = String(id);
-        $scope.wsbase = ws+"/";
-        // Base window
-        $scope.ws=$scope.wsbase+id+"/relationship";
-        $scope.relationship(id);
-    };
-    // DEPRECATED: 2017-02-14
-    $scope.relationship = function(id){
-        
-        $scope.initialws = $scope.ws;
-        // Base Window functions
-        var functions = function(scope) {
-            scope.gotoback = function() {
-                $scope.det_window.dismiss('cancel');
-            };
-        };
-        
-        // Prepare for refresh
-        $scope.base_reload=[$scope.relationship, id];
-        $scope.base_window=openmodal($scope, $timeout, $uibModal, 'lg', functions);
-
-    };
     // DEPRECATED: 2017-07-04
     $scope.open_details = function(id, id_parent) {
         id = String(id);
@@ -2138,13 +2542,15 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         var url = ws+"/"+id+"/delete";
         del_item_sublist(id, msg, url, $scope, $http);
     };
+
     // Startup hotkey system
-    if (hotkeys!==undefined) {
+    if (codenerix_hotkeys && hotkeys!==undefined) {
         var hotkeysrv = hotkeys.bindTo($scope);
         hotkeysrv.add({combo: '+', description: 'Add new row', callback: $scope.addnew});
         hotkeysrv.add({combo: 'ctrl+up', description: 'Select previous row', callback: $scope.goto_row_previous});
         hotkeysrv.add({combo: 'ctrl+down', description: 'Select next row', callback: $scope.goto_row_next});
         hotkeysrv.add({combo: 'enter', description: 'Go to selected row', callback: $scope.goto_row_detail});
+        hotkeysrv.add({combo: 'ctrl+enter', description: 'Go to selected row', callback: $scope.goto_row_detail});
         hotkeysrv.add({combo: 'ctrl+right', description: 'Go to selected row', callback: $scope.goto_row_detail});
         hotkeysrv.add({combo: 'r', description: 'Refresh', callback: $scope.refresh});
         hotkeysrv.add({combo: 's', description: 'Go to search box', callback: $scope.goto_search});
@@ -2154,6 +2560,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     // First query
     refresh($scope,$timeout,Register, callback);
 };
+
 
 function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, listid, ws, hotkeys) {
     // Set our own url
@@ -2173,7 +2580,7 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     }
     
     // Add linked element
-    $scope.linked=function (ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl) {
+    $scope.linked=function (base_url, ngmodel, appname, modelname, formobj, formname, id, wsbaseurl) {
         inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl, $timeout);
     }
     
@@ -2182,14 +2589,30 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     angularmaterialchip($scope);
     if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
     
+    // Set dynamic scope filling with subscribers
+    $scope.subscribers = function (subsjsb64) { subscribers_worker($scope, subsjsb64) };
+    
     // Go to list
     $scope.gotoback = function() {
         $state.go('list'+listid);
     };
     
     // Update this element
-    $scope.submit = function(form, next) {
-        formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'add');
+    $scope.submit = function(form, next, target, nlistid, nurl, nform, nnext, naction) {
+        if (form instanceof KeyboardEvent) {
+            form = $scope[$scope.form_name];
+            next = 'list';
+        }
+        if (typeof(nlistid) == 'undefined') { var ulistid = listid; } else { var ulistid = nlistid; }
+        if (typeof(nurl) == 'undefined') { var uurl = url; } else { var uurl = nurl; }
+        if (typeof(nform) == 'undefined') { var uform = form; } else { var uform = nform; }
+        if (typeof(nnext) == 'undefined') { var unext = next; } else { var unext = nnext; }
+        if (typeof(naction) == 'undefined') { var uaction = 'add'; } else { var uaction = naction; }
+        if ((target == 'submit') || (typeof(target) == 'undefined')) {
+            formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, ulistid, uurl, uform, unext, uaction);
+        } else {
+            $scope[target](ulistid, uurl, uform, unext, uaction);
+        }
     };
 
     var fields = [];
@@ -2230,7 +2653,7 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
     };
     
     // Startup hotkey system
-    if (hotkeys!==undefined) {
+    if (codenerix_hotkeys && hotkeys!==undefined) {
         var hotkeysrv = hotkeys.bindTo($scope);
         hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
         hotkeysrv.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit});
@@ -2294,9 +2717,12 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
             });
          }
     };
-    
+
+    // Set dynamic scope filling with subscriber
+    $scope.subscribers = function (subsjsb64) { subscribers_worker($scope, subsjsb64) };
+
     // Startup hotkey system
-    if (hotkeys!==undefined) {
+    if (codenerix_hotkeys && hotkeys!==undefined) {
         var hotkeysrv = hotkeys.bindTo($scope);
         hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
         hotkeysrv.add({combo: 'e', description: 'Edit', callback: $scope.edit});
@@ -2316,7 +2742,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     $templateCache.remove(url);
     
     // Add linked element
-    $scope.linked=function (ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl) {
+    $scope.linked=function (base_url, ngmodel, appname, modelname, formobj, formname, id, wsbaseurl) {
         inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, base_url, appname, modelname,formobj, formname, id, wsbaseurl, $timeout);
     }
     
@@ -2324,6 +2750,9 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     dynamic_fields($scope);
     angularmaterialchip($scope);
     if (typeof(codenerix_extensions)!="undefined") {codenerix_extensions($scope, $timeout);}
+    
+    // Set dynamic scope filling with subscribers
+    $scope.subscribers = function (subsjsb64) { subscribers_worker($scope, subsjsb64) };
     
     // Go to list
     $scope.gotoback = function() {
@@ -2394,37 +2823,81 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         alert(msg);
     }
     // Delete this element
-    $scope.delete = function(msg) {
-        if (confirm(msg)) {
-            // Clear cache
-            $templateCache.remove(url);
-            // User confirmed
-            var url = ws+"/"+$stateParams.pk+"/delete";
-            $http.post( url, {}, {} )
-            .success(function(answer, stat) {
-                // Check the answer
-                if (stat==202) {
-                    // If the request was accepted go back to the list
-                    $state.go('list'+listid);
+    $scope.delete = function(msg, target, nurl) {
+        if (typeof(nurl) == 'undefined') { var uurl = url; } else { var uurl = nurl; }
+        if ((target == 'delete') || (typeof(target) == 'undefined')) {
+            if (confirm(msg)) {
+                // Clear cache
+                $templateCache.remove(uurl);
+                // Get url
+                if (typeof(nurl) == 'undefined') {
+                    var uurl = ws+"/"+$stateParams.pk+"/delete";
                 } else {
-                    // Error happened, show an alert
-                    console.log("ERROR "+stat+": "+answer)
-                    alert("ERROR "+stat+": "+answer)
+                    var uurl = nurl;
                 }
-            })
-            .error(function(data, status, headers, config) {
-                if (cnf_debug){
-                    alert(data);
-                }else{
-                    alert(cnf_debug_txt)
-                }
-            });
-         }
+                $http.post( uurl, {}, {} )
+                .success(function(answer, stat) {
+
+                    // Check the answer
+                    if (stat==202) {
+
+                        // Call to call back before anything else
+                        var next = "list";
+                        if (typeof($scope.delete_callback) != 'undefined') {
+                            if (codenerix_debug) {
+                                console.log("Delete Callback found, calling it back!");
+                            }
+                            next = $scope.delete_callback(listid, uurl, $stateParams.pk, next, answer, stat);
+                            if (codenerix_debug) {
+                                console.log("Delete callback said next state is '"+next+"'");
+                            }
+                        }
+
+                        if (next == "list") {
+                            // If the request was accepted go back to the list
+                            $state.go('list'+listid);
+                        } else if (next=='none') {
+                            if (codenerix_debug) {
+                                console.warn("Automatic destination state has been avoided by programmer's request!");
+                            }
+                        } else {
+                            console.error("Unknown destination requested by the programmer, I don't understand next='"+next+"'");
+                        }
+                    } else {
+                        // Error happened, show an alert
+                        console.log("ERROR "+stat+": "+answer)
+                        alert("ERROR "+stat+": "+answer)
+                    }
+                })
+                .error(function(data, status, headers, config) {
+                    if (cnf_debug){
+                        alert(data);
+                    }else{
+                        alert(cnf_debug_txt)
+                    }
+                });
+            }
+        } else {
+            $scope[target](msg, $stateParams.pk);
+        }
     };
     
     // Update this element
-    $scope.submit = function(form, next) {
-        formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, listid, url, form, next, 'edit');
+    $scope.submit = function(form, next, target, nlistid, nurl, nform, nnext, naction) {
+        if (form instanceof KeyboardEvent) {
+            form = $scope[$scope.form_name];
+            next = 'list';
+        }
+        if (typeof(nlistid) == 'undefined') { var ulistid = listid; } else { var ulistid = nlistid; }
+        if (typeof(nurl) == 'undefined') { var uurl = url; } else { var uurl = nurl; }
+        if (typeof(nform) == 'undefined') { var uform = form; } else { var uform = nform; }
+        if (typeof(nnext) == 'undefined') { var unext = next; } else { var unext = nnext; }
+        if (typeof(naction) == 'undefined') { var uaction = 'edit'; } else { var uaction = naction; }
+        if ((target == 'submit') || (typeof(target) == 'undefined')) {
+            formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, null, ulistid, uurl, uform, unext, uaction);
+        } else {
+            $scope[target](ulistid, uurl, uform, unext, uaction, $stateParams.pk);
+        }
     };
 
     var fields = [];
@@ -2441,7 +2914,7 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
     };
     
     // Startup hotkey system
-    if (hotkeys!==undefined) {
+    if (codenerix_hotkeys && hotkeys!==undefined) {
         var hotkeysrv = hotkeys.bindTo($scope);
         hotkeysrv.add({combo: 'ctrl+left', description: 'Go back', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.gotoback});
         hotkeysrv.add({combo: 'ctrl+enter', description: 'Save', allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],callback: $scope.submit});

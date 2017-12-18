@@ -25,6 +25,7 @@ from functools import reduce
 
 from django.db.models import Q
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User, Group, Permission
@@ -34,7 +35,7 @@ from codenerix.middleware import get_current_user
 from django.conf import settings
 
 from codenerix.helpers import clean_memcache_item
-from codenerix.models import GenLog
+from codenerix.models import GenLog, CodenerixModel
 
 
 class GenPerson(GenLog, models.Model):  # META: Abstract class
@@ -42,16 +43,16 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     Defines a person
     '''
     # Control fields
-    user = models.OneToOneField(User, blank=True, null=True, related_name='person')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name='person')
     name = models.CharField(_("Name"), max_length=45, blank=False, null=False)
     surname = models.CharField(_("Surname"), max_length=90, blank=False, null=False)
     disabled = models.DateTimeField(_("Disabled from"), null=True, blank=True)
-    creator = models.ForeignKey(User, blank=True, null=True, related_name='creators', default=None)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='creators', default=None)
 
-    class Meta:
+    class Meta(CodenerixModel.Meta):
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         if self.name and self.surname:
             output = '%s %s' % (smart_text(self.name), smart_text(self.surname))
         elif self.name:
@@ -62,9 +63,9 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             output = "%s*" % (self.user)
         return smart_text(output)
 
-    def __str__(self):
-        return self.__unicode__()
-    
+    def __unicode__(self):
+        return self.__str__()
+
     def __fields__(self, info):
         fields = []
         fields.append(('user__username', _('User')))
@@ -77,7 +78,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         return fields
 
     def __limitQ__(self, info):
-        l = {}
+        limit = {}
         # If user is not a superuser, the shown records depends on the profile
         if not info.request.user.is_superuser:
 
@@ -86,9 +87,9 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
             # The criterials are not exclusives
             if criterials:
-                l["profile_people_limit"] = reduce(operator.or_, criterials)
+                limit["profile_people_limit"] = reduce(operator.or_, criterials)
 
-        return l
+        return limit
 
     def __searchF__(self, info):
         tf = {}
@@ -107,20 +108,20 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def is_admin(self):
         try:
             return bool(self.user.is_superuser or self.user.groups.get(name='Admins'))
-        except:
+        except Exception:
             return False
 
     def profiles(self):
         '''
         return the rolls this people is related with
         '''
-        l = []
+        limit = []
 
         if self.is_admin():
-            l.append(_("Administrator"))
-        l.sort()
+            limit.append(_("Administrator"))
+        limit.sort()
 
-        return l
+        return limit
 
     def delete(self):
         self.clean_memcache()
@@ -138,7 +139,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def clean_memcache(self):
         if self.pk:
             prefix = hashlib.md5()
-            prefix.update(base64.b64encode(settings.SECRET_KEY))
+            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')).decode())
             clean_memcache_item("person:{}".format(self.pk), prefix.hexdigest())
 
     def get_grouppermit(self):
@@ -183,32 +184,32 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         self.user.save()
 
     def refresh_permissions(self):
-        
+
         # Check we have a user to work with
         if self.user:
-        
+
             # Clear groups and permisions for this user
             self.user.groups.clear()
             self.user.user_permissions.clear()
-            
+
             # Collect all groups and unique permissions for this user relationships
             groups = []
             permissions = []
             for x in self._meta.get_fields():
                 model = x.related_model
-                
+
                 # Only check roles
                 if model and issubclass(model, GenRole):
                     # Get the link
                     link = getattr(self, x.name, None)
-                    
+
                     # Check if the linked class has CodenerixMeta
                     if link and hasattr(link, 'CodenerixMeta'):
-                        
+
                         # Get groups and permissions from that class
                         groups += list(getattr(link.CodenerixMeta, 'rol_groups', None) or {})
                         permissions += list(getattr(link.CodenerixMeta, 'rol_permissions', None) or [])
-            
+
             # Add groups
             for groupname in set(groups):
                 group = Group.objects.filter(name=groupname).first()
@@ -219,59 +220,65 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                     group = Group.objects.filter(name=groupname).first()
                     if group is None:
                         raise IOError("Group '{} not found in the system. I have tried to remake groups but this group is not defined as a Role and it doesn't belong to the system either".format(groupname))
-                
+
                 # Add the user to this group
                 self.user.groups.add(group)
-            
+
             # Add permissions
             for permissionname in set(permissions):
                 permission = Permission.objects.filter(codename=permissionname).first()
                 if permission is None:
                     raise IOError("Permission '{}' not found in the system".format(permissionname))
-                
+
                 # Add the permission to this user
                 self.user.user_permissions.add(permission)
-            
+
         else:
             raise IOError("You can not refresh permissions for a Person wich doesn't have an associated user")
-    
+
     @staticmethod
     def group_permissions(clss):
-        
+
         groupsresult = {}
         for x in clss._meta.get_fields():
             model = x.related_model
-            
+
             # Check if it is a role
             if model and issubclass(model, GenRole):
-                
+
                 # Check if the class has CodenerixMeta
                 if hasattr(model, 'CodenerixMeta'):
-                    
+
                     # Get groups and permissions
                     groups = getattr(model.CodenerixMeta, 'rol_groups', [])
-                    
+
                     # Add groups
                     if groups:
                         groups_is_dict = type(groups) is dict
                         groupslist = list(set(groups))
                         for groupname in groupslist:
-                            
+
                             # Check permissions just in case something is wrong
                             perms = []
                             if groups_is_dict:
                                 for permname in groups[groupname]:
                                     perm = Permission.objects.filter(codename=permname).first()
-                                    if perm is None:
-                                        raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname))
-                                    else:
+                                    # Commented by Juan Soler on a project we
+                                    # both are working on. Since this code is
+                                    # preventing a proper execution, I will
+                                    # comment it as he has done in our project
+                                    # and I will wait for him to validate this lines
+                                    # if perm is None:
+                                    #    raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname))
+                                    # else:
+                                    if perm is not None:
                                         perms.append(perm)
-                            
+
                             # Remember perms for this group
                             if groupname not in groupsresult:
-                                groupsresult[groupname]=[]
-                            groupsresult[groupname]+=perms
-        
+                                groupsresult[groupname] = []
+                            groupsresult[groupname] += perms
+
         # Set permissions for all groups
         for groupname in groupsresult:
             # Get group
@@ -283,7 +290,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             else:
                 # Remove all permissions for this group
                 group.permissions.clear()
-            
+
             # Add permissions to the group
             for perm in groupsresult[groupname]:
                 group.permissions.add(perm)
@@ -314,6 +321,14 @@ class GenRole(object):
         for field in self._meta.get_fields():
             model = field.related_model
             if model and issubclass(model, GenPerson):
-                person = getattr(self, field.name)
+                try:
+                    person = getattr(self, field.name)
+                except ObjectDoesNotExist:
+                    pass
                 break
         return person
+
+    def CDNX_refresh_permissions_CDNX(self):
+        person = self.__CDNX_search_person_CDNX__()
+        if person:
+            person.refresh_permissions()

@@ -32,6 +32,7 @@ Features
 * compatible with Python 2.7 and Python >= 3.4
 * hotkeys support
 * `Haystack <http://haystacksearch.org>`_ support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
+* nice packages with plenty of icons ready to use (Glyphicon, Font Awesome & Font Awesome Animation)
 
 Ready for:
 ''''''''''
@@ -121,7 +122,11 @@ http://www.centrologic.com/contacto/
 FAQ
 ***
 
-* sudo apt-get install libmysqlclient-dev, when::
+* sudo apt-get install libmysqlclient-dev, when using MySQL::
+
+    EnvironmentError: mysql_config not found, 
+
+* sudo apt-get install default-libmysqlclient-dev, when using Maria DB::
 
     EnvironmentError: mysql_config not found, 
 
@@ -133,21 +138,30 @@ FAQ
     
     _mysql.c:40:20: fatal error: Python.h: No such file or directory
     #include "Python.h"
-                       ^
-    compilation terminated.
-    error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
+                         ^
+    compilation terminated.
+    error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
 
 * sudo apt-get install libssl-dev, when::
-
+    
     build/temp.linux-x86_64-2.7/_openssl.c:434:30: fatal error: openssl/opensslv.h: No such file or directory
-    #include <openssl/opensslv.h>
-                                 ^
-    compilation terminated.
-    error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
+    #include <openssl/opensslv.h>
+                                     ^
+    compilation terminated.
+    error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
 
 *******
 Credits
 *******
+We are thankful to:
+
+=================================== =================== =====================================================================================
+Author                              Module              Contribution
+=================================== =================== =====================================================================================
+Mounir Messelmeni                   Haystack Engines    Contribution with Asciifolding support for Haystack Elasticsearch Engine
+Khanh TO                            ngReallyClick       We added codenerixReallyClick as a version that works with uibModal of ngReallyClick
+=================================== =================== =====================================================================================
+
 Several technologies have been used to build `CODENERIX <http://www.codenerix.com>`_:
 
 =================================== =================== =========================== =========================================================
@@ -168,6 +182,8 @@ Checklist-model                     MIT                 
 Date Range Picker                   MIT                 Fragaria, s.r.o.            https://github.com/dangrossman/bootstrap-daterangepicker
 django-angular                      MIT                 Jacob Rief                  https://github.com/jrief/django-angular
 Font Awesome                        MIT & SIL OFL 1.1   Dave Gandy                  https://github.com/FortAwesome/Font-Awesome/
+Font Awesome Animation              MIT                 Louis Lin                   https://github.com/l-lin/font-awesome-animation/
+hotkeys                             MIT                 Wes Cruver                  https://github.com/chieffancypants/angular-hotkeys/
 HTML Clean for jQuery               BSD                 Anthony Johnston            https://github.com/components/jquery-htmlclean
 HTML5 Shiv                          MIT or GPL2         Alexander Farkas            https://github.com/aFarkas/html5shiv
 jQuery                              MIT                 jQuery Foundation, Inc.     https://github.com/jquery/jquery
@@ -177,5 +193,4 @@ nsPopover                           MIT                 contact@
 Quill                               COPYRIGHT           Jason Chen & salesforce.com https://quilljs.com/
 Rangy                               MIT                 Tim Down                    https://github.com/timdown/rangy
 textAngular                         MIT                 Austin Anderson             https://github.com/fraywing/textAngular/wiki
-hotkeys                             MIT                 Wes Cruver                  https://github.com/chieffancypants/angular-hotkeys/
 =================================== =================== =========================== =========================================================

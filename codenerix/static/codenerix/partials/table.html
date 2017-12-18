@@ -76,8 +76,15 @@ limitations under the License.
                                                     </div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <select ng-if="filter.kind=='select'" class="form-control input-sm" ng-model="filter.choosen" ng-change="refresh()" style="min-width:66px" ng-class="{'input-filter':filter.choosen}">
-                                                <option ng-repeat='entry in filter.choice' value='{{$index}}' ng-selected='$index==filter.choosen'>{{entry}}</option>
+                                            <select 
+                                                ng-if="filter.kind=='select'" 
+                                                class="form-control input-sm" 
+                                                ng-model="filter.choosen" 
+                                                ng-change="refresh()" 
+                                                style="min-width:66px" 
+                                                ng-class="{'input-filter':filter.choosen}" 
+                                                ng-init="filter.choosen=filter.choosen"
+                                                ng-options="+(index) as choice for (index, choice) in filter.choice" >
                                             </select>
                                             <input ng-if="filter.kind=='input'" type="text" class="form-control input-sm " ng-model="filter.value" ng-class="{'input-filter':filter.value}">
                                             <button ng-if="filter.kind=='input'" ng-hide="true" type="button" class="form-control btn btn-default btn-sm" ng-click="refresh()"><span class="glyphicon glyphicon-search"></span></button>
@@ -94,5 +101,8 @@ limitations under the License.
                     </thead>
                     <tbody codenerix-vtable>
                         <tr ng-repeat="row in data.table.body" ng-click="detail(row.pk)" ui-view></tr>
+                    </tbody>
+                    <tfoot>
+                        <tr ng-repeat="row in data.table.summary" ui-view='summary'></tr>
                     </tbody>
                 </table>
