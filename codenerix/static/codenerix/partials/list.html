@@ -123,7 +123,7 @@ limitations under the License.
             <div class="panel panel-default pull-left" ng-if="data.filter.subfilters.length">
                 <div class="panel-body listfilters bg-warning">
                     <div class="pull-left column" ng-repeat="filter in data.filter.subfilters"><!-- FILTERS {{{1 -->
-                        <form name="search" ng-submit="refresh()" role="form">
+                        <form name="search" ng-submit="refresh()" autocomplete="off" role="form">
                             <div class="input-group input-group-sm">
                                 <div ng-if="filter.kind!='checkbox'" class="input-group-addon"><span class="glyphicon glyphicon-eye-open" popover-placement="top" uib-popover="{{filter.name}}" popover-trigger="mouseenter"></span></div>
                                 <input name='filter.choosen' ng-model='filter.choosen' type='hidden'>
