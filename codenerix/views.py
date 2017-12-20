@@ -80,7 +80,7 @@ if getattr(settings, 'HAYSTACK_CONNECTIONS', None):
 
 
 def status(request, status, answer):
-    answerjson = urlsafe_base64_decode(answer)
+    answerjson = urlsafe_base64_decode(answer).decode()
     status = status.lower()
     if status == 'accept':
         out = 202     # Accepted
@@ -1284,17 +1284,27 @@ class GenList(GenBase, ListView):
         if obj is None:
             obj = self.model
 
-        field = obj._meta.get_field(names[0])
-        if field.is_relation:
-            new_name = "__".join(names[1:])
-            if new_name:
-                return self.get_type_field(new_name, field.related_model)
-            else:
-                # Foreign, ManytoMany
-                return None
+        field_callable = getattr(obj, names[0], None)
+        if callable(field_callable):
+            # methods
+            return None
         else:
-            t = type(field)
-            return str(t).split("'")[1].split('.')[-1]
+            fields = obj.__dict__
+            if names[0] in fields:
+                field = obj._meta.get_field(names[0])
+                if field.is_relation:
+                    new_name = "__".join(names[1:])
+                    if new_name:
+                        return self.get_type_field(new_name, field.related_model)
+                    else:
+                        # Foreign, ManytoMany
+                        return None
+                else:
+                    t = type(field)
+                    return str(t).split("'")[1].split('.')[-1]
+            else:
+                # properties
+                return None
 
     def get_queryset(self):
         # Call the base implementation
@@ -2693,7 +2703,8 @@ class GenList(GenBase, ListView):
                         elif callable(value):
                             # Build the list of arguments
                             args = {}
-                            if 'request' in value.__code__.co_varnames:
+                            # if 'request' in value.__code__.co_varnames:
+                            if hasattr(value, '__code__') and 'request' in value.__code__.co_varnames:
                                 args['request'] = self.request
                             # Call the method
                             value = value(**args)
