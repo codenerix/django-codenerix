@@ -443,32 +443,32 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             ser = {}
             ser['allowed_referral_hosts'] = [("*", True)]
             con = {}
-            con['user'] = "{}\{}".format(nt4_domain,username)
+            con['user'] = "{}\{}".format(nt4_domain, username)
             con['password'] = password
             con['raise_exceptions'] = True
             con['authentication'] = ldap3.NTLM
             if use_ssl:
                 certfile = settings.AD_CERT_FILE
                 self.debug('ldap.ssl :: Activated - Cert file: {}'.format(certfile))
-                con['auto_bind']  = ldap3.AUTO_BIND_TLS_BEFORE_BIND
+                con['auto_bind'] = ldap3.AUTO_BIND_TLS_BEFORE_BIND
                 ser['use_ssl'] = True
                 ser['tls'] = ldap3.Tls(validate=ssl.CERT_REQUIRED, version=ssl.PROTOCOL_TLSv1)
             else:
                 con['auto_bind'] = ldap3.AUTO_BIND_NO_TLS
             try:
-                #self.debug('ldap.server params :: {}'.format(ser))
+                # self.debug('ldap.server params :: {}'.format(ser))
                 server = ldap3.Server(ldap_url, **ser)
                 self.debug('ldap.server :: {}'.format(server))
-                #self.debug('ldap.connection params :: {}'.format(con))
+                # self.debug('ldap.connection params :: {}'.format(con))
                 answer = ldap3.Connection(server, **con)
                 self.debug('ldap.connection :: {}'.format(answer))
-                #answer.open()
-                #answer.bind()
+                # answer.open()
+                # answer.bind()
                 self.debug('ldap.connected :: Authorized')
             except LDAPSocketOpenError as e:
                 # The access for this user has been denied, Debug it if required
                 self.debug("LDAP connect failed 'SocketOpenError' for url '{}' with error '{}'".format(ldap_url, e))
-                answer = False
+                answer = None
             except LDAPException as e:
                 # The access for this user has been denied, Debug it if required
                 self.debug("LDAP connect failed 'LDAPException' for user '{}' with error '{}'".format(username, e))
@@ -493,25 +493,21 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         if authorization:
             # The user was validated in Active Directory
             user = self.get_or_create_user(username, password)
-        else:
-            # Access denied
-            user = None
-
-        # Check if we didn't get a logged in user
-        if user:
             # Make sure the user is active
             user.is_active = True
             user.save()
         else:
-
-            # If there was link to Active Directory and User is not authorized (lock it in Django)
-            if authorization is not None and getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
-                u = User.objects.filter(username=username).first()
-                # Username found
-                if u:
+            # Locate user in our system
+            user = User.objects.filter(username=username).first()
+            if user:
+                # If access was denied
+                if authorization is False or getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
                     # Deactivate the user
-                    u.is_active = False
-                    u.save()
+                    user.is_active = False
+                    user.save()
+
+            # No access and no user here
+            user = None
 
         # Return the final decision
         return user
