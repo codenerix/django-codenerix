@@ -82,9 +82,9 @@ class LimitedAuth(ModelBackend):
     which extends the last one with check_auth() extra system limitations
     '''
 
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, *args, **kwargs):
         # Launch default django authentication
-        user = super(LimitedAuth, self).authenticate(username, password)
+        user = super(LimitedAuth, self).authenticate(*args, **kwargs)
 
         # Answer to the system
         answer = check_auth(user)
