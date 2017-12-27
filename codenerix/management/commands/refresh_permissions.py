@@ -23,7 +23,12 @@ from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from django.contrib.auth.management import create_permissions
-from django.contrib.contenttypes.management import update_contenttypes
+try:
+    # Django < 1.11
+    from django.contrib.contenttypes.management import update_contenttypes as create_contenttypes
+except ImportError:
+    # Django >= 1.11
+    from django.contrib.contenttypes.management import create_contenttypes
 
 from codenerix.lib.debugger import Debugger
 
@@ -58,7 +63,7 @@ class Command(BaseCommand, Debugger):
         idx = 1
         for app_config in apps_config:
             self.debug("    -> {}/{} {}".format(idx, apps_total, app_config.label), color='cyan')
-            update_contenttypes(app_config)
+            create_contenttypes(app_config)
             idx += 1
 
         # Get all users from the system
