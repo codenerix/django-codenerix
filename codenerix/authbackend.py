@@ -350,7 +350,7 @@ class TokenAuthMiddleware(object):
                 # Set we are in authtoken
                 request.authtoken = True
                 # Log user in
-                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                login(request, user)
                 # Disable CSRF checks
                 setattr(request, '_dont_enforce_csrf_checks', True)
                 json_details = request.GET.get("authjson_details", request.POST.get("authjson_details", False))

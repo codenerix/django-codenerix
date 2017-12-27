@@ -1,4 +1,4 @@
-__version__ = "1.0.83"
+__version__ = "1.0.84"
 
 __authors__ = [
     'Juan Miguel Taboada Godoy <juanmi@juanmitaboada.com>',
