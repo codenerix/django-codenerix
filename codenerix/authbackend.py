@@ -38,6 +38,7 @@ from django.conf import settings
 import ldap3
 from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
 
+
 def check_auth(user):
     '''
     Check if the user should or shouldn't be inside the system:
@@ -82,9 +83,9 @@ class LimitedAuth(ModelBackend):
     which extends the last one with check_auth() extra system limitations
     '''
 
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, *args, **kwargs):
         # Launch default django authentication
-        user = super(LimitedAuth, self).authenticate(username, password)
+        user = super(LimitedAuth, self).authenticate(*args, **kwargs)
 
         # Answer to the system
         answer = check_auth(user)
@@ -181,7 +182,6 @@ class LimitedAuthMiddleware(object):
                     request.session.pop('user_session_caducity')
                     logout(request)
 
-
     def __call__(self, request):
 
         # Code to be executed for each request before the view (and later middleware) are called.
@@ -202,13 +202,21 @@ class TokenAuth(ModelBackend):
     Authentication system based on a Token key
     '''
 
-    def authenticate(self, username=None, token=None, string=None):
+    def authenticate(self, *args, **kwargs):
+
+        # Get our arguments
+        username = kwargs.get("username", None)
+        token = kwargs.get("token", None)
+        string = kwargs.get("string", None)
+
+        # Try to find the user
         try:
             # Get the requested username
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             user = None
 
+        # If we got an user
         if user:
             # Get config
             config = {
@@ -265,7 +273,7 @@ class TokenAuth(ModelBackend):
 
             # Unsigned string
             if config['master_signed'] or config['user_signed'] or config['otp_signed']:
-                tosign = username + string
+                tosign = user.username + string
 
             # Build the list of valid keys
             keys = []
@@ -345,7 +353,7 @@ class TokenAuthMiddleware(object):
             username = request.GET.get("authuser", request.POST.get("authuser", None))
             json = request.GET.get("json", request.POST.get("json", body))
             # Authenticate user
-            user = authenticate(username=username, token=token, string=json)
+            user = authenticate(request=None, username=username, token=token, string=json)
             if user:
                 # Set we are in authtoken
                 request.authtoken = True
@@ -482,10 +490,14 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         # Return the final result
         return answer
 
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, *args, **kwargs):
         '''
         Authenticate the user agains LDAP
         '''
+
+        # Get config
+        username = kwargs.get("username", None)
+        password = kwargs.get("password", None)
 
         # Check user in Active Directory (authorization == None if can not connect to Active Directory Server)
         authorization = self.ldap_link(username, password, mode='LOGIN')
@@ -558,7 +570,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 # Get answer
                 result = results[0].__dict__
 
-            elif len(results)>1:
+            elif len(results) > 1:
                 # Found serveral results
                 self.debug("I found several results for your LDAP query")
                 memberships = []
