@@ -139,7 +139,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def clean_memcache(self):
         if self.pk:
             prefix = hashlib.md5()
-            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')).decode())
+            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')))
             clean_memcache_item("person:{}".format(self.pk), prefix.hexdigest())
 
     def get_grouppermit(self):
@@ -169,6 +169,17 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
         # Create user and save it to the database
         if self.user:
+            # Check if the user requested to change the username
+            if username != self.user.username:
+                # Check if the username already exists in the database and it is not me
+                already = User.objects.filter(username=username).exclude(pk=self.user.pk).first()
+                if already:
+                    # Username already in use
+                    raise ValidationError("Username already exists in the database")
+                else:
+                    # Set new username
+                    self.user.username = username
+
             # Update password if any
             if password:
                 self.user.set_password(password)
