@@ -186,6 +186,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     CODENERIX_JS_DEBUG = ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.js"></script> \
+    <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap/js/bootstrap.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-dropdowns-functions.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular/angular.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular/angular-animate.js"></script> \
@@ -229,6 +230,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     CODENERIX_JS_MIN = ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.min.js"></script> \
+    <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap/js/bootstrap.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-dropdowns-functions.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular/angular.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular/angular-animate.min.js"></script> \
