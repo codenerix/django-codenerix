@@ -511,7 +511,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         else:
             # Locate user in our system
             user = User.objects.filter(username=username).first()
-            if user:
+            if user and not user.is_staff:
                 # If access was denied
                 if authorization is False or getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
                     # Deactivate the user
