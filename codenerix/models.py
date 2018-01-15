@@ -168,14 +168,23 @@ class CodenerixModel(CodenerixModelBase):
         return None
 
     def internal_lock_delete(self):
+        # if we have a specific lock delete from model
         answer = self.lock_delete()
         if answer is None:
+            # for each field
             for related in self._meta.get_fields():
+                # check if it is protected
                 if 'on_delete' in related.__dict__ and related.on_delete == models.PROTECT:
+                    # if we have a name
                     field = getattr(self, related.related_name, None)
-                    if field and field.exists():
-                        answer = _('Cannot delete item, relationship with %(model_name)s') % {'model_name': related.related_model._meta.verbose_name}
-                        break
+                    if field:
+                        # try to get 'exists' function
+                        f_exists = getattr(field, 'exists', None)
+                        # if we didn't get it or the result from it is positive
+                        if f_exists is None or f_exists():
+                            # answer that the item is locked
+                            answer = _('Cannot delete item, relationship with %(model_name)s') % {'model_name': related.related_model._meta.verbose_name}
+                            break
         return answer
 
     def lock_delete(self, request=None):
