@@ -2773,7 +2773,7 @@ class GenList(GenBase, ListView):
                     locator = " with no success"
                 if len(key_path) >= 2 and key_path[0] == 'table' and key_path[1] == 'body':
                     method = "bodybuilder"
-                raise TypeError("The method {0}() from model '{1}' inside app '{2}' didn't return a JSON serializable object, we have tried to locate the exacly point for the error{3}. Error was: {4}".format(method, self._modelname, self._appname, locator, e))
+                raise TypeError("The method {0}() from model '{1}' inside app '{2}' didn't return a JSON serializable object, we have tried to locate the exactly point for the error{3}. Error was: {4}".format(method, self._modelname, self._appname, locator, e))
             # Return the new answer
             return HttpResponse(json_answer, content_type='application/json', **response_kwargs)
         else:
