@@ -1822,10 +1822,13 @@ function codenerix_builder(libraries, routes, redirects) {
             templateUrl: get_static('codenerix/partials/list.html'),
             controller: 'ListCtrl'
         }}]);
-        // List rows and summary
+        // List rows header and summary
         var rows_dict = {};
         if (typeof(static_partial_row)!='undefined') {
             rows_dict[''] = {templateUrl: static_partial_row};
+        }
+        if (typeof(static_partial_header)!='undefined') {
+            rows_dict['header'] = {templateUrl: static_partial_header};
         }
         if (typeof(static_partial_summary)!='undefined') {
             rows_dict['summary'] = {templateUrl: static_partial_summary};
@@ -1873,10 +1876,13 @@ function codenerix_builder(libraries, routes, redirects) {
                         templateUrl: get_static('codenerix/partials/list.html'),
                         controller: controller
                     }}]);
-                    // Sublist rows and summary
+                    // Sublist rows header and summary
                     var rows_dict = {};
                     if (typeof(tab.static_partial_row)!='undefined') {
                         rows_dict[''] = {'templateUrl': tab.static_partial_row};
+                    }
+                    if (typeof(tab.static_partial_header)!='undefined') {
+                        rows_dict['header'] = {templateUrl: tab.static_partial_header};
                     }
                     if (typeof(tab.static_partial_summary)!='undefined') {
                         rows_dict['summary'] = {templateUrl: tab.static_partial_summary};

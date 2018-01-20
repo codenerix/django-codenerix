@@ -781,6 +781,13 @@ class GenBase(object):
                     tabfinal['static_partial_row_path'] = settings.STATIC_URL + static_partial_row_path
                     tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
 
+                    # Get static partial header information
+                    if 'static_partial_header' not in tab:
+                        tabdetailinfo = model_inspect(tabdetailsclss)
+                        static_partial_header_path = "{0}/{1}_header.html".format(tabdetailinfo['appname'], "{0}s".format(tabdetailinfo['modelname'].lower()))
+                    else:
+                        static_partial_header_path = tab['static_partial_header']
+
                     # Get static partial summary information
                     if 'static_partial_summary' not in tab:
                         tabdetailinfo = model_inspect(tabdetailsclss)
@@ -789,6 +796,8 @@ class GenBase(object):
                         static_partial_summary_path = tab['static_partial_summary']
 
                     # Save static partial information
+                    tabfinal['static_partial_header_path'] = settings.STATIC_URL + static_partial_header_path
+                    tabfinal['static_partial_header'] = get_static(static_partial_header_path, self.user, self.language, None, 'html', relative=True)
                     tabfinal['static_partial_summary_path'] = settings.STATIC_URL + static_partial_summary_path
                     tabfinal['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
 
@@ -835,6 +844,14 @@ class GenBase(object):
             tabfinal['static_partial_row_path'] = settings.STATIC_URL + static_partial_row_path
             tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
 
+            # Get static partial header information
+            if 'static_partial_header' not in tab:
+                tabdetailinfo = model_inspect(tabdetailsclss)
+                static_partial_header_path = "{0}/{1}_header.html".format(tabdetailinfo['appname'], "{0}s".format(tabdetailinfo['modelname'].lower()))
+            else:
+                static_partial_header_path = tab['static_partial_header']
+
+
             # Get static partial summary information
             if 'static_partial_summary' not in tab:
                 tabdetailinfo = model_inspect(tabdetailsclss)
@@ -843,6 +860,8 @@ class GenBase(object):
                 static_partial_summary_path = tab['static_partial_summary']
 
             # Save static partial information
+            tabfinal['static_partial_header_path'] = settings.STATIC_URL + static_partial_header_path
+            tabfinal['static_partial_header'] = get_static(static_partial_header_path, self.user, self.language, None, 'html', relative=True)
             tabfinal['static_partial_summary_path'] = settings.STATIC_URL + static_partial_summary_path
             tabfinal['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
 
@@ -1009,6 +1028,7 @@ class GenList(GenBase, ListView):
 
         ws_entry_point                              # Set ws_entry_point variable to a fixed value
         static_partial_row                          # Set static_partial_row to a fixed value
+        static_partial_header                       # Set static_partial_header to a fixed value
         static_partial_summary                      # Set static_partial_summary to a fixed value
         static_app_row                              # Set static_app_row to a fixed value
         static_controllers_row                      # Set static_controllers_row to a fixed value
@@ -1185,6 +1205,9 @@ class GenList(GenBase, ListView):
 
         static_partial_row_path = getattr(self, 'static_partial_row', "{0}/{1}_rows.html".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
+
+        static_partial_header_path = getattr(self, 'static_partial_header', "{0}/{1}_header.html".format(self._appname, "{0}s".format(self._modelname.lower())))
+        self.extra_context['static_partial_header'] = get_static(static_partial_header_path, self.user, self.language, None, 'html', relative=True)
 
         static_partial_summary_path = getattr(self, 'static_partial_summary', "{0}/{1}_summary.html".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
@@ -2547,6 +2570,7 @@ class GenList(GenBase, ListView):
         answer['table'] = {}
         answer['table']['head'] = self.__jcontext_tablehead(context)
         answer['table']['body'] = None
+        answer['table']['header'] = None
         answer['table']['summary'] = None
 
         # Return answer
