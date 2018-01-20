@@ -505,13 +505,15 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         if authorization:
             # The user was validated in Active Directory
             user = self.get_or_create_user(username, password)
-            # Make sure the user is active
-            user.is_active = True
-            user.save()
+            # Get or get_create_user will revalidate the new user
+            if user:
+                # If the user has been properly validated
+                user.is_active = True
+                user.save()
         else:
             # Locate user in our system
             user = User.objects.filter(username=username).first()
-            if user:
+            if user and not user.is_staff:
                 # If access was denied
                 if authorization is False or getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
                     # Deactivate the user

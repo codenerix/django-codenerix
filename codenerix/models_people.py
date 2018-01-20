@@ -139,7 +139,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def clean_memcache(self):
         if self.pk:
             prefix = hashlib.md5()
-            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')).decode())
+            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')))
             clean_memcache_item("person:{}".format(self.pk), prefix.hexdigest())
 
     def get_grouppermit(self):
@@ -169,6 +169,17 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
         # Create user and save it to the database
         if self.user:
+            # Check if the user requested to change the username
+            if username != self.user.username:
+                # Check if the username already exists in the database and it is not me
+                already = User.objects.filter(username=username).exclude(pk=self.user.pk).first()
+                if already:
+                    # Username already in use
+                    raise ValidationError("Username already exists in the database")
+                else:
+                    # Set new username
+                    self.user.username = username
+
             # Update password if any
             if password:
                 self.user.set_password(password)
@@ -183,7 +194,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         # Save changes
         self.user.save()
 
-    def refresh_permissions(self):
+    def refresh_permissions(self, quiet=False):
 
         # Check we have a user to work with
         if self.user:
@@ -234,7 +245,8 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                 self.user.user_permissions.add(permission)
 
         else:
-            raise IOError("You can not refresh permissions for a Person wich doesn't have an associated user")
+            if not quiet:
+                raise IOError("You can not refresh permissions for a Person wich doesn't have an associated user")
 
     @staticmethod
     def group_permissions(clss):
@@ -295,16 +307,23 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             for perm in groupsresult[groupname]:
                 group.permissions.add(perm)
 
+    def save(self, *args, **kwargs):
+        # Save this person
+        answer = super(GenPerson, self).save(*args, **kwargs)
+        # Refresh permissions if possible
+        self.refresh_permissions(quiet=True)
+        # Return answer
+        return answer
 
 class GenRole(object):
-    def save(self, *args, **kwards):
+    def save(self, *args, **kwargs):
         # only update permissions for new users
         REFRESH_PERMISSIONS = not self.pk
-        result = super(GenRole, self).save(*args, **kwards)
+        result = super(GenRole, self).save(*args, **kwargs)
         if REFRESH_PERMISSIONS:
             person = self.__CDNX_search_person_CDNX__()
             if person:
-                person.refresh_permissions()
+                person.refresh_permissions(quiet=True)
         return result
 
     def delete(self):
@@ -312,7 +331,7 @@ class GenRole(object):
         result = super(GenRole, self).delete()
         if person:
             # update permissions
-            person.refresh_permissions()
+            person.refresh_permissions(quiet=True)
         return result
 
     def __CDNX_search_person_CDNX__(self):
@@ -331,4 +350,4 @@ class GenRole(object):
     def CDNX_refresh_permissions_CDNX(self):
         person = self.__CDNX_search_person_CDNX__()
         if person:
-            person.refresh_permissions()
+            person.refresh_permissions(quiet=True)

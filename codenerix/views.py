@@ -37,6 +37,7 @@ import pytz
 import base64
 from dateutil import tz
 from dateutil.parser import parse
+from decimal import Decimal
 
 # Django
 from django.db import models
@@ -2642,6 +2643,9 @@ class GenList(GenBase, ListView):
                     elif isinstance(value, datetime.time):
                         # Convert datetime to string
                         value = value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
+                    elif isinstance(value, Decimal):
+                        # Convert Decimal to float
+                        value = float(value)
                     # Save token
                     token[key] = value
 
@@ -2674,18 +2678,21 @@ class GenList(GenBase, ListView):
                         # Analize if is related
                         related = (getattr(value, 'all', None) is not None)
                         # Analize data type
-                        if type(rkval) == dict:
+                        if isinstance(rkval, dict):
                             # This is a recursive call to go through foreign keys
                             value = self.bodybuilder(value.all(), rkval)
-                        elif type(value) == datetime.datetime:
+                        elif isinstance(value, datetime.datetime):
                             # Convert datetime to string
                             value = value.replace(tzinfo=pytz.utc).astimezone(tz.tzlocal()).strftime(formats.get_format('DATETIME_INPUT_FORMATS', lang=self.language)[0])
-                        elif type(value) == datetime.date:
+                        elif isinstance(value, datetime.date):
                             # Convert datetime to string
                             value = value.strftime(formats.get_format('DATE_INPUT_FORMATS', lang=self.language)[0])
-                        elif type(value) == datetime.time:
+                        elif isinstance(value, datetime.time):
                             # Convert datetime to string
                             value = value.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
+                        elif isinstance(value, Decimal):
+                            # Convert Decimal to float
+                            value = float(value)
                         elif related:
                             # If the object is related but nobody is taking care of it
                             values = []
@@ -2730,9 +2737,11 @@ class GenList(GenBase, ListView):
             # Build the new answer
             if hasattr(self, 'json_builder'):
                 answer = self.json_builder(json_context, context)
+                method = "json_builder"
             else:
                 # User doesn't want to change anything in our answer
                 answer = json_context
+                method = "get_context_json"
 
             # Check if the user filled table body, if not, we will do it now
             if (type(answer) == dict) and ('table' in answer) and ('body' in answer['table']) and (answer['table']['body'] is None):
@@ -2762,7 +2771,9 @@ class GenList(GenBase, ListView):
                     locator = ", a probably place for the problem is at: {0}".format(" -> ".join(key_path))
                 else:
                     locator = " with no success"
-                raise TypeError("The method json_builder() from model '{0}' inside app '{1}' didn't return a JSON serializable object, we have tried to locate the exacly point for the error{2}. Error was: {3}".format(self._modelname, self._appname, locator, e))
+                if len(key_path) >= 2 and key_path[0] == 'table' and key_path[1] == 'body':
+                    method = "bodybuilder"
+                raise TypeError("The method {0}() from model '{1}' inside app '{2}' didn't return a JSON serializable object, we have tried to locate the exactly point for the error{3}. Error was: {4}".format(method, self._modelname, self._appname, locator, e))
             # Return the new answer
             return HttpResponse(json_answer, content_type='application/json', **response_kwargs)
         else:
@@ -3257,7 +3268,7 @@ class GenModify(object):
             try:
                 json_answer = json.dumps(answer)
             except TypeError as e:
-                raise TypeError("The method json_builder() from model '{0}' inside app '{1}' didn't return a JSON serializable object. Error was: {2}".format(self._modelname, self._appname, e))
+                raise TypeError("The method get_context_json() from model '{0}' inside app '{1}' didn't return a JSON serializable object. Error was: {2}".format(self._modelname, self._appname, e))
             # Return the new answer
             return HttpResponse(json_answer, content_type='application/json', **response_kwargs)
         else:

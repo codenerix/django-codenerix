@@ -19,35 +19,35 @@
 # limitations under the License.
 
 import os
-import sys
 
 try:
     from subprocess import getstatusoutput
-    pythoncmd="python3"
-except:
+    pythoncmd = "python3"
+except Exception:
     from commands import getstatusoutput
-    pythoncmd="python2"
+    pythoncmd = "python2"
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
 from codenerix.lib.debugger import Debugger
 
+
 class Command(BaseCommand, Debugger):
 
     # Show this when the user types help
     help = "Remove *.pyc files"
-    
+
     def handle(self, *args, **options):
-        
+
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
-        
-        # Get environment
-        appname=settings.ROOT_URLCONF.split(".")[0]
-        basedir=settings.BASE_DIR
-        appdir = os.path.abspath("{}/{}".format(basedir,appname))
-        status, output = getstatusoutput("find {}/ -type f -name '*.pyc' -delete".format(appdir))
-        if status: raise CommandError(output)
 
+        # Get environment
+        appname = settings.ROOT_URLCONF.split(".")[0]
+        basedir = settings.BASE_DIR
+        appdir = os.path.abspath("{}/{}".format(basedir, appname))
+        status, output = getstatusoutput("find {}/ -name '*.py[c|o]' -o -name __pycache__ -exec rm -rf {{}} +".format(appdir))
+        if status:
+            raise CommandError(output)
