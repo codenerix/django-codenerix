@@ -3302,7 +3302,7 @@ class GenModify(object):
 class GenCreate(GenModify, GenBase, CreateView):
     action_permission = 'add'
     get_template_names_key = 'add'
-    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
+    success_url = reverse_lazy("CDNX_status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     show_internal_name = True
     extends_base = "codenerix/form.html"
@@ -3317,7 +3317,7 @@ class GenCreateModal(GenCreate):
 class GenUpdate(GenModify, GenBase, UpdateView):
     action_permission = 'change'
     get_template_names_key = 'form'
-    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
+    success_url = reverse_lazy("CDNX_status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     show_internal_name = True
 
@@ -3355,7 +3355,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
     '''
 
     # get_template_names_key='delete'
-    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
+    success_url = reverse_lazy("CDNX_status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     action_permission = 'delete'
 

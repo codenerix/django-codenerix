@@ -616,7 +616,7 @@ def form_answer(status, answer):
     answer_encoded = urlsafe_base64_encode(str.encode(json.dumps(answer))).decode()
 
     # Build success URL
-    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': answer_encoded})
+    success_url = reverse_lazy("CDNX_status", kwargs={'status': 'accept', 'answer': answer_encoded})
 
     # Return response
     return HttpResponseRedirect(success_url)
