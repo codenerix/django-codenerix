@@ -1194,7 +1194,7 @@ function dynamic_fields(scope) {
                 }
             });
             // Prepare URL
-            var url = baseurl+search+'?filter='+angular.toJson(filter2)
+            var url = baseurl+search+'?def=1&filter='+angular.toJson(filter2)
             
             // Send the request
             http.get(url,{},{})

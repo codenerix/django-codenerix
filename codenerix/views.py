@@ -851,7 +851,6 @@ class GenBase(object):
             else:
                 static_partial_header_path = tab['static_partial_header']
 
-
             # Get static partial summary information
             if 'static_partial_summary' not in tab:
                 tabdetailinfo = model_inspect(tabdetailsclss)
@@ -3849,7 +3848,9 @@ class GenForeignKey(GenBase, View):
         limit = getattr(settings, "LIMIT_FOREIGNKEY", 100)
 
         # Build answer
-        answer = [{'id': None, 'label': '---------'}]
+        answer = []
+        if self.request.GET.get('def', "0") == "1":
+            answer.append({'id': None, 'label': '---------'})
         qscount = qs.count()
         for e in qs[0:limit]:
             answer.append(self.custom_choice(e, {'id': e.pk, 'label': self.build_label(e)}))
