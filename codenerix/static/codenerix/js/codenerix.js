@@ -1242,7 +1242,6 @@ function dynamic_fields(scope) {
     
     scope.getAutoComplete = function(http,baseurl,options,filter,modelname,modelvalue,search,deepness) {
 
-        console.log(filter);
         if ((search.length>=deepness) || (search=='*')) {
             var filter2 = {}
             angular.forEach(filter, function(value, key){
