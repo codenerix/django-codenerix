@@ -193,9 +193,9 @@ function del_item_sublist(id, msg, url, scope, $http){
                 // If the request was accepted go back to the list
             } else {
                 // Error happened, show an alert
-                console.log("ERROR "+stat+": "+answer)
+                console.log("ERROR "+stat+": "+answer);
                 console.log(answer);
-                alert("ERROR "+stat+": "+answer)
+                alert("ERROR "+stat+": "+answer);
             }
         })
         .error(function(data, status, headers, config) {
