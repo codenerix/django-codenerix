@@ -177,8 +177,19 @@ function subscribers_worker(scope, subsjsb64) {
 }
 
 // delete item form sublist in details view
-function del_item_sublist(id, msg, url, scope, $http){
+function del_item_sublist(id, msg, url, scope, $http, args){
+
+    // Get ID as string
     id = String(id);
+
+    // Prepare msg
+    if (typeof(args) != "undefined") {
+        angular.forEach(args, function(value, key) {
+            msg = msg.replace("<"+key+">", value);
+        });
+    }
+
+    // Ask the user
     if (confirm(msg)){
         
         $http.post( url, {}, {} )
@@ -2445,10 +2456,10 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                 var url = $scope.initialbase+$scope.id_parent+"/addfile"
                 $scope.add(url);
             };
-            scope.removerecord = function(id, msg){
+            scope.removerecord = function(id, msg, args){
                 //var url = $scope.initialbase+$scope.id_parent+"/addfile"
                 var url = $scope.wsbase+"/"+id+"/delete";
-                del_item_sublist(id, msg, url, $scope, $http);
+                del_item_sublist(id, msg, url, $scope, $http, args);
                 //$scope.add(url);
             };
         };
@@ -2558,10 +2569,10 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         refresh($scope, $timeout, Register, undefined);
     };
 
-    $scope.removerecord = function(id, msg){
+    $scope.removerecord = function(id, msg, args){
         $scope.base_reload = [$scope.refreshlist, $scope.listid, 0];
         var url = ws+"/"+id+"/delete";
-        del_item_sublist(id, msg, url, $scope, $http);
+        del_item_sublist(id, msg, url, $scope, $http, args);
     };
 
     // Startup hotkey system
@@ -3090,10 +3101,10 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
         $scope.add(url);
     };
 
-    $scope.removerecord = function(id, msg){
+    $scope.removerecord = function(id, msg, args){
         //var url = $scope.initialbase+$scope.id_parent+"/addfile"
         var url = $scope.wsbase+id+"/delete";
-        del_item_sublist(id, msg, url, $scope, $http);
+        del_item_sublist(id, msg, url, $scope, $http, args);
         //$scope.add(url);
     };
     
