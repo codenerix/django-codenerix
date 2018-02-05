@@ -18,6 +18,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import random
 import hashlib
 import io
@@ -720,12 +721,15 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
 
 class WysiwygAngularRender(forms.widgets.HiddenInput):
     def render_wysiwyg(self, ngmodel, extraif="", force_editors=False, attrs=None):
+        # Recompute ngmodel
+        if re.fullmatch("\w+",ngmodel):
+            ngmodel = "$parent.$parent.{}".format(ngmodel)
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
         # Editors
         editors = {}
-        editors['quill'] = _("NG Quill")
         editors['textangular'] = _("Text Angular")
+        editors['quill'] = _("NG Quill")
         editors['raw'] = _("Source code")
         editors['preview'] = _("Preview")
         editors_list = []
