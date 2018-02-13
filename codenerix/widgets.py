@@ -723,7 +723,7 @@ class WysiwygAngularRender(forms.widgets.HiddenInput):
     def render_wysiwyg(self, ngmodel, extraif="", force_editors=False, attrs=None):
         # Recompute ngmodel
         if re.fullmatch("\w+",ngmodel):
-            ngmodel = "$parent.$parent.{}".format(ngmodel)
+            ngmodel = "$parent.{}".format(ngmodel)
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
         # Editors
