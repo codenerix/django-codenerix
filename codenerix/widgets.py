@@ -804,7 +804,7 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
         # Get model name
         vmodel = attrs.get('ng-model').replace("'", '"')
         # Get normal field
-        html = "<div ng-init='{0}={{}}; {0}[\"__JSON_DATA__\"]={1}'></div>".format(vmodel, value)
+        html = "<div ng-init='{0}={{}}; {0}[\"__JSON_DATA__\"]={1}'></div>".format(vmodel, value.replace("'", "&#39;"))
         html += u"<input type='hidden' name='{0}' ng-model='{1}'>".format(name, vmodel)
 
         # Render blocks with ANGULAR
