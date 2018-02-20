@@ -403,7 +403,9 @@ class DynamicSelect(DynamicSelectInputWidget, forms.widgets.Select):
                 clss.language = self.language
             label = clss().get_label(value)
 
-        placeholder = _('Press * or start typing')
+        # Prepare placeholder
+        placeholder = self.attrs.get('placeholder', _('Press * or start typing'))
+        ngplaceholder = self.attrs.get('ng-placeholder', "'{}'".format(_('Press * or start typing')))
 
         # Detect parent node
         vmodelsp = vmodel.split(".")
@@ -430,11 +432,11 @@ class DynamicSelect(DynamicSelectInputWidget, forms.widgets.Select):
         if hasattr(self, "multiple") and self.multiple:
             html += ' multiple '
         if value:
-            html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{3}'}},{{'id':'{1}','label':'{2}'}}]; $select.selected=options.{0}[1];".format(vmodel, value, escapejs(label), placeholder)
+            html += u" ng-init=\"options.{0}=[{{'id':null,'label':{3}}},{{'id':'{1}','label':'{2}'}}]; $select.selected=options.{0}[1];".format(vmodel, value, escapejs(label), ngplaceholder)
             html += u" option_default={}; options.{}=option_default['rows']".format(self.get_foreign(vurl, vform, vmodel, "'*'", 'getForeignKeys'), vmodel)
         else:
             # init options for form modal
-            html += u" ng-init=\"options.{0}=[{{'id':null,'label':'{1}'}}]; \"".format(vmodel, placeholder)
+            html += u" ng-init=\"options.{0}=[{{'id':null,'label':{1}}}]; \"".format(vmodel, ngplaceholder)
         html += u" ng-click=\"option_default={}; options.{}=option_default['rows']".format(self.get_foreign(vurl, vform, vmodel, "'*'", 'getForeignKeys'), vmodel)
 
         html += u" id=\"{0}\"".format(vid)
@@ -444,7 +446,7 @@ class DynamicSelect(DynamicSelectInputWidget, forms.widgets.Select):
         html += ' ng-disabled="disabled"'
         html += ' reset-search-input="false"'
         html += '>'
-        html += u' <ui-select-match placeholder="{}">'.format(placeholder)
+        html += u' <ui-select-match placeholder=\'{}\'>'.format(placeholder)
         html += ' <div ng-bind-html="$select.selected.label"></div>'
         html += ' </ui-select-match>'
         html += ' <ui-select-choices'

@@ -175,4 +175,13 @@ angular.module('codenerixFilters', [])
         to = to || '';
         return input.replace(new RegExp(from, 'g'), to);
     };
+})
+.filter('default', function() {
+    return function(input, defaultValue) {
+        if (angular.isUndefined(input) || input === null || input === '') {
+            return defaultValue;
+        } else {
+            return input;
+        }
+    }
 });
