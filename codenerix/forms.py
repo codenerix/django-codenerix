@@ -31,8 +31,10 @@ from codenerix.widgets import StaticSelect, DynamicSelect, DynamicInput, MultiSt
 
 class BaseForm(object):
 
-    __language = None
-    attributes = {}
+    def __init__(self, *args, **kwargs):
+        self.__language = None
+        self.attributes = {}
+        return super(BaseForm, self).__init__(*args, **kwargs)
 
     def set_language(self, language):
         self.__language = language

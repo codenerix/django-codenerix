@@ -781,6 +781,13 @@ class GenBase(object):
                     tabfinal['static_partial_row_path'] = settings.STATIC_URL + static_partial_row_path
                     tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
 
+                    # Get static partial header information
+                    if 'static_partial_header' not in tab:
+                        tabdetailinfo = model_inspect(tabdetailsclss)
+                        static_partial_header_path = "{0}/{1}_header.html".format(tabdetailinfo['appname'], "{0}s".format(tabdetailinfo['modelname'].lower()))
+                    else:
+                        static_partial_header_path = tab['static_partial_header']
+
                     # Get static partial summary information
                     if 'static_partial_summary' not in tab:
                         tabdetailinfo = model_inspect(tabdetailsclss)
@@ -789,6 +796,8 @@ class GenBase(object):
                         static_partial_summary_path = tab['static_partial_summary']
 
                     # Save static partial information
+                    tabfinal['static_partial_header_path'] = settings.STATIC_URL + static_partial_header_path
+                    tabfinal['static_partial_header'] = get_static(static_partial_header_path, self.user, self.language, None, 'html', relative=True)
                     tabfinal['static_partial_summary_path'] = settings.STATIC_URL + static_partial_summary_path
                     tabfinal['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
 
@@ -835,6 +844,13 @@ class GenBase(object):
             tabfinal['static_partial_row_path'] = settings.STATIC_URL + static_partial_row_path
             tabfinal['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
 
+            # Get static partial header information
+            if 'static_partial_header' not in tab:
+                tabdetailinfo = model_inspect(tabdetailsclss)
+                static_partial_header_path = "{0}/{1}_header.html".format(tabdetailinfo['appname'], "{0}s".format(tabdetailinfo['modelname'].lower()))
+            else:
+                static_partial_header_path = tab['static_partial_header']
+
             # Get static partial summary information
             if 'static_partial_summary' not in tab:
                 tabdetailinfo = model_inspect(tabdetailsclss)
@@ -843,6 +859,8 @@ class GenBase(object):
                 static_partial_summary_path = tab['static_partial_summary']
 
             # Save static partial information
+            tabfinal['static_partial_header_path'] = settings.STATIC_URL + static_partial_header_path
+            tabfinal['static_partial_header'] = get_static(static_partial_header_path, self.user, self.language, None, 'html', relative=True)
             tabfinal['static_partial_summary_path'] = settings.STATIC_URL + static_partial_summary_path
             tabfinal['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
 
@@ -1009,6 +1027,7 @@ class GenList(GenBase, ListView):
 
         ws_entry_point                              # Set ws_entry_point variable to a fixed value
         static_partial_row                          # Set static_partial_row to a fixed value
+        static_partial_header                       # Set static_partial_header to a fixed value
         static_partial_summary                      # Set static_partial_summary to a fixed value
         static_app_row                              # Set static_app_row to a fixed value
         static_controllers_row                      # Set static_controllers_row to a fixed value
@@ -1097,6 +1116,10 @@ class GenList(GenBase, ListView):
 
         # Answer the new context
         return answer
+
+    # You can use also custom queryset
+    def custom_queryset(self, queyset):
+        return <your customized queryset>
     '''
 
     # Default values
@@ -1185,6 +1208,9 @@ class GenList(GenBase, ListView):
 
         static_partial_row_path = getattr(self, 'static_partial_row', "{0}/{1}_rows.html".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_row'] = get_static(static_partial_row_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_ROWS, 'html', relative=True)
+
+        static_partial_header_path = getattr(self, 'static_partial_header', "{0}/{1}_header.html".format(self._appname, "{0}s".format(self._modelname.lower())))
+        self.extra_context['static_partial_header'] = get_static(static_partial_header_path, self.user, self.language, None, 'html', relative=True)
 
         static_partial_summary_path = getattr(self, 'static_partial_summary', "{0}/{1}_summary.html".format(self._appname, "{0}s".format(self._modelname.lower())))
         self.extra_context['static_partial_summary'] = get_static(static_partial_summary_path, self.user, self.language, self.DEFAULT_STATIC_PARTIAL_SUMMARY, 'html', relative=True)
@@ -1307,7 +1333,7 @@ class GenList(GenBase, ListView):
                 # properties
                 return None
 
-    def get_queryset(self):
+    def get_queryset(self, raw_query=False):
         # Call the base implementation
         if not self.haystack:
             queryset = super(GenList, self).get_queryset()
@@ -2120,145 +2146,149 @@ class GenList(GenBase, ListView):
             ))
         #"""
 
-        # Check the total count of registers + rows per page
-        total_rows_per_page = jsondata.get('rowsperpage', self.default_rows_per_page)
-        pages_to_bring = jsondata.get('pages_to_bring', 1)
-        if total_rows_per_page == 'All' or self.export:
-            total_rows_per_page = queryset.count()
-        paginator = Paginator(queryset, total_rows_per_page)
-        total_registers = paginator.count
+        # Check if the user requested to return a raw queryset
+        if raw_query:
+            return queryset
+        else:
+            # Check the total count of registers + rows per page
+            total_rows_per_page = jsondata.get('rowsperpage', self.default_rows_per_page)
+            pages_to_bring = jsondata.get('pages_to_bring', 1)
+            if total_rows_per_page == 'All' or self.export:
+                total_rows_per_page = queryset.count()
+            paginator = Paginator(queryset, total_rows_per_page)
+            total_registers = paginator.count
 
-        # Rows per page
-        if total_rows_per_page:
-            try:
-                total_rows_per_page = int(total_rows_per_page)
-            except Exception:
-                total_rows_per_page = 'All'
-        else:
-            total_rows_per_page = self.default_rows_per_page
-        if total_rows_per_page == 'All':
-            page_number = 1
-            total_rows_per_page = total_registers
-            total_rows_per_page_out = _('All')
-            total_pages = 1
-        else:
-            total_rows_per_page = int(total_rows_per_page)  # By default 10 rows per page
-            total_rows_per_page_out = total_rows_per_page
-            total_pages = int(total_registers / total_rows_per_page)
-            if total_registers % total_rows_per_page:
-                total_pages += 1
-            page_number = jsondata.get('page', 1)  # If no page specified use first page
-            if page_number == 'last':
-                page_number = total_pages
-            else:
+            # Rows per page
+            if total_rows_per_page:
                 try:
-                    page_number = int(page_number)
+                    total_rows_per_page = int(total_rows_per_page)
                 except Exception:
-                    page_number = 1
-                if page_number < 1:
-                    page_number = 1
-                if page_number > total_pages:
+                    total_rows_per_page = 'All'
+            else:
+                total_rows_per_page = self.default_rows_per_page
+            if total_rows_per_page == 'All':
+                page_number = 1
+                total_rows_per_page = total_registers
+                total_rows_per_page_out = _('All')
+                total_pages = 1
+            else:
+                total_rows_per_page = int(total_rows_per_page)  # By default 10 rows per page
+                total_rows_per_page_out = total_rows_per_page
+                total_pages = int(total_registers / total_rows_per_page)
+                if total_registers % total_rows_per_page:
+                    total_pages += 1
+                page_number = jsondata.get('page', 1)  # If no page specified use first page
+                if page_number == 'last':
                     page_number = total_pages
+                else:
+                    try:
+                        page_number = int(page_number)
+                    except Exception:
+                        page_number = 1
+                    if page_number < 1:
+                        page_number = 1
+                    if page_number > total_pages:
+                        page_number = total_pages
 
-        # Build the list of page counters allowed
-        choice = {}
-        c = self.default_rows_per_page
-        chk = 1
-        while total_registers >= c:
-            choice[c] = c
-            if chk == 1:
-                # From 5 to 10
-                c = c * 2
-                # Next level
-                chk = 2
-            elif chk == 2:
-                # From 10 to 25 (10*2+10/2)
-                c = c * 2 + int(c / 2)
-                # Next level
-                chk = 3
-            elif chk == 3:
-                # From 25 to 50
-                c *= 2
-                chk = 1
-            # Don't give a too long choice
-            if c > 2000:
-                break
-
-        # Add all choice in any case
-        if settings.ALL_PAGESALLOWED:
-            choice['All'] = _('All')
-
-        # Save the pagination in the structure
-        context['rowsperpageallowed'] = choice
-        context['rowsperpage'] = total_rows_per_page_out
-        context['pages_to_bring'] = pages_to_bring
-        context['pagenumber'] = page_number
-
-        # Get the full number of registers and save it to context
-        context['total_registers'] = total_registers
-        if total_rows_per_page == 'All':
-            # Remove total_rows_per_page if is all
-            total_rows_per_page = None
-            context['page_before'] = None
-            context['page_after'] = None
-            context['start_register'] = 1
-            context['showing_registers'] = total_registers
-        else:
-            # Page before
-            if page_number <= 1:
-                context['page_before'] = None
-            else:
-                context['page_before'] = page_number-1
-            # Page after
-            if page_number >= total_pages:
-                context['page_after'] = None
-            else:
-                context['page_after'] = page_number+1
-            # Starting on register number
-            context['start_register'] = (page_number-1)*total_rows_per_page+1
-            context['showing_registers'] = total_rows_per_page
-
-        # Calculate end
-        context['end_register'] = min(context['start_register']+context['showing_registers']-1, total_registers)
-
-        # Add pagination
-        regs = []
-        if paginator.count:
-            desired_page_number = page_number
-            try:
-                range_pages_to_bring = xrange(pages_to_bring)
-            except NameError:
-                range_pages_to_bring = range(pages_to_bring)
-            for p in range_pages_to_bring:
-                try:
-                    regs += paginator.page(desired_page_number)
-                    desired_page_number += 1
-                except PageNotAnInteger:
-                    # If page is not an integer, deliver first page.
-                    regs += paginator.page(1)
-                    desired_page_number = 2
-                except EmptyPage:
-                    # If page is out of range (e.g. 9999), deliver last page of results.
-                    if pages_to_bring == 1:
-                        regs += paginator.page(paginator.num_pages)
-                    # Leave bucle
+            # Build the list of page counters allowed
+            choice = {}
+            c = self.default_rows_per_page
+            chk = 1
+            while total_registers >= c:
+                choice[c] = c
+                if chk == 1:
+                    # From 5 to 10
+                    c = c * 2
+                    # Next level
+                    chk = 2
+                elif chk == 2:
+                    # From 10 to 25 (10*2+10/2)
+                    c = c * 2 + int(c / 2)
+                    # Next level
+                    chk = 3
+                elif chk == 3:
+                    # From 25 to 50
+                    c *= 2
+                    chk = 1
+                # Don't give a too long choice
+                if c > 2000:
                     break
 
-        # Fill pages
-        if total_registers:
-            context['pages'] = pages(paginator, page_number)
-            try:
-                range_fill = xrange(pages_to_bring-1)
-            except NameError:
-                range_fill = range(pages_to_bring-1)
-            for p in range_fill:
-                page_number += 1
-                context['pages'] += pages(paginator, page_number)
-        else:
-            context['pages'] = []
+            # Add all choice in any case
+            if settings.ALL_PAGESALLOWED:
+                choice['All'] = _('All')
 
-        # Return queryset
-        return regs
+            # Save the pagination in the structure
+            context['rowsperpageallowed'] = choice
+            context['rowsperpage'] = total_rows_per_page_out
+            context['pages_to_bring'] = pages_to_bring
+            context['pagenumber'] = page_number
+
+            # Get the full number of registers and save it to context
+            context['total_registers'] = total_registers
+            if total_rows_per_page == 'All':
+                # Remove total_rows_per_page if is all
+                total_rows_per_page = None
+                context['page_before'] = None
+                context['page_after'] = None
+                context['start_register'] = 1
+                context['showing_registers'] = total_registers
+            else:
+                # Page before
+                if page_number <= 1:
+                    context['page_before'] = None
+                else:
+                    context['page_before'] = page_number-1
+                # Page after
+                if page_number >= total_pages:
+                    context['page_after'] = None
+                else:
+                    context['page_after'] = page_number+1
+                # Starting on register number
+                context['start_register'] = (page_number-1)*total_rows_per_page+1
+                context['showing_registers'] = total_rows_per_page
+
+            # Calculate end
+            context['end_register'] = min(context['start_register']+context['showing_registers']-1, total_registers)
+
+            # Add pagination
+            regs = []
+            if paginator.count:
+                desired_page_number = page_number
+                try:
+                    range_pages_to_bring = xrange(pages_to_bring)
+                except NameError:
+                    range_pages_to_bring = range(pages_to_bring)
+                for p in range_pages_to_bring:
+                    try:
+                        regs += paginator.page(desired_page_number)
+                        desired_page_number += 1
+                    except PageNotAnInteger:
+                        # If page is not an integer, deliver first page.
+                        regs += paginator.page(1)
+                        desired_page_number = 2
+                    except EmptyPage:
+                        # If page is out of range (e.g. 9999), deliver last page of results.
+                        if pages_to_bring == 1:
+                            regs += paginator.page(paginator.num_pages)
+                        # Leave bucle
+                        break
+
+            # Fill pages
+            if total_registers:
+                context['pages'] = pages(paginator, page_number)
+                try:
+                    range_fill = xrange(pages_to_bring-1)
+                except NameError:
+                    range_fill = range(pages_to_bring-1)
+                for p in range_fill:
+                    page_number += 1
+                    context['pages'] += pages(paginator, page_number)
+            else:
+                context['pages'] = []
+
+            # Return queryset
+            return regs
 
     def get_context_data(self, **kwargs):
         '''
@@ -2547,6 +2577,7 @@ class GenList(GenBase, ListView):
         answer['table'] = {}
         answer['table']['head'] = self.__jcontext_tablehead(context)
         answer['table']['body'] = None
+        answer['table']['header'] = None
         answer['table']['summary'] = None
 
         # Return answer
@@ -3278,7 +3309,7 @@ class GenModify(object):
 class GenCreate(GenModify, GenBase, CreateView):
     action_permission = 'add'
     get_template_names_key = 'add'
-    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
+    success_url = reverse_lazy("CDNX_status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     show_internal_name = True
     extends_base = "codenerix/form.html"
@@ -3293,7 +3324,7 @@ class GenCreateModal(GenCreate):
 class GenUpdate(GenModify, GenBase, UpdateView):
     action_permission = 'change'
     get_template_names_key = 'form'
-    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
+    success_url = reverse_lazy("CDNX_status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     show_internal_name = True
 
@@ -3331,7 +3362,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
     '''
 
     # get_template_names_key='delete'
-    success_url = reverse_lazy("status", kwargs={'status': 'accept', 'answer': ''})
+    success_url = reverse_lazy("CDNX_status", kwargs={'status': 'accept', 'answer': ''})
     success_url_keys = []
     action_permission = 'delete'
 
@@ -3340,11 +3371,19 @@ class GenDelete(GenModify, GenBase, DeleteView):
         Entry point for this class, here we decide basic stuff
         '''
 
-        # Check if this is a webservice request
-        self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
-        self.json_worker = self.__authtoken or (self.json is True)
-        # Call the base implementation
-        return super(GenDelete, self).dispatch(request, **kwargs)
+        # Delete method must happen with POST not with GET
+        if request.method == 'POST':
+            # Check if this is a webservice request
+            self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
+            self.json_worker = self.__authtoken or (self.json is True)
+            # Call the base implementation
+            return super(GenDelete, self).dispatch(request, **kwargs)
+        else:
+            json_answer = json.dumps({
+                'error': True,
+                'errortxt': _('Method not allowed, use POST to delete or DELETE on the detail url'),
+                })
+            return HttpResponse(json_answer, content_type='application/json')
 
     def delete(self, *args, **kwargs):
         obj = self.get_object()
@@ -3825,7 +3864,9 @@ class GenForeignKey(GenBase, View):
         limit = getattr(settings, "LIMIT_FOREIGNKEY", 100)
 
         # Build answer
-        answer = [{'id': None, 'label': '---------'}]
+        answer = []
+        if self.request.GET.get('def', "0") == "1":
+            answer.append({'id': None, 'label': '---------'})
         qscount = qs.count()
         for e in qs[0:limit]:
             answer.append(self.custom_choice(e, {'id': e.pk, 'label': self.build_label(e)}))

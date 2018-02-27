@@ -177,8 +177,19 @@ function subscribers_worker(scope, subsjsb64) {
 }
 
 // delete item form sublist in details view
-function del_item_sublist(id, msg, url, scope, $http){
+function del_item_sublist(id, msg, url, scope, $http, args){
+
+    // Get ID as string
     id = String(id);
+
+    // Prepare msg
+    if (typeof(args) != "undefined") {
+        angular.forEach(args, function(value, key) {
+            msg = msg.replace("<"+key+">", value);
+        });
+    }
+
+    // Ask the user
     if (confirm(msg)){
         
         $http.post( url, {}, {} )
@@ -193,9 +204,9 @@ function del_item_sublist(id, msg, url, scope, $http){
                 // If the request was accepted go back to the list
             } else {
                 // Error happened, show an alert
-                console.log("ERROR "+stat+": "+answer)
+                console.log("ERROR "+stat+": "+answer);
                 console.log(answer);
-                alert("ERROR "+stat+": "+answer)
+                alert("ERROR "+stat+": "+answer);
             }
         })
         .error(function(data, status, headers, config) {
@@ -1194,7 +1205,7 @@ function dynamic_fields(scope) {
                 }
             });
             // Prepare URL
-            var url = baseurl+search+'?filter='+angular.toJson(filter2)
+            var url = baseurl+search+'?def=1&filter='+angular.toJson(filter2)
             
             // Send the request
             http.get(url,{},{})
@@ -1240,7 +1251,8 @@ function dynamic_fields(scope) {
         }
     };
     
-    scope.getAutoComplete = function(http,baseurl,filter,search,deepness) {
+    scope.getAutoComplete = function(http,baseurl,options,filter,modelname,modelvalue,search,deepness) {
+
         if ((search.length>=deepness) || (search=='*')) {
             var filter2 = {}
             angular.forEach(filter, function(value, key){
@@ -1330,6 +1342,19 @@ var codenerix_directive_htmlcompile = ['codenerixHtmlCompile', ['$compile', func
             });
         }
     }
+}]];
+
+var codenerix_directive_onenter = ['codenerixOnEnter', [ function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.codenerixOnEnter);
+                });
+                event.preventDefault();
+            }
+        });
+    };
 }]];
 
 var codenerix_directive_focus = ['codenerixFocus', ['$timeout', function($timeout) {
@@ -1758,6 +1783,7 @@ function codenerix_builder(libraries, routes, redirects) {
     .directive(codenerix_directive_focus[0], codenerix_directive_focus[1])
     .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
     .directive(codenerix_directive_htmlcompile[0], codenerix_directive_htmlcompile[1])
+    .directive(codenerix_directive_onenter[0], codenerix_directive_onenter[1])
     .directive(codenerix_directive_reallyclick[0], codenerix_directive_reallyclick[1])
     
     // Set routing system
@@ -1822,10 +1848,13 @@ function codenerix_builder(libraries, routes, redirects) {
             templateUrl: get_static('codenerix/partials/list.html'),
             controller: 'ListCtrl'
         }}]);
-        // List rows and summary
+        // List rows header and summary
         var rows_dict = {};
         if (typeof(static_partial_row)!='undefined') {
             rows_dict[''] = {templateUrl: static_partial_row};
+        }
+        if (typeof(static_partial_header)!='undefined') {
+            rows_dict['header'] = {templateUrl: static_partial_header};
         }
         if (typeof(static_partial_summary)!='undefined') {
             rows_dict['summary'] = {templateUrl: static_partial_summary};
@@ -1873,10 +1902,13 @@ function codenerix_builder(libraries, routes, redirects) {
                         templateUrl: get_static('codenerix/partials/list.html'),
                         controller: controller
                     }}]);
-                    // Sublist rows and summary
+                    // Sublist rows header and summary
                     var rows_dict = {};
                     if (typeof(tab.static_partial_row)!='undefined') {
                         rows_dict[''] = {'templateUrl': tab.static_partial_row};
+                    }
+                    if (typeof(tab.static_partial_header)!='undefined') {
+                        rows_dict['header'] = {templateUrl: tab.static_partial_header};
                     }
                     if (typeof(tab.static_partial_summary)!='undefined') {
                         rows_dict['summary'] = {templateUrl: tab.static_partial_summary};
@@ -2424,10 +2456,10 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
                 var url = $scope.initialbase+$scope.id_parent+"/addfile"
                 $scope.add(url);
             };
-            scope.removerecord = function(id, msg){
+            scope.removerecord = function(id, msg, args){
                 //var url = $scope.initialbase+$scope.id_parent+"/addfile"
                 var url = $scope.wsbase+"/"+id+"/delete";
-                del_item_sublist(id, msg, url, $scope, $http);
+                del_item_sublist(id, msg, url, $scope, $http, args);
                 //$scope.add(url);
             };
         };
@@ -2537,10 +2569,10 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         refresh($scope, $timeout, Register, undefined);
     };
 
-    $scope.removerecord = function(id, msg){
+    $scope.removerecord = function(id, msg, args){
         $scope.base_reload = [$scope.refreshlist, $scope.listid, 0];
         var url = ws+"/"+id+"/delete";
-        del_item_sublist(id, msg, url, $scope, $http);
+        del_item_sublist(id, msg, url, $scope, $http, args);
     };
 
     // Startup hotkey system
@@ -3069,10 +3101,10 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
         $scope.add(url);
     };
 
-    $scope.removerecord = function(id, msg){
+    $scope.removerecord = function(id, msg, args){
         //var url = $scope.initialbase+$scope.id_parent+"/addfile"
         var url = $scope.wsbase+id+"/delete";
-        del_item_sublist(id, msg, url, $scope, $http);
+        del_item_sublist(id, msg, url, $scope, $http, args);
         //$scope.add(url);
     };
     
