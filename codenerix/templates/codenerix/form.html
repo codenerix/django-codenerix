@@ -45,7 +45,7 @@ limitations under the License.
     autocomplete="off"
     ng-init="field_list={{formlist|get_field_list|safe}}; form_name='{{form.form_name}}'; subscribers('{{subscriptions|safe}}');"
     ng-submit="submit({{form.form_name}},'{%if show_details%}details{%else%}list{%endif%}', '{{angular_submit|default:"submit"}}')">
-    <div {% if form.attributes.ngcontroller %}ng-controller="{{ form.attributes.ngcontroller }}"{% endif %}>
+    <div{% if form.attributes.ngcontroller %}ng-controller="{{ form.attributes.ngcontroller }}"{% endif %}>
         {% block extra_form_top%}{% endblock %}
         <input type="text" id="id_elementid" name="elementid" ng-model="elementid" ng-value="elementid" style="display:none" />
         <input type="text" id="__pk__" name="__pk__" ng-model="__pk__" ng-value="{{object.pk}}" value="{{object.pk}}" style="display:none" />
