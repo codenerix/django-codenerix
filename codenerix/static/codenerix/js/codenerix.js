@@ -1357,6 +1357,19 @@ var codenerix_directive_onenter = ['codenerixOnEnter', [ function () {
     };
 }]];
 
+var codenerix_directive_ontab = ['codenerixOnTab', [ function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 9) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.codenerixOnTab);
+                });
+                event.preventDefault();
+            }
+        });
+    };
+}]];
+
 var codenerix_directive_focus = ['codenerixFocus', ['$timeout', function($timeout) {
     return {
         scope: { trigger: '=codenerixFocus' },
@@ -1784,6 +1797,7 @@ function codenerix_builder(libraries, routes, redirects) {
     .directive(codenerix_directive_autofocus[0], codenerix_directive_autofocus[1])
     .directive(codenerix_directive_htmlcompile[0], codenerix_directive_htmlcompile[1])
     .directive(codenerix_directive_onenter[0], codenerix_directive_onenter[1])
+    .directive(codenerix_directive_ontab[0], codenerix_directive_ontab[1])
     .directive(codenerix_directive_reallyclick[0], codenerix_directive_reallyclick[1])
     
     // Set routing system
