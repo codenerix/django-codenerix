@@ -33,6 +33,15 @@ Features
 * hotkeys support
 * `Haystack <http://haystacksearch.org>`_ support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
 * nice packages with plenty of icons ready to use (Glyphicon, Font Awesome & Font Awesome Animation)
+* special Codenerix directives
+  
+	* codenerixHtmlCompile to render HTML code straight from your scope variables (including AngularJS code)
+	* codenerixOnEnter to detect when Enter key is pressed
+	* codenerixOnTab to detect when Tab key is pressed
+	* codenerixFocus to control when a input field get the focus
+	* codenerixVtable to render tables with dynamic loading and cache system. It is used for really big tables that we would like to render virtually. The website will look like a really long list but when you scroll down the engine will send queries to the server to get the registers you should be seeing.
+	* codenerixAutofocus to set the focus on the input who has it when the page is loaded
+	* codenerixReallyClick to ask the user if it really clicked (it is a kind of "confirm" function)
 
 Ready for:
 ''''''''''
