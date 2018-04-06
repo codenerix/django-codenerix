@@ -499,6 +499,7 @@ class GenBase(object):
     json = False
     search_filter_button = False
     extra_context = {}
+    is_modal = False
 
     # Translations
     gentranslate = {
@@ -2920,6 +2921,7 @@ class GenListModal(GenList):
     get_template_names_key = 'listmodal'
     show_internal_name = False
     title = None
+    is_modal = True
 
     def get_context_data(self, **kwargs):
         context = super(GenListModal, self).get_context_data(**kwargs)
@@ -3319,6 +3321,7 @@ class GenCreateModal(GenCreate):
     get_template_names_key = 'addmodal'
     show_internal_name = False
     extends_base = "codenerix/form.html"
+    is_modal = True
 
 
 class GenUpdate(GenModify, GenBase, UpdateView):
@@ -3352,6 +3355,7 @@ class GenUpdate(GenModify, GenBase, UpdateView):
 class GenUpdateModal(GenUpdate):
     get_template_names_key = 'formmodal'
     show_internal_name = False
+    is_modal = True
 
 
 class GenDelete(GenModify, GenBase, DeleteView):
@@ -3625,6 +3629,9 @@ class GenDetail(GenBase, DetailView):
         context = super(GenDetail, self).get_context_data(**kwargs)
         context['object_detail'] = self.get_filled_structure()
 
+        # Get if this is a modal window
+        self.extra_context['is_modal_window'] = self.is_modal
+
         # Get tabs_autorender information
         self.extra_context['tabs_autorender'] = self.get_tabs_autorender()
 
@@ -3748,6 +3755,7 @@ class GenDetail(GenBase, DetailView):
 class GenDetailModal(GenDetail):
     get_template_names_key = 'detailsmodal'
     extends_base = "codenerix/details.html"
+    is_modal = True
 
 
 class GenForeignKey(GenBase, View):
@@ -3906,6 +3914,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         must_be_superuser = True
 
     class LogDetails(GenDetailModal, GenDetail):
+        is_modal = True
         model = Log
         linkedit = False
         linkdelete = False
