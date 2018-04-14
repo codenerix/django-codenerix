@@ -1612,35 +1612,37 @@ var codenerix_directive_reallyclick = ['codenerixReallyClick' , ['$uibModal', fu
         restrict: 'A',
         scope:{
           codenerixReallyClick:"&",
+          codenerixReallyActive:"&?",
           item:"="
         },
         link: function(scope, element, attrs) {
           element.bind('click', function() {
+            // Get attributes
             var message = attrs.codenerixReallyMessage || "Are you sure ?";
-
-            /*
-            //This works
-            if (message && confirm(message)) {
-              scope.$apply(attrs.codenerixReallyClick);
+            if (typeof(scope.codenerixReallyActive) == "undefined") {
+                var active = true;
+            } else {
+                var active = scope.codenerixReallyActive();
             }
-            //*/
 
-            //*This doesn't works
-            var modalHtml = '<div class="modal-body">' + message + '</div>';
-            modalHtml += '<div class="modal-footer"><button class="btn btn-primary" ng-click="ok()">OK</button><button class="btn btn-danger" ng-click="cancel()">Cancel</button></div>';
+            // If the directive is active
+            if (active) {
+                var modalHtml = '<div class="modal-body">' + message + '</div>';
+                modalHtml += '<div class="modal-footer"><button class="btn btn-primary" ng-click="ok()">OK</button><button class="btn btn-danger" ng-click="cancel()">Cancel</button></div>';
 
-            var uibModalInstance = $uibModal.open({
-              template: modalHtml,
-              controller: ModalInstanceCtrl
-            });
+                var uibModalInstance = $uibModal.open({
+                  template: modalHtml,
+                  controller: ModalInstanceCtrl
+                });
 
-            uibModalInstance.result.then(function() {
-              scope.codenerixReallyClick({item:scope.item}); //raise an error : $digest already in progress
-            }, function() {
-              //Modal dismissed
-            });
-            //*/
-            
+                uibModalInstance.result.then(function() {
+                  scope.codenerixReallyClick({item:scope.item});
+                }, function() {
+                  // Modal dismissed
+                });
+            } else {
+              scope.codenerixReallyClick({item:scope.item});
+            }
           });
 
         }
