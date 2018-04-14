@@ -225,7 +225,7 @@ function del_item_sublist(id, msg, url, scope, $http, args){
     }
 }
 
-function openmodal($scope, $timeout, $uibModal, size, functions, callback, locked, callback_cancel) {
+function openmodal($scope, $timeout, $uibModal, size, functions, callback, locked, callback_cancel, inline) {
     var ngmodel=null;
     // Define the modal window
     $scope.build_modal = function (inline) {
@@ -369,7 +369,46 @@ function openmodal($scope, $timeout, $uibModal, size, functions, callback, locke
         });
         return modalInstance;
     }
-    return $scope.build_modal();
+    return $scope.build_modal(inline);
+};
+
+// Open a quick window wich will execute an action and will inform the user about the result in a nice way
+function quickmodal($scope, $timeout, $uibModal, size, action, functions, callback, callback_cancel) {
+
+    var static_url = $scope.data.meta.url_static;
+
+    var template  = "<div class='modal-body text-center h1' codenerix-html-compile='quickmodal.html'></div>";
+    $scope.quickmodal = {'html': $scope.data.meta.gentranslate.PleaseWait};
+    $scope.quickmodal.html += "...<br/><img src='"+static_url+"codenerix/img/loader.gif'></div>";
+
+    var internal_functions = function(scope) {
+        functions(scope);
+        scope.quickmodal = $scope.quickmodal;
+    };
+
+    var modalInstance = openmodal($scope, $timeout, $uibModal, 'sm', internal_functions, callback, true, callback_cancel, template);
+
+    var quickmodal_ok = function(answer) {
+        $scope.quickmodal.html = $scope.data.meta.gentranslate.Done+" <img src='"+static_url+"codenerix/img/ok.gif'>";
+        $timeout(function() {
+            modalInstance.close(answer);
+        }, 2000);
+    };
+    var quickmodal_error = function(msg) {
+        var html = "<span class='text-danger'><strong>"+$scope.data.meta.gentranslate.Error+"</strong></span><br/>";
+        html += "<img src='"+static_url+"codenerix/img/warning.gif'><br/>";
+        html += '<button type="button" class="btn btn-sm btn-danger" ng-click="cancel()">'+$scope.data.meta.gentranslate.Cancel+'</button>';
+        html += "<hr><h3>";
+        html += msg;
+        html += "</h3>";
+        $scope.quickmodal.html = html;
+    };
+
+    // Execution given action
+    action(quickmodal_ok, quickmodal_error);
+
+    // Return modal window
+    return modalInstance;
 };
 
 
@@ -851,7 +890,7 @@ function formsubmit($scope, $rootScope, $http, $window, $state, $templateCache, 
 
 
 // Linked elements behavior when they are called by a link() call from a click on a plus symbol
-function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl, $timeout) {
+function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, ws, listid, ngmodel, base_url, appname, modelname, formobj, formname, id, wsbaseurl, $timeout, inline) {
     // Get incoming attributes
     $scope.ngmodel=ngmodel;
     $scope.base_url=base_url;
@@ -1026,7 +1065,7 @@ function inlinked($scope, $rootScope, $http, $window, $uibModal, $state, $stateP
             }
         });
     };
-    $scope.build_modal();
+    $scope.build_modal(inline);
 };
 
 function dynamic_fields(scope) {

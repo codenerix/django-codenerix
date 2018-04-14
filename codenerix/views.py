@@ -504,32 +504,36 @@ class GenBase(object):
     # Translations
     gentranslate = {
         'Add': _("Add"),
-        'Edit': _("Edit"),
         'Cancel': _("Cancel"),
-        'Search': _("Search"),
-        'Filters': _("Filters"),
-        'RowsPerPage': _("Rows per page"),
-        'PageNumber': _("Page number"),
-        'registers': _("registers"),
-        'CleanFilters': _("Clean filters"),
-        'PrintExcel': _("Print Excel"),
-        'Date': _("Date"),
-        'Year': _("Year"),
-        'Month': _("Month"),
-        'Day': _("Day"),
-        'Time': _("Time"),
-        'Hour': _("Hour"),
-        'Minute': _("Minute"),
-        'Second': _("Second"),
         'Change': _("Change"),
+        'CleanFilters': _("Clean filters"),
+        'Date': _("Date"),
+        'Day': _("Day"),
         'Delete': _("Delete"),
-        'View': _("View"),
+        'Done': _("Done"),
         'Download': _("Download"),
+        'Edit': _("Edit"),
+        'Error': _("Error"),
+        'Filters': _("Filters"),
+        "Go_back": _("Go back"),
+        'Hour': _("Hour"),
+        'Month': _("Month"),
+        'Minute': _("Minute"),
+        'PageNumber': _("Page number"),
+        "PleaseWait": _("Please wait"),
+        'PrintExcel': _("Print Excel"),
         'Save': _('Save'),
         'Save_here': _("Save here"),
         "Save_and_new": _("Save & new"),
         "Reload": _("Reload"),
-        "Go_back": _("Go back"),
+        'RowsPerPage': _("Rows per page"),
+        'Search': _("Search"),
+        'Second': _("Second"),
+        'Time': _("Time"),
+        'View': _("View"),
+        'Warning': _("Warning"),
+        'Year': _("Year"),
+        'registers': _("registers"),
     }
 
     # Default tabs information
@@ -2386,6 +2390,7 @@ class GenList(GenBase, ListView):
         a['username'] = self.user.username
         a['context'] = self.client_context
         a['url_media'] = settings.MEDIA_URL
+        a['url_static'] = settings.STATIC_URL
         a['page'] = context['pagenumber']
         a['pages'] = context['pages']
         a['pages_to_bring'] = context['pages_to_bring']
