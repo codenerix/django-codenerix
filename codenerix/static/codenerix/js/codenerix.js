@@ -50,9 +50,16 @@ var codenerix_libraries = [
     'checklist-model',
     'ngQuill',
     'cfp.hotkeys',
+    'frapontillo.bootstrap-switch',
 ];
-var codenerix_debug = false;
-var codenerix_hotkeys = true;
+
+// Default configuration
+if (typeof(codenerix_debug)=="undefined") {
+    var codenerix_debug = false;
+}
+if (typeof(codenerix_hotkeys)=="undefined") {
+    var codenerix_hotkeys = true;
+}
 
 // Add the remove method to the Array structure
 Array.prototype.remove = function(from, to) {

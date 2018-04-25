@@ -248,7 +248,7 @@ class MODELINFO:
         l['profile_people_limit']=reduce(operator_or_,criterials)
         return l
     '''
-    def __init__(self, soul, appname, modelname, viewname, request, user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, kwargs):
+    def __init__(self, soul, appname, modelname, viewname, request, user, profile, jsonquery, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, kwargs):
         # Internal attributes
         if soul:
             self.__soul = soul()
@@ -266,6 +266,7 @@ class MODELINFO:
         self.elementid = elementid
         self.request = request
         self.user = user
+        self.jsonquery = jsonquery
         self.profile = profile
         self.kwargs = kwargs
 
@@ -933,6 +934,7 @@ class GenBase(object):
             # Configure class
             info = model_inspect(myclass)
             profile = get_profile(self.user)
+            jsonquery = {}
             appname = getattr(myclass, 'appname', info['appname'])
             modelname = getattr(myclass, 'modelname', info['modelname'])
 
@@ -943,7 +945,7 @@ class GenBase(object):
             MsearchQ = None
             if hasattr(myclass, '__limitQ__'):
                 MlimitQ = myclass().__limitQ__
-            MODELINF = MODELINFO(myclass.__dict__.get('model', None), appname, modelname, myclass.__module__, self.request, self.user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
+            MODELINF = MODELINFO(myclass.__dict__.get('model', None), appname, modelname, myclass.__module__, self.request, self.user, profile, jsonquery, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
 
             # Filter on limits
             if hasattr(self, '__limitQ__'):
@@ -1365,9 +1367,17 @@ class GenList(GenBase, ListView):
         context = self.__context
 
         # Update kwargs if json key is present
-        jsonquery = self.request.GET.get('json', self.request.POST.get('json', None))
-        if jsonquery is not None:
+        jsonquerytxt = self.request.GET.get('json', self.request.POST.get('json', None))
+        if jsonquerytxt is not None:
+            # Decode json
+            try:
+                jsonquery = json.loads(jsonquerytxt)
+            except json.JSONDecodeError as e:
+                raise IOError("json argument in your GET/POST parameters is not a valid JSON string")
+
+            # Set json context
             jsondata = self.set_context_json(jsonquery)
+
             # Get listid
             listid = jsondata.pop('listid')
             # Get elementid
@@ -1376,9 +1386,10 @@ class GenList(GenBase, ListView):
             listid = None
             elementid = None
             jsondata = {}
+            jsonquery = {}
 
         # Build info for GenModel methods
-        MODELINF = MODELINFO(self.model, self._appname, self._modelname, self._viewname, self.request, self.user, self.profile, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, self.__kwargs)
+        MODELINF = MODELINFO(self.model, self._appname, self._modelname, self._viewname, self.request, self.user, self.profile, jsonquery, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, self.__kwargs)
 
         # Process the filter
         context['filters'] = []
@@ -2477,7 +2488,7 @@ class GenList(GenBase, ListView):
             # Rebuild the tuple
             token = {}
             token['key'] = key.split(":")[0]
-            token['name'] = gettext(name)
+            token['name'] = name and gettext(name) or None
             token['kind'] = typekind
             # Decide by kind of data
             if typekind == 'select':
@@ -2594,24 +2605,26 @@ class GenList(GenBase, ListView):
         Get a json parameter and rebuild the context back to a dictionary (probably kwargs)
         '''
 
+        # Make sure we are getting dicts
+        if type(jsonquery) != dict:
+            raise IOError("set_json_context() method can be called only with dictionaries, you gave me a '{}'".format(type(jsonquery)))
+
         # Set we will answer json to this request
         self.json = True
-
-        # Open json string
-        v = json.loads(jsonquery)
 
         # Transfer keys
         newget = {}
         for key in ['search', 'search_filter_button', 'page', 'pages_to_bring', 'rowsperpage', 'filters', 'year', 'month', 'day', 'hour', 'minute', 'second']:
-            if key in v:
-                newget[key] = v[key]
+            if key in jsonquery:
+                newget[key] = jsonquery[key]
 
         # Add transformed ordering
-        if ('ordering' in v) and (v['ordering']):
+        json_ordering = jsonquery.get('ordering', None)
+        if json_ordering:
             # Convert to list
             ordering = []
-            for key in v['ordering']:
-                ordering.append({key: v['ordering'][key]})
+            for key in json_ordering:
+                ordering.append({key: jsonquery['ordering'][key]})
 
             # Order the result from ordering
             # ordering = sorted(ordering, key=lambda x: abs(x.values()[0]))
@@ -2631,18 +2644,10 @@ class GenList(GenBase, ListView):
                     newget['ordering'].append({key: value})
 
         # Get listid
-        if 'listid' in v:
-            listid = v['listid']
-        else:
-            listid = None
-        newget['listid'] = listid
+        newget['listid'] = jsonquery.get("listid", None)
 
         # Get elementid
-        if 'elementid' in v:
-            elementid = v['elementid']
-        else:
-            elementid = None
-        newget['elementid'] = elementid
+        newget['elementid'] = jsonquery.get("elementid", None)
 
         # Return new get
         return newget
