@@ -1139,7 +1139,7 @@ class GenList(GenBase, ListView):
         return answer
 
     # You can use also custom queryset
-    def custom_queryset(self, queyset):
+    def custom_queryset(self, queyset, info):
         return <your customized queryset>
     '''
 
@@ -1323,7 +1323,7 @@ class GenList(GenBase, ListView):
             result = {}
         return result
 
-    def custom_queryset(self, queryset):
+    def custom_queryset(self, queryset, info):
         # Here you can change the queryset before of the pagination
         return queryset
 
@@ -2174,7 +2174,7 @@ class GenList(GenBase, ListView):
             else:
                 queryset = queryset.values(*query_optimizer)
         if hasattr(self, 'custom_queryset'):
-            queryset = self.custom_queryset(queryset)
+            queryset = self.custom_queryset(queryset, MODELINF)
         """
         raise Exception("FOUND: {} -- __foreignkeys: {} -- __columns: {} -- autorules_keys: {} -- \
             query_select_related: {} -- query_renamed: {} -- query_optimizer: {} | use_extra: {}| -- \
