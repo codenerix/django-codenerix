@@ -1323,10 +1323,6 @@ class GenList(GenBase, ListView):
             result = {}
         return result
 
-    def custom_queryset(self, queryset, info):
-        # Here you can change the queryset before of the pagination
-        return queryset
-
     def get_type_field(self, name, obj=None):
         names = remove_getdisplay(name).split('__')
         if obj is None:
@@ -2162,6 +2158,7 @@ class GenList(GenBase, ListView):
 
         if found and query_select_related:
             queryset = queryset.select_related(*query_select_related)
+
         # If we got the query_optimizer to optimize everything, use it
         # use_extra = False
         query_verifier.sort()
@@ -2173,8 +2170,12 @@ class GenList(GenBase, ListView):
                 queryset = queryset.annotate(**query_renamed).values(*query_optimizer)
             else:
                 queryset = queryset.values(*query_optimizer)
+
+        # Custom queryset
         if hasattr(self, 'custom_queryset'):
             queryset = self.custom_queryset(queryset, MODELINF)
+
+        # Internal Codenerix DEBUG for Querysets
         """
         raise Exception("FOUND: {} -- __foreignkeys: {} -- __columns: {} -- autorules_keys: {} -- \
             query_select_related: {} -- query_renamed: {} -- query_optimizer: {} | use_extra: {}| -- \
