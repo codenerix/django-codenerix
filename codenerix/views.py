@@ -902,12 +902,13 @@ class GenBase(object):
         # Get queryset
         queryset = self.model.objects.all()
 
+        # Default myclass and mykwargs
+        myclass = self.__class__
+        mykwargs = self.__kwargs
+
         # Check if this class has a limitQ method
         error = False
-        if hasattr(self, '__limitQ__'):
-            myclass = self.__class__
-            mykwargs = self.__kwargs
-        else:
+        if not hasattr(self, '__limitQ__'):
             # Get list class
             myurl = self.request.get_full_path()
             if myurl:
@@ -929,24 +930,25 @@ class GenBase(object):
             else:
                 error = True
 
+        # Configure class and MODELINF
+        info = model_inspect(myclass)
+        profile = get_profile(self.user)
+        jsonquery = {}
+        appname = getattr(myclass, 'appname', info['appname'])
+        modelname = getattr(myclass, 'modelname', info['modelname'])
+
+        # Get MODELINFO
+        Mfields = None
+        MlimitQ = None
+        MsearchF = None
+        MsearchQ = None
+        if hasattr(myclass, '__limitQ__'):
+            MlimitQ = myclass().__limitQ__
+        MODELINF = MODELINFO(myclass.__dict__.get('model', None), appname, modelname, myclass.__module__, self.request, self.user, profile, jsonquery, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
+
+        # Process data
         distinct = False
         if not error:
-            # Configure class
-            info = model_inspect(myclass)
-            profile = get_profile(self.user)
-            jsonquery = {}
-            appname = getattr(myclass, 'appname', info['appname'])
-            modelname = getattr(myclass, 'modelname', info['modelname'])
-
-            # Get MODELINFO
-            Mfields = None
-            MlimitQ = None
-            MsearchF = None
-            MsearchQ = None
-            if hasattr(myclass, '__limitQ__'):
-                MlimitQ = myclass().__limitQ__
-            MODELINF = MODELINFO(myclass.__dict__.get('model', None), appname, modelname, myclass.__module__, self.request, self.user, profile, jsonquery, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
-
             # Filter on limits
             if hasattr(self, '__limitQ__'):
                 limits = self.__limitQ__(MODELINF)
@@ -968,7 +970,14 @@ class GenBase(object):
                 queryset = queryset.filter(qobjects)
 
         if hasattr(self, 'annotations'):
-            queryset = queryset.annotate(**self.annotations)
+            # Prepare annotations
+            if callable(self.annotations):
+                anot = self.annotations(MODELINF)
+            else:
+                anot = self.annotations
+
+            # Set annotations
+            queryset = queryset.annotate(**anot)
 
         if distinct:
             queryset = queryset.distinct()
@@ -1008,6 +1017,11 @@ class GenList(GenBase, ListView):
             'min_price': Min('books__price'),       # the import Count, Sum, Avg, etc must do in of view
             'max_price': Max('books__price')        #
         }
+        def annotations(self, info):                # This is another way to work out annotations
+            anot = {}
+            anot['min_price'] = Min('books__price')
+            anot['max_price'] = Max('books__price')
+            return anot
 
         default_ordering = '-name'                  # Set a default ordering (Example: descent order by name)
         default_ordering = ['-name', 'date', '-xz'] # Set a default ordering (Example: descent order by name, ascendent order by date & descendent order by xz)
@@ -1433,7 +1447,14 @@ class GenList(GenBase, ListView):
 
         if hasattr(self, 'annotations'):
             if not self.haystack:
-                queryset = queryset.annotate(**self.annotations)
+                # Prepare annotations
+                if callable(self.annotations):
+                    anot = self.annotations(MODELINF)
+                else:
+                    anot = self.annotations
+
+                # Set annotations
+                queryset = queryset.annotate(**anot)
             else:
                 raise IOError("Haystack doesn't support annotate")
 
@@ -2109,7 +2130,14 @@ class GenList(GenBase, ListView):
                     query_optimizer.append(rule)
 
             if hasattr(self, 'annotations'):
-                for xnfrule in self.annotations.keys():
+                # Prepare annotations
+                if callable(self.annotations):
+                    anot = self.annotations(MODELINF)
+                else:
+                    anot = self.annotations
+
+                # Process annotations
+                for xnfrule in anot.keys():
                     found = True
                     if xnfrule not in query_verifier:
                         query_verifier.append(xnfrule)
