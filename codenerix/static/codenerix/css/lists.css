@@ -101,3 +101,7 @@ input[type="checkbox"] {
 .row_selected {
     background-color: #66ffff;
 }
+
+.bootstrap-switch-container > span {
+    padding: 4px 12px !important;
+}

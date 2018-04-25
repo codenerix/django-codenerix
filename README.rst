@@ -184,10 +184,12 @@ AngularJS reCaptcha                 MIT                 VividCortex             
 AngularUI                           MIT                 AngularUI Team              https://github.com/angular-ui
 angular-base64-upload               MIT                 pitogo.adones@gmail.com     https://github.com/adonespitogo/angular-base64-upload
 angular-bootstrap-colorpicker       MIT                 Michal Zielenkiewicz        https://github.com/buberdds/angular-bootstrap-colorpicker
+angular-bootstrap-switch            Apache              Francesco Pontillo          https://github.com/frapontillo/angular-bootstrap-switch
 angular-loading-bar                 MIT                 Wes Cruver                  https://github.com/chieffancypants/angular-loading-bar
 Bootstrap                           MIT                 Twitter, Inc.               https://github.com/twbs/bootstrap
 Bootstrap Tab Collapse              MIT                 flatlogic.com               https://github.com/flatlogic/bootstrap-tabcollapse
 bootstrap-datetimepicker            Apache              Stefan Petre                https://github.com/smalot/bootstrap-datetimepicker
+bootstrap-switch                    MIT                 Mattia Larentis             https://github.com/Bttstrp/bootstrap-switch
 Checklist-model                     MIT                 noginsk@rambler.ru          https://github.com/vitalets/checklist-model
 Date Range Picker                   MIT                 Fragaria, s.r.o.            https://github.com/dangrossman/bootstrap-daterangepicker
 django-angular                      MIT                 Jacob Rief                  https://github.com/jrief/django-angular

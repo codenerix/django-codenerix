@@ -28,24 +28,25 @@ limitations under the License.
 
 {% block angular_app_libraries %}
     <script type="text/javascript">
-        {# Define modules that we will use here #}
-        var services=angular.module('codenerixInlineServices', ['ngResource']);
-        var subws_entry_point=Array();
-        {% if tabs_autorender %}
-            {# Define services used to access to the resources of each tab #}
-            {% for tab in tabs_autorender %}
-                {% if tab.auto %}
-                    subws_entry_point[{{tab.internal_id}}]='{% url tab.ws object.id %}';
-                    services.factory('Register{{tab.internal_id}}', ['$resource', function($resource){
-                        return $resource('{% url tab.ws object.id %}/:pk/:action', { json:'{}', pk:null, action:null },{
-                            query:{ method: "GET", params: { json:'@json' }, isArray: false },
-                            get:{ method: "GET", params: { pk:'@pk', action:'@action' }, isArray: false },
-                        }); 
-                    }]);
-                {% endif %}
-            {% endfor %}
+        {% if not is_modal %}
+            {# Define modules that we will use here #}
+            var services=angular.module('codenerixInlineServices', ['ngResource']);
+            var subws_entry_point=Array();
+            {% if tabs_autorender %}
+                {# Define services used to access to the resources of each tab #}
+                {% for tab in tabs_autorender %}
+                    {% if tab.auto %}
+                        subws_entry_point[{{tab.internal_id}}]='{% url tab.ws object.id %}';
+                        services.factory('Register{{tab.internal_id}}', ['$resource', function($resource){
+                            return $resource('{% url tab.ws object.id %}/:pk/:action', { json:'{}', pk:null, action:null },{
+                                query:{ method: "GET", params: { json:'@json' }, isArray: false },
+                                get:{ method: "GET", params: { pk:'@pk', action:'@action' }, isArray: false },
+                            }); 
+                        }]);
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
         {% endif %}
-        
     </script>
 {% endblock %}
 

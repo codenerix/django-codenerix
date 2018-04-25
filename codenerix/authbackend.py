@@ -237,7 +237,7 @@ class TokenAuth(ModelBackend):
                 if config['key'] and (config['master_unsigned'] or config['master_signed']):
                     master = config['key']
                 else:
-                    if settings.DEBUG:
+                    if getattr(settings, "DEBUG_AUTH", False):
                         raise IOError("To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token")
                     else:
                         master = None
@@ -255,14 +255,14 @@ class TokenAuth(ModelBackend):
                             try:
                                 otp = str(pyotp.TOTP(base64.b32encode(user_key)).now())
                             except TypeError:
-                                if settings.DEBUG:
+                                if getattr(settings, "DEBUG_AUTH", False):
                                     raise IOError("To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='")
                                 else:
                                     otp = None
                     else:
                         otp = None
                 else:
-                    if settings.DEBUG:
+                    if getattr(settings, "DEBUG_AUTH", False):
                         raise IOError("To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)")
                     else:
                         user_key = None

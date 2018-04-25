@@ -803,10 +803,16 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
 
+        # Cleaned value
+        if value:
+            value_clean = value.replace("'", "&#39;")
+        else:
+            value_clean = value
+
         # Get model name
         vmodel = attrs.get('ng-model').replace("'", '"')
         # Get normal field
-        html = "<div ng-init='{0}={{}}; {0}[\"__JSON_DATA__\"]={1}'></div>".format(vmodel, value.replace("'", "&#39;"))
+        html = "<div ng-init='{0}={{}}; {0}[\"__JSON_DATA__\"]={1}'></div>".format(vmodel, value_clean)
         html += u"<input type='hidden' name='{0}' ng-model='{1}'>".format(name, vmodel)
 
         # Render blocks with ANGULAR

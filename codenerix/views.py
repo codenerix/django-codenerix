@@ -248,7 +248,7 @@ class MODELINFO:
         l['profile_people_limit']=reduce(operator_or_,criterials)
         return l
     '''
-    def __init__(self, soul, appname, modelname, viewname, request, user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, kwargs):
+    def __init__(self, soul, appname, modelname, viewname, request, user, profile, jsonquery, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, kwargs):
         # Internal attributes
         if soul:
             self.__soul = soul()
@@ -266,6 +266,7 @@ class MODELINFO:
         self.elementid = elementid
         self.request = request
         self.user = user
+        self.jsonquery = jsonquery
         self.profile = profile
         self.kwargs = kwargs
 
@@ -499,36 +500,41 @@ class GenBase(object):
     json = False
     search_filter_button = False
     extra_context = {}
+    is_modal = False
 
     # Translations
     gentranslate = {
         'Add': _("Add"),
-        'Edit': _("Edit"),
         'Cancel': _("Cancel"),
-        'Search': _("Search"),
-        'Filters': _("Filters"),
-        'RowsPerPage': _("Rows per page"),
-        'PageNumber': _("Page number"),
-        'registers': _("registers"),
-        'CleanFilters': _("Clean filters"),
-        'PrintExcel': _("Print Excel"),
-        'Date': _("Date"),
-        'Year': _("Year"),
-        'Month': _("Month"),
-        'Day': _("Day"),
-        'Time': _("Time"),
-        'Hour': _("Hour"),
-        'Minute': _("Minute"),
-        'Second': _("Second"),
         'Change': _("Change"),
+        'CleanFilters': _("Clean filters"),
+        'Date': _("Date"),
+        'Day': _("Day"),
         'Delete': _("Delete"),
-        'View': _("View"),
+        'Done': _("Done"),
         'Download': _("Download"),
+        'Edit': _("Edit"),
+        'Error': _("Error"),
+        'Filters': _("Filters"),
+        "Go_back": _("Go back"),
+        'Hour': _("Hour"),
+        'Month': _("Month"),
+        'Minute': _("Minute"),
+        'PageNumber': _("Page number"),
+        "PleaseWait": _("Please wait"),
+        'PrintExcel': _("Print Excel"),
         'Save': _('Save'),
         'Save_here': _("Save here"),
         "Save_and_new": _("Save & new"),
         "Reload": _("Reload"),
-        "Go_back": _("Go back"),
+        'RowsPerPage': _("Rows per page"),
+        'Search': _("Search"),
+        'Second': _("Second"),
+        'Time': _("Time"),
+        'View': _("View"),
+        'Warning': _("Warning"),
+        'Year': _("Year"),
+        'registers': _("registers"),
     }
 
     # Default tabs information
@@ -896,12 +902,13 @@ class GenBase(object):
         # Get queryset
         queryset = self.model.objects.all()
 
+        # Default myclass and mykwargs
+        myclass = self.__class__
+        mykwargs = self.__kwargs
+
         # Check if this class has a limitQ method
         error = False
-        if hasattr(self, '__limitQ__'):
-            myclass = self.__class__
-            mykwargs = self.__kwargs
-        else:
+        if not hasattr(self, '__limitQ__'):
             # Get list class
             myurl = self.request.get_full_path()
             if myurl:
@@ -923,23 +930,25 @@ class GenBase(object):
             else:
                 error = True
 
+        # Configure class and MODELINF
+        info = model_inspect(myclass)
+        profile = get_profile(self.user)
+        jsonquery = {}
+        appname = getattr(myclass, 'appname', info['appname'])
+        modelname = getattr(myclass, 'modelname', info['modelname'])
+
+        # Get MODELINFO
+        Mfields = None
+        MlimitQ = None
+        MsearchF = None
+        MsearchQ = None
+        if hasattr(myclass, '__limitQ__'):
+            MlimitQ = myclass().__limitQ__
+        MODELINF = MODELINFO(myclass.__dict__.get('model', None), appname, modelname, myclass.__module__, self.request, self.user, profile, jsonquery, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
+
+        # Process data
         distinct = False
         if not error:
-            # Configure class
-            info = model_inspect(myclass)
-            profile = get_profile(self.user)
-            appname = getattr(myclass, 'appname', info['appname'])
-            modelname = getattr(myclass, 'modelname', info['modelname'])
-
-            # Get MODELINFO
-            Mfields = None
-            MlimitQ = None
-            MsearchF = None
-            MsearchQ = None
-            if hasattr(myclass, '__limitQ__'):
-                MlimitQ = myclass().__limitQ__
-            MODELINF = MODELINFO(myclass.__dict__.get('model', None), appname, modelname, myclass.__module__, self.request, self.user, profile, Mfields, MlimitQ, MsearchF, MsearchQ, None, None, mykwargs)
-
             # Filter on limits
             if hasattr(self, '__limitQ__'):
                 limits = self.__limitQ__(MODELINF)
@@ -961,7 +970,14 @@ class GenBase(object):
                 queryset = queryset.filter(qobjects)
 
         if hasattr(self, 'annotations'):
-            queryset = queryset.annotate(**self.annotations)
+            # Prepare annotations
+            if callable(self.annotations):
+                anot = self.annotations(MODELINF)
+            else:
+                anot = self.annotations
+
+            # Set annotations
+            queryset = queryset.annotate(**anot)
 
         if distinct:
             queryset = queryset.distinct()
@@ -1001,6 +1017,11 @@ class GenList(GenBase, ListView):
             'min_price': Min('books__price'),       # the import Count, Sum, Avg, etc must do in of view
             'max_price': Max('books__price')        #
         }
+        def annotations(self, info):                # This is another way to work out annotations
+            anot = {}
+            anot['min_price'] = Min('books__price')
+            anot['max_price'] = Max('books__price')
+            return anot
 
         default_ordering = '-name'                  # Set a default ordering (Example: descent order by name)
         default_ordering = ['-name', 'date', '-xz'] # Set a default ordering (Example: descent order by name, ascendent order by date & descendent order by xz)
@@ -1118,7 +1139,7 @@ class GenList(GenBase, ListView):
         return answer
 
     # You can use also custom queryset
-    def custom_queryset(self, queyset):
+    def custom_queryset(self, queyset, info):
         return <your customized queryset>
     '''
 
@@ -1302,10 +1323,6 @@ class GenList(GenBase, ListView):
             result = {}
         return result
 
-    def custom_queryset(self, queryset):
-        # Here you can change the queryset before of the pagination
-        return queryset
-
     def get_type_field(self, name, obj=None):
         names = remove_getdisplay(name).split('__')
         if obj is None:
@@ -1360,9 +1377,17 @@ class GenList(GenBase, ListView):
         context = self.__context
 
         # Update kwargs if json key is present
-        jsonquery = self.request.GET.get('json', self.request.POST.get('json', None))
-        if jsonquery is not None:
+        jsonquerytxt = self.request.GET.get('json', self.request.POST.get('json', None))
+        if jsonquerytxt is not None:
+            # Decode json
+            try:
+                jsonquery = json.loads(jsonquerytxt)
+            except json.JSONDecodeError as e:
+                raise IOError("json argument in your GET/POST parameters is not a valid JSON string")
+
+            # Set json context
             jsondata = self.set_context_json(jsonquery)
+
             # Get listid
             listid = jsondata.pop('listid')
             # Get elementid
@@ -1371,9 +1396,10 @@ class GenList(GenBase, ListView):
             listid = None
             elementid = None
             jsondata = {}
+            jsonquery = {}
 
         # Build info for GenModel methods
-        MODELINF = MODELINFO(self.model, self._appname, self._modelname, self._viewname, self.request, self.user, self.profile, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, self.__kwargs)
+        MODELINF = MODELINFO(self.model, self._appname, self._modelname, self._viewname, self.request, self.user, self.profile, jsonquery, Mfields, MlimitQ, MsearchF, MsearchQ, listid, elementid, self.__kwargs)
 
         # Process the filter
         context['filters'] = []
@@ -1417,7 +1443,14 @@ class GenList(GenBase, ListView):
 
         if hasattr(self, 'annotations'):
             if not self.haystack:
-                queryset = queryset.annotate(**self.annotations)
+                # Prepare annotations
+                if callable(self.annotations):
+                    anot = self.annotations(MODELINF)
+                else:
+                    anot = self.annotations
+
+                # Set annotations
+                queryset = queryset.annotate(**anot)
             else:
                 raise IOError("Haystack doesn't support annotate")
 
@@ -2093,7 +2126,14 @@ class GenList(GenBase, ListView):
                     query_optimizer.append(rule)
 
             if hasattr(self, 'annotations'):
-                for xnfrule in self.annotations.keys():
+                # Prepare annotations
+                if callable(self.annotations):
+                    anot = self.annotations(MODELINF)
+                else:
+                    anot = self.annotations
+
+                # Process annotations
+                for xnfrule in anot.keys():
                     found = True
                     if xnfrule not in query_verifier:
                         query_verifier.append(xnfrule)
@@ -2118,6 +2158,7 @@ class GenList(GenBase, ListView):
 
         if found and query_select_related:
             queryset = queryset.select_related(*query_select_related)
+
         # If we got the query_optimizer to optimize everything, use it
         # use_extra = False
         query_verifier.sort()
@@ -2129,8 +2170,12 @@ class GenList(GenBase, ListView):
                 queryset = queryset.annotate(**query_renamed).values(*query_optimizer)
             else:
                 queryset = queryset.values(*query_optimizer)
+
+        # Custom queryset
         if hasattr(self, 'custom_queryset'):
-            queryset = self.custom_queryset(queryset)
+            queryset = self.custom_queryset(queryset, MODELINF)
+
+        # Internal Codenerix DEBUG for Querysets
         """
         raise Exception("FOUND: {} -- __foreignkeys: {} -- __columns: {} -- autorules_keys: {} -- \
             query_select_related: {} -- query_renamed: {} -- query_optimizer: {} | use_extra: {}| -- \
@@ -2385,6 +2430,7 @@ class GenList(GenBase, ListView):
         a['username'] = self.user.username
         a['context'] = self.client_context
         a['url_media'] = settings.MEDIA_URL
+        a['url_static'] = settings.STATIC_URL
         a['page'] = context['pagenumber']
         a['pages'] = context['pages']
         a['pages_to_bring'] = context['pages_to_bring']
@@ -2471,7 +2517,7 @@ class GenList(GenBase, ListView):
             # Rebuild the tuple
             token = {}
             token['key'] = key.split(":")[0]
-            token['name'] = gettext(name)
+            token['name'] = name and gettext(name) or None
             token['kind'] = typekind
             # Decide by kind of data
             if typekind == 'select':
@@ -2588,24 +2634,26 @@ class GenList(GenBase, ListView):
         Get a json parameter and rebuild the context back to a dictionary (probably kwargs)
         '''
 
+        # Make sure we are getting dicts
+        if type(jsonquery) != dict:
+            raise IOError("set_json_context() method can be called only with dictionaries, you gave me a '{}'".format(type(jsonquery)))
+
         # Set we will answer json to this request
         self.json = True
-
-        # Open json string
-        v = json.loads(jsonquery)
 
         # Transfer keys
         newget = {}
         for key in ['search', 'search_filter_button', 'page', 'pages_to_bring', 'rowsperpage', 'filters', 'year', 'month', 'day', 'hour', 'minute', 'second']:
-            if key in v:
-                newget[key] = v[key]
+            if key in jsonquery:
+                newget[key] = jsonquery[key]
 
         # Add transformed ordering
-        if ('ordering' in v) and (v['ordering']):
+        json_ordering = jsonquery.get('ordering', None)
+        if json_ordering:
             # Convert to list
             ordering = []
-            for key in v['ordering']:
-                ordering.append({key: v['ordering'][key]})
+            for key in json_ordering:
+                ordering.append({key: jsonquery['ordering'][key]})
 
             # Order the result from ordering
             # ordering = sorted(ordering, key=lambda x: abs(x.values()[0]))
@@ -2625,18 +2673,10 @@ class GenList(GenBase, ListView):
                     newget['ordering'].append({key: value})
 
         # Get listid
-        if 'listid' in v:
-            listid = v['listid']
-        else:
-            listid = None
-        newget['listid'] = listid
+        newget['listid'] = jsonquery.get("listid", None)
 
         # Get elementid
-        if 'elementid' in v:
-            elementid = v['elementid']
-        else:
-            elementid = None
-        newget['elementid'] = elementid
+        newget['elementid'] = jsonquery.get("elementid", None)
 
         # Return new get
         return newget
@@ -2920,6 +2960,7 @@ class GenListModal(GenList):
     get_template_names_key = 'listmodal'
     show_internal_name = False
     title = None
+    is_modal = True
 
     def get_context_data(self, **kwargs):
         context = super(GenListModal, self).get_context_data(**kwargs)
@@ -3319,6 +3360,7 @@ class GenCreateModal(GenCreate):
     get_template_names_key = 'addmodal'
     show_internal_name = False
     extends_base = "codenerix/form.html"
+    is_modal = True
 
 
 class GenUpdate(GenModify, GenBase, UpdateView):
@@ -3352,6 +3394,7 @@ class GenUpdate(GenModify, GenBase, UpdateView):
 class GenUpdateModal(GenUpdate):
     get_template_names_key = 'formmodal'
     show_internal_name = False
+    is_modal = True
 
 
 class GenDelete(GenModify, GenBase, DeleteView):
@@ -3625,6 +3668,9 @@ class GenDetail(GenBase, DetailView):
         context = super(GenDetail, self).get_context_data(**kwargs)
         context['object_detail'] = self.get_filled_structure()
 
+        # Get if this is a modal window
+        self.extra_context['is_modal_window'] = self.is_modal
+
         # Get tabs_autorender information
         self.extra_context['tabs_autorender'] = self.get_tabs_autorender()
 
@@ -3748,6 +3794,7 @@ class GenDetail(GenBase, DetailView):
 class GenDetailModal(GenDetail):
     get_template_names_key = 'detailsmodal'
     extends_base = "codenerix/details.html"
+    is_modal = True
 
 
 class GenForeignKey(GenBase, View):
@@ -3906,6 +3953,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         must_be_superuser = True
 
     class LogDetails(GenDetailModal, GenDetail):
+        is_modal = True
         model = Log
         linkedit = False
         linkdelete = False
