@@ -294,6 +294,9 @@ def cdnx_beauty(value, kind=None):
         elif type(value) is time.time:
             fmt = formats.get_format('TIME_INPUT_FORMATS', lang=get_language())[0]
             value = time.time.strftime(value, fmt)
+        elif type(value) is float:
+            if float(int(value)) == value:
+                value = int(value)
 
     return value
 
