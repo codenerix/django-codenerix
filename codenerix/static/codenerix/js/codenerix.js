@@ -1620,26 +1620,47 @@ var codenerix_directive_reallyclick = ['codenerixReallyClick' , ['$uibModal', fu
         scope:{
           codenerixReallyClick:"&",
           codenerixReallyActive:"&?",
+          codenerixReallyOk:"&?",
+          codenerixReallyCancel:"&?",
           item:"="
         },
         link: function(scope, element, attrs) {
           element.bind('click', function() {
             // Get attributes
             var message = attrs.codenerixReallyMessage || "Are you sure ?";
+            var size = attrs.codenerixReallySize || "md";
             if (typeof(scope.codenerixReallyActive) == "undefined") {
                 var active = true;
             } else {
                 var active = scope.codenerixReallyActive();
             }
+            if (typeof(scope.codenerixReallyOk) == "undefined") {
+                var ok = true;
+            } else {
+                var ok = scope.codenerixReallyOk();
+            }
+            if (typeof(scope.codenerixReallyCancel) == "undefined") {
+                var cancel = true;
+            } else {
+                var cancel = scope.codenerixReallyCancel();
+            }
 
             // If the directive is active
             if (active) {
                 var modalHtml = '<div class="modal-body">' + message + '</div>';
-                modalHtml += '<div class="modal-footer"><button class="btn btn-primary" ng-click="ok()">OK</button><button class="btn btn-danger" ng-click="cancel()">Cancel</button></div>';
+                modalHtml += '<div class="modal-footer">';
+                if (ok) {
+                    modalHtml += '<button class="btn btn-primary" ng-click="ok()">OK</button>';
+                }
+                if (cancel) {
+                    modalHtml += '<button class="btn btn-danger" ng-click="cancel()">Cancel</button>'
+                }
+                modalHtml += '</div>';
 
                 var uibModalInstance = $uibModal.open({
                   template: modalHtml,
-                  controller: ModalInstanceCtrl
+                  controller: ModalInstanceCtrl,
+                  size: size,
                 });
 
                 uibModalInstance.result.then(function() {
