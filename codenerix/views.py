@@ -3799,7 +3799,7 @@ class GenDetailModal(GenDetail):
 
 class GenForeignKey(GenBase, View):
     '''
-    Every class tha inherit from GenForeignKey must implement 2 attributes and 1 method:
+    Every class tha inherit from GenForeignKey must implement 2 attributes and it should impelement 1 optional method:
     === ATTRIBUTES ===
     - model = model to use for get_queryset()
     - label = string with "format" like: "{name}" or "{company__name}", the system will render it itself
@@ -3935,6 +3935,9 @@ class GenForeignKey(GenBase, View):
 
         # Send it
         return HttpResponse(json_answer, content_type='application/json')
+
+    def get_foreign(self, queryset, search, filter):
+        return queryset.all()
 
 
 # === FORMS ===
