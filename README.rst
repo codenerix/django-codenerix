@@ -4,9 +4,9 @@ django-codenerix
 
 Open source enterprise business management system built on top of Django + AngularJS + Bootstrap. Ready for fast development of any CMS, ERP, Business Management Software, you can discover more in `CODENERIX.com <http://www.codenerix.com/>`_.
 
-.. image:: http://www.centrologic.com/wp-content/uploads/2017/01/logo-codenerix.png
+.. image:: http://www.codenerix.com/wp-content/uploads/2018/05/codenerix.png
     :target: http://www.codenerix.com
-    :alt: Try our demo with Centrologic Cloud
+    :alt: Try our demo with Codenerix Cloud
 
 ********
 Features
@@ -70,7 +70,7 @@ Demo
 
 You can have a look to our `demo online <http://demo.codenerix.com>`_.
 
-You can find some working examples in GITHUB at `django-codenerix-examples <https://github.com/centrologic/django-codenerix-examples>`_ project.
+You can find some working examples in GITHUB at `django-codenerix-examples <https://github.com/codenerix/django-codenerix-examples>`_ project.
 
 
 **********
@@ -83,9 +83,9 @@ Quickstart
 
     apt-get install git python-pip python3-pip zlib1g-dev libjpeg-dev python-dev python3-dev
 
-3. Clone the `CODENERIX Examples <https://github.com/centrologic/django-codenerix-examples>`_ project::
+3. Clone the `CODENERIX Examples <https://github.com/codenerix/django-codenerix-examples>`_ project::
 
-    git clone https://github.com/centrologic/django-codenerix-examples
+    git clone https://github.com/codenerix/django-codenerix-examples
 
 4. Go to the desired folder (we will go to **agenda**)::
 
@@ -112,20 +112,8 @@ you find any mistake or you have doubts about the explanations.
 
 You can get access to online documentation at `CODENERIX Documentation <http://doc.codenerix.com>`_.
 
-You can find all documentation in GITHUB at `django-codenerix-documentation <https://github.com/centrologic/django-codenerix-documentation>`_ project.
+You can find all documentation in GITHUB at `django-codenerix-documentation <https://github.com/codenerix/django-codenerix-documentation>`_ project.
 
-
-******************
-Commercial support
-******************
-
-This project is backed by `Centrologic <http://www.centrologic.com/>`_. You can discover more in `CODENERIX.com <http://www.codenerix.com/>`_.
-If you need help implementing or hosting django-codenerix, please contact us:
-http://www.centrologic.com/contacto/
-
-.. image:: http://www.centrologic.com/wp-content/uploads/2015/09/logo-centrologic.png
-    :target: http://www.centrologic.com
-    :alt: Centrologic is supported mainly by Centrologic Computational Logistic Center
 
 ***
 FAQ
@@ -162,6 +150,9 @@ FAQ
 *******
 Credits
 *******
+
+This project has been possible thanks to `Centrologic <http://www.centrologic.com/>`_.
+
 We are thankful to:
 
 =================================== =================== =====================================================================================

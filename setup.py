@@ -33,7 +33,7 @@ setup(
     license='Apache License Version 2.0',
     description='Codenerix it is a framework that goes on top of Django so it makes easier development and building of ERPs.',
     long_description=README,
-    url='https://github.com/centrologic/django-codenerix',
+    url='https://github.com/codenerix/django-codenerix',
     author=', '.join(codenerix.__authors__),
     keywords=['django', 'codenerix', 'management','erp','crm'],
     platforms=['OS Independent'],
