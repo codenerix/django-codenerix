@@ -894,7 +894,7 @@ class GenReCaptchaInput(ReCaptcha):
         # Decide name of the field in the POST
         if 'fieldname' in kwargs:
             fieldname = kwargs.pop('fieldname')
-        else:
+        if not fieldname:
             fieldname = 'g-recaptcha-response'
         self.recaptcha_response_name = fieldname
         self.recaptcha_challenge_name = fieldname
