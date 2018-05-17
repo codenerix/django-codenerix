@@ -2260,7 +2260,11 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
         }
     };
 
-    
+    $scope.gotourl = function (url) {
+        // Jump to new location
+        window.location.href = url;
+    };
+
     $scope.detail = function (pk) {
         if ($scope.data.meta.linkedit) {
             if (!sublist) {
@@ -2730,6 +2734,11 @@ function multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $stat
         }
     };
 
+    $scope.gotourl = function (url) {
+        // Jump to new location
+        window.location.href = url;
+    };
+
     var fields = [];
     $scope.preUpdateField = function(field_o, field_d) {
         fields[field_o] = $scope[field_o];
@@ -2804,6 +2813,11 @@ function multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $
         alert(msg);
     };
 
+    $scope.gotourl = function (url) {
+        // Jump to new location
+        window.location.href = url;
+    };
+
     // Delete this element
     $scope.delete = function(msg) {
         if (confirm(msg)) {
@@ -2876,6 +2890,11 @@ function multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $sta
         // Go to list
         $state.go('list'+listid);
         // $state.go('details'+listid,{pk:$stateParams.pk});
+    };
+
+    $scope.gotourl = function (url) {
+        // Jump to new location
+        window.location.href = url;
     };
     
     // Go to details
@@ -3182,6 +3201,11 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
     
     $scope.addrecord = function(url){
         $scope.add(url);
+    };
+
+    $scope.gotourl = function (url) {
+        // Jump to new location
+        window.location.href = url;
     };
 
     $scope.removerecord = function(id, msg, args){
