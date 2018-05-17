@@ -3222,7 +3222,7 @@ class GenModify(object):
                 # Append to the general list of fields
                 for group in formobj.get_groups():
                     for mainfield in group.get("fields", []):
-                        for field in [mainfield]+mainfield.get("fields", []):
+                        for field in [mainfield] + mainfield.get("fields", []):
                             # Get the input
                             inp = field.get("input")
 
@@ -3244,6 +3244,9 @@ class GenModify(object):
                             elif type(inpvalue) == datetime.time:
                                 # Convert datetime to string
                                 inpvalue = inpvalue.strftime(formats.get_format('TIME_INPUT_FORMATS', lang=self.language)[0])
+                            elif isinstance(inpvalue, Decimal):
+                                # Convert Decimal to float
+                                inpvalue = float(inpvalue)
 
                             if not json_details:
                                 fields[inp.html_name] = inpvalue
