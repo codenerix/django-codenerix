@@ -1382,7 +1382,7 @@ class GenList(GenBase, ListView):
             # Decode json
             try:
                 jsonquery = json.loads(jsonquerytxt)
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 raise IOError("json argument in your GET/POST parameters is not a valid JSON string")
 
             # Set json context
@@ -2283,18 +2283,18 @@ class GenList(GenBase, ListView):
                 if page_number <= 1:
                     context['page_before'] = None
                 else:
-                    context['page_before'] = page_number-1
+                    context['page_before'] = page_number - 1
                 # Page after
                 if page_number >= total_pages:
                     context['page_after'] = None
                 else:
-                    context['page_after'] = page_number+1
+                    context['page_after'] = page_number + 1
                 # Starting on register number
-                context['start_register'] = (page_number-1)*total_rows_per_page+1
+                context['start_register'] = (page_number - 1) * total_rows_per_page + 1
                 context['showing_registers'] = total_rows_per_page
 
             # Calculate end
-            context['end_register'] = min(context['start_register']+context['showing_registers']-1, total_registers)
+            context['end_register'] = min(context['start_register'] + context['showing_registers'] - 1, total_registers)
 
             # Add pagination
             regs = []
@@ -2323,9 +2323,9 @@ class GenList(GenBase, ListView):
             if total_registers:
                 context['pages'] = pages(paginator, page_number)
                 try:
-                    range_fill = xrange(pages_to_bring-1)
+                    range_fill = xrange(pages_to_bring - 1)
                 except NameError:
-                    range_fill = range(pages_to_bring-1)
+                    range_fill = range(pages_to_bring - 1)
                 for p in range_fill:
                     page_number += 1
                     context['pages'] += pages(paginator, page_number)
@@ -2535,7 +2535,7 @@ class GenList(GenBase, ListView):
                 token['choicedynamic'] = argument
                 token['choosen'] = value
 
-                func = resolve(argument[1]+'*').func
+                func = resolve(argument[1] + '*').func
                 clss = get_class(func)
                 token['choices'] = clss().get_choices(value)
 
@@ -3428,7 +3428,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
             json_answer = json.dumps({
                 'error': True,
                 'errortxt': _('Method not allowed, use POST to delete or DELETE on the detail url'),
-                })
+            })
             return HttpResponse(json_answer, content_type='application/json')
 
     def delete(self, *args, **kwargs):
