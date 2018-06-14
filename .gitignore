@@ -89,3 +89,4 @@ ENV/
 # CODENERIX files
 /django_codenerix*.egg-info
 dist
+.session.vim
