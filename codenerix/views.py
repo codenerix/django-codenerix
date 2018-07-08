@@ -591,7 +591,10 @@ class GenBase(object):
 
         model_name = getattr(self.model, "_meta", None) and getattr(self.model._meta, "model_name")
         if not model_name:
-            raise IOError("Couldn't find a model_name inside your model, did you provided a model or some other class? - Type of your object is '{}'".format(self.model.__module__))
+            if hasattr(self, 'model') and self.model is not None:
+                raise IOError("Couldn't find a model_name inside your model, did you provided a model or some other class? - Type of your object is '{}'".format(self.model.__module__))
+            else:
+                raise IOError("Did you forget to set model in your view?")
 
         (authorized, reason) = gen_auth_permission(
             self.request.user,
