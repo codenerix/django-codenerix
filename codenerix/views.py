@@ -46,6 +46,7 @@ from django.views.generic import ListView
 from django.forms.models import model_to_dict
 from django.utils.translation import ugettext as _  # Before it was , ugettext_lazy as __
 from django.utils.encoding import smart_text
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, get_object_or_404, render
@@ -3766,7 +3767,13 @@ class GenDetail(GenBase, DetailView):
                 meta["cannot_update"] = None
 
         # Update context
-        meta['extra_context'] = self.extra_context
+        meta['extra_context'] = {}
+        model_user = get_user_model()
+        for key in self.extra_context:
+            value = self.extra_context[key]
+            if isinstance(value, model_user):
+                value = "{}".format(value)
+            meta['extra_context'][key] = value
 
         ncontext = {
             'meta': meta,
