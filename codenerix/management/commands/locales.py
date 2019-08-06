@@ -22,15 +22,16 @@ import os
 
 try:
     from subprocess import getstatusoutput
-    pythoncmd="python3"
+    pythoncmd = "python3"
 except:
     from commands import getstatusoutput
-    pythoncmd="python"
+    pythoncmd = "python"
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
 from codenerix.lib.debugger import Debugger
+
 
 class Command(BaseCommand, Debugger):
 
@@ -40,36 +41,36 @@ class Command(BaseCommand, Debugger):
     def add_arguments(self, parser):
         # Set witch mode to use
         parser.add_argument('--mode',
-            dest='mode',
-            default="suexec",
-            help="Mode used in the environment 'suexec', 'apache' or 'wwwdata'") 
+                            dest='mode',
+                            default="suexec",
+                            help="Mode used in the environment 'suexec', 'apache' or 'wwwdata'") 
         
         # Named (optional) arguments
         parser.add_argument('--noauto',
-            action='store_true',
-            dest='noauto',
-            default=False,
-            help='Tells the command not to find automatic solution for problems')
+                            action='store_true',
+                            dest='noauto',
+                            default=False,
+                            help='Tells the command not to find automatic solution for problems')
         
         # Named (optional) arguments
         parser.add_argument('--noguess',
-            action='store_true',
-            dest='noguess',
-            default=False,
-            help='Disable guessing user environment')
-        
+                            action='store_true',
+                            dest='noguess',
+                            default=False,
+                            help='Disable guessing user environment')
+
         # Named (optional) arguments
         parser.add_argument('--clean',
-            action='store_true',
-            dest='clean',
-            default=False,
-            help='Do a full clean by deleting everything before building translations')
-    
+                            action='store_true',
+                            dest='clean',
+                            default=False,
+                            help='Do a full clean by deleting everything before building translations')
+
     def handle(self, *args, **options):
         # Check arguments
-        mode=options['mode']
-        if mode not in ['wwwdata','apache','suexec']:
-            self.print_help('','')
+        mode = options['mode']
+        if mode not in ['wwwdata', 'apache', 'suexec']:
+            self.print_help('', '')
             raise CommandError("Allowed modes are suexec, apache or wwwdata ('apache' and 'wwwdata' option will force permissions to apache or www-data user, suexec won't touch permissions)")
         
         # Autoconfigure Debugger
@@ -77,61 +78,61 @@ class Command(BaseCommand, Debugger):
         self.set_debug()
         
         # Get environment
-        appname=settings.ROOT_URLCONF.split(".")[0]
-        basedir=settings.BASE_DIR
-        appdir = os.path.abspath("{}/{}".format(basedir,appname))
-        noauto=options['noauto']
-        
+        appname = settings.ROOT_URLCONF.split(".")[0]
+        basedir = settings.BASE_DIR
+        appdir = os.path.abspath("{}/{}".format(basedir, appname))
+        noauto = options['noauto']
+
         # Check user selection
         if not options['noguess']:
             cmd = "find {} -name 'locale' -exec ls -lR {{}} \; | grep www-data".format(appdir)
             status, output = getstatusoutput(cmd)
             if status:
-                guess="suexec"
+                guess = "suexec"
             else:
-                guess="wwwdata"
-            if guess!=mode:
-                self.print_help('','')
-                raise CommandError("You have selected mode '{}' but I believe you are using '{}', if sure use --noguess".format(mode,guess))
+                guess = "wwwdata"
+            if guess != mode:
+                self.print_help('', '')
+                raise CommandError("You have selected mode '{}' but I believe you are using '{}', if sure use --noguess".format(mode, guess))
         
         # Show header
-        self.debug("Creating locales for {}".format(appname),color='blue')
+        self.debug("Creating locales for {}".format(appname), color='blue')
         if noauto:
-            self.debug("Autoconfig mode is OFF",color='yellow')
+            self.debug("Autoconfig mode is OFF", color='yellow')
         
         # Get list of apps
-        apps=[]
-        length=len(appname)
+        apps = []
+        length = len(appname)
         for app in settings.INSTALLED_APPS:
-            if app[0:length]==appname:
-                apps.append(app[length+1:])
+            if app[0:length] == appname:
+                apps.append(app[length + 1:])
         
         # Check for locale folders
-        ERROR=False
-        for app in ['']+apps:
-            testpath = os.path.abspath("{}/{}/locale".format(appdir,app).replace("//","/"))
+        ERROR = False
+        for app in [''] + apps:
+            testpath = os.path.abspath("{}/{}/locale".format(appdir, app).replace("//", "/"))
             if not os.path.exists(testpath):
                 if noauto:
-                    ERROR=True
-                    self.debug("'locale' folder missing at {}/".format(testpath),color='yellow')
+                    ERROR = True
+                    self.debug("'locale' folder missing at {}/".format(testpath), color='yellow')
                 else:
-                    self.debug("'locale' folder missing, creating {}/".format(testpath),color='purple')
+                    self.debug("'locale' folder missing, creating {}/".format(testpath), color='purple')
                     os.mkdir(testpath)
         
         if ERROR:
             raise CommandError("Some error has happened, can not keep going! (avoid using --noauto to let CODENERIX find a solution)")
         
         # Check execution mode
-        sudo=''
-        if mode=='apache' or mode=='wwwdata':
+        sudo = ''
+        if mode == 'apache' or mode == 'wwwdata':
             status, output = getstatusoutput("whoami")
             if status:
                 # Error in command
                 self.error("Error while executing 'whoami' command")
                 raise CommandError(output)
-            elif output=='www-data':
+            elif output == 'www-data':
                 # Detected we are already www-data user, so keep going
-                self.debug("Detected we are 'www-data' user",color='purple')
+                self.debug("Detected we are 'www-data' user", color='purple')
             else:
                 # No permissions try to become root using sudo
                 status, output = getstatusoutput("sudo whoami")
@@ -139,10 +140,10 @@ class Command(BaseCommand, Debugger):
                     # Error in command
                     self.error("Error while executing 'sudo whoami' command")
                     raise CommandError(output)
-                elif output=='root':
+                elif output == 'root':
                     # Detected sudo is working and we can become root
-                    self.debug("Detected we can become 'root' user",color='purple')
-                    sudo='sudo '
+                    self.debug("Detected we can become 'root' user", color='purple')
+                    sudo = 'sudo '
                 else:
                     # No permissions
                     raise CommandError("You requested 'apache' or 'wwwdata' execution mode but you are not www-data and we can not become root")
@@ -161,43 +162,46 @@ class Command(BaseCommand, Debugger):
                 self.debug("", header=False)
             
             # Remove all locale folders
-            if key=='y':
-                self.debug("Removing locale folders...",color="red")
-                for app in ['']+apps:
-                    testpath = os.path.abspath("{}/{}/locale".format(appdir,app).replace("//","/"))
+            if key == 'y':
+                self.debug("Removing locale folders...", color="red")
+                for app in [''] + apps:
+                    testpath = os.path.abspath("{}/{}/locale".format(appdir, app).replace("//", "/"))
                     if os.path.exists(testpath):
-                        self.debug("    > Removing {}".format(testpath),color="red")
-                        cmd = "{}rm -R {}/*".format(sudo,testpath)
+                        self.debug("    > Removing {}".format(testpath), color="red")
+                        cmd = "{}rm -R {}/*".format(sudo, testpath)
                         status, output = getstatusoutput(cmd)
-                        if status: raise CommandError(output)
+                        if status:
+                            raise CommandError(output)
             else:
                 raise CommandError("You requested to clean all 'locale' folders but you answered NO to the previous question, can not keep going!")
         
-        
         # Ready to go
-        for (code,name) in settings.LANGUAGES:
-            self.debug("Processing translations for {}...".format(name), color='cyan')
-            cmd="{}{}/manage.py makemessages -v0 --symlinks --ignore env -l {}".format(sudo,basedir,code) # --exclude is not working in some computers
-            status, output = getstatusoutput(cmd)
-            if status: raise CommandError(output)
-            
-            cmd="{}{}/manage.py makemessages -v0 --symlinks --ignore env -d djangojs -l {}".format(sudo,basedir,code) # --exclude is not working in some computers
-            status, output = getstatusoutput(cmd)
-            if status: raise CommandError(output)
-            
-        
+        if not options['compile']:
+            for (code, name) in settings.LANGUAGES:
+                self.debug("Processing translations for {}...".format(name), color='cyan')
+                cmd = "{}{}/manage.py makemessages -v0 --symlinks --ignore env -l {}".format(sudo, basedir, code)  # --exclude is not working in some computers
+                status, output = getstatusoutput(cmd)
+                if status:
+                    raise CommandError(output)
+                
+                cmd = "{}{}/manage.py makemessages -v0 --symlinks --ignore env -d djangojs -l {}".format(sudo, basedir, code)  # --exclude is not working in some computers
+                status, output = getstatusoutput(cmd)
+                if status:
+                    raise CommandError(output)
+
         # Set permissions for locale folders
         if sudo:
-            self.debug("Setting permissions...",color='cyan')
-            if mode=='apache':
-                user='apache'
-            elif mode=='wwwdata':
-                user='www-data'
+            self.debug("Setting permissions...", color='cyan')
+            if mode == 'apache':
+                user = 'apache'
+            elif mode == 'wwwdata':
+                user = 'www-data'
             else:
                 raise CommandError("Wrong mode for sudo '{}'".format(mode))
-            for app in ['']+apps:
-                testpath = os.path.abspath("{}/{}/locale".format(appdir,app).replace("//","/"))
-                cmd="sudo chown {}.{} {}/ -R".format(user,user,testpath)
+            for app in [''] + apps:
+                testpath = os.path.abspath("{}/{}/locale".format(appdir, app).replace("//", "/"))
+                cmd = "sudo chown {}.{} {}/ -R".format(user, user, testpath)
                 status, output = getstatusoutput(cmd)
-                if status: raise CommandError(output)
+                if status:
+                    raise CommandError(output)
 

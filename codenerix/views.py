@@ -46,6 +46,7 @@ from django.views.generic import ListView
 from django.forms.models import model_to_dict
 from django.utils.translation import ugettext as _  # Before it was , ugettext_lazy as __
 from django.utils.encoding import smart_text
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, get_object_or_404, render
@@ -591,7 +592,10 @@ class GenBase(object):
 
         model_name = getattr(self.model, "_meta", None) and getattr(self.model._meta, "model_name")
         if not model_name:
-            raise IOError("Couldn't find a model_name inside your model, did you provided a model or some other class? - Type of your object is '{}'".format(self.model.__module__))
+            if hasattr(self, 'model') and self.model is not None:
+                raise IOError("Couldn't find a model_name inside your model, did you provided a model or some other class? - Type of your object is '{}'".format(self.model.__module__))
+            else:
+                raise IOError("Did you forget to set model in your view?")
 
         (authorized, reason) = gen_auth_permission(
             self.request.user,
@@ -1382,7 +1386,7 @@ class GenList(GenBase, ListView):
             # Decode json
             try:
                 jsonquery = json.loads(jsonquerytxt)
-            except json.JSONDecodeError as e:
+            except json.JSONDecodeError:
                 raise IOError("json argument in your GET/POST parameters is not a valid JSON string")
 
             # Set json context
@@ -2283,18 +2287,18 @@ class GenList(GenBase, ListView):
                 if page_number <= 1:
                     context['page_before'] = None
                 else:
-                    context['page_before'] = page_number-1
+                    context['page_before'] = page_number - 1
                 # Page after
                 if page_number >= total_pages:
                     context['page_after'] = None
                 else:
-                    context['page_after'] = page_number+1
+                    context['page_after'] = page_number + 1
                 # Starting on register number
-                context['start_register'] = (page_number-1)*total_rows_per_page+1
+                context['start_register'] = (page_number - 1) * total_rows_per_page + 1
                 context['showing_registers'] = total_rows_per_page
 
             # Calculate end
-            context['end_register'] = min(context['start_register']+context['showing_registers']-1, total_registers)
+            context['end_register'] = min(context['start_register'] + context['showing_registers'] - 1, total_registers)
 
             # Add pagination
             regs = []
@@ -2323,9 +2327,9 @@ class GenList(GenBase, ListView):
             if total_registers:
                 context['pages'] = pages(paginator, page_number)
                 try:
-                    range_fill = xrange(pages_to_bring-1)
+                    range_fill = xrange(pages_to_bring - 1)
                 except NameError:
-                    range_fill = range(pages_to_bring-1)
+                    range_fill = range(pages_to_bring - 1)
                 for p in range_fill:
                     page_number += 1
                     context['pages'] += pages(paginator, page_number)
@@ -2535,7 +2539,7 @@ class GenList(GenBase, ListView):
                 token['choicedynamic'] = argument
                 token['choosen'] = value
 
-                func = resolve(argument[1]+'*').func
+                func = resolve(argument[1] + '*').func
                 clss = get_class(func)
                 token['choices'] = clss().get_choices(value)
 
@@ -3428,7 +3432,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
             json_answer = json.dumps({
                 'error': True,
                 'errortxt': _('Method not allowed, use POST to delete or DELETE on the detail url'),
-                })
+            })
             return HttpResponse(json_answer, content_type='application/json')
 
     def delete(self, *args, **kwargs):
@@ -3763,7 +3767,13 @@ class GenDetail(GenBase, DetailView):
                 meta["cannot_update"] = None
 
         # Update context
-        meta['extra_context'] = self.extra_context
+        meta['extra_context'] = {}
+        model_user = get_user_model()
+        for key in self.extra_context:
+            value = self.extra_context[key]
+            if isinstance(value, model_user):
+                value = "{}".format(value)
+            meta['extra_context'][key] = value
 
         ncontext = {
             'meta': meta,

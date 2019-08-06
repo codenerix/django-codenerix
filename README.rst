@@ -164,7 +164,7 @@ Khanh TO                            ngReallyClick       We added codenerixReally
 Francisco Torrejon                  Core                He was one of the first developers and part of the original project until 2015
 =================================== =================== =====================================================================================
 
-Several technologies have been used to build `CODENERIX <http://www.codenerix.com>`_:
+Several technologies have been used to build `CODENERIX`_:
 
 =================================== =================== =========================== =========================================================
 Project name                        License             Owner                       Link to project
