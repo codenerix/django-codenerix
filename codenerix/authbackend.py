@@ -207,108 +207,116 @@ class TokenAuth(ModelBackend):
         # Get our arguments
         username = kwargs.get("username", None)
         token = kwargs.get("token", None)
-        string = kwargs.get("string", None)
+        string = kwargs.get("string", "")
 
-        # Try to find the user
-        try:
-            # Get the requested username
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            user = None
+        if username is not None and token is not None:
 
-        # If we got an user
-        if user:
-            # Get config
-            config = {
-                'key': None,
-                'master_unsigned': False,
-                'user_unsigned': False,
-                'otp_unsigned': False,
-                'master_signed': False,
-                'user_signed': False,
-                'otp_signed': False,
-            }
-            config_settings = getattr(settings, 'AUTHENTICATION_TOKEN', {})
-            for (key, value) in config_settings.items():
-                config[key] = value
+            # Try to find the user
+            try:
+                # Get the requested username
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                user = None
 
-            # Get keys
-            if config['key'] or config['master_unsigned'] or config['master_signed']:
-                if config['key'] and (config['master_unsigned'] or config['master_signed']):
-                    master = config['key']
-                else:
-                    if getattr(settings, "DEBUG_AUTH", False):
-                        raise IOError("To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token")
+            # If we got an user
+            if user:
+
+                # Get config
+                config = {
+                    'key': None,
+                    'master_unsigned': False,
+                    'user_unsigned': False,
+                    'otp_unsigned': False,
+                    'master_signed': False,
+                    'user_signed': False,
+                    'otp_signed': False,
+                }
+                config_settings = getattr(settings, 'AUTHENTICATION_TOKEN', {})
+                for (key, value) in config_settings.items():
+                    config[key] = value
+
+                # Get keys
+                if config['key'] or config['master_unsigned'] or config['master_signed']:
+                    if config['key'] and (config['master_unsigned'] or config['master_signed']):
+                        master = config['key']
                     else:
-                        master = None
-            else:
-                master = None
-
-            if config['user_unsigned'] or config['user_signed'] or config['otp_unsigned'] or config['otp_signed']:
-                if user.first_name:
-                    user_key = user.first_name
-
-                    if config['otp_unsigned'] or config['otp_signed']:
-                        if not pyotp:
-                            raise IOError("PYOTP library not found, you can not use OTP signed/unsigned configuration")
+                        if getattr(settings, "DEBUG_AUTH", False):
+                            raise IOError("To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token")
                         else:
-                            try:
-                                otp = str(pyotp.TOTP(base64.b32encode(user_key)).now())
-                            except TypeError:
-                                if getattr(settings, "DEBUG_AUTH", False):
-                                    raise IOError("To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='")
-                                else:
-                                    otp = None
-                    else:
-                        otp = None
+                            master = None
                 else:
-                    if getattr(settings, "DEBUG_AUTH", False):
-                        raise IOError("To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)")
+                    master = None
+
+                if config['user_unsigned'] or config['user_signed'] or config['otp_unsigned'] or config['otp_signed']:
+                    if user.first_name:
+                        user_key = user.first_name
+
+                        if config['otp_unsigned'] or config['otp_signed']:
+                            if not pyotp:
+                                raise IOError("PYOTP library not found, you can not use OTP signed/unsigned configuration")
+                            else:
+                                try:
+                                    otp = str(pyotp.TOTP(base64.b32encode(user_key)).now())
+                                except TypeError:
+                                    if getattr(settings, "DEBUG_AUTH", False):
+                                        raise IOError("To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='")
+                                    else:
+                                        otp = None
+                        else:
+                            otp = None
                     else:
-                        user_key = None
-                        otp = None
+                        if getattr(settings, "DEBUG_AUTH", False):
+                            raise IOError("To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)")
+                        else:
+                            user_key = None
+                            otp = None
+                else:
+                    user_key = None
+                    otp = None
+
+                # Unsigned string
+                if config['master_signed'] or config['user_signed'] or config['otp_signed']:
+                    tosign = user.username + string
+
+                # Build the list of valid keys
+                keys = []
+                if master:
+                    if config['master_unsigned']:                   # MASTER KEY
+                        # keys.append("master_unsigned")
+                        keys.append(master)
+                    if config['master_signed']:                     # MASTER KEY SIGNED
+                        # keys.append("master_signed")
+                        keys.append(hashlib.sha1(tosign.encode() + master.encode()).hexdigest())
+                if user_key:
+                    if config['user_unsigned']:                     # USER KEY
+                        # keys.append("user_unsigned")
+                        keys.append(user_key)
+                    if config['user_signed']:                       # USER KEY SIGNED
+                        # keys.append("user_signed")
+                        keys.append(hashlib.sha1(tosign.encode() + user_key.encode()).hexdigest())
+                if otp:
+                    if config['otp_unsigned']:                      # OTP KEY
+                        # keys.append("otp_unsigned")
+                        keys.append(otp)
+                    if config['otp_signed']:                        # OTP KEY SIGNED
+                        # keys.append("otp_signed")
+                        keys.append(hashlib.sha1(tosign.encode() + otp.encode()).hexdigest())
+
+                # Key is valid
+                if token in keys:
+                    answer = user
+                else:
+                    # Not authenticated
+                    answer = None
+
             else:
-                user_key = None
-                otp = None
 
-            # Unsigned string
-            if config['master_signed'] or config['user_signed'] or config['otp_signed']:
-                tosign = user.username + string
-
-            # Build the list of valid keys
-            keys = []
-            if master:
-                if config['master_unsigned']:                   # MASTER KEY
-                    # keys.append("master_unsigned")
-                    keys.append(master)
-                if config['master_signed']:                     # MASTER KEY SIGNED
-                    # keys.append("master_signed")
-                    keys.append(hashlib.sha1(tosign.encode() + master.encode()).hexdigest())
-            if user_key:
-                if config['user_unsigned']:                     # USER KEY
-                    # keys.append("user_unsigned")
-                    keys.append(user_key)
-                if config['user_signed']:                       # USER KEY SIGNED
-                    # keys.append("user_signed")
-                    keys.append(hashlib.sha1(tosign.encode() + user_key.encode()).hexdigest())
-            if otp:
-                if config['otp_unsigned']:                      # OTP KEY
-                    # keys.append("otp_unsigned")
-                    keys.append(otp)
-                if config['otp_signed']:                        # OTP KEY SIGNED
-                    # keys.append("otp_signed")
-                    keys.append(hashlib.sha1(tosign.encode() + otp.encode()).hexdigest())
-
-            # Key is valid
-            if token in keys:
-                answer = user
-            else:
-                # Not authenticated
+                # Username not found, not accepting the authentication request
                 answer = None
 
         else:
 
-            # Username not found, not accepting the authentication request
+            # Missing data, can not authenticate with this information
             answer = None
 
         # Return answer
