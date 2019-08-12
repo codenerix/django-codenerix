@@ -21,19 +21,30 @@
 
 from django import VERSION
 
+import debug_toolbar
+
 DEBUG_TOOLBAR_DEFAULT_PANELS = (
-    'debug_toolbar.panels.version.VersionDebugPanel',
-    'debug_toolbar.panels.timer.TimerDebugPanel',
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
     'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeaderDebugPanel',
-    'debug_toolbar.panels.request_vars.RequestVarsDebugPanel',
-    'debug_toolbar.panels.template.TemplateDebugPanel',
-    'debug_toolbar.panels.sql.SQLDebugPanel',
-    'debug_toolbar.panels.signals.SignalDebugPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
 )
 DEBUG_TOOLBAR_DEFAULT_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
+    # Toolbar options
+    'RESULTS_CACHE_SIZE': 3,
+    'SHOW_COLLAPSED': True,
+    # Panel options
+    'SQL_WARNING_THRESHOLD': 100,   # milliseconds
 }
 
 
@@ -71,7 +82,7 @@ def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=F
 
 
 # Autourl
-def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI):
+def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI, DEBUG_TOOLBAR=False, DEBUG_PANEL=False):
     from django.conf.urls import include, url
 
     if ROSETTA:
@@ -88,6 +99,8 @@ def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI):
             URLPATTERNS += [path('admin/', admin.site.urls, )]
     if DEBUG and SPAGHETTI:
         URLPATTERNS += [url(r'^plate/', include('django_spaghetti.urls'))]
+    if DEBUG and DEBUG_TOOLBAR:
+        URLPATTERNS += [url(r'^__debug__/', include(debug_toolbar.urls))]
     return URLPATTERNS
 
 

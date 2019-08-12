@@ -299,18 +299,21 @@ class BaseForm(object):
 
                     # Get the Django Field object
                     found = None
+                    foundbool = False
                     for infield in list_fields:
                         if infield.__dict__[check_system] == field:
                             found = infield
+                            foundbool = True
                             break
 
-                    if found:
+                    if foundbool:
                         # Get attributes (required and original attributes)
                         wrequired = found.field.widget.is_required
                         wattrs = found.field.widget.attrs
                         # Fill base attributes
                         atr['name'] = found.html_name
                         atr['input'] = found
+                        atr['inputbool'] = foundbool
                         atr['focus'] = False
                         # Set focus
                         if focus_must is None:
@@ -407,6 +410,7 @@ class BaseForm(object):
                     # Fill base attributes
                     atr['name'] = infield.html_name
                     atr['input'] = infield
+                    atr['inputbool'] = True
                     atr['focus'] = False
                     # Set focus
                     if focus_must is None:
