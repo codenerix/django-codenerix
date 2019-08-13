@@ -359,7 +359,7 @@ class TokenAuthMiddleware(object):
         # If the user is authenticated and shouldn't be
         if token:
             username = request.GET.get("authuser", request.POST.get("authuser", None))
-            json = request.GET.get("json", request.POST.get("json", body))
+            json = request.GET.get("json", request.POST.get("json", body.decode()))
             # Authenticate user
             user = authenticate(request=None, username=username, token=token, string=json)
             if user:
