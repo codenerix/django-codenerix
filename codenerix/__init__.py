@@ -28,5 +28,5 @@ __requirements__ = {
     ],
     '3': [
         "html5lib",
-        ],
-    }
+    ],
+}
