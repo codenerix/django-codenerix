@@ -67,7 +67,7 @@ class StaticSelectMulti(forms.widgets.Select):
     def set_language(self, language):
         self.__language = language
 
-    def render(self, name, value, attrs=None, choices=()):
+    def render(self, name, value, attrs=None, choices=(), renderer=None):
         # Initialization
         # required=self.attrs.get('ng-required','false')
         vmodel = self.field_name
@@ -184,7 +184,7 @@ class StaticSelect(forms.widgets.Select):
             self.choices = targs.get('choices', '')
         return super(StaticSelect, self).__init__(*args, **kwargs)
 
-    def render(self, name, value, attrs=None, choices=()):
+    def render(self, name, value, attrs=None, choices=(), renderer=None):
         # Initialization
         required = self.attrs.get('ng-required', 'false')
         controller = self.attrs.get('ng-controller', None)
@@ -380,7 +380,7 @@ class DynamicSelectInputWidget(object):
 
 class DynamicSelect(DynamicSelectInputWidget, forms.widgets.Select):
 
-    def render(self, name, value, attrs=None, choices=()):
+    def render(self, name, value, attrs=None, choices=(), renderer=None):
         if not self.autofill_url:
             raise IOError("autofill_url not defined")
         # Initialization
@@ -478,7 +478,7 @@ class MultiDynamicSelect_old(DynamicSelect):
 
 class DynamicInput(DynamicSelectInputWidget, forms.widgets.Input):
 
-    def render(self, name, value, attrs=None, choices=()):
+    def render(self, name, value, attrs=None, choices=(), renderer=None):
 
         # Requet the field to render normally
         html = super(DynamicInput, self).render(name, value, attrs=attrs)
@@ -503,7 +503,7 @@ class DynamicInput(DynamicSelectInputWidget, forms.widgets.Input):
 
 
 class FileAngularInput(forms.widgets.FileInput):
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if not attrs:
             attrs = {}
         if value is not None:
@@ -570,7 +570,7 @@ class FileAngularInput(forms.widgets.FileInput):
 # class Date2TimeInput(forms.widgets.TextInput):
 class Date2TimeInput(forms.widgets.DateTimeInput):
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if not attrs:
             attrs = {}
 
@@ -635,7 +635,7 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
         # language = {{LANGUAGE_CODE|default:"en"}}
 
         if label:
-            html = '<label style="margin-right:10px" class="pull-right" for="id_date">'+_('Hour')+'</label>'
+            html = '<label style="margin-right:10px" class="pull-right" for="id_date">' + _('Hour') + '</label>'
         else:
             html = ''
         html += '<div class="row">'
@@ -646,7 +646,7 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
         tmp = []
         for x in attrs:
             y = attrs[x]
-            tmp.append(x+'="'+y+'"')
+            tmp.append(x + '="' + y + '"')
         attributes = ' '.join(tmp)
 
         html += '        <input type="text" name="{0}" id="id_{0}" value="{1}" {2} />'.format(name, value_date, attributes)
@@ -661,13 +661,13 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
             ngmodel[0] = "{}_time".format(ngmodel[0])
             ngmodel = "']".join(ngmodel)
         else:
-            ngmodel = attrs['ng-model']+'_time'
+            ngmodel = attrs['ng-model'] + '_time'
         # attrs['ng-model'] = attrs['ng-model']+'_time'
         attrs['ng-model'] = ngmodel
         tmp = []
         for x in attrs:
             y = attrs[x]
-            tmp.append(x+'="'+y+'"')
+            tmp.append(x + '="' + y + '"')
         attributes = ' '.join(tmp)
         html += '        <input type="text" name="{0}_time" id="id_{0}_time" value="{1}" maxlength="4" {2} />'.format(name, value_time, attributes)
         html += '</div>'
@@ -695,8 +695,8 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
         if name in data:
             date = data[name]
             ttime = '00:00'
-            if name+"_time" in data:
-                ttime = data[name+"_time"].strip()
+            if name + "_time" in data:
+                ttime = data[name + "_time"].strip()
 
                 if ttime.isnumeric():
                     if len(ttime) == 0:
@@ -722,9 +722,9 @@ class Date2TimeInput(forms.widgets.DateTimeInput):
 
 
 class WysiwygAngularRender(forms.widgets.HiddenInput):
-    def render_wysiwyg(self, ngmodel, extraif="", force_editors=False, attrs=None):
+    def render_wysiwyg(self, ngmodel, extraif="", force_editors=False, attrs=None, renderer=None):
         # Recompute ngmodel
-        if re.fullmatch("\w+",ngmodel):
+        if re.fullmatch("\w+", ngmodel):
             ngmodel = "$parent.{}".format(ngmodel)
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
@@ -779,7 +779,7 @@ class WysiwygAngularRender(forms.widgets.HiddenInput):
 
 
 class WysiwygAngularInput(WysiwygAngularRender):
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
         # Get model name
@@ -791,7 +791,7 @@ class WysiwygAngularInput(WysiwygAngularRender):
         # Render
         html = "<div ng-init='editor_{0}=\"quill\"'>".format(hashkey)
         html += u"<textarea name=\"{0}\" ng-model=\"{1}\" ng-show='false' ng-init=\"{3}\">{2}</textarea>".format(name, vmodel, value, init)
-        html += self.render_wysiwyg(ngmodel=vmodel, force_editors=True, attrs=attrs)
+        html += self.render_wysiwyg(ngmodel=vmodel, force_editors=True, attrs=attrs, renderer=renderer)
         html += "</div>"
 
         # Return result
@@ -799,7 +799,7 @@ class WysiwygAngularInput(WysiwygAngularRender):
 
 
 class MultiBlockWysiwygInput(WysiwygAngularRender):
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
 
@@ -820,7 +820,7 @@ class MultiBlockWysiwygInput(WysiwygAngularRender):
         html += '<label>{{key}}</label>'
 
         html += '<div ng-show="block.deleted"><p class="text-danger">{}</p></div>'.format(_("Field deleted in the template"))
-        html += self.render_wysiwyg(ngmodel='block.value', extraif="block.type==\"string\" && ", attrs=attrs)
+        html += self.render_wysiwyg(ngmodel='block.value', extraif="block.type==\"string\" && ", attrs=attrs, renderer=renderer)
         html += "</div>"
 
         # Return result
@@ -840,7 +840,7 @@ class VisualHTMLInput(forms.widgets.HiddenInput):
 
     visual = True
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         # Compute hashkey
         hashkey = attrs.get('id', str(random.randint(0, 1000)))
         vmodel = attrs.get('ng-model').replace("'", '"')
@@ -872,7 +872,7 @@ class VisualHTMLInput(forms.widgets.HiddenInput):
 
 
 class BootstrapWysiwygInput(forms.widgets.HiddenInput):
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         # Get model name
         # vmodel = attrs.get('ng-model').replace("'",'"')
 
@@ -908,10 +908,10 @@ class GenReCaptchaInput(ReCaptcha):
 #        self.js_attrs = attrs
 #        super(ReCaptcha, self).__init__(*args, **kwargs)
 
-#    def render(self, name, value, attrs=None):
+#    def render(self, name, value, attrs=None, renderer=None):
 #        return mark_safe(u'%s' % client.displayhtml(self.public_key, self.js_attrs, use_ssl=self.use_ssl))
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if self.legacy:
             html = super(GenReCaptchaInput, self).render(name, value, attrs)
         else:

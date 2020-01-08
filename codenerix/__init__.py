@@ -1,4 +1,4 @@
-__version__ = "1.1.31"
+__version__ = "1.1.33"
 
 __authors__ = [
     'Juan Miguel Taboada Godoy <juanmi@juanmitaboada.com>',
@@ -15,7 +15,7 @@ __requirements__ = {
         "openpyxl",
         "Pillow",
         "Unidecode",
-        "Django>=1.10.8",
+        "Django>=1.10.8,<2.2.9",
         "django-multi-email-field",
         "ldap3",
         "django-haystack>=2.6.1",

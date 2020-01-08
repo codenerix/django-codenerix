@@ -2,7 +2,7 @@
 from django import VERSION
 from django.forms.forms import DeclarativeFieldsMetaclass, BaseForm
 from django.forms.models import BaseModelForm
-from django.utils import six
+import six
 from .angular_base import BaseFieldsModifierMetaclass, NgFormBaseMixin
 from .angular_model import NgModelFormMixin
 if VERSION[:2] >= (1, 5):

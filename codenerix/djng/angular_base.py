@@ -11,13 +11,14 @@ except ImportError:  # Python 2
 
 from django.forms import forms
 from django.http import QueryDict
-from django.utils import six
+import six
 try:
     from importlib import import_module
 except ImportError:
     from django.utils.importlib import import_module
 from django.utils.html import format_html, format_html_join, escape
-from django.utils.encoding import python_2_unicode_compatible, force_text
+from django.utils.encoding import force_text
+from six import python_2_unicode_compatible
 from django.utils.safestring import mark_safe, SafeText, SafeData
 from django.core.exceptions import ValidationError
 

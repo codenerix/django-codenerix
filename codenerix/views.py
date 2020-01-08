@@ -44,13 +44,13 @@ from django.db import models
 from django.views.generic import View
 from django.views.generic import ListView
 from django.forms.models import model_to_dict
-from django.utils.translation import ugettext as _  # Before it was , ugettext_lazy as __
+from django.utils.translation import gettext, ugettext as _  # Before it was , ugettext_lazy as __
+from django.utils.text import format_lazy
 from django.utils.encoding import smart_text
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, get_object_or_404, render
-from django.utils.translation import string_concat, gettext
 from django.core.exceptions import ImproperlyConfigured, ValidationError, FieldError
 from django.core import serializers
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
@@ -1874,9 +1874,9 @@ class GenList(GenBase, ListView):
                 else:
                     month = '__'
                 if f['hour'][2]:
-                    rightnow = string_concat(grv(f, 'day'), "/", month, "/", grv(f, 'year'), " ", grv(f, 'hour'), ":", grv(f, 'minute'), ":", grv(f, 'second'))
+                    rightnow = format_lazy(grv(f, 'day'), "/", month, "/", grv(f, 'year'), " ", grv(f, 'hour'), ":", grv(f, 'minute'), ":", grv(f, 'second'))
                 else:
-                    rightnow = string_concat(grv(f, 'day'), "/", month, "/", grv(f, 'year'))
+                    rightnow = format_lazy(grv(f, 'day'), "/", month, "/", grv(f, 'year'))
             context['datefilter']['rightnow'] = rightnow
         else:
             context['datefilter'] = None
@@ -3070,7 +3070,10 @@ class GenModify(object):
                     attr['__obj__'] = api_obj
 
         # Set the pk in the success url
-        self.success_url.__dict__['_proxy____kw']['kwargs']['answer'] = urlsafe_base64_encode(str.encode(json.dumps(attr))).decode()
+        try:
+            self.success_url.__dict__['_proxy____kw']['kwargs']['answer'] = urlsafe_base64_encode(str.encode(json.dumps(attr))).decode()
+        except AttributeError:
+            self.success_url.__dict__['_proxy____kw']['kwargs']['answer'] = urlsafe_base64_encode(str.encode(json.dumps(attr)))
         # Let the system decide next step
         return super(GenModify, self).get_success_url()
 
