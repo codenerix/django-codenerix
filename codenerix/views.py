@@ -52,7 +52,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.shortcuts import redirect, get_object_or_404, render
 from django.core.exceptions import ImproperlyConfigured, ValidationError, FieldError
-from django.core import serializers
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.detail import DetailView
@@ -72,6 +72,8 @@ from django.db.models import Q, F, FieldDoesNotExist
 from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, PatternFill, Color
 from openpyxl.writer.excel import save_virtual_workbook
+
+from codenerix.models import CodenerixModel
 
 from codenerix.helpers import epochdate, monthname, get_static, get_template, get_profile, model_inspect, get_class, remove_getdisplay, daterange_filter, trace_json_error, qobject_builder_string_search
 from codenerix.templatetags.codenerix_lists import unlist
@@ -3582,12 +3584,12 @@ class GenDetail(GenBase, DetailView):
 
             sublist = []
 
-            idx = 0
             for item_element in item_elements:
                 # the element can contains another groups
-                if (idx > 1) and (type(item_element) == tuple):
+                if type(item_element) == tuple:
                     # Recursive
-                    sublist.append(self.get_filled_structure([subgroup]))
+                    raise NotImplementedError("Recursive calls are not developed")
+                    # sublist.append(self.get_filled_structure([item_element]))
                 else:
                     filter_field = None
                     # Check if it is a list
@@ -3656,11 +3658,9 @@ class GenDetail(GenBase, DetailView):
                         "name": _(verbose_names[field]),
                         "value": value,
                         "filter": filter_field,
+                        "field": field,
                     })
                     gr_object_content.append(field)
-
-                # Increment index
-                idx += 1
 
             item["value"] = sublist
             result.append(item)
@@ -3717,13 +3717,24 @@ class GenDetail(GenBase, DetailView):
         # Return context
         return context
 
+    def get_fields_structure(self, info):
+        datas = {}
+        for element in info:
+            if 'col' in element:
+                for item in element['value']:
+                    if 'field' in item:
+                        if not isinstance(item['value'], CodenerixModel):
+                            datas[item['field']] = item['value']
+                        else:
+                            datas[item['field']] = str(item['value'])
+
+        return datas
+
     def get_context_data_json(self, object_property, **kwargs):
         context = super(GenDetail, self).get_context_data(**kwargs)
-        # info = self.get_filled_structure()
+        info = self.get_filled_structure()
 
-        datas = json.loads(serializers.serialize('json', [context["object"], ]))[0]
-        body = datas["fields"]
-        body["pk"] = datas["pk"]
+        body = json.loads(json.dumps(self.get_fields_structure(info), cls=DjangoJSONEncoder))
 
         meta = {}
         meta["gentranslate"] = {}
