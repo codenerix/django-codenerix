@@ -68,9 +68,14 @@ class SSLEmailBackend(EmailBackend):
                 raise
 
 
-def get_connection(host=settings.CLIENT_EMAIL_HOST, port=settings.CLIENT_EMAIL_PORT, username=settings.CLIENT_EMAIL_USERNAME, password=settings.CLIENT_EMAIL_PASSWORD, use_tls=settings.CLIENT_EMAIL_USE_TLS):
+def get_connection(host=settings.CLIENT_EMAIL_HOST, port=settings.CLIENT_EMAIL_PORT, username=settings.CLIENT_EMAIL_USERNAME, password=settings.CLIENT_EMAIL_PASSWORD, use_tls=settings.CLIENT_EMAIL_USE_TLS, use_ssl=settings.CLIENT_EMAIL_USE_SSL):
+    if use_ssl:
+        backend = "codenerix.lib.genmail.SSLEmailBackend"
+    else:
+        backend = "django.core.mail.backends.smtp.EmailBackend"
+
     return mail.get_connection(
-        backend="codenerix.lib.genmail.SSLEmailBackend",
+        backend=backend,
         host=host,
         port=port,
         username=username,
