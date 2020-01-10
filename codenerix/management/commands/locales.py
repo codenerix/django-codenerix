@@ -66,6 +66,13 @@ class Command(BaseCommand, Debugger):
                             default=False,
                             help='Do a full clean by deleting everything before building translations')
 
+        # Named (optional) arguments
+        parser.add_argument('--compile',
+                            action='store_true',
+                            dest='compile',
+                            default=False,
+                            help='Compile .po files')
+
     def handle(self, *args, **options):
         # Check arguments
         mode = options['mode']
