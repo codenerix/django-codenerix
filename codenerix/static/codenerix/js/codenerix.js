@@ -2282,7 +2282,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     };
 
     $scope.detail = function (pk) {
-        if ($scope.data.meta.linkedit) {
+        if ($scope.data.meta.linkedit || $scope.data.meta.show_details) {
             if (!sublist) {
                 if ($scope.data.meta.show_details) {
                     // Showing details
