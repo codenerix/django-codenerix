@@ -1220,7 +1220,7 @@ class GenList(GenBase, ListView):
         deprecated = [('retrictions', '2016061000')]
         for (depre, version) in deprecated:
             if hasattr(self, depre):
-                raise IOError("The attribute '{}' has been deprecated in version '{}' and it is not available anymore".format(version))
+                raise IOError("The attribute '{}' has been deprecated in version '{}' and it is not available anymore".format(depre, version))
 
         # Build extracontext
         if not hasattr(self, 'extra_context'):

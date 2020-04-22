@@ -56,11 +56,11 @@ angular.module('codenerixFilters', [])
             return "-";
         } else {
             var kind = kind.substring(6);
-            if (kind=='euro')           { return "" +Math.round(input * 100) / 100 +"€";
-            } else if (kind=='dollar')  { return "$"+Math.round(input * 100) / 100;
-            } else if (kind=='pound')   { return "£"+Math.round(input * 100) / 100;
-            } else if (kind=='yuan')    { return "¥"+Math.round(input * 100) / 100;
-            } else if (kind=='bitcoin') { return "" +Math.round(input * 100) / 100+"<span class='fa fa-btc'></span>";
+            if (kind=='euro')           { return ""  + Math.round(input * 100) / 100 +"€";
+            } else if (kind=='dollar')  { return "$" + Math.round(input * 100) / 100;
+            } else if (kind=='pound')   { return "£" + Math.round(input * 100) / 100;
+            } else if (kind=='yuan')    { return "¥" + Math.round(input * 100) / 100;
+            } else if (kind=='bitcoin') { return ""  + Math.round(input * 100) / 100+"<span class='fa fa-btc'></span>";
             } else { return input+"?";
             }
         }

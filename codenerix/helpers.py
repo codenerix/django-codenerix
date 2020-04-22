@@ -276,9 +276,9 @@ def get_static(desired, user, lang, default, extension='html', relative=False):
         return default
 
 
-def direct_to_template(request, template):
+def direct_to_template(request, template, lang):
     template = get_template(template, request.user)
-    return render(request, template)
+    return render(request, template, lang)
 
 
 def model_inspect(obj):
@@ -558,13 +558,13 @@ def trace_json_error(struct, path=[]):
     kind = type(struct)
     if kind is dict:
         for key in struct:
-            found = trace_json_error(struct[key], path+[key])
+            found = trace_json_error(struct[key], path + [key])
             if found:
                 break
     elif kind is list:
         idx = 0
         for element in struct:
-            found = trace_json_error(element, path+[str(idx)])
+            found = trace_json_error(element, path + [str(idx)])
             if found:
                 break
             idx += 1

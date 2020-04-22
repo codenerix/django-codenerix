@@ -79,104 +79,102 @@ function multi_dynamic_select_dict(arg, form){
 function subscribers_worker(scope, subsjsb64) {
     var subsjs = atob(subsjsb64);
     if (subsjs) {
-        if (subsjs) {
-            try {
-                var subs = JSON.parse(subsjs);
-            } catch (e) {
-                var subs = null;
-            }
-            if (subs) {
-                if (typeof(CodenerixSubscribersWebsocket) != 'undefined') {
-                    var ws = CodenerixSubscribersWebsocket();
+        try {
+            var subs = JSON.parse(subsjs);
+        } catch (e) {
+            var subs = null;
+        }
+        if (subs) {
+            if (typeof(CodenerixSubscribersWebsocket) != 'undefined') {
+                var ws = CodenerixSubscribersWebsocket();
 
-                    if (ws) {
-                        // Define opener
-                        ws.opened = function () {
-                            ws.debug("Requesting config");
-                            ws.send({'action': 'get_config', 'uuid': ws.uuid}, null);
-                            angular.forEach(subs, (function (value, key) {
-                                ws.debug("Subscribe "+key);
-                                ws.send({'action': 'subscribe', 'uuid': key}, null);
-                            }));
-                        };
+                if (ws) {
+                    // Define opener
+                    ws.opened = function () {
+                        ws.debug("Requesting config");
+                        ws.send({'action': 'get_config', 'uuid': ws.uuid}, null);
+                        angular.forEach(subs, (function (value, key) {
+                            ws.debug("Subscribe "+key);
+                            ws.send({'action': 'subscribe', 'uuid': key}, null);
+                        }));
+                    };
 
-                        // Define receiver
-                        ws.recv = function(message, ref, uuid) {
-                            ws.debug("Got message from '"+uuid+"': " + JSON.stringify(message) + " (REF: "+ref+")");
-                            
-                            var action = message.action;
+                    // Define receiver
+                    ws.recv = function(message, ref, uuid) {
+                        ws.debug("Got message from '"+uuid+"': " + JSON.stringify(message) + " (REF: "+ref+")");
+                        
+                        var action = message.action;
 
-                            if (action == 'ping') {
-                                ws.debug("Sending PONG "+message.ref+" (ref:"+ref+")");
-                                ws.send({'action': 'pong'}, ref);
-                            } else if (action == 'config') {
-                                ws.debug("Got config: "+JSON.stringify(message)+" (ref:"+ref+")");
-                            } else if (action == 'subscription') {
-                                if (typeof(subs[uuid]) != 'undefined') {
-                                    ws.debug("Got subscription message: "+JSON.stringify(message));
-                                    angular.forEach(subs[uuid], (function (configtuple, key) {
-                                        // Get subscription configuration
-                                        var pkgkey = configtuple[0];
-                                        var config = configtuple[1];
-                                        if (typeof(config) == 'undefined') {
-                                            config = {'default':''}
-                                        }
-                                        
-                                        // If message brings data for our field
-                                        var msgdata = message.data[pkgkey];
-                                        if (typeof(msgdata) != 'undefined') {
-                                            // Fill the field with package information
-                                            if (typeof(config.mapper) == 'undefined') {
-                                                var newvalue = msgdata;
-                                            } else {
-                                                var newvalue = new Function('value', config.mapper)(msgdata);
-                                            }
+                        if (action == 'ping') {
+                            ws.debug("Sending PONG "+message.ref+" (ref:"+ref+")");
+                            ws.send({'action': 'pong'}, ref);
+                        } else if (action == 'config') {
+                            ws.debug("Got config: "+JSON.stringify(message)+" (ref:"+ref+")");
+                        } else if (action == 'subscription') {
+                            if (typeof(subs[uuid]) != 'undefined') {
+                                ws.debug("Got subscription message: "+JSON.stringify(message));
+                                angular.forEach(subs[uuid], (function (configtuple, key) {
+                                    // Get subscription configuration
+                                    var pkgkey = configtuple[0];
+                                    var config = configtuple[1];
+                                    if (typeof(config) == 'undefined') {
+                                        config = {'default':''}
+                                    }
+                                    
+                                    // If message brings data for our field
+                                    var msgdata = message.data[pkgkey];
+                                    if (typeof(msgdata) != 'undefined') {
+                                        // Fill the field with package information
+                                        if (typeof(config.mapper) == 'undefined') {
+                                            var newvalue = msgdata;
                                         } else {
-                                            // Fill the field with default information from subscription system
-                                            if (typeof(config.default) == 'undefined') {
-                                                var newvalue = '';
+                                            var newvalue = new Function('value', config.mapper)(msgdata);
+                                        }
+                                    } else {
+                                        // Fill the field with default information from subscription system
+                                        if (typeof(config.default) == 'undefined') {
+                                            var newvalue = '';
+                                        } else {
+                                            if (typeof(config.default.mapper) == 'undefined') {
+                                                var newvalue = config.default;
                                             } else {
-                                                if (typeof(config.default.mapper) == 'undefined') {
-                                                    var newvalue = config.default;
-                                                } else {
-                                                    var newvalue = new Function('value', config.default.mapper)();
-                                                }
+                                                var newvalue = new Function('value', config.default.mapper)();
                                             }
                                         }
-                                        scope[scope.form_name][key].$setViewValue(newvalue);
-                                        scope[scope.form_name][key].$pristine = false;
-                                        scope[scope.form_name][key].$dirty = true;
-                                        scope[scope.form_name][key].$render();
-                                    }));
-                                    scope[scope.form_name].$pristine = false;
-                                    scope[scope.form_name].$dirty = true;
-                                    scope.$apply();
-                                } else {
-                                ws.error("Got message from unknown UUID '"+uuid+"': "+JSON.stringify(message));
-                                }
-                            } else if (action == 'error') {
-                                if ((typeof(message.error) == 'undefined') || (message.error == null)) {
-                                    var error = "No error";
-                                } else {
-                                    var error = message.error;
-                                }
-                                ws.error("Got an error from server: "+error);
+                                    }
+                                    scope[scope.form_name][key].$setViewValue(newvalue);
+                                    scope[scope.form_name][key].$pristine = false;
+                                    scope[scope.form_name][key].$dirty = true;
+                                    scope[scope.form_name][key].$render();
+                                }));
+                                scope[scope.form_name].$pristine = false;
+                                scope[scope.form_name].$dirty = true;
+                                scope.$apply();
                             } else {
-                                ws.send_error("Unknown action '"+action+"'", ref);
+                            ws.error("Got message from unknown UUID '"+uuid+"': "+JSON.stringify(message));
                             }
-                        };
-
-                        ws.closed = function() {
-                            if (typeof(uuid) == 'undefined') {
-                                ws.warning("We are not online! ");
+                        } else if (action == 'error') {
+                            if ((typeof(message.error) == 'undefined') || (message.error == null)) {
+                                var error = "No error";
                             } else {
-                                ws.warning("We are not online! "+uuid);
+                                var error = message.error;
                             }
+                            ws.error("Got an error from server: "+error);
+                        } else {
+                            ws.send_error("Unknown action '"+action+"'", ref);
                         }
+                    };
 
-                        // Start websocket
-                        ws.start();
+                    ws.closed = function() {
+                        if (typeof(uuid) == 'undefined') {
+                            ws.warning("We are not online! ");
+                        } else {
+                            ws.warning("We are not online! "+uuid);
+                        }
                     }
+
+                    // Start websocket
+                    ws.start();
                 }
             }
         }
@@ -1932,17 +1930,26 @@ function codenerix_builder(libraries, routes, redirects) {
             controller: 'ListCtrl'
         }}]);
         // List rows header and summary
-        var rows_dict = {};
+        var rows_dict = null;
         if (typeof(static_partial_row)!='undefined') {
+            if (rows_dict==null) {
+                rows_dict = {};
+            }
             rows_dict[''] = {templateUrl: static_partial_row};
         }
         if (typeof(static_partial_header)!='undefined') {
+            if (rows_dict==null) {
+                rows_dict = {};
+            }
             rows_dict['header'] = {templateUrl: static_partial_header};
         }
         if (typeof(static_partial_summary)!='undefined') {
+            if (rows_dict==null) {
+                rows_dict = {};
+            }
             rows_dict['summary'] = {templateUrl: static_partial_summary};
         }
-        if (rows_dict) {
+        if (rows_dict!=null) {
            known.push(['list0.rows', rows_dict]);
         }
         // If we are in a from (ws_entry_point exists)
@@ -1986,17 +1993,26 @@ function codenerix_builder(libraries, routes, redirects) {
                         controller: controller
                     }}]);
                     // Sublist rows header and summary
-                    var rows_dict = {};
+                    var rows_dict = null;
                     if (typeof(tab.static_partial_row)!='undefined') {
+                        if (rows_dict==null) {
+                            rows_dict = {};
+                        }
                         rows_dict[''] = {'templateUrl': tab.static_partial_row};
                     }
                     if (typeof(tab.static_partial_header)!='undefined') {
+                        if (rows_dict==null) {
+                            rows_dict = {};
+                        }
                         rows_dict['header'] = {templateUrl: tab.static_partial_header};
                     }
                     if (typeof(tab.static_partial_summary)!='undefined') {
+                        if (rows_dict==null) {
+                            rows_dict = {};
+                        }
                         rows_dict['summary'] = {templateUrl: tab.static_partial_summary};
                     }
-                    if (rows_dict) {
+                    if (rows_dict!=null) {
                        known.push(['details0.sublist'+tab.internal_id+'.rows', rows_dict]);
                     }
                 });
@@ -3224,6 +3240,7 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
             files.push($(this).val());
         });
         return false;
+        /*
         var datas = {
                         'pk': $scope.pk,
                         'files': files,
@@ -3278,6 +3295,7 @@ function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
                     }
                 });
         }
+        */
     };
 }
 
@@ -3335,7 +3353,7 @@ function angularmaterialchip(scope){
             scope.amc_items[items] = {};
         }
         if (query == '*'){
-            var results = query ? scope.amc_items[items].slice(0,50) : [];
+            var results = scope.amc_items[items].slice(0,50);
         }else{
             var results = query ? scope.amc_items[items].filter(createFilterFor(query)) : [];
         }

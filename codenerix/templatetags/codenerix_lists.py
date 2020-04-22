@@ -65,16 +65,20 @@ def istype(i, kind):
 
     # Choose kind
     if kind == 'datetime':
-        if   ftype == 'DATETIME_INPUT_FORMATS':   answer = 'DATETIME_INPUT_FORMATS'
-        elif ftype == 'DATE_INPUT_FORMATS':       answer = 'DATE_INPUT_FORMATS'
-        elif ftype == 'TIME_INPUT_FORMATS':       answer = 'TIME_INPUT_FORMAT'
-        else:                                     answer = False
+        if ftype == 'DATETIME_INPUT_FORMATS':
+            answer = 'DATETIME_INPUT_FORMATS'
+        elif ftype == 'DATE_INPUT_FORMATS':
+            answer = 'DATE_INPUT_FORMATS'
+        elif ftype == 'TIME_INPUT_FORMATS':
+            answer = 'TIME_INPUT_FORMAT'
+        else:
+            answer = False
     elif kind == 'date2time':
         answer = 'DATE_INPUT_FORMATS'
     elif kind == 'color':
         answer = (ngmodel(i) == 'color')
     else:
-        IOError("Unknown type '{0}' in 'istype' filter".format(kind))
+        raise IOError("Unknown type '{0}' in 'istype' filter".format(kind))
 
     # Return answer
     return answer
