@@ -3685,10 +3685,10 @@ class GenDetail(GenBase, DetailView):
         self.extra_context['tabs_autorender'] = self.get_tabs_autorender()
 
         # Check linkedit
-        context['linkedit'] = getattr(self, 'linkedit', True)
+        context['linkedit'] = getattr(self, 'linkedit', True) and self.auth_permission('change')
 
         # Check linkdelete
-        context['linkdelete'] = getattr(self, 'linkdelete', True)
+        context['linkdelete'] = getattr(self, 'linkdelete', True) and self.auth_permission('delete')
 
         # Check linkback
         context['linkback'] = getattr(self, 'linkback', True)
@@ -3746,10 +3746,10 @@ class GenDetail(GenBase, DetailView):
             meta['version_api'] = getattr(settings, "VERSION_API", None)
 
         # Check linkedit
-        meta['linkedit'] = getattr(self, 'linkedit', True)
+        meta['linkedit'] = getattr(self, 'linkedit', True) and self.auth_permission('change')
 
         # Check linkdelete
-        meta['linkdelete'] = getattr(self, 'linkdelete', True)
+        meta['linkdelete'] = getattr(self, 'linkdelete', True) and self.auth_permission('delete')
 
         # Check linkback
         meta['linkback'] = getattr(self, 'linkback', True)
