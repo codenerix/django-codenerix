@@ -1195,7 +1195,7 @@ class GenList(GenBase, ListView):
         if not onlybase:
 
             # Check if this is a REST query to pusth the answer to responde in JSON
-            if bool(self.request.META.get('HTTP_X_REST', False)):
+            if bool(self.request.META.get('HTTP_X_REST', False)) or bool(self.request.GET.get('force_rest_api', False)):
                 self.json = True
                 if self.request.GET.get('json', self.request.POST.get('json', None)) is None:
                     newget = {}
@@ -3502,7 +3502,7 @@ class GenDetail(GenBase, DetailView):
         '''
 
         # Check if this is a REST query to pusth the answer to responde in JSON
-        if bool(self.request.META.get('HTTP_X_REST', False)):
+        if bool(self.request.META.get('HTTP_X_REST', False)) or bool(self.request.GET.get('force_rest_api', False)):
             self.json = True
 
         # Check if this is a REST query to add an element
