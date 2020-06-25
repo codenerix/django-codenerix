@@ -789,7 +789,7 @@ class WysiwygAngularInput(WysiwygAngularRender):
         if value is None:
             value = ''
         # Render
-        html = "<div ng-init='editor_{0}=\"quill\"'>".format(hashkey)
+        html = "<div ng-init='editor_{0}=\"textangular\"'>".format(hashkey)
         html += u"<textarea name=\"{0}\" ng-model=\"{1}\" ng-show='false' ng-init=\"{3}\">{2}</textarea>".format(name, vmodel, value, init)
         html += self.render_wysiwyg(ngmodel=vmodel, force_editors=True, attrs=attrs, renderer=renderer)
         html += "</div>"
