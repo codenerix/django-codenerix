@@ -3013,7 +3013,7 @@ class GenModify(object):
         '''
 
         # Check if this is a webservice request
-        self.json_worker = (bool(getattr(self.request, "authtoken", False))) or (self.json is True)
+        self.json_worker = (bool(getattr(self.request, "authtoken", False))) or (self.json is True) or bool(self.request.GET.get('force_rest_api', False))
         self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
 
         # Check if this is an AJAX request
