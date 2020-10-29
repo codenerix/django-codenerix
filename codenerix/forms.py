@@ -366,7 +366,7 @@ class BaseForm(object):
 
                         # Check if we have to replace the widget with a newer one
                         if isinstance(found.field.widget, Select) and not isinstance(found.field.widget, DynamicSelect):
-                            if not isinstance(found.field.widget, MultiStaticSelect):
+                            if not isinstance(found.field.widget, MultiStaticSelect) and not isinstance(found.field.widget, MultiDynamicSelect):
                                 found.field.widget = StaticSelect(wattrs)
                             found.field.widget.choices = found.field.choices
                             found.field.widget.is_required = wrequired
@@ -467,7 +467,7 @@ class BaseForm(object):
                     if isinstance(infield.field.widget, Select) and not isinstance(infield.field.widget, DynamicSelect):
                         if isinstance(infield.field, NullBooleanField):
                             infield.field.widget = CheckboxInput(wattrs)
-                        elif not isinstance(infield.field.widget, MultiStaticSelect):
+                        elif not isinstance(infield.field.widget, MultiStaticSelect) and not isinstance(found.field.widget, MultiDynamicSelect):
                             infield.field.widget = StaticSelect(wattrs)
                         if hasattr(infield.field.widget, 'choices') and hasattr(infield.field, 'choices'):
                             infield.field.widget.choices = infield.field.choices

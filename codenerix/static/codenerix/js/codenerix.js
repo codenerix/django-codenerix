@@ -3319,14 +3319,6 @@ function printURL(xthis,url) {
 }
 
 function angularmaterialchip(scope){
-    scope.amc_querySearch = querySearch;
-    scope.amc_autocompleteDemoRequireMatch = true;
-    scope.amc_transformChip = transformChip;
-    
-    // options values
-    scope.amc_items = {};
-    // options seleted
-    scope.amc_select = {};
 
     /**
     * Return the proper object when the append is called.
@@ -3365,10 +3357,20 @@ function angularmaterialchip(scope){
     function createFilterFor(query) {
         var lowercaseQuery = angular.lowercase(query);
         return function filterFn(option) {
-            var results = (angular.lowercase(option.label).indexOf(lowercaseQuery) === 0) ||
+            var results = (angular.lowercase(option.label).indexOf(lowercaseQuery) >= 0 ) ||
                 (option.id == lowercaseQuery);
             return results;
             //return (angular.lowercase(option.label).indexOf(lowercaseQuery) === 0) || (option.id == lowercaseQuery);
         };
     }
+
+    // Link elements
+    scope.amc_querySearch = querySearch;
+    scope.amc_autocompleteDemoRequireMatch = true;
+    scope.amc_transformChip = transformChip;
+    
+    // options values
+    scope.amc_items = {};
+    // options seleted
+    scope.amc_select = {};
 }
