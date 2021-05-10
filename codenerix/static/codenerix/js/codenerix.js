@@ -2145,15 +2145,18 @@ function codenerix_builder(libraries, routes, redirects) {
 
 function multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, listid, ws, callback, sublist, hotkeys) {
     // Move to inside state to get double view resolved
+    let listid_txt = listid;
     if ((callback==undefined) && (!sublist)) {
         $state.go('list'+listid+'.rows');
+    }else{
+        listid_txt = "s"+listid;
     }
     $scope.listid=listid;
     // Startup memory
     var l = ListMemory;
-    if ((l.mem!=undefined) && (l.mem[listid])) {
+    if ((l.mem!=undefined) && (l.mem[listid_txt])) {
         // We have already a memory from what happened here
-        $scope.query=l.mem[listid];
+        $scope.query=l.mem[listid_txt];
     } else {
         // Enviroment
         $scope.ws=ws;
@@ -2212,7 +2215,7 @@ function multilist($scope, $rootScope, $timeout, $location, $uibModal, $template
     if (l.mem==undefined) {
         l.mem={};
     }
-    l.mem[listid]=$scope.query;
+    l.mem[listid_txt]=$scope.query;
 
     if (sublist){
         $scope.refresh_callback = function(){
