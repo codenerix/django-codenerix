@@ -2,10 +2,10 @@
 django-codenerix
 ================
 
-Open source enterprise business management system built on top of Django + AngularJS + Bootstrap. Ready for fast development of any CMS, ERP, Business Management Software, you can discover more in `CODENERIX.com <http://www.codenerix.com/>`_.
+Open source enterprise business management system built on top of Django + AngularJS + Bootstrap. Ready for fast development of any CMS, ERP, Business Management Software, you can discover more in `CODENERIX.com <https://www.codenerix.com/>`_.
 
-.. image:: http://www.codenerix.com/wp-content/uploads/2018/05/codenerix.png
-    :target: http://www.codenerix.com
+.. image:: https://www.codenerix.com/wp-content/uploads/2018/05/codenerix.png
+    :target: https://www.codenerix.com
     :alt: Try our demo with Codenerix Cloud
 
 ********
@@ -62,7 +62,7 @@ New fields and widgets:
 * BootstrapWysiwygField (coming soon)
 * GenReCaptchaField
 
-More information on `our website <http://www.codenerix.com>`_.
+More information on `our website <https://www.codenerix.com>`_.
 
 ****
 Demo
@@ -107,7 +107,7 @@ Documentation
 *************
 
 We have tried to write the most accurate documentation about this project so you have enought information to feel confortable
-with `CODENERIX <http://www.codenerix.com/>`_. Nevertheless we are human, and we make mistakes, so please contact with us if
+with `CODENERIX <https://www.codenerix.com/>`_. Nevertheless we are human, and we make mistakes, so please contact with us if
 you find any mistake or you have doubts about the explanations.
 
 You can get access to online documentation at `CODENERIX Documentation <http://doc.codenerix.com>`_.
