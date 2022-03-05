@@ -4,9 +4,11 @@ django-codenerix
 
 Open source enterprise business management system built on top of Django + AngularJS + Bootstrap. Ready for fast development of any CMS, ERP, Business Management Software, you can discover more in `CODENERIX.com <https://www.codenerix.com/>`_.
 
-.. image:: https://www.codenerix.com/wp-content/uploads/2018/05/codenerix.png
+.. image:: https://github.com/codenerix/django-codenerix/codenerix/static/media/img/codenerix.png
     :target: https://www.codenerix.com
     :alt: Try our demo with Codenerix Cloud
+
+![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
 
 ********
 Features
