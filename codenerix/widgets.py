@@ -18,6 +18,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import re
 import random
 import hashlib
@@ -520,20 +521,28 @@ class FileAngularInput(forms.widgets.FileInput):
         })
 
         # Hacer link hacia el archivo
-        button = super(FileAngularInput, self).render(name, value, attrs=attrs)
-        if value and type(value) != dict:
-            if imghdr.what("{}/{}".format(settings.MEDIA_ROOT, value)) is not None:
-                image = u'<img src="{0}{1}" style="max-height:75px; max-width:150px;" />'.format(settings.MEDIA_URL, value)
-                link = u'<a href="{0}{1}" target="_blank">{2}</a>'.format(settings.MEDIA_URL, value, image)
-
-                html = '<div class="row">'
-                html += '   <div class="col-md-6">{}</div>'.format(button)
-                html += '   <div class="col-md-6">{}</div>'.format(link)
-                html += '</div>'
+        if value and not isinstance(value, dict):
+            path_image = "{}/{}".format(settings.MEDIA_ROOT, value)
+            if not os.path.exists(path_image):
+                value = None
+                attrs.pop('value')
+                button = super(FileAngularInput, self).render(name, value, attrs=attrs)
+                html = button
             else:
-                link = u'<br /><a href="{0}{1}" target="_blank">{2}</a><br />'.format(settings.MEDIA_URL, value, value)
-                html = link + button
+                button = super(FileAngularInput, self).render(name, value, attrs=attrs)
+                if imghdr.what(path_image) is not None:
+                    image = u'<img src="{0}{1}" style="max-height:75px; max-width:150px;" />'.format(settings.MEDIA_URL, value)
+                    link = u'<a href="{0}{1}" target="_blank">{2}</a>'.format(settings.MEDIA_URL, value, image)
+
+                    html = '<div class="row">'
+                    html += '   <div class="col-md-6">{}</div>'.format(button)
+                    html += '   <div class="col-md-6">{}</div>'.format(link)
+                    html += '</div>'
+                else:
+                    link = u'<br /><a href="{0}{1}" target="_blank">{2}</a><br />'.format(settings.MEDIA_URL, value, value)
+                    html = link + button
         else:
+            button = super(FileAngularInput, self).render(name, value, attrs=attrs)
             html = button
 
         return html
