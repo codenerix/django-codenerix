@@ -22,12 +22,12 @@ from bson import json_util
 import json
 from django.db import models
 from django.apps import apps
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.safestring import mark_safe
 from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from django.utils.encoding import force_text, smart_text
+from django.utils.encoding import force_str, smart_str
 from django.conf import settings
 from django.db.models.signals import post_delete, pre_delete
 from django.dispatch.dispatcher import receiver
@@ -453,16 +453,16 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                                     ffield_verbose_name = str(ffield.verbose_name)
 
                                 if key not in attrs_bd or not self.CodenerixMeta.log_full:
-                                    attrs_txt[ffield_verbose_name] = force_text(field_txt, errors='replace')
+                                    attrs_txt[ffield_verbose_name] = force_str(field_txt, errors='replace')
                                 else:
                                     if attrs_bd[key] is None:
                                         attrs_bd[key] = '---'
                                     attrs_txt[key] = (
                                         ffield_verbose_name,
                                         u"{}{}{}".format(
-                                            force_text(attrs_bd[key], errors='replace'),
+                                            force_str(attrs_bd[key], errors='replace'),
                                             SEPARATOR,
-                                            force_text(field_txt, errors='replace')
+                                            force_str(field_txt, errors='replace')
                                         )
                                     )
 
@@ -471,7 +471,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
             log.username = username
             log.content_type_id = ContentType.objects.get_for_model(self).pk
             log.object_id = pk
-            log.object_repr = force_text(self, errors="replace")
+            log.object_repr = force_str(self, errors="replace")
             try:
                 log.change_json = json.dumps(attrs, default=json_util.default)
             except UnicodeDecodeError:
@@ -542,7 +542,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                         # If related, we don't do anything
                         if getattr(value, 'all', None) is None:
                             # value = str(value)
-                            value = smart_text(value)
+                            value = smart_str(value)
                             attrs[ffield.name] = value
 
                 if hasattr(ffield, "verbose_name"):
@@ -556,14 +556,14 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
                     else:
                         ffield_verbose_name = str(ffield.verbose_name)
 
-                    attrs_txt[ffield_verbose_name] = force_text(field, errors='replace')
+                    attrs_txt[ffield_verbose_name] = force_str(field, errors='replace')
 
             log = Log()
             log.user_id = user_id
             log.username = username
             log.content_type_id = ContentType.objects.get_for_model(instance).pk
             log.object_id = instance.pk
-            log.object_repr = force_text(instance)
+            log.object_repr = force_str(instance)
             log.change_json = json.dumps(attrs, default=json_util.default)
             log.change_txt = json.dumps(attrs_txt, default=json_util.default)
             log.snapshot_txt = instance.__strlog_delete__()

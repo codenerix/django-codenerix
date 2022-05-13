@@ -26,8 +26,8 @@ from functools import reduce
 from django.db.models import Q
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -54,14 +54,14 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
     def __str__(self):
         if self.name and self.surname:
-            output = '%s %s' % (smart_text(self.name), smart_text(self.surname))
+            output = '%s %s' % (smart_str(self.name), smart_str(self.surname))
         elif self.name:
             output = self.name
         elif self.surname:
             output = self.surname
         else:
             output = "%s*" % (self.user)
-        return smart_text(output)
+        return smart_str(output)
 
     def __unicode__(self):
         return self.__str__()

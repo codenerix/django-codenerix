@@ -30,10 +30,10 @@ import imghdr
 
 from django import forms
 from django.urls import reverse, resolve
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.core.files.base import File
 from django.utils import formats
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.html import escapejs
 from django.conf import settings
 from django.utils.translation import get_language
@@ -104,22 +104,22 @@ class StaticSelectMulti(forms.widgets.Select):
             if hasattr(self, "field"):
                 for (key, label) in self.field.choices:
                     if value == key:
-                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_text(label))))
-                    init += u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_text(label)))
+                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_str(label))))
+                    init += u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_str(label)))
             elif type(self.choices) == list:
 
                 for (key, label) in self.choices:
                     if value == key:
-                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_text(label))))
-                    init += u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_text(label)))
+                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_str(label))))
+                    init += u'{{"id":"{0}","label":"{1}"}},'.format(key, escapejs(smart_str(label)))
             else:
                 # FORCE RELOAD DATAS
                 elements = self.choices.queryset
                 elements._result_cache = None
                 for choice in elements:
-                    init += u'{{"id":"{0}","label":"{1}"}},'.format(choice.pk, escapejs(smart_text(choice)))
+                    init += u'{{"id":"{0}","label":"{1}"}},'.format(choice.pk, escapejs(smart_str(choice)))
                     if value and (type(value) is list) and (choice.pk in value):
-                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(int(choice.pk), escapejs(smart_text(choice))))
+                        valuejs.append(u'{{"id":"{0}","label":"{1}"}},'.format(int(choice.pk), escapejs(smart_str(choice))))
         else:
             init = "getForeignKeys(http,'{0}',amc_items,{{".format(vurl)
             comma = False
@@ -197,7 +197,7 @@ class StaticSelect(forms.widgets.Select):
         vid = attrs.get('id', 'id_{0}'.format(name))
         vstyle = attrs.get('style', '')
         ngreadonly = attrs.get('ng-readonly', '')
-        vform = smart_text(self.form_name)
+        vform = smart_str(self.form_name)
         placeholder = escapejs(_('Select an option'))
         is_multiple = hasattr(self, "multiple") and self.multiple
 
@@ -244,13 +244,13 @@ class StaticSelect(forms.widgets.Select):
             for (key, label) in self.field.choices:
                 if value == key:
                     ini = index
-                html += u"{{'id':'{0}','label':'{1}'}},".format(key, escapejs(smart_text(label)))
+                html += u"{{'id':'{0}','label':'{1}'}},".format(key, escapejs(smart_str(label)))
                 index += 1
         elif type(self.choices) == list:
             for (key, label) in self.choices:
                 if value == key:
                     ini = index
-                html += u"{{'id':'{0}','label':'{1}'}},".format(key, escapejs(smart_text(label)))
+                html += u"{{'id':'{0}','label':'{1}'}},".format(key, escapejs(smart_str(label)))
                 index += 1
         else:
             if not is_multiple:
@@ -259,7 +259,7 @@ class StaticSelect(forms.widgets.Select):
             for choice in self.choices.queryset:
                 if value == choice.pk:  # only not multiple
                     ini = index
-                html += u"{{'id':'{0}','label':'{1}'}},".format(choice.pk, escapejs(smart_text(choice)))
+                html += u"{{'id':'{0}','label':'{1}'}},".format(choice.pk, escapejs(smart_str(choice)))
                 if value and (type(value) is list) and (str(choice.pk) in value):
                     list_value.append({'id': int(choice.pk), 'label': str(choice)})
                 index += 1
@@ -394,7 +394,7 @@ class DynamicSelect(DynamicSelectInputWidget, forms.widgets.Select):
         vmodel = self.field_name
         vid = attrs.get('id', 'id_{0}'.format(name))
         vstyle = attrs.get('style', '')
-        vform = smart_text(self.form_name)
+        vform = smart_str(self.form_name)
         vurl = reverse(self.autofill_url, kwargs={'search': 'a'})[:-1]
         # Get access to the get_label() method and request for the label of the bound input
         if value:
@@ -745,7 +745,7 @@ class WysiwygAngularRender(forms.widgets.HiddenInput):
         editors['preview'] = _("Preview")
         editors_list = []
         for keyarg in editors.keys():
-            editors_list.append(u"\"{0}\":{{\"key\":\"{0}\",\"name\":\"{1}\"}}".format(keyarg, smart_text(editors[keyarg])))
+            editors_list.append(u"\"{0}\":{{\"key\":\"{0}\",\"name\":\"{1}\"}}".format(keyarg, smart_str(editors[keyarg])))
         editors_json = u"{" + ",".join(editors_list) + "}"
 
         # Detect if this field is required

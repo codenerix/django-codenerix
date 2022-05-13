@@ -44,9 +44,9 @@ from django.db import models
 from django.views.generic import View
 from django.views.generic import ListView
 from django.forms.models import model_to_dict
-from django.utils.translation import gettext, ugettext as _  # Before it was , ugettext_lazy as __
+from django.utils.translation import gettext, gettext as _  # Before it was , ugettext_lazy as __
 from django.utils.text import format_lazy
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -66,7 +66,8 @@ from django.utils.translation import get_language
 
 from django.conf import settings
 
-from django.db.models import Q, F, FieldDoesNotExist
+from django.db.models import Q, F
+from django.core.exceptions import FieldDoesNotExist
 
 # Export to Excel
 from openpyxl import Workbook
@@ -2776,7 +2777,7 @@ class GenList(GenBase, ListView):
                             for v in value.all():
                                 # This is a recursive call to go through foreign keys
                                 if tail is None:
-                                    values.append(smart_text(v))
+                                    values.append(smart_str(v))
                                 else:
                                     values.append(self.bodybuilder([v], {tail: rkval})[0][tail])
                             # Save the list in value
@@ -2794,7 +2795,7 @@ class GenList(GenBase, ListView):
                             value = value(**args)
                         else:
                             # This is an attribute
-                            value = smart_text(value)
+                            value = smart_str(value)
 
                     # Save the value
                     token[alias] = value
@@ -2925,7 +2926,7 @@ class GenList(GenBase, ListView):
                 except TypeError:
                     value = None
                 if value:
-                    dims[cell.column] = max((dims.get(cell.column, 0), len(smart_text(cell.value)))) * head_deviation
+                    dims[cell.column] = max((dims.get(cell.column, 0), len(smart_str(cell.value)))) * head_deviation
             # Deviation only accepts to first row
             head_deviation = 1.0
         for col, value in dims.items():
@@ -3017,7 +3018,7 @@ class GenModify(object):
         self.__authtoken = (bool(getattr(self.request, "authtoken", False)))
 
         # Check if this is an AJAX request
-        if (request.is_ajax() or self.json_worker) and request.body:
+        if (request.headers.get('x-requested-with') == 'XMLHttpRequest' or self.json_worker) and request.body:
             request.POST = QueryDict('').copy()
             body = request.body
             if type(request.body) == bytes:
@@ -3041,7 +3042,7 @@ class GenModify(object):
             attr = {'__pk__': None, '__str__': 'OK'}
         else:
             # Built the attr structure
-            attr = {'__pk__': self.object.pk, '__str__': smart_text(self.object)}
+            attr = {'__pk__': self.object.pk, '__str__': smart_str(self.object)}
             # Fill attr with the rest of info
             for key in self.success_url_keys:
                 keysp = key.split(":")
@@ -3529,7 +3530,7 @@ class GenDetail(GenBase, DetailView):
         self.json_worker = self.__authtoken or (self.json is True)
 
         # Check if this is an AJAX request
-        if (request.is_ajax() or self.json_worker) and request.body:
+        if (request.headers.get('x-requested-with') == 'XMLHttpRequest' or self.json_worker) and request.body:
             request.POST = json.loads(request.body)
 
         # Set class internal variables
@@ -3578,7 +3579,7 @@ class GenDetail(GenBase, DetailView):
             # raise Exception(group)
             item = {}
 
-            item["name"] = smart_text(group[0])
+            item["name"] = smart_str(group[0])
             item["col"] = group[1]
             item_elements = group[2:]
 

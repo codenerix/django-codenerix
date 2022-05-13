@@ -35,8 +35,8 @@ import importlib
 
 # Django
 from django.db.models import Q
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template as django_get_template
 from django.shortcuts import render
@@ -145,7 +145,7 @@ def monthname(value):
 # Name unify
 def nameunify(name, url=False):
     # Make unicode
-    name = smart_text(name)
+    name = smart_str(name)
 
     # Get it on lower
     namelow = unidecode(name).lower().strip(' \t\n\r')
