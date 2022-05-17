@@ -1,0 +1,7 @@
+django-codenerix (4.0.1) stable; urgency=medium
+
+  * Django 4.x support
+  * Resolved XLS export problems with float
+  * FileAngularInput repaired on details when adding new entry
+
+ -- Juanmi Taboada <juanmi@juanmitaboada.com>  Tue, 17 May 2022 13:58:14 +0200

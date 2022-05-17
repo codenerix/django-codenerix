@@ -3,7 +3,7 @@
 #
 # django-codenerix
 #
-# Copyright 2017 Centrologic Computational Logistic Center S.L.
+# Codenerix GNU
 #
 # Project URL : http://www.codenerix.com
 #
@@ -83,24 +83,23 @@ def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=F
 
 # Autourl
 def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI, DEBUG_TOOLBAR=False, DEBUG_PANEL=False):
-    from django.conf.urls import include, url
+    from django.conf.urls import include
+    from django.urls import re_path
 
     if ROSETTA:
-        URLPATTERNS += [url(r'^rosetta/', include('rosetta.urls'))]
+        URLPATTERNS += [re_path(r'^rosetta/', include('rosetta.urls'))]
 
     if ADMINSITE:
         from django.contrib import admin
         if VERSION[0] < 2 and ADMINSITE:
-            URLPATTERNS += [url(r'^admin', include(admin.site.urls))]
-            URLPATTERNS += [url(r'^admin/', include(admin.site.urls))]
+            URLPATTERNS += [re_path(r'^admin/', include(admin.site.urls))]
         else:
             from django.urls import path
-            URLPATTERNS += [path('admin', admin.site.urls, )]
             URLPATTERNS += [path('admin/', admin.site.urls, )]
     if DEBUG and SPAGHETTI:
-        URLPATTERNS += [url(r'^plate/', include('django_spaghetti.urls'))]
+        URLPATTERNS += [re_path(r'^plate/', include('django_spaghetti.urls'))]
     if DEBUG and DEBUG_TOOLBAR:
-        URLPATTERNS += [url(r'^__debug__/', include(debug_toolbar.urls))]
+        URLPATTERNS += [re_path(r'^__debug__/', include(debug_toolbar.urls))]
     return URLPATTERNS
 
 

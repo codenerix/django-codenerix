@@ -2,7 +2,7 @@
 #
 # django-codenerix
 #
-# Copyright 2017 Centrologic Computational Logistic Center S.L.
+# Codenerix GNU
 #
 # Project URL : http://www.codenerix.com
 #
@@ -23,6 +23,7 @@ from django.db import transaction
 
 # Warning: Q objects are used inside an eval() that you can find somewhere down
 from django.db.models import Q
+
 
 class MultiForm(object):
     '''

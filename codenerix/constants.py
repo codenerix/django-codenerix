@@ -2,7 +2,7 @@
 #
 # django-codenerix
 #
-# Copyright 2017 Centrologic Computational Logistic Center S.L.
+# Codenerix GNU
 #
 # Project URL : http://www.codenerix.com
 #
@@ -18,7 +18,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 WEIGHT_UNITS = {
         # SI

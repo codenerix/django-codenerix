@@ -2,7 +2,7 @@
 #
 # django-codenerix
 #
-# Copyright 2017 Centrologic Computational Logistic Center S.L.
+# Codenerix GNU
 #
 # Project URL : http://www.codenerix.com
 #
@@ -21,7 +21,7 @@
 from codenerix.djng.angular_model import NgModelFormMixin
 from codenerix.djng import NgFormValidationMixin, NgForm, NgModelForm
 
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.forms.widgets import Select, CheckboxInput
 from django.forms import NullBooleanField
 

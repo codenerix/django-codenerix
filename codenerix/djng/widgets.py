@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import json
 from django.forms import widgets
 from django.utils.safestring import mark_safe
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.html import format_html, format_html_join
 
 
@@ -49,7 +49,7 @@ def flatatt(attrs):
 #        start_tag = format_html('<ul {0}>', mark_safe(' '.join(self.field_attrs)))
 #        output = [start_tag]
 #        for widget in self:
-#            output.append(format_html('<li>{0}</li>', force_text(widget)))
+#            output.append(format_html('<li>{0}</li>', force_str(widget)))
 #        output.append('</ul>')
 #        return mark_safe('\n'.join(output))
 #

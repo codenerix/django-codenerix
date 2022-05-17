@@ -2,7 +2,7 @@
 #
 # django-codenerix
 #
-# Copyright 2017 Centrologic Computational Logistic Center S.L.
+# Codenerix GNU
 #
 # Project URL : http://www.codenerix.com
 #
@@ -20,7 +20,7 @@
 
 from django.template import Library
 from django.urls import reverse
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ValidationError
 from django.utils import formats
@@ -324,7 +324,7 @@ def get_field_list(forms):
 
 @register.filter
 def invalidator(formname, inp):
-    return mark_safe("{{'codenerix_invalid':{0}.{1}.$invalid}}".format(smart_text(formname), ngmodel(inp)))
+    return mark_safe("{{'codenerix_invalid':{0}.{1}.$invalid}}".format(smart_str(formname), ngmodel(inp)))
 
 
 @register.filter

@@ -8,7 +8,7 @@ error messages for AngularJS form validation.
 import re
 from django.forms import fields
 from django.forms import widgets
-from django.utils.translation import gettext_lazy, ungettext_lazy
+from django.utils.translation import gettext_lazy, ngettext_lazy
 #from .widgets import CheckboxSelectMultiple as DjngCheckboxSelectMultiple
 
 
@@ -33,13 +33,13 @@ class DefaultFieldMixin(object):
             self.widget.attrs['ng-maxlength'] = self.max_length
         for item in self.validators:
             if getattr(item, 'code', None) == 'min_length':
-                message = ungettext_lazy(
+                message = ngettext_lazy(
                     'Ensure this value has at least %(limit_value)d character',
                     'Ensure this value has at least %(limit_value)d characters',
                     'limit_value')
                 errors.append(('$error.minlength', message % {'limit_value': self.min_length}))
             if getattr(item, 'code', None) == 'max_length':
-                message = ungettext_lazy(
+                message = ngettext_lazy(
                     'Ensure this value has at most %(limit_value)d character',
                     'Ensure this value has at most %(limit_value)d characters',
                     'limit_value')

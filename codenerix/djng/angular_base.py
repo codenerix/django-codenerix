@@ -9,7 +9,7 @@ try:
 except ImportError:  # Python 2
     from UserList import UserList
 
-from django.forms import forms
+from django.forms import forms, BoundField
 from django.http import QueryDict
 import six
 try:
@@ -17,7 +17,7 @@ try:
 except ImportError:
     from django.utils.importlib import import_module
 from django.utils.html import format_html, format_html_join, escape
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from six import python_2_unicode_compatible
 from django.utils.safestring import mark_safe, SafeText, SafeData
 from django.core.exceptions import ValidationError
@@ -50,7 +50,7 @@ class TupleErrorList(UserList, list):
     li_format = '<li ng-show="{0}.{1}" class="{2}">{3}</li>'
     li_format_bind = '<li ng-show="{0}.{1}" class="{2}" ng-bind="{0}.{3}"></li>'
 
-    def __init__(self, initlist=None, error_class=None):
+    def __init__(self, initlist=None, error_class=None, renderer=None):
         super(TupleErrorList, self).__init__(initlist)
 
         if error_class is None:
@@ -82,28 +82,28 @@ class TupleErrorList(UserList, list):
             error_lists = {'$pristine': [], '$dirty': []}
             for e in self:
                 li_format = e[5] == '$message' and self.li_format_bind or self.li_format
-                err_tuple = (e[0], e[3], e[4], force_text(e[5]))
+                err_tuple = (e[0], e[3], e[4], force_str(e[5]))
                 error_lists[e[2]].append(format_html(li_format, *err_tuple))
             # renders and combine both of these lists
             return mark_safe(''.join([format_html(self.ul_format, first[0], first[1], prop,
                         mark_safe(''.join(list_items))) for prop, list_items in error_lists.items()]))
         return format_html('<ul class="errorlist">{0}</ul>',
-            format_html_join('', '<li>{0}</li>', ((force_text(e),) for e in self)))
+            format_html_join('', '<li>{0}</li>', ((force_str(e),) for e in self)))
 
     def as_text(self):
         if not self:
             return ''
         if isinstance(self[0], tuple):
-            return '\n'.join(['* %s' % force_text(e[5]) for e in self if bool(e[5])])
-        return '\n'.join(['* %s' % force_text(e) for e in self])
+            return '\n'.join(['* %s' % force_str(e[5]) for e in self if bool(e[5])])
+        return '\n'.join(['* %s' % force_str(e) for e in self])
 
     def __str__(self):
         return self.as_ul()
 
     def __repr__(self):
         if self and isinstance(self[0], tuple):
-            return repr([force_text(e[5]) for e in self])
-        return repr([force_text(e) for e in self])
+            return repr([force_str(e[5]) for e in self])
+        return repr([force_str(e) for e in self])
 
     def __contains__(self, item):
         return item in list(self)
@@ -122,10 +122,10 @@ class TupleErrorList(UserList, list):
             return error
         if isinstance(error, ValidationError):
             return list(error)[0]
-        return force_text(error)
+        return force_str(error)
 
 
-class NgBoundField(forms.BoundField):
+class NgBoundField(BoundField):
     @property
     def errors(self):
         """

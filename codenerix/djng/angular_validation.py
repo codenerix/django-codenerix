@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 from django.forms import widgets
 from django.utils.html import format_html
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from .angular_base import NgFormBaseMixin, SafeTuple
 
 
@@ -31,7 +31,7 @@ class NgFormValidationMixin(NgFormBaseMixin):
             return errors
         identifier = format_html('{0}[\'{1}\']', self.form_name, self.add_prefix(bound_field.name))
         potential_errors = bound_field.field.get_potential_errors()
-        errors.extend([SafeTuple((identifier, self.field_error_css_classes, '$dirty', pe[0], 'invalid', force_text(pe[1])))
+        errors.extend([SafeTuple((identifier, self.field_error_css_classes, '$dirty', pe[0], 'invalid', force_str(pe[1])))
                        for pe in potential_errors])
         if not isinstance(bound_field.field.widget, widgets.PasswordInput):
             # all valid fields shall display OK tick after changed into dirty state

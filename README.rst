@@ -152,7 +152,7 @@ FAQ
 Credits
 *******
 
-This project has been possible thanks to `Centrologic <http://www.centrologic.com/>`_.
+This project has been possible thanks to `Codenerix <http://www.codenerix.com>`_.
 
 We are thankful to:
 
