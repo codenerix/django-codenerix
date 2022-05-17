@@ -92,11 +92,9 @@ def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI, DEBUG_TOOLBAR=Fal
     if ADMINSITE:
         from django.contrib import admin
         if VERSION[0] < 2 and ADMINSITE:
-            URLPATTERNS += [re_path(r'^admin', include(admin.site.urls))]
             URLPATTERNS += [re_path(r'^admin/', include(admin.site.urls))]
         else:
             from django.urls import path
-            URLPATTERNS += [path('admin', admin.site.urls, )]
             URLPATTERNS += [path('admin/', admin.site.urls, )]
     if DEBUG and SPAGHETTI:
         URLPATTERNS += [re_path(r'^plate/', include('django_spaghetti.urls'))]

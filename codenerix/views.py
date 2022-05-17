@@ -2008,7 +2008,7 @@ class GenList(GenBase, ListView):
                 sort[order_key]['size'] = size
                 sort[order_key]['class'] = sort_class
                 if order_key and order_key[0] != '*':
-                        sort[order_key]['ordering'] = json.dumps(ordering).replace('"', '\\"')
+                    sort[order_key]['ordering'] = json.dumps(ordering).replace('"', '\\"')
                 if order_key in position:
                     sort[order_key]['position'] = position[order_key]
 
@@ -2896,7 +2896,7 @@ class GenList(GenBase, ListView):
                 if type(row[id]) != list:
                     cell = self.__cell_format(key_col + 1, key_row + 2, '{}')
 
-                    if row[id]:
+                    if row[id] and not isinstance(row[id], float):
                         try:
                             t = parse(row[id])
                             if types[key_col] == 'DateTimeField':
@@ -2926,7 +2926,7 @@ class GenList(GenBase, ListView):
                 except TypeError:
                     value = None
                 if value:
-                    dims[cell.column] = max((dims.get(cell.column, 0), len(smart_str(cell.value)))) * head_deviation
+                    dims[cell.column_letter] = max((dims.get(cell.column_letter, 0), len(smart_str(cell.value)))) * head_deviation
             # Deviation only accepts to first row
             head_deviation = 1.0
         for col, value in dims.items():
