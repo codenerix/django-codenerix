@@ -2,7 +2,7 @@
 #
 # django-codenerix
 #
-# Copyright 2017 Centrologic Computational Logistic Center S.L.
+# Codenerix GNU
 #
 # Project URL : http://www.codenerix.com
 #
@@ -400,9 +400,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
     # AD_CERT_FILE='/path/to/your/cert.txt'     # Path to SSL certificate
     # AD_DEBUG_FILE='/tmp/ldap.debug'           # Path to DEBUG file (if none, Debugging will be disabled)
     # AD_LDAP_PORT=9834                         # Port to use
-    # AD_DNS_NAME='CARMEN.CENTROLOGIC.COM'      # DNS nameserver if different thatn NT4 DOMAIN
+    # AD_DNS_NAME='NTDOMAIN.CODENERIX.COM'      # DNS nameserver if different thatn NT4 DOMAIN
     AD_LOCK_UNAUTHORIZED=True                   # Unauthorized users in Active Directory should be locked in Django
-    AD_NT4_DOMAIN='CARMEN.CENTROLOGIC.COM'      # NT4 Domain name
+    AD_NT4_DOMAIN='NTDOMAIN.CODENERIX.COM'      # NT4 Domain name
     AD_MAP_FIELDS= {                            # Fields to map:   left=Django   right=Active Directory
             'email':        'mail',
             'first_name':   'givenName',
