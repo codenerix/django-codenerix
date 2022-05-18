@@ -1,3 +1,9 @@
+django-codenerix (4.0.2) stable; urgency=medium
+
+  * Added missing folder in last published version in pypy
+
+ -- Juanmi Taboada <juanmi@juanmitaboada.com>  Tue, 18 May 2022 09:13:00 +0200
+
 django-codenerix (4.0.1) stable; urgency=medium
 
   * Django 4.x support
