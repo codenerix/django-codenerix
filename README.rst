@@ -113,7 +113,7 @@ You can get access to online documentation at `CODENERIX Documentation <http://d
 
 You can find all documentation in GITHUB at `django-codenerix-documentation <https://github.com/codenerix/django-codenerix-documentation>`_ project.
 
-You can chat with us `here <https://goo.gl/NgpzBh>`_.
+You can get in touch with us `here <https://codenerix.com/contact/>`_.
 
 ***
 FAQ
