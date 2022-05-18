@@ -13,3 +13,4 @@ recursive-include codenerix/static *
 recursive-include codenerix/templates *
 recursive-include codenerix/templatetags *
 recursive-include codenerix/djng *
+recursive-include codenerix/multi_email_field *
