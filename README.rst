@@ -2,7 +2,7 @@
 django-codenerix
 ================
 
-Open source enterprise business management system built on top of Django + AngularJS + Bootstrap. Ready for fast development of any CMS, ERP, Business Management Software, you can discover more in `CODENERIX.com <https://www.codenerix.com/>`_.
+Open source enterprise business management system built on top of Django + AngularJS + Bootstrap. Ready for fast development of any CMS, ERP, Business Management Software, you can discover more in `CODENERIX.com <https://www.codenerix.com>`_.
 
 .. image:: https://github.com/codenerix/django-codenerix/raw/master/codenerix/static/codenerix/img/codenerix.png
     :target: https://www.codenerix.com
@@ -29,7 +29,8 @@ Features
 * integrated API system as standard
 * several authentication methods' including OTP (One Time Password)
 * ready for authentication with Microsoft Active Directory
-* compatible with Python 2.7 and Python >= 3.4
+* checked from Python 3.4 to Python 3.9
+* checked from Django 2.2.9 to Django 4.0.4
 * hotkeys support
 * `Haystack <http://haystacksearch.org>`_ support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
 * nice packages with plenty of icons ready to use (Glyphicon, Font Awesome & Font Awesome Animation)
@@ -62,13 +63,11 @@ New fields and widgets:
 * BootstrapWysiwygField (coming soon)
 * GenReCaptchaField
 
-More information on `our website <https://www.codenerix.com>`_.
-
 ****
 Demo
 ****
 
-You can have a look to our `demo online <http://demo.codenerix.com>`_.
+You can have a look to our demo online `CODENERIX DEMO <http://demo.codenerix.com>`_.
 
 You can find some working examples in GITHUB at `django-codenerix-examples <https://github.com/codenerix/django-codenerix-examples>`_ project.
 
@@ -107,7 +106,7 @@ Documentation
 *************
 
 We have tried to write the most accurate documentation about this project so you have enought information to feel confortable
-with `CODENERIX <https://www.codenerix.com/>`_. Nevertheless we are human, and we make mistakes, so please contact with us if
+with CODENERIX. Nevertheless we are human, and we make mistakes, so please contact with us if
 you find any mistake or you have doubts about the explanations.
 
 You can get access to online documentation at `CODENERIX Documentation <http://doc.codenerix.com>`_.
@@ -152,8 +151,6 @@ FAQ
 Credits
 *******
 
-This project has been possible thanks to `Codenerix <http://www.codenerix.com>`_.
-
 We are thankful to:
 
 =================================== =================== =====================================================================================
@@ -164,7 +161,7 @@ Khanh TO                            ngReallyClick       We added codenerixReally
 Francisco Torrejon                  Core                He was one of the first developers and part of the original project until 2015
 =================================== =================== =====================================================================================
 
-Several technologies have been used to build `CODENERIX`_:
+Several technologies have been used to build CODENERIX:
 
 =================================== =================== =========================== =========================================================
 Project name                        License             Owner                       Link to project

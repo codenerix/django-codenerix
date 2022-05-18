@@ -35,6 +35,7 @@ setup(
     long_description=README,
     url='https://github.com/codenerix/django-codenerix',
     author=', '.join(codenerix.__authors__),
+    author_email=', '.join(codenerix.__authors_email__),
     keywords=['django', 'codenerix', 'management', 'erp', 'crm'],
     platforms=['OS Independent'],
     classifiers=[
