@@ -62,7 +62,7 @@ def txt2img(text, FontSize=14, bg="#ffffff", fg="#000000", font="FreeMono.ttf"):
     return imgtag
 
 
-@register.filter
+@register.simple_tag
 def file64(path, basepath):
     '''
     Returns the given path as a Base 64 IMAGE tag
@@ -79,7 +79,7 @@ def file64(path, basepath):
     return img
 
 
-@register.filter
+@register.simple_tag
 def static64(path):
     '''
     Returns the given path from STATIC as a Base 64 IMAGE tag
@@ -88,7 +88,7 @@ def static64(path):
     return file64(path, settings.STATIC_ROOT)
 
 
-@register.filter
+@register.simple_tag
 def media64(path):
     '''
     Returns the given path from MEDIA as a Base 64 IMAGE tag
