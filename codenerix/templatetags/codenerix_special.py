@@ -18,9 +18,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import hashlib
 from PIL import Image, ImageDraw, ImageFont
 from os import path
+import base64
 
 from django.template import Library
 from django.conf import settings
@@ -58,6 +60,42 @@ def txt2img(text, FontSize=14, bg="#ffffff", fg="#000000", font="FreeMono.ttf"):
         img.save(font_dir + img_name, "JPEG", quality=100)
     imgtag = '<img src="' + settings.MEDIA_URL + 'txt2img/' + img_name + '" alt="' + text + '" />'
     return imgtag
+
+
+@register.filter
+def file64(path, basepath):
+    '''
+    Returns the given path as a Base 64 IMAGE tag
+    '''
+
+    # Attach Base 64 string
+    finalpath = basepath + "/" + path
+    if os.path.exists(finalpath):
+        with open(finalpath, "rb") as binary:
+            img = base64.b64encode(binary.read()).decode()
+    else:
+        raise IOError("File not found at '{}'".format(finalpath))
+
+    return img
+
+
+@register.filter
+def static64(path):
+    '''
+    Returns the given path from STATIC as a Base 64 IMAGE tag
+    '''
+
+    return file64(path, settings.STATIC_ROOT)
+
+
+@register.filter
+def media64(path):
+    '''
+    Returns the given path from MEDIA as a Base 64 IMAGE tag
+    '''
+
+    return file64(path, settings.MEDIA_ROOT)
+
 
 @register.tag
 def ifusergroup(parser, token):
