@@ -28,6 +28,8 @@ import ssl
 import datetime
 import time
 
+from codenerix_lib.debugger import Debugger
+
 from django.utils import timezone
 from django.contrib.auth import logout
 from django.contrib.auth.backends import ModelBackend
@@ -39,13 +41,13 @@ import ldap3
 from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
 
 
-def check_auth(user):
-    '''
+def check_auth(user, debugger=None):
+    """
     Check if the user should or shouldn't be inside the system:
     - If the user is staff or superuser: LOGIN GRANTED
     - If the user has a Person and it is not "disabled": LOGIN GRANTED
     - Elsewhere: LOGIN DENIED
-    '''
+    """
 
     # Initialize authentication
     auth = None
@@ -54,74 +56,204 @@ def check_auth(user):
     # Check if there is an user
     if user:
 
+        # Show debugger
+        if debugger:
+            debugger("check_auth(): Username: '{}'".format(user), color="white")
+
         # It means that Django accepted the user and it is active
         if user.is_staff or user.is_superuser:
+
             # This is an administrator, let it in
             auth = user
+
+            # Show debugger
+            if debugger:
+                debugger(
+                    "check_auth(): user '{}' is an Adminitrator".format(user),
+                    color="green",
+                )
+
         else:
+
+            # Show debugger
+            if debugger:
+                debugger(
+                    "check_auth(): user '{}' is a Normal User".format(user),
+                    color="cyan",
+                )
+
             # It is a normal user, check if there is a person behind
             person = getattr(user, "person", None)
             if not person:
+
+                # Show debugger
+                if debugger:
+                    debugger(
+                        "check_auth(): no associated person found for user '{}'".format(
+                            user
+                        ),
+                        color="yellow",
+                    )
+
                 # Check if there is related one
                 person_related = getattr(user, "people", None)
                 if person_related:
+
+                    # Show debugger
+                    if debugger:
+                        debugger(
+                            "check_auth(): there are People associated for user '{}'".format(
+                                user
+                            ),
+                            color="cyan",
+                        )
+
                     # Must be only one
                     if person_related.count() == 1:
+
+                        # Person found
                         person = person_related.get()
 
-            if person and ((person.disabled is None) or (person.disabled > timezone.now())):
+                    elif debugger:
+                        debugger(
+                            "check_auth(): found more than One People associated for user '{}', not valid Person found!".format(
+                                user
+                            ),
+                            color="yellow",
+                        )
+
+                elif debugger:
+                    debugger(
+                        "check_auth(): no People found for for user '{}', not valid Person found!".format(
+                            user
+                        ),
+                        color="red",
+                    )
+
+            # Show debugger
+            if debugger and person:
+                debugger(
+                    "check_auth(): user={} - person={} - disabled={}'".format(
+                        user, person, person.disabled
+                    ),
+                    color="cyan",
+                )
+
+            # Check if the person is already disabled
+            if person and (
+                (person.disabled is None) or (person.disabled > timezone.now())
+            ):
                 # There is a person, no disabled found or the found one is fine to log in
                 auth = user
+
+                if debugger:
+                    debugger(
+                        "check_auth(): user '{}' access granted!".format(user),
+                        color="green",
+                    )
+
+            elif debugger:
+                debugger(
+                    "check_auth(): user '{}' access NOT granted!".format(user),
+                    color="red",
+                )
+
+    elif debugger:
+        debugger(
+            "check_auth(): No username, access NOT granted!".format(user), color="red"
+        )
 
     # Return back the final decision
     return auth
 
 
-class LimitedAuth(ModelBackend):
-    '''
+class LimitedAuth(ModelBackend, Debugger):
+    """
     Authentication system based on default Django's authentication system
     which extends the last one with check_auth() extra system limitations
-    '''
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        # Configure debugger
+        self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
+        if self.__debugger:
+            self.set_debug()
+
+        # Keep going with super
+        super(LimitedAuth, self).__init__(*args, **kwargs)
 
     def authenticate(self, *args, **kwargs):
+
+        # Show debugger
+        if self.__debugger:
+            self.debug("Started authenticate()", color="blue")
+
         # Launch default django authentication
         user = super(LimitedAuth, self).authenticate(*args, **kwargs)
 
         # Answer to the system
-        answer = check_auth(user)
+        answer = check_auth(user, self.debug)
         return answer
 
 
-class LimitedAuthMiddleware(object):
-    '''
+class LimitedAuthMiddleware(Debugger):
+    """
     Check every request if the user should or shouldn't be inside the system
     SESSION_EXPIRE_WHEN_INACTIVE: number of seconds the user can be innactive on the website without being logged out
     SESSION_SHIFTS: list of hours of the day when all users must be logged out
 
     NOTE: install in your MIDDLEWARE setting after (order matters):
         'django.contrib.auth.middleware.AuthenticationMiddleware'
-    '''
+    """
 
     def __init__(self, get_response=None):
+
+        # Configure debugger
+        self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
+        if self.__debugger:
+            self.set_debug()
+
+        # Get response
         self.get_response = get_response
 
     def process_request(self, request):
+
+        # Show debugger
+        if self.__debugger:
+            self.debug("Started process_request()", color="blue")
+
         # If the user is authenticated and shouldn't be
         if request.user.is_authenticated:
 
+            # Show debugger
+            if self.__debugger:
+                self.debug("User already authenticated", color="cyan")
+
             # If the user doesn't pass the check_auth test
-            if not check_auth(request.user):
+            if not check_auth(request.user, self.debug):
+
+                # Show debugger
+                if self.__debugger:
+                    self.debug("User didn'pass check_auth()", color="red")
+
                 # Push it out from the system
                 logout(request)
+
+            # Show debugger
+            elif self.__debugger:
+                self.debug("User pass check_auth()", color="green")
 
             # Get now
             now = datetime.datetime.now()
 
             # Create delta for caducity by EXPIRE_WHEN_INACTIVE
-            expire_when_innactive = getattr(settings, 'SESSION_EXPIRE_WHEN_INACTIVE', None)
+            expire_when_innactive = getattr(
+                settings, "SESSION_EXPIRE_WHEN_INACTIVE", None
+            )
             if expire_when_innactive is not None:
                 # Get last_seen
-                last_seen = request.session.get('user_last_seen', None)
+                last_seen = request.session.get("user_last_seen", None)
                 # Calculate delta
                 if last_seen is not None:
                     # Check if we have to logout this user for being innactive too long
@@ -130,7 +262,9 @@ class LimitedAuthMiddleware(object):
                         nowts = now.timestamp()
                     except AttributeError:
                         # python2
-                        nowts = float(time.mktime(now.timetuple()) + now.microsecond / 1000000.0)
+                        nowts = float(
+                            time.mktime(now.timetuple()) + now.microsecond / 1000000.0
+                        )
 
                     diff = nowts - last_seen - expire_when_innactive
 
@@ -146,13 +280,16 @@ class LimitedAuthMiddleware(object):
                     last_seen = last_seen.timestamp()
                 except AttributeError:
                     # python2
-                    last_seen = float(time.mktime(last_seen.timetuple()) + last_seen.microsecond / 1000000.0)
+                    last_seen = float(
+                        time.mktime(last_seen.timetuple())
+                        + last_seen.microsecond / 1000000.0
+                    )
 
                 # Remember in session
-                request.session['user_last_seen'] = last_seen
+                request.session["user_last_seen"] = last_seen
 
             # Create delta for caducity by SHIFTS
-            shifts = getattr(settings, 'SESSION_SHIFTS', None)
+            shifts = getattr(settings, "SESSION_SHIFTS", None)
             if shifts is not None:
                 shifts = shifts + [shifts[0] + 24]
                 for turno in shifts:
@@ -167,20 +304,28 @@ class LimitedAuthMiddleware(object):
                     kickout = kickout.timestamp() - now.timestamp()
                 except AttributeError:
                     # python2
-                    ts = float(time.mktime(kickout.timetuple()) + kickout.microsecond / 1000000.0)
-                    tz = float(time.mktime(now.timetuple()) + now.microsecond / 1000000.0)
+                    ts = float(
+                        time.mktime(kickout.timetuple())
+                        + kickout.microsecond / 1000000.0
+                    )
+                    tz = float(
+                        time.mktime(now.timetuple()) + now.microsecond / 1000000.0
+                    )
                     kickout = ts - tz
 
                 # Get caducity
-                caducity = request.session.get('user_session_caducity', None)
+                caducity = request.session.get("user_session_caducity", None)
                 if not caducity or kickout < caducity:
                     # Remember new caducity
                     request.session.set_expiry(kickout)
-                    request.session['user_session_caducity'] = kickout
+                    request.session["user_session_caducity"] = kickout
                 else:
                     # Push it out from the system
-                    request.session.pop('user_session_caducity')
+                    request.session.pop("user_session_caducity")
                     logout(request)
+
+        elif self.__debugger:
+            self.debug("User not authenticated", color="yellow")
 
     def __call__(self, request):
 
@@ -197,17 +342,49 @@ class LimitedAuthMiddleware(object):
         return response
 
 
-class TokenAuth(ModelBackend):
-    '''
+class TokenAuth(ModelBackend, Debugger):
+    """
     Authentication system based on a Token key
-    '''
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        # Configure debugger
+        self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
+        if self.__debugger:
+            self.set_debug()
+
+        # Keep going with super
+        super(TokenAuth, self).__init__(*args, **kwargs)
 
     def authenticate(self, *args, **kwargs):
+
+        # Show debugger
+        if self.__debugger:
+            self.debug("Started authenticate()", color="blue")
 
         # Get our arguments
         username = kwargs.get("username", None)
         token = kwargs.get("token", None)
         string = kwargs.get("string", "")
+
+        # Show debug
+        if self.__debugger:
+            self.debug(
+                "Authentication request:",
+                color="white",
+            )
+            self.debug("  > Username [authuser]: '{}'".format(username), color="cyan")
+            self.debug(
+                "  > Token [authtoken]: '{}' <- authentication token (signed or unsigned)".format(
+                    token
+                ),
+                color="cyan",
+            )
+            self.debug(
+                "  > String [json]: '{}' <- string to be used as salt".format(string),
+                color="cyan",
+            )
 
         if username is not None and token is not None:
 
@@ -221,52 +398,102 @@ class TokenAuth(ModelBackend):
             # If we got an user
             if user:
 
+                # Show debug
+                if self.__debugger:
+                    self.debug(
+                        "User '{}' found!".format(username),
+                        color="green",
+                    )
+
                 # Get config
                 config = {
-                    'key': None,
-                    'master_unsigned': False,
-                    'user_unsigned': False,
-                    'otp_unsigned': False,
-                    'master_signed': False,
-                    'user_signed': False,
-                    'otp_signed': False,
+                    "key": None,
+                    "master_unsigned": False,
+                    "user_unsigned": False,
+                    "otp_unsigned": False,
+                    "master_signed": False,
+                    "user_signed": False,
+                    "otp_signed": False,
                 }
-                config_settings = getattr(settings, 'AUTHENTICATION_TOKEN', {})
+                config_settings = getattr(settings, "AUTHENTICATION_TOKEN", {})
                 for (key, value) in config_settings.items():
                     config[key] = value
 
+                # Show debug
+                if self.__debugger:
+                    self.debug(
+                        "Authentication configuration:",
+                        color="white",
+                    )
+                    for (key, value) in config_settings.items():
+                        self.debug(
+                            "  > {}: {}".format(key, value),
+                            color="cyan",
+                        )
+
                 # Get keys
-                if config['key'] or config['master_unsigned'] or config['master_signed']:
-                    if config['key'] and (config['master_unsigned'] or config['master_signed']):
-                        master = config['key']
+                if (
+                    config["key"]
+                    or config["master_unsigned"]
+                    or config["master_signed"]
+                ):
+                    if config["key"] and (
+                        config["master_unsigned"] or config["master_signed"]
+                    ):
+
+                        # Assign master key
+                        master = config["key"]
+
                     else:
-                        if getattr(settings, "DEBUG_AUTH", False):
-                            raise IOError("To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token")
+                        if self.__debugger:
+                            raise IOError(
+                                "To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token"
+                            )
                         else:
                             master = None
                 else:
                     master = None
 
-                if config['user_unsigned'] or config['user_signed'] or config['otp_unsigned'] or config['otp_signed']:
+                if (
+                    config["user_unsigned"]
+                    or config["user_signed"]
+                    or config["otp_unsigned"]
+                    or config["otp_signed"]
+                ):
+                    # Check if user first_name is filled
                     if user.first_name:
+
+                        # Get user first_name as user_key
                         user_key = user.first_name
 
-                        if config['otp_unsigned'] or config['otp_signed']:
+                        if config["otp_unsigned"] or config["otp_signed"]:
                             if not pyotp:
-                                raise IOError("PYOTP library not found, you can not use OTP signed/unsigned configuration")
+                                raise IOError(
+                                    "PYOTP library not found, you can not use OTP signed/unsigned configuration"
+                                )
                             else:
                                 try:
-                                    otp = str(pyotp.TOTP(base64.b32encode(user_key)).now())
+                                    otp = str(
+                                        pyotp.TOTP(
+                                            base64.b32encode(user_key.encode())
+                                        ).now()
+                                    )
                                 except TypeError:
-                                    if getattr(settings, "DEBUG_AUTH", False):
-                                        raise IOError("To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='")
+                                    if self.__debugger:
+                                        raise IOError(
+                                            "To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {} key length is {} ".format(
+                                                user_key, len(user_key)
+                                            )
+                                        )
                                     else:
                                         otp = None
                         else:
                             otp = None
                     else:
-                        if getattr(settings, "DEBUG_AUTH", False):
-                            raise IOError("To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)")
+                        if self.__debugger:
+                            raise IOError(
+                                "To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)"
+                            )
                         else:
                             user_key = None
                             otp = None
@@ -274,57 +501,231 @@ class TokenAuth(ModelBackend):
                     user_key = None
                     otp = None
 
+                # Show debug
+                if self.__debugger:
+                    self.debug(
+                        "Clear text keys:",
+                        color="white",
+                    )
+                    if master:
+                        info = []
+                        if config.get("master_signed", False):
+                            info.append("signed")
+                        if config.get("master_unsigned", False):
+                            info.append("unsigned")
+                        self.debug(
+                            "  > Master KEY configured: '{}' [{}]".format(
+                                master, ", ".join(info)
+                            ),
+                            color="cyan",
+                        )
+                    else:
+                        self.debug(
+                            "  > Master KEY NOT configured",
+                            color="purple",
+                        )
+                    if user_key:
+                        info = []
+                        if config.get("user_signed", False):
+                            info.append("signed")
+                        if config.get("user_unsigned", False):
+                            info.append("unsigned")
+                        self.debug(
+                            "  > User KEY configured: '{}' [{}]".format(
+                                user_key, ", ".join(info)
+                            ),
+                            color="cyan",
+                        )
+                    else:
+                        self.debug(
+                            "  > User KEY NOT configured",
+                            color="purple",
+                        )
+                    if otp:
+                        info = []
+                        if config.get("otp_signed", False):
+                            info.append("signed")
+                        if config.get("otp_unsigned", False):
+                            info.append("unsigned")
+                        self.debug(
+                            "  > OTP KEY configured: '{}' [{}]".format(
+                                otp, ", ".join(info)
+                            ),
+                            color="cyan",
+                        )
+                    else:
+                        self.debug(
+                            "  > OTP KEY NOT configured",
+                            color="purple",
+                        )
+
                 # Unsigned string
-                if config['master_signed'] or config['user_signed'] or config['otp_signed']:
+                if (
+                    config["master_signed"]
+                    or config["user_signed"]
+                    or config["otp_signed"]
+                ):
                     tosign = user.username + string
+
+                # Show debugger
+                if self.__debugger:
+                    self.debug(
+                        "Configured calculated keys:",
+                        color="white",
+                    )
+                    self.debug(
+                        "  > tosign = '{}' = '{}' + '{}'".format(
+                            tosign, user.username, string
+                        ),
+                        color="white",
+                    )
 
                 # Build the list of valid keys
                 keys = []
                 if master:
-                    if config['master_unsigned']:                   # MASTER KEY
+                    if config["master_unsigned"]:  # MASTER KEY
+
                         # keys.append("master_unsigned")
                         keys.append(master)
-                    if config['master_signed']:                     # MASTER KEY SIGNED
+
+                        # Show debugger
+                        if self.__debugger:
+                            self.debug(
+                                "  > Master Unsigned Key: {}".format(keys[-1]),
+                                color="cyan",
+                            )
+
+                    if config["master_signed"]:  # MASTER KEY SIGNED
+
                         # keys.append("master_signed")
-                        keys.append(hashlib.sha1(tosign.encode() + master.encode()).hexdigest())
+                        keys.append(
+                            hashlib.sha1(tosign.encode() + master.encode()).hexdigest()
+                        )
+
+                        # Show debugger
+                        if self.__debugger:
+                            self.debug(
+                                "  > Master Signed Key: {} <- sha1( {} + {} )".format(
+                                    keys[-1], tosign, master
+                                ),
+                                color="cyan",
+                            )
+
                 if user_key:
-                    if config['user_unsigned']:                     # USER KEY
+                    if config["user_unsigned"]:  # USER KEY
+
                         # keys.append("user_unsigned")
                         keys.append(user_key)
-                    if config['user_signed']:                       # USER KEY SIGNED
+
+                        # Show debugger
+                        if self.__debugger:
+                            self.debug(
+                                "  > User Unsigned Key: {}".format(keys[-1]),
+                                color="cyan",
+                            )
+
+                    if config["user_signed"]:  # USER KEY SIGNED
+
                         # keys.append("user_signed")
-                        keys.append(hashlib.sha1(tosign.encode() + user_key.encode()).hexdigest())
+                        keys.append(
+                            hashlib.sha1(
+                                tosign.encode() + user_key.encode()
+                            ).hexdigest()
+                        )
+
+                        # Show debugger
+                        if self.__debugger:
+                            self.debug(
+                                "  > User Signed Key: {} <- sha1( {} + {} )".format(
+                                    keys[-1], tosign, user_key
+                                ),
+                                color="cyan",
+                            )
+
                 if otp:
-                    if config['otp_unsigned']:                      # OTP KEY
+                    if config["otp_unsigned"]:  # OTP KEY
+
                         # keys.append("otp_unsigned")
                         keys.append(otp)
-                    if config['otp_signed']:                        # OTP KEY SIGNED
+
+                        # Show debugger
+                        if self.__debugger:
+                            self.debug(
+                                "  > OTP Unsigned Key: {}".format(keys[-1]),
+                                color="cyan",
+                            )
+
+                    if config["otp_signed"]:  # OTP KEY SIGNED
+
                         # keys.append("otp_signed")
-                        keys.append(hashlib.sha1(tosign.encode() + otp.encode()).hexdigest())
+                        keys.append(
+                            hashlib.sha1(tosign.encode() + otp.encode()).hexdigest()
+                        )
+
+                        # Show debugger
+                        if self.__debugger:
+                            self.debug(
+                                "  > OTP Signed Key: {} <- sha1( {}+ {} )".format(
+                                    keys[-1], tosign, otp
+                                ),
+                                color="cyan",
+                            )
 
                 # Key is valid
                 if token in keys:
                     answer = user
+
+                    # Show debug
+                    if self.__debugger:
+                        self.debug(
+                            "User '{}' authenticated!".format(username),
+                            color="green",
+                        )
+
                 else:
+
                     # Not authenticated
                     answer = None
+
+                    # Show debug
+                    if self.__debugger:
+                        self.debug(
+                            "User '{}' NOT authenticated with tokenkey '{}'!".format(
+                                username, token
+                            ),
+                            color="red",
+                        )
 
             else:
 
                 # Username not found, not accepting the authentication request
                 answer = None
 
+                # Show debug
+                if self.__debugger:
+                    self.debug(
+                        "User '{}' NOT found!".format(username),
+                        color="yellow",
+                    )
+
         else:
 
             # Missing data, can not authenticate with this information
             answer = None
 
+            # Show debug
+            if self.__debugger:
+                self.debug(
+                    "Missing data, can not authenticte with this information",
+                    color="yellow",
+                )
+
         # Return answer
         return answer
 
 
-class TokenAuthMiddleware(object):
-    '''
+class TokenAuthMiddleware(Debugger):
+    """
     Check for every request if the user is not loged in, so we can log it in with a TOKEN
 
     NOTE 1: install in your MIDDLEWARE setting after (order matters):
@@ -344,37 +745,75 @@ class TokenAuthMiddleware(object):
         Check: http://stackoverflow.com/questions/11374382/how-can-i-disable-djangos-csrf-protection-only-in-certain-cases
         They recommend in this post to use the decorator, but we didn't manage to make it work
         in the post() method inside our class-view. Probably this will work in the dispatch().
-    '''
+    """
 
     def __init__(self, get_response=None):
+
+        # Configure debugger
+        self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
+        if self.__debugger:
+            self.set_debug()
+
+        # Get response
         self.get_response = get_response
 
     def process_request(self, request):
+
+        # Show debugger
+        if self.__debugger:
+            self.debug("Started process_request()", color="blue")
+
         # By default we are not in authtoken
         request.authtoken = False
+
         # Get body
         body = request.body
+
         # Get token
         token = request.GET.get("authtoken", request.POST.get("authtoken", ""))
+
         # If the user is authenticated and shouldn't be
         if token:
+
+            if self.__debugger:
+                self.debug("AUTHTOKEN='{}'".format(token), color="cyan")
+
+            # Get username and json
             username = request.GET.get("authuser", request.POST.get("authuser", None))
             json = request.GET.get("json", request.POST.get("json", body.decode()))
+            if self.__debugger:
+                self.debug("USERNAME={} - JSON={}".format(username, json), color="cyan")
+
             # Authenticate user
-            user = authenticate(request=None, username=username, token=token, string=json)
+            user = authenticate(
+                request=None, username=username, token=token, string=json
+            )
             if user:
+
+                # Show debug
+                if self.__debugger:
+                    self.debug("User authenticated", color="green")
+
                 # Set we are in authtoken
                 request.authtoken = True
                 # Log user in
                 login(request, user)
                 # Disable CSRF checks
-                setattr(request, '_dont_enforce_csrf_checks', True)
-                json_details = request.GET.get("authjson_details", request.POST.get("authjson_details", False))
-                if json_details in ['true', '1', 't', True]:
+                setattr(request, "_dont_enforce_csrf_checks", True)
+                json_details = request.GET.get(
+                    "authjson_details", request.POST.get("authjson_details", False)
+                )
+                if json_details in ["true", "1", "t", True]:
                     json_details = True
                 else:
                     json_details = False
                 request.json_details = json_details
+
+            elif self.__debugger:
+                self.debug("User not authenticated", color="red")
+
+        elif self.__debugger:
+            self.debug("No authtoken found in your request", color="yellow")
 
     def __call__(self, request):
 
@@ -392,7 +831,7 @@ class TokenAuthMiddleware(object):
 
 
 class ActiveDirectoryGroupMembershipSSLBackend:
-    '''
+    """
     Authorization backend for Active Directory in Django
 
     # Possible configuration parameters
@@ -408,14 +847,14 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             'first_name':   'givenName',
             'last_name':    'sn',
         }
-    '''
+    """
 
     __debug = None
 
     def debug(self, msg):
-        '''
+        """
         Handle the debugging to a file
-        '''
+        """
         # If debug is not disabled
         if self.__debug is not False:
 
@@ -426,7 +865,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 debug_filename = getattr(settings, "AD_DEBUG_FILE", None)
                 if debug_filename:
                     # Open the debug file pointer
-                    self.__debug = open(settings.AD_DEBUG_FILE, 'a')
+                    self.__debug = open(settings.AD_DEBUG_FILE, "a")
                 else:
                     # Disable debuging forever
                     self.__debug = False
@@ -436,7 +875,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 self.__debug.write("{}\n".format(msg))
                 self.__debug.flush()
 
-    def ldap_link(self, username, password, mode='LOGIN'):
+    def ldap_link(self, username, password, mode="LOGIN"):
 
         # If no password provided, we will not try to authenticate
         if password:
@@ -447,47 +886,57 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             use_ssl = getattr(settings, "AD_SSL", False)
             if use_ssl:
                 default_port = 636
-                proto = 'ldaps'
+                proto = "ldaps"
             else:
                 default_port = 389
-                proto = 'ldap'
-            port = getattr(settings, 'AD_LDAP_PORT', default_port)
-            ldap_url = '{}://{}:{}'.format(proto, dns_name, port)
-            self.debug('ldap.initialize :: url: {}'.format(ldap_url))
+                proto = "ldap"
+            port = getattr(settings, "AD_LDAP_PORT", default_port)
+            ldap_url = "{}://{}:{}".format(proto, dns_name, port)
+            self.debug("ldap.initialize :: url: {}".format(ldap_url))
 
             # Prepare library
             ser = {}
-            ser['allowed_referral_hosts'] = [("*", True)]
+            ser["allowed_referral_hosts"] = [("*", True)]
             con = {}
-            con['user'] = "{}\{}".format(nt4_domain, username)
-            con['password'] = password
-            con['raise_exceptions'] = True
-            con['authentication'] = ldap3.NTLM
+            con["user"] = "{}\{}".format(nt4_domain, username)
+            con["password"] = password
+            con["raise_exceptions"] = True
+            con["authentication"] = ldap3.NTLM
             if use_ssl:
                 certfile = settings.AD_CERT_FILE
-                self.debug('ldap.ssl :: Activated - Cert file: {}'.format(certfile))
-                con['auto_bind'] = ldap3.AUTO_BIND_TLS_BEFORE_BIND
-                ser['use_ssl'] = True
-                ser['tls'] = ldap3.Tls(validate=ssl.CERT_REQUIRED, version=ssl.PROTOCOL_TLSv1)
+                self.debug("ldap.ssl :: Activated - Cert file: {}".format(certfile))
+                con["auto_bind"] = ldap3.AUTO_BIND_TLS_BEFORE_BIND
+                ser["use_ssl"] = True
+                ser["tls"] = ldap3.Tls(
+                    validate=ssl.CERT_REQUIRED, version=ssl.PROTOCOL_TLSv1
+                )
             else:
-                con['auto_bind'] = ldap3.AUTO_BIND_NO_TLS
+                con["auto_bind"] = ldap3.AUTO_BIND_NO_TLS
             try:
                 # self.debug('ldap.server params :: {}'.format(ser))
                 server = ldap3.Server(ldap_url, **ser)
-                self.debug('ldap.server :: {}'.format(server))
+                self.debug("ldap.server :: {}".format(server))
                 # self.debug('ldap.connection params :: {}'.format(con))
                 answer = ldap3.Connection(server, **con)
-                self.debug('ldap.connection :: {}'.format(answer))
+                self.debug("ldap.connection :: {}".format(answer))
                 # answer.open()
                 # answer.bind()
-                self.debug('ldap.connected :: Authorized')
+                self.debug("ldap.connected :: Authorized")
             except LDAPSocketOpenError as e:
                 # The access for this user has been denied, Debug it if required
-                self.debug("LDAP connect failed 'SocketOpenError' for url '{}' with error '{}'".format(ldap_url, e))
+                self.debug(
+                    "LDAP connect failed 'SocketOpenError' for url '{}' with error '{}'".format(
+                        ldap_url, e
+                    )
+                )
                 answer = None
             except LDAPException as e:
                 # The access for this user has been denied, Debug it if required
-                self.debug("LDAP connect failed 'LDAPException' for user '{}' with error '{}'".format(username, e))
+                self.debug(
+                    "LDAP connect failed 'LDAPException' for user '{}' with error '{}'".format(
+                        username, e
+                    )
+                )
                 answer = False
 
         else:
@@ -499,16 +948,16 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         return answer
 
     def authenticate(self, *args, **kwargs):
-        '''
+        """
         Authenticate the user agains LDAP
-        '''
+        """
 
         # Get config
         username = kwargs.get("username", None)
         password = kwargs.get("password", None)
 
         # Check user in Active Directory (authorization == None if can not connect to Active Directory Server)
-        authorization = self.ldap_link(username, password, mode='LOGIN')
+        authorization = self.ldap_link(username, password, mode="LOGIN")
 
         if authorization:
             # The user was validated in Active Directory
@@ -523,7 +972,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             user = User.objects.filter(username=username).first()
             if user and not user.is_staff:
                 # If access was denied
-                if authorization is False or getattr(settings, "AD_LOCK_UNAUTHORIZED", False):
+                if authorization is False or getattr(
+                    settings, "AD_LOCK_UNAUTHORIZED", False
+                ):
                     # Deactivate the user
                     user.is_active = False
                     user.save()
@@ -542,15 +993,15 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         info = {}
 
         # Get an already authenticated link connection to LDAP
-        link = self.ldap_link(username, password, mode='SEARCH')
+        link = self.ldap_link(username, password, mode="SEARCH")
 
         if link:
 
             # Prepare SEARCH fields
-            mapping = getattr(settings, 'AD_MAP_FIELDS', {})
+            mapping = getattr(settings, "AD_MAP_FIELDS", {})
             # Build the search fields
-            search_fields = ['sAMAccountName', 'memberOf'] + list(mapping.values())
-            search_dns = getattr(settings, 'AD_NT4_DOMAIN', '').lower().split(".")
+            search_fields = ["sAMAccountName", "memberOf"] + list(mapping.values())
+            search_dns = getattr(settings, "AD_NT4_DOMAIN", "").lower().split(".")
             # Build the dn list
             search_dnlist = []
             for token in search_dns:
@@ -563,7 +1014,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             link.search(
                 search_base=search_dn,
                 # search_filter='(&(objectclass=person)(uid=admin))',
-                search_filter='(sAMAccountName={})'.format(username),
+                search_filter="(sAMAccountName={})".format(username),
                 search_scope=ldap3.SUBTREE,
                 # attributes=ldap3.ALL_ATTRIBUTES,
                 attributes=search_fields,
@@ -590,7 +1041,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 memberships = []
 
             # Validate that they are a member of review board group
-            memberships = result.get('memberOf', [])
+            memberships = result.get("memberOf", [])
 
             # Process all memberships found
             groupsAD = {}
@@ -601,10 +1052,10 @@ class ActiveDirectoryGroupMembershipSSLBackend:
 
                 for token in tokens:
                     (key, value) = token.split("=")
-                    if key == 'CN':
+                    if key == "CN":
                         if not cn:
                             cn = value
-                    elif key == 'DC':
+                    elif key == "DC":
                         dcs.append(value)
 
                 # Prepare the full domain name addess of the AD
@@ -620,7 +1071,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
 
             # Prepare the answer
             info = {}
-            info['groups'] = groupsAD
+            info["groups"] = groupsAD
 
             # Look for other tokens to get mapped
             for djfield in mapping.keys():
@@ -639,9 +1090,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         return info
 
     def get_or_create_user(self, username, password):
-        '''
+        """
         Get or create the given user
-        '''
+        """
 
         # Get the groups for this user
         info = self.get_ad_info(username, password)
@@ -654,14 +1105,14 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             user = User(username=username)
 
         # Update user
-        user.first_name = info.get('first_name', '')
-        user.last_name = info.get('last_name', '')
-        user.email = info.get('email', '')
+        user.first_name = info.get("first_name", "")
+        user.last_name = info.get("last_name", "")
+        user.email = info.get("email", "")
 
         # Check if the user is in the Administrators groups
         is_admin = False
-        for domain in info['groups']:
-            if 'Domain Admins' in info['groups'][domain]:
+        for domain in info["groups"]:
+            if "Domain Admins" in info["groups"][domain]:
                 is_admin = True
                 break
 
@@ -695,19 +1146,19 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             return None
 
     def validate(self, user, info):
-        '''
+        """
         Dummy validate system, to be redeclared
         User object here is not saved in the database, but it is ready to be saved
         If the answer from this method is None, user will be denied to login in to the system!
-        '''
+        """
         self.debug("Validation process!")
         return user
 
     def synchronize(self, user, info):
-        '''
+        """
         It tries to do a group synchronization if possible
         This methods should be redeclared by the developer
-        '''
+        """
 
         self.debug("Synchronize!")
 
@@ -715,9 +1166,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         user.groups.clear()
 
         # For all domains found for this user
-        for domain in info['groups']:
+        for domain in info["groups"]:
             # For all groups he is
-            for groupname in info['groups'][domain]:
+            for groupname in info["groups"][domain]:
                 # Lookup for that group
                 group = Group.objects.filter(name=groupname).first()
                 if group:
