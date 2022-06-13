@@ -69,7 +69,7 @@ def check_auth(user, debugger=None):
             # Show debugger
             if debugger:
                 debugger(
-                    "check_auth(): user '{}' is an Adminitrator".format(user),
+                    "check_auth(): user '{}' is an Administrator".format(user),
                     color="green",
                 )
 
@@ -426,9 +426,13 @@ class TokenAuth(ModelBackend, Debugger):
                         color="white",
                     )
                     for (key, value) in config_settings.items():
+                        if value:
+                            color = "blue"
+                        else:
+                            color = "purple"
                         self.debug(
                             "  > {}: {}".format(key, value),
-                            color="cyan",
+                            color=color,
                         )
 
                 # Get keys
@@ -489,6 +493,11 @@ class TokenAuth(ModelBackend, Debugger):
                                         otp = None
                         else:
                             otp = None
+
+                        # Remove user key if not in use
+                        if (not config["user_unsigned"]) or (not config["user_signed"]):
+                            user_key = None
+
                     else:
                         if self.__debugger:
                             raise IOError(
@@ -517,7 +526,7 @@ class TokenAuth(ModelBackend, Debugger):
                             "  > Master KEY configured: '{}' [{}]".format(
                                 master, ", ".join(info)
                             ),
-                            color="cyan",
+                            color="blue",
                         )
                     else:
                         self.debug(
@@ -534,7 +543,7 @@ class TokenAuth(ModelBackend, Debugger):
                             "  > User KEY configured: '{}' [{}]".format(
                                 user_key, ", ".join(info)
                             ),
-                            color="cyan",
+                            color="blue",
                         )
                     else:
                         self.debug(
@@ -551,7 +560,7 @@ class TokenAuth(ModelBackend, Debugger):
                             "  > OTP KEY configured: '{}' [{}]".format(
                                 otp, ", ".join(info)
                             ),
-                            color="cyan",
+                            color="blue",
                         )
                     else:
                         self.debug(
@@ -590,9 +599,13 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
+                            if keys[-1] == token:
+                                color = "cyan"
+                            else:
+                                color = "blue"
                             self.debug(
                                 "  > Master Unsigned Key: {}".format(keys[-1]),
-                                color="cyan",
+                                color=color,
                             )
 
                     if config["master_signed"]:  # MASTER KEY SIGNED
@@ -604,11 +617,15 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
+                            if keys[-1] == token:
+                                color = "green"
+                            else:
+                                color = "blue"
                             self.debug(
                                 "  > Master Signed Key: {} <- sha1( {} + {} )".format(
                                     keys[-1], tosign, master
                                 ),
-                                color="cyan",
+                                color=color,
                             )
 
                 if user_key:
@@ -619,9 +636,13 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
+                            if keys[-1] == token:
+                                color = "green"
+                            else:
+                                color = "blue"
                             self.debug(
                                 "  > User Unsigned Key: {}".format(keys[-1]),
-                                color="cyan",
+                                color=color,
                             )
 
                     if config["user_signed"]:  # USER KEY SIGNED
@@ -635,11 +656,15 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
+                            if keys[-1] == token:
+                                color = "green"
+                            else:
+                                color = "blue"
                             self.debug(
                                 "  > User Signed Key: {} <- sha1( {} + {} )".format(
                                     keys[-1], tosign, user_key
                                 ),
-                                color="cyan",
+                                color=color,
                             )
 
                 if otp:
@@ -650,9 +675,13 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
+                            if keys[-1] == token:
+                                color = "green"
+                            else:
+                                color = "blue"
                             self.debug(
                                 "  > OTP Unsigned Key: {}".format(keys[-1]),
-                                color="cyan",
+                                color=color,
                             )
 
                     if config["otp_signed"]:  # OTP KEY SIGNED
@@ -664,11 +693,15 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
+                            if keys[-1] == token:
+                                color = "green"
+                            else:
+                                color = "blue"
                             self.debug(
-                                "  > OTP Signed Key: {} <- sha1( {}+ {} )".format(
+                                "  > OTP Signed Key: {} <- sha1( {} + {} )".format(
                                     keys[-1], tosign, otp
                                 ),
-                                color="cyan",
+                                color=color,
                             )
 
                 # Key is valid
