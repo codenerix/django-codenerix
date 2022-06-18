@@ -1,13 +1,39 @@
-django-codenerix (4.0.2) stable; urgency=medium
+# Changelog
+All notable changes to this project will be documented in this file.
 
-  * Added missing folder in last published version in pypy
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
- -- Juanmi Taboada <juanmi@juanmitaboada.com>  Tue, 18 May 2022 09:13:00 +0200
+## [Unreleased]
 
-django-codenerix (4.0.1) stable; urgency=medium
+## [4.0.7] - 2022-06-18
+### Fixed
+- "authjson_details" is using DjangoJSONEncoder for json.dumps(), which prevents authjson_details from failing on newer Django.
 
-  * Django 4.x support
-  * Resolved XLS export problems with float
-  * FileAngularInput repaired on details when adding new entry
+## [4.0.6] - 2022-06-13
+### Changed
+- AUTHENTICATION_DEBUG improved debugging output
 
- -- Juanmi Taboada <juanmi@juanmitaboada.com>  Tue, 17 May 2022 13:58:14 +0200
+## [4.0.5] - 2022-06-12
+###  Added
+- Support for AUTHENTICATION_DEBUG in config which helps debugging Authentication problems
+
+## [4.0.4] - 2022-05-27
+### Changed
+- Template filters static64, media64 and file64 to simple_tags for easier usage
+
+## [4.0.3] - 2022-05-27
+### Added
+- New templatetags in codenerix_special library for templates: static64, media64 and file64 to serve files from disk as base64 text. Intended to embed binary data in templates.
+
+## [4.0.2] - 2022-05-18
+### Added
+- Added missing folder in last published version in pypy
+
+## [4.0.1] - 2022-05-17
+### Added
+- Django 4.x is fully supported
+
+### Fixed
+- Resolved XLS export problems with float
+- FileAngularInput repaired on details when adding new entry
