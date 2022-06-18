@@ -26,11 +26,16 @@ from django.forms.widgets import Select, CheckboxInput
 from django.forms import NullBooleanField
 
 from codenerix.helpers import model_inspect
-from codenerix.widgets import StaticSelect, DynamicSelect, DynamicInput, MultiStaticSelect, MultiDynamicSelect
+from codenerix.widgets import (
+    StaticSelect,
+    DynamicSelect,
+    DynamicInput,
+    MultiStaticSelect,
+    MultiDynamicSelect,
+)
 
 
 class BaseForm(object):
-
     def __init__(self, *args, **kwargs):
         self.__language = None
         self.attributes = {}
@@ -44,16 +49,16 @@ class BaseForm(object):
 
     def get_name(self):
         # If name atrribute exists in Meta
-        if 'name' in self.Meta.__dict__:
+        if "name" in self.Meta.__dict__:
             # Try to get name from Meta
             name = self.Meta.name
         else:
             # If not try to find it automatically
             info = model_inspect(self.Meta.model())
-            if info['verbose_name']:
-                name = info['verbose_name']
+            if info["verbose_name"]:
+                name = info["verbose_name"]
             else:
-                name = info['modelname']
+                name = info["modelname"]
         return name
 
     def __errors__(self):
@@ -64,8 +69,8 @@ class BaseForm(object):
         if len(color) != 0:
             valores_validos = "#0123456789abcdefABCDEF"
             r = True
-            for l in color:
-                if l not in valores_validos:
+            for lt in color:
+                if lt not in valores_validos:
                     r = False
                     break
             if not r or color[0] != "#" or not (len(color) == 4 or len(color) == 7):
@@ -78,7 +83,7 @@ class BaseForm(object):
 
     def get_errors(self):
         # Where to look for fields
-        if 'list_errors' in dir(self):
+        if "list_errors" in dir(self):
             list_errors = self.list_errors
         else:
             # r = self.non_field_errors()
@@ -93,7 +98,7 @@ class BaseForm(object):
         return []
 
     def get_groups(self, gs=None, processed=[], initial=True):
-        '''
+        """
         <--------------------------------------- 12 columns ------------------------------------>
                     <--- 6 columns --->                           <--- 6 columns --->
          ------------------------------------------   ------------------------------------------
@@ -177,7 +182,7 @@ class BaseForm(object):
             ['age',6, None, None, None, None, None, ["ng-click=functionjs('param1')", "ng-change=functionjs2()"]]    Input 'age' with extras functions
             ['age',None,None,None,None, 'filter']    Input 'age' with extras filter ONLY DETAILS
             ['age',6, {'color': 'red'}          Input 'age' will be shown with red title
-        '''
+        """
 
         # Check if language is set
         if not self.__language:
@@ -187,7 +192,7 @@ class BaseForm(object):
         if initial:
             processed = []
         # Where to look for fields
-        if 'list_fields' in dir(self):
+        if "list_fields" in dir(self):
             list_fields = self.list_fields
             check_system = "html_name"
         else:
@@ -196,15 +201,15 @@ class BaseForm(object):
 
         # Default attributes for fields
         attributes = [
-            ('columns', 6),
-            ('color', None),
-            ('bgcolor', None),
-            ('textalign', None),
-            ('inline', False),  # input in line with label
-            ('label', True),
-            ('extra', None),
-            ('extra_div', None),
-            ('foreign_info', {}),
+            ("columns", 6),
+            ("color", None),
+            ("bgcolor", None),
+            ("textalign", None),
+            ("inline", False),  # input in line with label
+            ("label", True),
+            ("extra", None),
+            ("extra_div", None),
+            ("foreign_info", {}),
         ]
         labels = [x[0] for x in attributes]
 
@@ -225,32 +230,32 @@ class BaseForm(object):
         # Start processing
         for g in gs:
             token = {}
-            token['name'] = g[0]
+            token["name"] = g[0]
 
-            if token['name'] in html_helper:
-                if 'pre' in html_helper[token['name']]:
-                    token["html_helper_pre"] = html_helper[token['name']]['pre']
-                if 'post' in html_helper[token['name']]:
-                    token["html_helper_post"] = html_helper[token['name']]['post']
+            if token["name"] in html_helper:
+                if "pre" in html_helper[token["name"]]:
+                    token["html_helper_pre"] = html_helper[token["name"]]["pre"]
+                if "post" in html_helper[token["name"]]:
+                    token["html_helper_post"] = html_helper[token["name"]]["post"]
 
             styles = g[1]
             if type(styles) is tuple:
                 if len(styles) >= 1:
-                    token['columns'] = g[1][0]
+                    token["columns"] = g[1][0]
                 if len(styles) >= 2:
-                    token['color'] = g[1][1]
+                    token["color"] = g[1][1]
                 if len(styles) >= 3:
-                    token['bgcolor'] = g[1][2]
+                    token["bgcolor"] = g[1][2]
                 if len(styles) >= 4:
-                    token['textalign'] = g[1][3]
+                    token["textalign"] = g[1][3]
                 if len(styles) >= 5:
-                    token['inline'] = g[1][4]
+                    token["inline"] = g[1][4]
                 if len(styles) >= 7:
-                    token['extra'] = g[1][5]
+                    token["extra"] = g[1][5]
                 if len(styles) >= 8:
-                    token['extra_div'] = g[1][6]
+                    token["extra_div"] = g[1][6]
             else:
-                token['columns'] = g[1]
+                token["columns"] = g[1]
             fs = g[2:]
             fields = []
             for f in fs:
@@ -262,19 +267,33 @@ class BaseForm(object):
                     fields += self.get_groups([list(f)], processed, False)
                 else:
                     try:
-                        list_type = [str, unicode, ]
+                        list_type = [
+                            str,
+                            unicode,
+                        ]
                     except NameError:
-                        list_type = [str, ]
+                        list_type = [
+                            str,
+                        ]
                     # Check if it is a list
                     if type(f) == list:
                         # This is a field with attributes, get the name
                         field = f[0]
 
-                        if html_helper and token['name'] in html_helper and 'items' in html_helper[token['name']] and field in html_helper[token['name']]['items']:
-                            if 'pre' in html_helper[token['name']]['items'][field]:
-                                atr["html_helper_pre"] = html_helper[token['name']]['items'][field]['pre']
-                            if 'post' in html_helper[token['name']]['items'][field]:
-                                atr["html_helper_post"] = html_helper[token['name']]['items'][field]['post']
+                        if (
+                            html_helper
+                            and token["name"] in html_helper
+                            and "items" in html_helper[token["name"]]
+                            and field in html_helper[token["name"]]["items"]
+                        ):
+                            if "pre" in html_helper[token["name"]]["items"][field]:
+                                atr["html_helper_pre"] = html_helper[token["name"]][
+                                    "items"
+                                ][field]["pre"]
+                            if "post" in html_helper[token["name"]]["items"][field]:
+                                atr["html_helper_post"] = html_helper[token["name"]][
+                                    "items"
+                                ][field]["post"]
 
                         # Process each attribute (if any)
                         dictionary = False
@@ -285,17 +304,27 @@ class BaseForm(object):
                                     if key in labels:
                                         atr[key] = element[key]
                                     else:
-                                        raise IOError("Unknown attribute '{0}' as field '{1}' in list of fields".format(key, field))
+                                        raise IOError(
+                                            "Unknown attribute '{0}' as field '{1}' in list of fields".format(
+                                                key, field
+                                            )
+                                        )
                             else:
                                 if not dictionary:
                                     if element is not None:
                                         atr[attributes[idx][0]] = element
                                 else:
-                                    raise IOError("We already processed a dicionary element in this list of fields, you can not add anoother type of elements to it, you must keep going with dictionaries")
+                                    raise IOError(
+                                        "We already processed a dicionary element in this list of fields, you can not add anoother type of elements to it, you must keep going with dictionaries"
+                                    )
                     elif type(f) in list_type:
                         field = f
                     else:
-                        raise IOError("Uknown element type '{0}' inside group '{1}'".format(type(f), token['name']))
+                        raise IOError(
+                            "Uknown element type '{0}' inside group '{1}'".format(
+                                type(f), token["name"]
+                            )
+                        )
 
                     # Get the Django Field object
                     found = None
@@ -311,10 +340,10 @@ class BaseForm(object):
                         wrequired = found.field.widget.is_required
                         wattrs = found.field.widget.attrs
                         # Fill base attributes
-                        atr['name'] = found.html_name
-                        atr['input'] = found
-                        atr['inputbool'] = foundbool
-                        atr['focus'] = False
+                        atr["name"] = found.html_name
+                        atr["input"] = found
+                        atr["inputbool"] = foundbool
+                        atr["focus"] = False
                         # Set focus
                         if focus_must is None:
                             if focus_first is None:
@@ -322,25 +351,29 @@ class BaseForm(object):
                             if wrequired:
                                 focus_must = atr
                         # Autocomplete
-                        if 'autofill' in dir(self.Meta):
+                        if "autofill" in dir(self.Meta):
                             autofill = self.Meta.autofill.get(found.html_name, None)
-                            atr['autofill'] = autofill
+                            atr["autofill"] = autofill
                             if autofill:
                                 # Check format of the request
                                 autokind = autofill[0]
                                 if type(autokind) == str:
                                     # Using new format
-                                    if autokind == 'select':
+                                    if autokind == "select":
                                         # If autofill is True for this field set the DynamicSelect widget
                                         found.field.widget = DynamicSelect(wattrs)
-                                    elif autokind == 'multiselect':
+                                    elif autokind == "multiselect":
                                         # If autofill is True for this field set the DynamicSelect widget
                                         found.field.widget = MultiDynamicSelect(wattrs)
-                                    elif autokind == 'input':
+                                    elif autokind == "input":
                                         # If autofill is True for this field set the DynamicSelect widget
                                         found.field.widget = DynamicInput(wattrs)
                                     else:
-                                        raise IOError("Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(autokind))
+                                        raise IOError(
+                                            "Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(
+                                                autokind
+                                            )
+                                        )
 
                                     # Configure the field
                                     found.field.widget.is_required = wrequired
@@ -362,11 +395,17 @@ class BaseForm(object):
                         else:
 
                             # Set we don't have autofill for this field
-                            atr['autofill'] = None
+                            atr["autofill"] = None
 
                         # Check if we have to replace the widget with a newer one
-                        if isinstance(found.field.widget, Select) and not isinstance(found.field.widget, DynamicSelect):
-                            if not isinstance(found.field.widget, MultiStaticSelect) and not isinstance(found.field.widget, MultiDynamicSelect):
+                        if isinstance(found.field.widget, Select) and not isinstance(
+                            found.field.widget, DynamicSelect
+                        ):
+                            if not isinstance(
+                                found.field.widget, MultiStaticSelect
+                            ) and not isinstance(
+                                found.field.widget, MultiDynamicSelect
+                            ):
                                 found.field.widget = StaticSelect(wattrs)
                             found.field.widget.choices = found.field.choices
                             found.field.widget.is_required = wrequired
@@ -378,8 +417,8 @@ class BaseForm(object):
                             if attribute not in atr.keys():
                                 atr[attribute] = default
                         # Fill label
-                        if atr['label'] is True:
-                            atr['label'] = found.label
+                        if atr["label"] is True:
+                            atr["label"] = found.label
                         # Set language
                         flang = getattr(found.field, "set_language", None)
                         if flang:
@@ -392,9 +431,13 @@ class BaseForm(object):
                         # Remember we have processed it
                         processed.append(found.__dict__[check_system])
                     else:
-                        raise IOError("Unknown field '{0}' specified in group '{1}'".format(f, token['name']))
+                        raise IOError(
+                            "Unknown field '{0}' specified in group '{1}'".format(
+                                f, token["name"]
+                            )
+                        )
 
-            token['fields'] = fields
+            token["fields"] = fields
             groups.append(token)
 
         # Add the rest of attributes we didn't use yet
@@ -408,10 +451,10 @@ class BaseForm(object):
                     # Prepare attr
                     atr = {}
                     # Fill base attributes
-                    atr['name'] = infield.html_name
-                    atr['input'] = infield
-                    atr['inputbool'] = True
-                    atr['focus'] = False
+                    atr["name"] = infield.html_name
+                    atr["input"] = infield
+                    atr["inputbool"] = True
+                    atr["focus"] = False
                     # Set focus
                     if focus_must is None:
                         if focus_first is None:
@@ -419,9 +462,9 @@ class BaseForm(object):
                         if wrequired:
                             focus_must = atr
                     # Autocomplete
-                    if 'autofill' in dir(self.Meta):
+                    if "autofill" in dir(self.Meta):
                         autofill = self.Meta.autofill.get(infield.html_name, None)
-                        atr['autofill'] = autofill
+                        atr["autofill"] = autofill
                         if autofill:
                             # Check format of the request
                             autokind = autofill[0]
@@ -429,17 +472,21 @@ class BaseForm(object):
                                 # Get old information
 
                                 # Using new format
-                                if autokind == 'select':
+                                if autokind == "select":
                                     # If autofill is True for this field set the DynamicSelect widget
                                     infield.field.widget = DynamicSelect(wattrs)
-                                elif autokind == 'multiselect':
+                                elif autokind == "multiselect":
                                     # If autofill is True for this field set the DynamicSelect widget
                                     infield.field.widget = MultiDynamicSelect(wattrs)
-                                elif autokind == 'input':
+                                elif autokind == "input":
                                     # If autofill is True for this field set the DynamicSelect widget
                                     infield.field.widget = DynamicInput(wattrs)
                                 else:
-                                    raise IOError("Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(autokind))
+                                    raise IOError(
+                                        "Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(
+                                            autokind
+                                        )
+                                    )
 
                                 # Configure the field
                                 infield.field.widget.is_required = wrequired
@@ -461,15 +508,21 @@ class BaseForm(object):
                     else:
 
                         # Set we don't have autofill for this field
-                        atr['autofill'] = None
+                        atr["autofill"] = None
 
                     # Check if we have to replace the widget with a newer one
-                    if isinstance(infield.field.widget, Select) and not isinstance(infield.field.widget, DynamicSelect):
+                    if isinstance(infield.field.widget, Select) and not isinstance(
+                        infield.field.widget, DynamicSelect
+                    ):
                         if isinstance(infield.field, NullBooleanField):
                             infield.field.widget = CheckboxInput(wattrs)
-                        elif not isinstance(infield.field.widget, MultiStaticSelect) and not isinstance(found.field.widget, MultiDynamicSelect):
+                        elif not isinstance(
+                            infield.field.widget, MultiStaticSelect
+                        ) and not isinstance(infield.field.widget, MultiDynamicSelect):
                             infield.field.widget = StaticSelect(wattrs)
-                        if hasattr(infield.field.widget, 'choices') and hasattr(infield.field, 'choices'):
+                        if hasattr(infield.field.widget, "choices") and hasattr(
+                            infield.field, "choices"
+                        ):
                             infield.field.widget.choices = infield.field.choices
                         infield.field.widget.is_required = wrequired
                         infield.field.widget.form_name = self.form_name
@@ -480,8 +533,8 @@ class BaseForm(object):
                         if attribute not in atr.keys():
                             atr[attribute] = default
                     # Fill label
-                    if atr['label'] is True:
-                        atr['label'] = infield.label
+                    if atr["label"] is True:
+                        atr["label"] = infield.label
                     # Set language
                     flang = getattr(infield.field, "set_language", None)
                     if flang:
@@ -494,13 +547,13 @@ class BaseForm(object):
 
             # Save the new elements
             if fields:
-                groups.append({'name': None, 'columns': 12, 'fields': fields})
+                groups.append({"name": None, "columns": 12, "fields": fields})
 
         # Set focus
         if focus_must:
-            focus_must['focus'] = True
+            focus_must["focus"] = True
         elif focus_first is not None:
-            focus_first['focus'] = True
+            focus_first["focus"] = True
 
         # Return the resulting groups
         return groups
