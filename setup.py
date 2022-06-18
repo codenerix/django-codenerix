@@ -18,12 +18,6 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as readme:
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-requirements = codenerix.__requirements__["all"]
-if sys.version_info[0] < 3:
-    requirements += codenerix.__requirements__["2"]
-else:
-    requirements += codenerix.__requirements__["3"]
-
 setup(
     name="django-codenerix",
     version=codenerix.__version__,
@@ -55,5 +49,22 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
     # cmdclass={ 'install': CustomInstallCommand, },
-    install_requires=requirements,
+    install_requires=[
+        "pymongo",
+        "python-dateutil",
+        "django-recaptcha>=1.2.1,<1.3",
+        "django-rosetta>=0.9.8",
+        "jsonfield",
+        "openpyxl",
+        "Pillow",
+        "Unidecode",
+        "Django>=4.0.1",
+        "ldap3",
+        "django-haystack>=2.6.1",
+        "pytz",
+        "elasticsearch>=2.0.0,<3.0.0",
+        "django-debug-toolbar==3.2.2",
+        "pyotp",
+        "html5lib",
+    ],
 )

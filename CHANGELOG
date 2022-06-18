@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.9] - 2022-06-18
+### Changed
+- Dependency system simplified for setup.py and restricted to Django>=4.0.1 (Python 2.x not supported anymore)
+
 ## [4.0.8] - 2022-06-18
 ### Fixed
 - Repaired GenForm that was preventing rendering of forms on specific situations
