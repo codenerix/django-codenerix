@@ -68,6 +68,7 @@ Demo
 ****
 
 You can have a look to our demos online:
+
 * `CODENERIX Simple Agenda DEMO <http://demo.codenerix.com>`_.
 * `CODENERIX Full ERP DEMO <https://erp.codenerix.com>`_.
 
