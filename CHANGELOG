@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.12] - 2022-08-16
+### Changed
+- Added support on DynamicSelects to allow Angular JS query the selected element details
+- Style cleanup on widgets.py
+
 ## [4.0.11] - 2022-07-14
 ### Changed
 - Added missing dependency over codenerix_lib package

@@ -1123,8 +1123,9 @@ function dynamic_fields(scope) {
         }
         return false;
     };
+
     // Control how the selected ui-select field works with pristine/dirty states
-    scope.selectedOptionSelect = function(input, value, ngchange, externalScope) {
+    scope.selectedOptionSelect = function(input, value, ngchange, externalScope, selected) {
         if ((typeof(input) == 'undefined') || (input === null)){
             // Dummy input
             input={'$setViewValue': function () {}};
@@ -1136,6 +1137,17 @@ function dynamic_fields(scope) {
             input.$pristine=input.$viewValue==value;
         }
         input.$setViewValue(input.$modelValue);
+
+        // Set selected
+        input.selected = selected;
+        // Decode JSON if we got JSON DATA
+        angular.forEach(input.selected, (function (value, key) {
+            if (key=='__JSON_DATA__') {
+                input.selected['__JSON_DATA__'] = angular.fromJson(value);
+                return;
+            }
+        }));
+
         // Process the selected item
         if (scope.valuegetforeingkey[input.$name] != undefined && 'rows' in scope.valuegetforeingkey[input.$name]){
             
