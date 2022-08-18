@@ -35,7 +35,7 @@ setup(
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Django",
-        "Framework :: Django :: 2.2",
+        "Framework :: Django :: 4.0",
         "Intended Audience :: Developers",
         "License :: Other/Proprietary License",
         "Operating System :: OS Independent",
@@ -59,7 +59,7 @@ setup(
         "openpyxl",
         "Pillow",
         "Unidecode",
-        "Django>=4.0.6",
+        "Django>=4.0.12",
         "ldap3",
         "django-haystack>=2.6.1",
         "pytz",
