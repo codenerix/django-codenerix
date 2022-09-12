@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.13] - 2022-09-12
+### Changed
+- On GenList frontend, it prevents empty cells when rendering columns which renders lists with duplicated entries
+
 ## [4.0.12] - 2022-08-16
 ### Changed
 - Added support on DynamicSelects to allow Angular JS query the selected element details
