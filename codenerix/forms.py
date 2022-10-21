@@ -191,6 +191,7 @@ class BaseForm(object):
         # Initialize the list
         if initial:
             processed = []
+
         # Where to look for fields
         if "list_fields" in dir(self):
             list_fields = self.list_fields
@@ -329,63 +330,96 @@ class BaseForm(object):
                     # Get the Django Field object
                     found = None
                     foundbool = False
+                    userwidget = None
                     for infield in list_fields:
                         if infield.__dict__[check_system] == field:
                             found = infield
                             foundbool = True
+
+                            # Check if the user specified a widget
+                            if "widgets" in dir(self.Meta):
+                                userwidget = self.Meta.widgets.get(field, None)
                             break
 
                     if foundbool:
+
                         # Get attributes (required and original attributes)
                         wrequired = found.field.widget.is_required
                         wattrs = found.field.widget.attrs
+
                         # Fill base attributes
                         atr["name"] = found.html_name
                         atr["input"] = found
                         atr["inputbool"] = foundbool
                         atr["focus"] = False
+
                         # Set focus
                         if focus_must is None:
                             if focus_first is None:
                                 focus_first = atr
                             if wrequired:
                                 focus_must = atr
+
                         # Autocomplete
                         if "autofill" in dir(self.Meta):
+
                             autofill = self.Meta.autofill.get(found.html_name, None)
                             atr["autofill"] = autofill
+
                             if autofill:
+
                                 # Check format of the request
                                 autokind = autofill[0]
                                 if type(autokind) == str:
-                                    # Using new format
-                                    if autokind == "select":
-                                        # If autofill is True for this field set the DynamicSelect widget
-                                        found.field.widget = DynamicSelect(wattrs)
-                                    elif autokind == "multiselect":
-                                        # If autofill is True for this field set the DynamicSelect widget
-                                        found.field.widget = MultiDynamicSelect(wattrs)
-                                    elif autokind == "input":
-                                        # If autofill is True for this field set the DynamicSelect widget
-                                        found.field.widget = DynamicInput(wattrs)
-                                    else:
-                                        raise IOError(
-                                            "Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(
-                                                autokind
-                                            )
-                                        )
 
-                                    # Configure the field
+                                    # Replace widget if the user didn't define any
+                                    if not userwidget:
+
+                                        # Using new format
+                                        if autokind == "select":
+
+                                            # If autofill is True for this field set the DynamicSelect widget
+                                            found.field.widget = DynamicSelect(wattrs)
+
+                                        elif autokind == "multiselect":
+
+                                            # If autofill is True for this field set the DynamicSelect widget
+                                            found.field.widget = MultiDynamicSelect(
+                                                wattrs
+                                            )
+
+                                        elif autokind == "input":
+
+                                            # If autofill is True for this field set the DynamicSelect widget
+                                            found.field.widget = DynamicInput(wattrs)
+
+                                        else:
+
+                                            raise IOError(
+                                                "Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(
+                                                    autokind
+                                                )
+                                            )
+
+                                    # Configure widget
                                     found.field.widget.is_required = wrequired
                                     found.field.widget.form_name = self.form_name
                                     found.field.widget.field_name = infield.html_name
                                     found.field.widget.autofill_deepness = autofill[1]
                                     found.field.widget.autofill_url = autofill[2]
                                     found.field.widget.autofill = autofill[3:]
+
                                 else:
+
                                     # Get old information [COMPATIBILITY WITH OLD VERSION]
-                                    # If autofill is True for this field set the DynamicSelect widget
-                                    found.field.widget = DynamicSelect(wattrs)
+
+                                    # Replace widget if the user didn't define any
+                                    if not userwidget:
+
+                                        # If autofill is True for this field set the DynamicSelect widget
+                                        found.field.widget = DynamicSelect(wattrs)
+
+                                    # Configure widget
                                     found.field.widget.is_required = wrequired
                                     found.field.widget.form_name = self.form_name
                                     found.field.widget.field_name = infield.html_name
@@ -401,10 +435,19 @@ class BaseForm(object):
                         if isinstance(found.field.widget, Select) and not isinstance(
                             found.field.widget, DynamicSelect
                         ):
-                            if not isinstance(
-                                found.field.widget, MultiStaticSelect
-                            ) and not isinstance(
-                                found.field.widget, MultiDynamicSelect
+                            # Replace widget if the user didn't define any and we haven't done yet
+                            if (
+                                (not userwidget)
+                                and (
+                                    not isinstance(
+                                        found.field.widget, MultiStaticSelect
+                                    )
+                                )
+                                and (
+                                    not isinstance(
+                                        found.field.widget, MultiDynamicSelect
+                                    )
+                                )
                             ):
                                 found.field.widget = StaticSelect(wattrs)
                             found.field.widget.choices = found.field.choices
@@ -442,53 +485,72 @@ class BaseForm(object):
 
         # Add the rest of attributes we didn't use yet
         if initial:
+
             fields = []
             for infield in list_fields:
+
                 if infield.__dict__[check_system] not in processed:
+
+                    # Check if the user specified a widget
+                    userwidget = self.Meta.widgets.get(infield.html_name, None)
+
                     # Get attributes (required and original attributes)
                     wattrs = infield.field.widget.attrs
                     wrequired = infield.field.widget.is_required
+
                     # Prepare attr
                     atr = {}
+
                     # Fill base attributes
                     atr["name"] = infield.html_name
                     atr["input"] = infield
                     atr["inputbool"] = True
                     atr["focus"] = False
+
                     # Set focus
                     if focus_must is None:
                         if focus_first is None:
                             focus_first = atr
                         if wrequired:
                             focus_must = atr
+
                     # Autocomplete
                     if "autofill" in dir(self.Meta):
+
                         autofill = self.Meta.autofill.get(infield.html_name, None)
                         atr["autofill"] = autofill
+
                         if autofill:
+
                             # Check format of the request
                             autokind = autofill[0]
+
                             if type(autokind) == str:
                                 # Get old information
 
-                                # Using new format
-                                if autokind == "select":
-                                    # If autofill is True for this field set the DynamicSelect widget
-                                    infield.field.widget = DynamicSelect(wattrs)
-                                elif autokind == "multiselect":
-                                    # If autofill is True for this field set the DynamicSelect widget
-                                    infield.field.widget = MultiDynamicSelect(wattrs)
-                                elif autokind == "input":
-                                    # If autofill is True for this field set the DynamicSelect widget
-                                    infield.field.widget = DynamicInput(wattrs)
-                                else:
-                                    raise IOError(
-                                        "Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(
-                                            autokind
-                                        )
-                                    )
+                                # Replace widget if the user didn't define any
+                                if not userwidget:
 
-                                # Configure the field
+                                    # Using new format
+                                    if autokind == "select":
+                                        # If autofill is True for this field set the DynamicSelect widget
+                                        infield.field.widget = DynamicSelect(wattrs)
+                                    elif autokind == "multiselect":
+                                        # If autofill is True for this field set the DynamicSelect widget
+                                        infield.field.widget = MultiDynamicSelect(
+                                            wattrs
+                                        )
+                                    elif autokind == "input":
+                                        # If autofill is True for this field set the DynamicSelect widget
+                                        infield.field.widget = DynamicInput(wattrs)
+                                    else:
+                                        raise IOError(
+                                            "Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(
+                                                autokind
+                                            )
+                                        )
+
+                                # Configure widget
                                 infield.field.widget.is_required = wrequired
                                 infield.field.widget.form_name = self.form_name
                                 infield.field.widget.field_name = infield.html_name
@@ -497,8 +559,14 @@ class BaseForm(object):
                                 infield.field.widget.autofill = autofill[3:]
                             else:
                                 # Get old information [COMPATIBILITY WITH OLD VERSION]
-                                # If autofill is True for this field set the DynamicSelect widget
-                                infield.field.widget = DynamicSelect(wattrs)
+
+                                # Replace widget if the user didn't define any
+                                if not userwidget:
+
+                                    # If autofill is True for this field set the DynamicSelect widget
+                                    infield.field.widget = DynamicSelect(wattrs)
+
+                                # Configure widget
                                 infield.field.widget.is_required = wrequired
                                 infield.field.widget.form_name = self.form_name
                                 infield.field.widget.field_name = infield.html_name
@@ -514,12 +582,20 @@ class BaseForm(object):
                     if isinstance(infield.field.widget, Select) and not isinstance(
                         infield.field.widget, DynamicSelect
                     ):
-                        if isinstance(infield.field, NullBooleanField):
-                            infield.field.widget = CheckboxInput(wattrs)
-                        elif not isinstance(
-                            infield.field.widget, MultiStaticSelect
-                        ) and not isinstance(infield.field.widget, MultiDynamicSelect):
-                            infield.field.widget = StaticSelect(wattrs)
+
+                        # Replace widget if the user didn't define any
+                        if not userwidget:
+
+                            if isinstance(infield.field, NullBooleanField):
+                                infield.field.widget = CheckboxInput(wattrs)
+                            elif not isinstance(
+                                infield.field.widget, MultiStaticSelect
+                            ) and not isinstance(
+                                infield.field.widget, MultiDynamicSelect
+                            ):
+                                infield.field.widget = StaticSelect(wattrs)
+
+                        # Configure widget
                         if hasattr(infield.field.widget, "choices") and hasattr(
                             infield.field, "choices"
                         ):

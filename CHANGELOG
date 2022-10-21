@@ -6,21 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.15] - 2022-10-21
+### Added
+- CODENERIX will respect the widgets added by the user in the Meta section of the forms
+
 ## [4.0.14] - 2022-09-12
-### Changed
+### Fixed
 - On forms resolves "'EmailValidator' object has no attribute 'domain_whitelist'" which is deprectated on Django >= 4.0.6
 
 ## [4.0.13] - 2022-09-12
-### Changed
+### Fixed
 - On GenList frontend, it prevents empty cells when rendering columns which renders lists with duplicated entries
 
 ## [4.0.12] - 2022-08-16
-### Changed
+### Added
 - Added support on DynamicSelects to allow Angular JS query the selected element details
 - Style cleanup on widgets.py
 
 ## [4.0.11] - 2022-07-14
-### Changed
+### Fixed
 - Added missing dependency over codenerix_lib package
 
 ## [4.0.10] - 2022-07-11

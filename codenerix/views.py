@@ -1092,6 +1092,7 @@ class GenBase(object):
             return tabs_autorender
 
     def get_object(self):
+
         # Autoindex
         if self.action_permission == "detail":
             cut_index = 1
@@ -1106,6 +1107,7 @@ class GenBase(object):
 
         # Get object
         pk = super(GenBase, self).get_object().pk
+
         # Get queryset
         queryset = self.model.objects.all()
 
