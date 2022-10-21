@@ -94,6 +94,16 @@ class BaseForm(object):
                     list_errors.append(element[5])
         return list_errors
 
+    def get_extends(self, name, userextend):
+        # Set extended variables
+        if userextend:
+            extends = []
+            for fieldextend in userextend:
+                extends.append("{}__{}".format(name, fieldextend))
+        else:
+            extends = None
+        return extends
+
     def __groups__(self):
         return []
 
@@ -182,6 +192,12 @@ class BaseForm(object):
             ['age',6, None, None, None, None, None, ["ng-click=functionjs('param1')", "ng-change=functionjs2()"]]    Input 'age' with extras functions
             ['age',None,None,None,None, 'filter']    Input 'age' with extras filter ONLY DETAILS
             ['age',6, {'color': 'red'}          Input 'age' will be shown with red title
+
+        Meta:
+        =====
+        - autofill: autofill system (CODENERIX)
+        - extend: extended variables system (CODENERIX)
+        - widgets: widgets system (DJANGO)
         """
 
         # Check if language is set
@@ -331,14 +347,18 @@ class BaseForm(object):
                     found = None
                     foundbool = False
                     userwidget = None
+                    userextend = None
                     for infield in list_fields:
                         if infield.__dict__[check_system] == field:
                             found = infield
                             foundbool = True
 
-                            # Check if the user specified a widget
+                            # Check if the user specified a extend
                             if "widgets" in dir(self.Meta):
                                 userwidget = self.Meta.widgets.get(field, None)
+                            # Check if the user specified a extend
+                            if "extend" in dir(self.Meta):
+                                userextend = self.Meta.extend.get(field, None)
                             break
 
                     if foundbool:
@@ -352,6 +372,7 @@ class BaseForm(object):
                         atr["input"] = found
                         atr["inputbool"] = foundbool
                         atr["focus"] = False
+                        atr["extend"] = self.get_extends(found.html_name, userextend)
 
                         # Set focus
                         if focus_must is None:
@@ -493,9 +514,15 @@ class BaseForm(object):
 
                     # Check if the user specified a widget
                     if "widgets" in dir(self.Meta):
-                        userwidget = self.Meta.widgets.get(infield.html_name, None)
+                        userwidget = self.Meta.extend.get(infield.html_name, None)
                     else:
                         userwidget = None
+
+                    # Check if the user specified a extend
+                    if "extend" in dir(self.Meta):
+                        userextend = self.Meta.extend.get(infield.html_name, None)
+                    else:
+                        userextend = None
 
                     # Get attributes (required and original attributes)
                     wattrs = infield.field.widget.attrs
@@ -509,6 +536,7 @@ class BaseForm(object):
                     atr["input"] = infield
                     atr["inputbool"] = True
                     atr["focus"] = False
+                    atr["extend"] = self.get_extends(infield.html_name, userextend)
 
                     # Set focus
                     if focus_must is None:

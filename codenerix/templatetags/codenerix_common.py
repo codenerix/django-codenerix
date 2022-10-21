@@ -30,16 +30,16 @@ from django.utils import formats
 from codenerix.helpers import zeropad, monthname, nameunify
 
 register = template.Library()
-register.filter('digitos', zeropad)
-register.filter('monthname', monthname)
-register.filter('nameunify', nameunify)
+register.filter("digitos", zeropad)
+register.filter("monthname", monthname)
+register.filter("nameunify", nameunify)
 
 
 @register.filter
 def debugme(obj, kind=None):
-    if kind == 'dict':
+    if kind == "dict":
         obj = obj.__dict__
-    elif kind == 'keys':
+    elif kind == "keys":
         obj = obj.__dict__.keys()
 
     raise IOError(obj)
@@ -47,12 +47,12 @@ def debugme(obj, kind=None):
 
 @register.filter
 def debugmedict(obj):
-        raise IOError(obj.__dict__)
+    raise IOError(obj.__dict__)
 
 
 @register.filter
 def addedit(value):
-    return (value == 'add') or (value == 'edit')
+    return (value == "add") or (value == "edit")
 
 
 @register.filter
@@ -72,17 +72,17 @@ def differ(value1, value2):
 def ghtml(value):
     if value:
         splitted = value.replace("\r", "").split("\n")
-        result = ''
+        result = ""
         for row in splitted:
             oldlen = 0
             while oldlen != len(row):
                 oldlen = len(row)
-                row = row.replace('  ', '&nbsp;&nbsp;')
-            if len(row) > 0 and row[0] == '#':
+                row = row.replace("  ", "&nbsp;&nbsp;")
+            if len(row) > 0 and row[0] == "#":
                 result += "<b>%s</b>" % (row[1:])
             else:
                 result += "%s" % (row)
-            result += '<br>'
+            result += "<br>"
     else:
         result = value
     return result
@@ -97,8 +97,11 @@ def smallerthan(value1, value2):
 def br(value):
     splitted = value.split("\n")
     header = splitted[0]
-    body = '<br>'.join(splitted[1:])
-    return "<div style='color:#5588BB'>%s</div><div style='color:#22BB00; margin-top:5px;'>%s</div>" % (header, body)
+    body = "<br>".join(splitted[1:])
+    return (
+        "<div style='color:#5588BB'>%s</div><div style='color:#22BB00; margin-top:5px;'>%s</div>"
+        % (header, body)
+    )
 
 
 @register.filter
@@ -120,7 +123,7 @@ def nicekilometers(value):
 @register.filter
 def niceeuronull(value):
     if value:
-        return u"{0}\u20AC".format(value)
+        return "{0}\u20AC".format(value)
     else:
         return "-"
 
@@ -170,7 +173,7 @@ def count(values):
 
 @register.filter
 def countpages(values):
-    return (values.count() - 1)
+    return values.count() - 1
 
 
 @register.filter
@@ -189,19 +192,19 @@ def pair(value):
         return True
 
 
-@register.filter(name='len')
+@register.filter(name="len")
 def lenlist(list):
     return len(list)
 
 
 @register.filter
 def nbsp(value):
-    return value.replace(' ', '&nbsp;')
+    return value.replace(" ", "&nbsp;")
 
 
 @register.filter
 def mod(value, arg):
-    if (value % arg == 0):
+    if value % arg == 0:
         return 1
     else:
         return
@@ -209,16 +212,16 @@ def mod(value, arg):
 
 @register.filter
 def keyvalue(dic, key):
-        return dic[key]
+    return dic[key]
 
 
 @register.filter
 def acumulate(element, li):
     if li:
-        number = li[-1]['id'] + 1
+        number = li[-1]["id"] + 1
     else:
         number = 1
-    li.append({'id': number, 'value': element})
+    li.append({"id": number, "value": element})
     return number
 
 
@@ -239,26 +242,31 @@ def langforms(forms, language):
 
 @register.filter
 def objectatrib(instance, atrib):
-    '''
+    """
     this filter is going to be useful to execute an object method or get an
     object attribute dynamically. this method is going to take into account
     the atrib param can contains underscores
-    '''
-    atrib = atrib.replace("__", ".")
-    atribs = []
-    atribs = atrib.split(".")
+    """
 
-    obj = instance
-    for atrib in atribs:
-        if type(obj) == dict:
-            result = obj[atrib]
-        else:
-            try:
-                result = getattr(obj, atrib)()
-            except Exception:
-                result = getattr(obj, atrib)
+    if instance != "":
 
-        obj = result
+        atrib = atrib.replace("__", ".")
+        atribs = []
+        atribs = atrib.split(".")
+
+        obj = instance
+        for atrib in atribs:
+            if type(obj) == dict:
+                result = obj[atrib]
+            else:
+                try:
+                    result = getattr(obj, atrib)()
+                except Exception:
+                    result = getattr(obj, atrib)
+
+            obj = result
+    else:
+        result = None
     return result
 
 
@@ -266,39 +274,62 @@ def objectatrib(instance, atrib):
 def TrueFalse(value):
     if type(value) == bool:
         if value:
-            return _('True')
+            return _("True")
         else:
-            return _('False')
+            return _("False")
     return value
 
 
 @register.filter
 def cdnx_beauty(value, kind=None):
     if kind:
-        if kind == 'skype':
-            return u"<a ng-click='$event.stopPropagation();' href='tel:{0}'>{0}</a>".format(value)
-        elif kind == 'image':
-            return u"<img ng-click='$event.stopPropagation();' src='{0}{1}'>".format(settings.MEDIA_URL, value)
-        elif kind == 'nofilter':
+        if kind == "skype":
+            return (
+                "<a ng-click='$event.stopPropagation();' href='tel:{0}'>{0}</a>".format(
+                    value
+                )
+            )
+        elif kind == "image":
+            return "<img ng-click='$event.stopPropagation();' src='{0}{1}'>".format(
+                settings.MEDIA_URL, value
+            )
+        elif kind == "nofilter":
             return value
         else:
-            raise Exception("Django filter 'codenerix' got a wrong kind named '" + kind + "'")
+            raise Exception(
+                "Django filter 'codenerix' got a wrong kind named '" + kind + "'"
+            )
     else:
         if value is None:
             return nicenull(value)
         elif type(value) is bool:
             return TrueFalse(value)
         elif type(value) is datetime.datetime:
-            fmt = formats.get_format('DATETIME_INPUT_FORMATS', lang=get_language())[0]
+            fmt = formats.get_format("DATETIME_INPUT_FORMATS", lang=get_language())[0]
             value = datetime.datetime.strftime(value, fmt)
         elif type(value) is time.time:
-            fmt = formats.get_format('TIME_INPUT_FORMATS', lang=get_language())[0]
+            fmt = formats.get_format("TIME_INPUT_FORMATS", lang=get_language())[0]
             value = time.time.strftime(value, fmt)
         elif type(value) is float:
             if float(int(value)) == value:
                 value = int(value)
 
     return value
+
+
+@register.filter
+def cdnx_angular(value):
+    """
+    Convert each value to its analog version in Angular
+    """
+    if value is None:
+        return "null"
+    elif type(value) is bool:
+        return str(value).lower()
+    elif type(value) is str:
+        return '"' + value + '"'
+    else:
+        return value
 
 
 @register.filter
@@ -326,7 +357,7 @@ def subtraction(value, arg):
 
 @register.filter
 def autofocus(f):
-    if f.get('focus', False):
+    if f.get("focus", False):
         return "autofocus"
     else:
         return ""
@@ -334,7 +365,7 @@ def autofocus(f):
 
 @register.filter
 def replace(value, fromto):
-    (f, t) = fromto.split('·')
+    (f, t) = fromto.split("·")
     return str(value).replace(f, t)
 
 

@@ -170,6 +170,11 @@ limitations under the License.
                             <div class="form-group">
                                 {% with column_counter1=1|column_counter %}
                                     {% for field in group.fields %}
+                                        {% if field.extend %}
+                                            {% for extended_field in field.extend %}
+                                            <span ng-init="{{extended_field}}={{object|objectatrib:extended_field|cdnx_angular}}"></span>
+                                            {% endfor %}
+                                        {% endif %}
                                         {% if field.inputbool %}
                                             {% with input=field.input %}
                                                 {% if column_counter1|add_columns:field.columns %}
