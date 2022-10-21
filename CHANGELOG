@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.16] - 2022-10-21
+### Fixed
+- Resolved bug "type object 'Meta' has no attribute 'widgets'"
+
 ## [4.0.15] - 2022-10-21
 ### Added
 - CODENERIX will respect the widgets added by the user in the Meta section of the forms

@@ -492,7 +492,10 @@ class BaseForm(object):
                 if infield.__dict__[check_system] not in processed:
 
                     # Check if the user specified a widget
-                    userwidget = self.Meta.widgets.get(infield.html_name, None)
+                    if "widgets" in dir(self.Meta):
+                        userwidget = self.Meta.widgets.get(infield.html_name, None)
+                    else:
+                        userwidget = None
 
                     # Get attributes (required and original attributes)
                     wattrs = infield.field.widget.attrs
