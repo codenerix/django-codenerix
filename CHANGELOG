@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.17] - 2022-10-27
+### Added
+- Extend system on forms
+- Translations
+
 ## [4.0.16] - 2022-10-21
 ### Fixed
 - Resolved bug "type object 'Meta' has no attribute 'widgets'"
