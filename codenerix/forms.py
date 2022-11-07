@@ -514,7 +514,7 @@ class BaseForm(object):
 
                     # Check if the user specified a widget
                     if "widgets" in dir(self.Meta):
-                        userwidget = self.Meta.extend.get(infield.html_name, None)
+                        userwidget = self.Meta.widgets.get(infield.html_name, None)
                     else:
                         userwidget = None
 
