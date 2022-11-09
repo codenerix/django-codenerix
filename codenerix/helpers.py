@@ -50,13 +50,13 @@ from django.urls import reverse_lazy
 
 
 def epochdate(timestamp):
-    '''
+    """
     Convet an epoch date to a tuple in format ("yyyy-mm-dd","hh:mm:ss")
     Example: "1023456427" -> ("2002-06-07","15:27:07")
 
     Parameters:
     - `timestamp`: date in epoch format
-    '''
+    """
 
     dt = datetime.fromtimestamp(float(timestamp)).timetuple()
     fecha = "{0:d}-{1:02d}-{2:02d}".format(dt.tm_year, dt.tm_mon, dt.tm_mday)
@@ -66,12 +66,17 @@ def epochdate(timestamp):
 
 def date2string(dtime, formt, default):
     try:
-        list_type = [str, unicode, ]
+        list_type = [
+            str,
+            unicode,
+        ]
     except NameError:
-        list_type = [str, ]
+        list_type = [
+            str,
+        ]
 
     if dtime:
-        if ('year' in dir(dtime)) and (dtime.year < 1900):
+        if ("year" in dir(dtime)) and (dtime.year < 1900):
             return default
         elif type(dtime) in list_type:
             return dtime
@@ -82,9 +87,9 @@ def date2string(dtime, formt, default):
 
 
 def daterange_filter(value, variable):
-    start = dateparse.parse_datetime(value['startDate'])
-    end = dateparse.parse_datetime(value['endDate'])
-    result = {'{0}__gte'.format(variable): start, '{0}__lte'.format(variable): end}
+    start = dateparse.parse_datetime(value["startDate"])
+    end = dateparse.parse_datetime(value["endDate"])
+    result = {"{0}__gte".format(variable): start, "{0}__lte".format(variable): end}
     return result
 
 
@@ -110,7 +115,7 @@ def timezone_deserialize(string):
 
 
 def zeropad(number, width):
-    return '{number:0{width}d}'.format(width=width, number=number)
+    return "{number:0{width}d}".format(width=width, number=number)
 
 
 def monthname(value):
@@ -148,17 +153,17 @@ def nameunify(name, url=False):
     name = smart_str(name)
 
     # Get it on lower
-    namelow = unidecode(name).lower().strip(' \t\n\r')
+    namelow = unidecode(name).lower().strip(" \t\n\r")
 
     # Define valid characters
-    allowed_characters = 'abcdefghijklmnopqrstuvwxyz0123456789_-'
+    allowed_characters = "abcdefghijklmnopqrstuvwxyz0123456789_-"
     if url:
-        namelow = namelow.replace(' ', "-")
+        namelow = namelow.replace(" ", "-").replace("_", "-")
     else:
-        namelow = namelow.replace("-", "").replace(' ', '_')
+        namelow = namelow.replace("-", "").replace(" ", "_")
 
     # Replace all unknown characters
-    result = ''
+    result = ""
     for c in namelow:
         if c in allowed_characters:
             result += c
@@ -172,7 +177,7 @@ def nameunify(name, url=False):
 def get_profile(user):
     # Check if it has admin rights admin
     try:
-        is_admin = bool(user.is_superuser or user.groups.get(name='Admins'))
+        is_admin = bool(user.is_superuser or user.groups.get(name="Admins"))
     except Exception:
         is_admin = False
 
@@ -198,9 +203,9 @@ def get_profiled_paths(path, user, lang, extension):
         if profile:
             paths.append("{0}.{1}".format(profile, lang))
             paths.append(profile)
-        if profile != 'admin':
+        if profile != "admin":
             paths.append("user.{0}".format(lang))
-            paths.append('user')
+            paths.append("user")
 
     # Add an empty path
     paths.append(lang)
@@ -217,7 +222,7 @@ def get_profiled_paths(path, user, lang, extension):
     return (paths, basepath)
 
 
-def get_template(template, user, lang, extension='html', raise_error=True):
+def get_template(template, user, lang, extension="html", raise_error=True):
     # Get profiled paths
     (templates, templatepath) = get_profiled_paths(template, user, lang, extension)
 
@@ -243,12 +248,14 @@ def get_template(template, user, lang, extension='html', raise_error=True):
         return found
     else:
         if raise_error:
-            raise IOError("I couldn't find a valid template, I have tried: {}".format(test))
+            raise IOError(
+                "I couldn't find a valid template, I have tried: {}".format(test)
+            )
         else:
             return test
 
 
-def get_static(desired, user, lang, default, extension='html', relative=False):
+def get_static(desired, user, lang, default, extension="html", relative=False):
     # Get profiled paths
     (paths, basepath) = get_profiled_paths(desired, user, lang, extension)
 
@@ -260,7 +267,11 @@ def get_static(desired, user, lang, default, extension='html', relative=False):
         else:
             addon = ""
         target = "%s%s.%s" % (basepath, addon, extension)
-        if hasattr(settings, "STATIC_ROOT") and settings.STATIC_ROOT and os.path.exists(os.path.join(settings.STATIC_ROOT, target)):
+        if (
+            hasattr(settings, "STATIC_ROOT")
+            and settings.STATIC_ROOT
+            and os.path.exists(os.path.join(settings.STATIC_ROOT, target))
+        ):
             if relative:
                 found = os.path.join(settings.STATIC_URL, target)
             else:
@@ -282,47 +293,47 @@ def direct_to_template(request, template, lang):
 
 
 def model_inspect(obj):
-        '''
-        Analize itself looking for special information, right now it returns:
-        - Application name
-        - Model name
-        '''
-        # Prepare the information object
-        info = {}
-        if hasattr(obj, '_meta'):
-            info['verbose_name'] = getattr(obj._meta, 'verbose_name', None)
-        else:
-            info['verbose_name'] = None
+    """
+    Analize itself looking for special information, right now it returns:
+    - Application name
+    - Model name
+    """
+    # Prepare the information object
+    info = {}
+    if hasattr(obj, "_meta"):
+        info["verbose_name"] = getattr(obj._meta, "verbose_name", None)
+    else:
+        info["verbose_name"] = None
 
-        # Get info from the object
-        if hasattr(obj, 'model') and obj.model:
-            model = obj.model
-        else:
-            model = obj.__class__
+    # Get info from the object
+    if hasattr(obj, "model") and obj.model:
+        model = obj.model
+    else:
+        model = obj.__class__
 
-        namesp = str(model)
-        namesp = namesp.replace("<class ", "").replace(">", "").replace("'", "").split(".")
+    namesp = str(model)
+    namesp = namesp.replace("<class ", "").replace(">", "").replace("'", "").split(".")
 
-        # Remember information
-        info['appname'] = namesp[-3]
-        info['modelname'] = namesp[-1]
-        info['model'] = model
+    # Remember information
+    info["appname"] = namesp[-3]
+    info["modelname"] = namesp[-1]
+    info["model"] = model
 
-        # Return the info
-        return info
+    # Return the info
+    return info
 
 
 def upload_path(instance, filename):
-    '''
+    """
     This method is created to return the path to upload files. This path must be
     different from any other to avoid problems.
-    '''
+    """
     path_separator = "/"
     date_separator = "-"
     ext_separator = "."
     empty_string = ""
     # get the model name
-    model_name = model_inspect(instance)['modelname']
+    model_name = model_inspect(instance)["modelname"]
 
     # get the string date
     date = datetime.now().strftime("%Y-%m-%d").split(date_separator)
@@ -334,15 +345,19 @@ def upload_path(instance, filename):
     filename = empty_string.join(split_filename[:-1])
     file_ext = split_filename[-1]
 
-    new_filename = empty_string.join([filename, str(random.random()).split(ext_separator)[1]])
+    new_filename = empty_string.join(
+        [filename, str(random.random()).split(ext_separator)[1]]
+    )
     new_filename = ext_separator.join([new_filename, file_ext])
-    string_path = path_separator.join([model_name, curr_year, curr_month, curr_day, new_filename])
+    string_path = path_separator.join(
+        [model_name, curr_year, curr_month, curr_day, new_filename]
+    )
     # the path is built using the current date and the modelname
     return string_path
 
 
 def get_class(func):
-    if not getattr(func, '__closure__', None):
+    if not getattr(func, "__closure__", None):
         return
 
     for closure in func.__closure__:
@@ -351,7 +366,7 @@ def get_class(func):
         if not contents:
             continue
 
-        if getattr(contents, '__bases__', None) and issubclass(contents, View):
+        if getattr(contents, "__bases__", None) and issubclass(contents, View):
             return contents
 
         result = get_class(contents)
@@ -360,11 +375,11 @@ def get_class(func):
 
 
 def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(",")[0]
     else:
-        ip = request.META.get('REMOTE_ADDR')
+        ip = request.META.get("REMOTE_ADDR")
     return ip
 
 
@@ -380,21 +395,21 @@ class CodenerixEncoder(object):
 
     codenerix_numeric_dic = {
         # Basic dicts
-        'num': '0123456789',
-        'alpha': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-        'alphanc': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-        'alphanum': '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-        'alphanumnc': '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        "num": "0123456789",
+        "alpha": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "alphanc": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "alphanum": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "alphanumnc": "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
         # Original dicts
-        'hex36': 'ENWR6MV71JOQHADUGFCYZ25X3B4L0KPTSI98',
-        'hex16': '54BEF80D1C96A732',
-        'hexz17': 'Z0123456789ABCDEF',
+        "hex36": "ENWR6MV71JOQHADUGFCYZ25X3B4L0KPTSI98",
+        "hex16": "54BEF80D1C96A732",
+        "hexz17": "Z0123456789ABCDEF",
     }
 
     def list_encoders(self):
         return self.codenerix_numeric_dic.keys()
 
-    def numeric_encode(self, number, dic='hex36', length=None, cfill=None):
+    def numeric_encode(self, number, dic="hex36", length=None, cfill=None):
 
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
@@ -437,7 +452,7 @@ class CodenerixEncoder(object):
         # Return the reverse string
         return string[::-1]
 
-    def numeric_decode(self, string, dic='hex36'):
+    def numeric_decode(self, string, dic="hex36"):
 
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
@@ -462,7 +477,7 @@ class CodenerixEncoder(object):
 
 
 class InMemoryZip(object):
-    '''
+    """
     # Compress
     imz = InMemoryZip()
     imz.append("info.dat", data).append("test.txt","asdfasfdsaf")
@@ -475,7 +490,7 @@ class InMemoryZip(object):
     # Uncompress
     imz = InMemoryZip(datazip)$
     info_unzipped = imz.get("info.dat")
-    '''
+    """
 
     def __init__(self, data=None):
         # Create the in-memory file-like object
@@ -489,10 +504,10 @@ class InMemoryZip(object):
         return self.in_memory_zip
 
     def append(self, filename_in_zip, file_contents):
-        '''
+        """
         Appends a file with name filename_in_zip and contents of
         file_contents to the in-memory zip.
-        '''
+        """
         # Set the file pointer to the end of the file
         self.in_memory_zip.seek(-1, io.SEEK_END)
 
@@ -531,25 +546,28 @@ class InMemoryZip(object):
         return size
 
     def read(self):
-        '''Returns a string with the contents of the in-memory zip.'''
+        """Returns a string with the contents of the in-memory zip."""
         self.in_memory_zip.seek(0)
         return self.in_memory_zip.read()
 
     def writetofile(self, filename):
-        '''Writes the in-memory zip to a file.'''
+        """Writes the in-memory zip to a file."""
         f = open(filename, "w")
         f.write(self.read())
         f.close()
 
 
 def remove_getdisplay(field_name):
-    '''
+    """
     for string 'get_FIELD_NAME_display' return 'FIELD_NAME'
-    '''
-    str_ini = 'get_'
-    str_end = '_display'
-    if str_ini == field_name[0:len(str_ini)] and str_end == field_name[(-1) * len(str_end):]:
-        field_name = field_name[len(str_ini):(-1) * len(str_end)]
+    """
+    str_ini = "get_"
+    str_end = "_display"
+    if (
+        str_ini == field_name[0 : len(str_ini)]
+        and str_end == field_name[(-1) * len(str_end) :]
+    ):
+        field_name = field_name[len(str_ini) : (-1) * len(str_end)]
     return field_name
 
 
@@ -578,10 +596,10 @@ def trace_json_error(struct, path=[]):
     return found
 
 
-def qobject_builder_string_search(valid_fields, text, conditions='icontains'):
+def qobject_builder_string_search(valid_fields, text, conditions="icontains"):
     fields = None
     for word in text.split(" "):
-        if word and word[0] == '-':
+        if word and word[0] == "-":
             word = word[1:]
             neg = True
         else:
@@ -589,7 +607,7 @@ def qobject_builder_string_search(valid_fields, text, conditions='icontains'):
 
         temp = None
         for field in valid_fields:
-            qobject = Q(**{'{}__{}'.format(field, conditions): word})
+            qobject = Q(**{"{}__{}".format(field, conditions): word})
             if temp:
                 temp |= qobject
             else:
@@ -608,58 +626,61 @@ def qobject_builder_string_search(valid_fields, text, conditions='icontains'):
 
 def form_answer(status, answer):
     # Normalize answer
-    if '__pk__' not in answer:
-        answer['__pk__'] = None
-    if '__str__' not in answer:
-        answer['__str__'] = 'OK'
+    if "__pk__" not in answer:
+        answer["__pk__"] = None
+    if "__str__" not in answer:
+        answer["__str__"] = "OK"
 
     # Encode answer
     answer_encoded = urlsafe_base64_encode(str.encode(json.dumps(answer))).decode()
 
     # Build success URL
-    success_url = reverse_lazy("CDNX_status", kwargs={'status': 'accept', 'answer': answer_encoded})
+    success_url = reverse_lazy(
+        "CDNX_status", kwargs={"status": "accept", "answer": answer_encoded}
+    )
 
     # Return response
     return HttpResponseRedirect(success_url)
 
 
-def JSONEncoder_newdefault(kind=['uuid', 'datetime', 'time', 'decimal']):
-    '''
+def JSONEncoder_newdefault(kind=["uuid", "datetime", "time", "decimal"]):
+    """
     JSON Encoder newdfeault is a wrapper capable of encoding several kinds
     Usage:
         from codenerix.helpers import JSONEncoder_newdefault
         JSONEncoder_newdefault()
-    '''
+    """
     JSONEncoder_olddefault = json.JSONEncoder.default
 
     def JSONEncoder_wrapped(self, o):
-        '''
+        """
         json.JSONEncoder.default = JSONEncoder_newdefault
-        '''
-        if ('uuid' in kind) and isinstance(o, UUID):
+        """
+        if ("uuid" in kind) and isinstance(o, UUID):
             return str(o)
-        if ('datetime' in kind) and isinstance(o, datetime):
+        if ("datetime" in kind) and isinstance(o, datetime):
             return str(o)
-        if ('time' in kind) and isinstance(o, time.struct_time):
+        if ("time" in kind) and isinstance(o, time.struct_time):
             return datetime.fromtimestamp(time.mktime(o))
-        if ('decimal' in kind) and isinstance(o, decimal.Decimal):
+        if ("decimal" in kind) and isinstance(o, decimal.Decimal):
             return str(o)
         return JSONEncoder_olddefault(self, o)
+
     json.JSONEncoder.default = JSONEncoder_wrapped
 
 
 def context_processors_update(context, request):
-    '''
+    """
     Update context with context_processors from settings
     Usage:
         from codenerix.helpers import context_processors_update
         context_processors_update(context, self.request)
-    '''
+    """
     for template in settings.TEMPLATES:
-        for context_processor in template['OPTIONS']['context_processors']:
-            path = context_processor.split('.')
+        for context_processor in template["OPTIONS"]["context_processors"]:
+            path = context_processor.split(".")
             name = path.pop(-1)
-            processor = getattr(importlib.import_module('.'.join(path)), name, None)
+            processor = getattr(importlib.import_module(".".join(path)), name, None)
             if processor:
                 context.update(processor(request))
     return context
