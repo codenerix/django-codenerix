@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-25 14:25+0200\n"
+"POT-Creation-Date: 2023-01-11 07:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -177,39 +177,39 @@ msgstr ""
 msgid "Sa"
 msgstr ""
 
-#: codenerix/context.py:94 codenerix/helpers.py:118
+#: codenerix/context.py:94 codenerix/helpers.py:123
 msgid "January"
 msgstr ""
 
-#: codenerix/context.py:95 codenerix/helpers.py:120
+#: codenerix/context.py:95 codenerix/helpers.py:125
 msgid "February"
 msgstr ""
 
-#: codenerix/context.py:96 codenerix/helpers.py:122
+#: codenerix/context.py:96 codenerix/helpers.py:127
 msgid "March"
 msgstr ""
 
-#: codenerix/context.py:97 codenerix/helpers.py:124
+#: codenerix/context.py:97 codenerix/helpers.py:129
 msgid "April"
 msgstr ""
 
-#: codenerix/context.py:98 codenerix/helpers.py:126
+#: codenerix/context.py:98 codenerix/helpers.py:131
 msgid "May"
 msgstr ""
 
-#: codenerix/context.py:99 codenerix/helpers.py:128
+#: codenerix/context.py:99 codenerix/helpers.py:133
 msgid "June"
 msgstr ""
 
-#: codenerix/context.py:100 codenerix/helpers.py:130
+#: codenerix/context.py:100 codenerix/helpers.py:135
 msgid "July"
 msgstr ""
 
-#: codenerix/context.py:101 codenerix/helpers.py:132
+#: codenerix/context.py:101 codenerix/helpers.py:137
 msgid "August"
 msgstr ""
 
-#: codenerix/context.py:102 codenerix/helpers.py:134
+#: codenerix/context.py:102 codenerix/helpers.py:139
 msgid "September"
 msgstr ""
 
@@ -217,11 +217,11 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: codenerix/context.py:104 codenerix/helpers.py:138
+#: codenerix/context.py:104 codenerix/helpers.py:143
 msgid "November"
 msgstr ""
 
-#: codenerix/context.py:105 codenerix/helpers.py:140
+#: codenerix/context.py:105 codenerix/helpers.py:145
 msgid "December"
 msgstr ""
 
@@ -267,11 +267,11 @@ msgstr ""
 msgid "Invalid color"
 msgstr ""
 
-#: codenerix/helpers.py:136
+#: codenerix/helpers.py:141
 msgid "Octuber"
 msgstr ""
 
-#: codenerix/helpers.py:409
+#: codenerix/helpers.py:424
 msgid "ERROR: dic has repeated elements"
 msgstr ""
 
@@ -382,6 +382,14 @@ msgid "deleted"
 msgstr ""
 
 #: codenerix/models_people.py:47 codenerix/models_people.py:72
+#: codenerix_geodata/models.py:36 codenerix_geodata/models.py:46
+#: codenerix_geodata/models.py:115 codenerix_geodata/models.py:125
+#: codenerix_geodata/models.py:135 codenerix_geodata/views.py:78
+#: codenerix_geodata/views.py:95 codenerix_geodata/views.py:155
+#: codenerix_geodata/views.py:181 codenerix_geodata/views.py:261
+#: codenerix_geodata/views.py:297 codenerix_geodata/views.py:389
+#: codenerix_geodata/views.py:435 codenerix_geodata/views.py:577
+#: codenerix_geodata/views.py:624
 msgid "Name"
 msgstr ""
 
@@ -679,4 +687,131 @@ msgstr ""
 
 #: codenerix/widgets.py:1038
 msgid "We are working on this plugin, it will be ready for next version"
+msgstr ""
+
+#: codenerix_geodata/forms.py:37 codenerix_geodata/forms.py:52
+#: codenerix_geodata/forms.py:67 codenerix_geodata/forms.py:82
+#: codenerix_geodata/forms.py:97 codenerix_geodata/forms.py:111
+msgid "Details"
+msgstr ""
+
+#: codenerix_geodata/management/commands/populate_geodata.py:155
+msgid "Populates Continent, Country and City models"
+msgstr ""
+
+#: codenerix_geodata/models.py:51 codenerix_geodata/models.py:67
+#: codenerix_geodata/models.py:77 codenerix_geodata/models.py:82
+#: codenerix_geodata/models.py:99 codenerix_geodata/models.py:110
+#: codenerix_geodata/models.py:141 codenerix_geodata/models.py:158
+#: codenerix_geodata/models.py:168 codenerix_geodata/models.py:174
+#: codenerix_geodata/models.py:191 codenerix_geodata/models.py:201
+#: codenerix_geodata/views.py:154 codenerix_geodata/views.py:260
+#: codenerix_geodata/views.py:388
+msgid "Code"
+msgstr ""
+
+#: codenerix_geodata/models.py:83 codenerix_geodata/models.py:100
+msgid "Continent"
+msgstr ""
+
+#: codenerix_geodata/models.py:140 codenerix_geodata/models.py:157
+#: codenerix_geodata/models.py:206 codenerix_geodata/models.py:225
+#: codenerix_geodata/models.py:234 codenerix_geodata/models.py:254
+#: codenerix_geodata/views.py:582
+msgid "Country"
+msgstr ""
+
+#: codenerix_geodata/models.py:173 codenerix_geodata/models.py:190
+#: codenerix_geodata/models.py:207 codenerix_geodata/models.py:235
+#: codenerix_geodata/models.py:255
+msgid "Region"
+msgstr ""
+
+#: codenerix_geodata/models.py:208 codenerix_geodata/models.py:236
+#: codenerix_geodata/models.py:256 codenerix_geodata/views.py:580
+msgid "Province"
+msgstr ""
+
+#: codenerix_geodata/models.py:209
+msgid "Timezone"
+msgstr ""
+
+#: codenerix_geodata/models.py:226
+msgid "Time zone"
+msgstr ""
+
+#: codenerix_geodata/models.py:237 codenerix_geodata/models.py:258
+msgid "City"
+msgstr ""
+
+#: codenerix_geodata/models.py:238 codenerix_geodata/models.py:257
+msgid "Town"
+msgstr ""
+
+#: codenerix_geodata/models.py:239
+msgid "Zip code"
+msgstr ""
+
+#: codenerix_geodata/models.py:240 codenerix_geodata/models.py:260
+msgid "Address"
+msgstr ""
+
+#: codenerix_geodata/models.py:241 codenerix_geodata/models.py:261
+msgid "Phone"
+msgstr ""
+
+#: codenerix_geodata/models.py:259
+msgid "Zipcode"
+msgstr ""
+
+#: codenerix_geodata/views.py:156 codenerix_geodata/views.py:182
+#: codenerix_geodata/views.py:264 codenerix_geodata/views.py:302
+#: codenerix_geodata/views.py:394 codenerix_geodata/views.py:443
+#: codenerix_geodata/views.py:583 codenerix_geodata/views.py:632
+msgid "Code continent"
+msgstr ""
+
+#: codenerix_geodata/views.py:157 codenerix_geodata/views.py:265
+#: codenerix_geodata/views.py:303 codenerix_geodata/views.py:395
+#: codenerix_geodata/views.py:444 codenerix_geodata/views.py:584
+#: codenerix_geodata/views.py:633
+msgid "Name continent"
+msgstr ""
+
+#: codenerix_geodata/views.py:183
+msgid "Continent name"
+msgstr ""
+
+#: codenerix_geodata/views.py:262 codenerix_geodata/views.py:392
+#: codenerix_geodata/views.py:581
+msgid "Code country"
+msgstr ""
+
+#: codenerix_geodata/views.py:263 codenerix_geodata/views.py:300
+#: codenerix_geodata/views.py:393 codenerix_geodata/views.py:441
+#: codenerix_geodata/views.py:630
+msgid "Name country"
+msgstr ""
+
+#: codenerix_geodata/views.py:299 codenerix_geodata/views.py:437
+#: codenerix_geodata/views.py:440 codenerix_geodata/views.py:626
+#: codenerix_geodata/views.py:629
+msgid "Code self"
+msgstr ""
+
+#: codenerix_geodata/views.py:390
+msgid "Code region"
+msgstr ""
+
+#: codenerix_geodata/views.py:391 codenerix_geodata/views.py:438
+#: codenerix_geodata/views.py:627
+msgid "Name region"
+msgstr ""
+
+#: codenerix_geodata/views.py:578
+msgid "Time Zone"
+msgstr ""
+
+#: codenerix_geodata/views.py:579
+msgid "Code province"
 msgstr ""

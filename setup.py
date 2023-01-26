@@ -67,5 +67,6 @@ setup(
         "django-debug-toolbar==3.2.2",
         "pyotp",
         "html5lib",
+        "pyinstrument",
     ],
 )

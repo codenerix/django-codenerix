@@ -24,52 +24,76 @@ from django import VERSION
 import debug_toolbar
 
 DEBUG_TOOLBAR_DEFAULT_PANELS = (
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-    'debug_toolbar.panels.redirects.RedirectsPanel',
-    'debug_toolbar.panels.profiling.ProfilingPanel',
+    "debug_toolbar.panels.versions.VersionsPanel",
+    "debug_toolbar.panels.timer.TimerPanel",
+    "debug_toolbar.panels.settings.SettingsPanel",
+    "debug_toolbar.panels.headers.HeadersPanel",
+    "debug_toolbar.panels.request.RequestPanel",
+    "debug_toolbar.panels.sql.SQLPanel",
+    "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+    "debug_toolbar.panels.templates.TemplatesPanel",
+    "debug_toolbar.panels.cache.CachePanel",
+    "debug_toolbar.panels.signals.SignalsPanel",
+    "debug_toolbar.panels.logging.LoggingPanel",
+    "debug_toolbar.panels.redirects.RedirectsPanel",
+    "debug_toolbar.panels.profiling.ProfilingPanel",
 )
 DEBUG_TOOLBAR_DEFAULT_CONFIG = {
-    'INTERCEPT_REDIRECTS': False,
+    "INTERCEPT_REDIRECTS": False,
     # Toolbar options
-    'RESULTS_CACHE_SIZE': 3,
-    'SHOW_COLLAPSED': True,
+    "RESULTS_CACHE_SIZE": 3,
+    "SHOW_COLLAPSED": True,
     # Panel options
-    'SQL_WARNING_THRESHOLD': 100,   # milliseconds
+    "SQL_WARNING_THRESHOLD": 100,  # milliseconds
 }
 
 
 # Autoload
-def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=False, ADMINSITE=False, DEBUG_TOOLBAR=False, DEBUG_PANEL=False, SNIPPET_SCREAM=False, GRAPH_MODELS=False, CODENERIX_DISABLE_LOG=False):
+def autoload(
+    INSTALLED_APPS,
+    MIDDLEWARE,
+    DEBUG=False,
+    SPAGHETTI=False,
+    ROSETTA=False,
+    ADMINSITE=False,
+    DEBUG_TOOLBAR=False,
+    DEBUG_PANEL=False,
+    SNIPPET_SCREAM=False,
+    GRAPH_MODELS=False,
+    CODENERIX_DISABLE_LOG=False,
+    DEBUG_PYINSTRUMENT=False,
+):
     EXTRA_MIDDLEWARES = []
     if DEBUG and SPAGHETTI:
-        INSTALLED_APPS += ('django_spaghetti',)
+        INSTALLED_APPS += ("django_spaghetti",)
     if DEBUG and ROSETTA:
-        INSTALLED_APPS += ('rosetta',)
-    if 'django.contrib.admin' not in INSTALLED_APPS and not CODENERIX_DISABLE_LOG:
-        INSTALLED_APPS += ('django.contrib.admin',)
+        INSTALLED_APPS += ("rosetta",)
+    if (
+        "django.contrib.admin" not in INSTALLED_APPS
+        and not CODENERIX_DISABLE_LOG
+    ):
+        INSTALLED_APPS += ("django.contrib.admin",)
     if DEBUG and ADMINSITE and not CODENERIX_DISABLE_LOG:
-        EXTRA_MIDDLEWARES.append('django.contrib.messages.middleware.MessageMiddleware')
+        EXTRA_MIDDLEWARES.append(
+            "django.contrib.messages.middleware.MessageMiddleware"
+        )
     if DEBUG and DEBUG_TOOLBAR:
-        INSTALLED_APPS += ('debug_toolbar',)
+        INSTALLED_APPS += ("debug_toolbar",)
         if DEBUG_PANEL:
-            INSTALLED_APPS += ('debug_panel',)
-            EXTRA_MIDDLEWARES.append('debug_panel.middleware.DebugPanelMiddleware')
+            INSTALLED_APPS += ("debug_panel",)
+            EXTRA_MIDDLEWARES.append(
+                "debug_panel.middleware.DebugPanelMiddleware"
+            )
         else:
-            EXTRA_MIDDLEWARES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+            EXTRA_MIDDLEWARES.append(
+                "debug_toolbar.middleware.DebugToolbarMiddleware"
+            )
     if DEBUG and SNIPPET_SCREAM:
-        EXTRA_MIDDLEWARES.append('snippetscream.ProfileMiddleware')
+        EXTRA_MIDDLEWARES.append("snippetscream.ProfileMiddleware")
     if DEBUG and GRAPH_MODELS:
-        INSTALLED_APPS += ('django_extensions',)
+        INSTALLED_APPS += ("django_extensions",)
+    if DEBUG and DEBUG_PYINSTRUMENT:
+        EXTRA_MIDDLEWARES.append("pyinstrument.middleware.ProfilerMiddleware")
 
     # Attach new middlewares
     if type(MIDDLEWARE) == tuple:
@@ -82,24 +106,39 @@ def autoload(INSTALLED_APPS, MIDDLEWARE, DEBUG=False, SPAGHETTI=False, ROSETTA=F
 
 
 # Autourl
-def autourl(URLPATTERNS, DEBUG, ROSETTA, ADMINSITE, SPAGHETTI, DEBUG_TOOLBAR=False, DEBUG_PANEL=False):
+def autourl(
+    URLPATTERNS,
+    DEBUG,
+    ROSETTA,
+    ADMINSITE,
+    SPAGHETTI,
+    DEBUG_TOOLBAR=False,
+    DEBUG_PANEL=False,
+):
     from django.conf.urls import include
     from django.urls import re_path
 
     if ROSETTA:
-        URLPATTERNS += [re_path(r'^rosetta/', include('rosetta.urls'))]
+        URLPATTERNS += [re_path(r"^rosetta/", include("rosetta.urls"))]
 
     if ADMINSITE:
         from django.contrib import admin
+
         if VERSION[0] < 2 and ADMINSITE:
-            URLPATTERNS += [re_path(r'^admin/', include(admin.site.urls))]
+            URLPATTERNS += [re_path(r"^admin/", include(admin.site.urls))]
         else:
             from django.urls import path
-            URLPATTERNS += [path('admin/', admin.site.urls, )]
+
+            URLPATTERNS += [
+                path(
+                    "admin/",
+                    admin.site.urls,
+                )
+            ]
     if DEBUG and SPAGHETTI:
-        URLPATTERNS += [re_path(r'^plate/', include('django_spaghetti.urls'))]
+        URLPATTERNS += [re_path(r"^plate/", include("django_spaghetti.urls"))]
     if DEBUG and DEBUG_TOOLBAR:
-        URLPATTERNS += [re_path(r'^__debug__/', include(debug_toolbar.urls))]
+        URLPATTERNS += [re_path(r"^__debug__/", include(debug_toolbar.urls))]
     return URLPATTERNS
 
 
@@ -197,7 +236,8 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.min.css" rel="stylesheet"> \
     '
-    CODENERIX_JS_DEBUG = ' \
+    CODENERIX_JS_DEBUG = (
+        ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap/js/bootstrap.js"></script> \
@@ -242,8 +282,11 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-bootstrap-switch/angular-bootstrap-switch.js"></script> \
-    ' + locales
-    CODENERIX_JS_MIN = ' \
+    '
+        + locales
+    )
+    CODENERIX_JS_MIN = (
+        ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap/js/bootstrap.min.js"></script> \
@@ -287,7 +330,9 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-bootstrap-switch/angular-bootstrap-switch.min.js"></script> \
-    ' + locales
+    '
+        + locales
+    )
 
     # Load CODENERIX CSS
     if DEBUG:
@@ -299,4 +344,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
         CODENERIX_JS = CODENERIX_JS_DEBUG
     else:
         CODENERIX_JS = CODENERIX_JS_MIN
-    return (CODENERIX_CSS.format(STATIC_URL=STATIC_URL), CODENERIX_JS.format(STATIC_URL=STATIC_URL))
+    return (
+        CODENERIX_CSS.format(STATIC_URL=STATIC_URL),
+        CODENERIX_JS.format(STATIC_URL=STATIC_URL),
+    )
