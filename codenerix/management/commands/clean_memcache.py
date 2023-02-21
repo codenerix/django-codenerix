@@ -20,27 +20,32 @@
 
 try:
     from subprocess import getstatusoutput
-    pythoncmd="python3"
+
+    pythoncmd = "python3"
 except:
     from commands import getstatusoutput
-    pythoncmd="python2"
+
+    pythoncmd = "python2"
 
 from django.core.management.base import BaseCommand, CommandError
 
 from codenerix.lib.debugger import Debugger
 
+
 class Command(BaseCommand, Debugger):
 
     # Show this when the user types help
     help = "Clean memcache"
-    
+
     def handle(self, *args, **options):
-        
+
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
-        
-        # Get environment
-        status, output = getstatusoutput("echo 'flush_all' | nc localhost 11211")
-        if status: raise CommandError(output)
 
+        # Get environment
+        status, output = getstatusoutput(
+            "echo 'flush_all' | nc -w 1 localhost 11211"
+        )
+        if status:
+            raise CommandError(output)
