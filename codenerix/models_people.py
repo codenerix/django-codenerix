@@ -17,44 +17,65 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import operator
 import base64
 import hashlib
+import operator
 from functools import reduce
 
-from django.db.models import Q
-from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import Permission
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.encoding import smart_str
-from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from codenerix.middleware import get_current_user
-from django.conf import settings
+from django.db import models
+from django.db.models import Q
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 
 from codenerix.helpers import clean_memcache_item
-from codenerix.models import GenLog, CodenerixModel
+from codenerix.middleware import get_current_user
+from codenerix.models import CodenerixModel
+from codenerix.models import GenLog
 
 
 class GenPerson(GenLog, models.Model):  # META: Abstract class
-    '''
+    """
     Defines a person
-    '''
+    """
+
     # Control fields
-    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True, related_name='person')
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="person",
+    )
     name = models.CharField(_("Name"), max_length=45, blank=False, null=False)
-    surname = models.CharField(_("Surname"), max_length=90, blank=False, null=False)
+    surname = models.CharField(
+        _("Surname"),
+        max_length=90,
+        blank=False,
+        null=False,
+    )
     disabled = models.DateTimeField(_("Disabled from"), null=True, blank=True)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='creators', default=None)
+    creator = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="creators",
+        default=None,
+    )
 
     class Meta(CodenerixModel.Meta):
         abstract = True
 
     def __str__(self):
         if self.name and self.surname:
-            output = '%s %s' % (smart_str(self.name), smart_str(self.surname))
+            output = "%s %s" % (smart_str(self.name), smart_str(self.surname))
         elif self.name:
             output = self.name
         elif self.surname:
@@ -68,13 +89,13 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
     def __fields__(self, info):
         fields = []
-        fields.append(('user__username', _('User')))
-        fields.append(('name', _('Name'), 100))
-        fields.append(('surname', _('Surname'), 100))
-        fields.append(('user__email', _('Email'), 100))
-        fields.append(('user__date_joined', _('Created'), 80))
-        fields.append(('user__is_active', _('Active'), None, 'center'))
-        fields.append(('disabled', _('Disabled from')))
+        fields.append(("user__username", _("User")))
+        fields.append(("name", _("Name"), 100))
+        fields.append(("surname", _("Surname"), 100))
+        fields.append(("user__email", _("Email"), 100))
+        fields.append(("user__date_joined", _("Created"), 80))
+        fields.append(("user__is_active", _("Active"), None, "center"))
+        fields.append(("disabled", _("Disabled from")))
         return fields
 
     def __limitQ__(self, info):
@@ -87,34 +108,43 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
             # The criterials are not exclusives
             if criterials:
-                limit["profile_people_limit"] = reduce(operator.or_, criterials)
+                limit["profile_people_limit"] = reduce(
+                    operator.or_,
+                    criterials,
+                )
 
         return limit
 
     def __searchF__(self, info):
         tf = {}
-        tf['user__is_active'] = (_('Active'), lambda x: Q(user__is_active=x), [(True, _('Yes')), (False, _('No'))])
+        tf["user__is_active"] = (
+            _("Active"),
+            lambda x: Q(user__is_active=x),
+            [(True, _("Yes")), (False, _("No"))],
+        )
         return tf
 
     def __searchQ__(self, info, text):
         tf = {}
-        tf['username'] = Q(user__username__icontains=text.lower())
-        tf['name'] = Q(name__icontains=text)
-        tf['surname'] = Q(surname__icontains=text)
-        tf['user_email'] = Q(user__email__icontains=text)
-        tf['user__date_joined'] = "datetime"
+        tf["username"] = Q(user__username__icontains=text.lower())
+        tf["name"] = Q(name__icontains=text)
+        tf["surname"] = Q(surname__icontains=text)
+        tf["user_email"] = Q(user__email__icontains=text)
+        tf["user__date_joined"] = "datetime"
         return tf
 
     def is_admin(self):
         try:
-            return bool(self.user.is_superuser or self.user.groups.get(name='Admins'))
+            return bool(
+                self.user.is_superuser or self.user.groups.get(name="Admins"),
+            )
         except Exception:
             return False
 
     def profiles(self):
-        '''
+        """
         return the rolls this people is related with
-        '''
+        """
         limit = []
 
         if self.is_admin():
@@ -139,8 +169,13 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def clean_memcache(self):
         if self.pk:
             prefix = hashlib.md5()
-            prefix.update(base64.b64encode(settings.SECRET_KEY.encode('utf-8')))
-            clean_memcache_item("person:{}".format(self.pk), prefix.hexdigest())
+            prefix.update(
+                base64.b64encode(settings.SECRET_KEY.encode("utf-8")),
+            )
+            clean_memcache_item(
+                "person:{}".format(self.pk),
+                prefix.hexdigest(),
+            )
 
     def get_grouppermit(self):
         return self.user.groups.all()
@@ -153,29 +188,43 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
         # if exist self.user no modify username
         if not self.user and not username:
-            raise ValidationError("This person doesn't have a user assigned, can not change password or email without an user")
+            raise ValidationError(
+                "This person doesn't have a user assigned, can not change password or email without an user",
+            )
 
         # Check passwords
         if password and confirm and password != confirm:
             raise ValidationError("Passwords do not match")
         if password and (len(password) < settings.PASSWORD_MIN_SIZE):
-            raise ValidationError("Password can not be smaller than {0} characters".format(settings.PASSWORD_MIN_SIZE))
+            raise ValidationError(
+                "Password can not be smaller than {0} characters".format(
+                    settings.PASSWORD_MIN_SIZE,
+                ),
+            )
 
         # Check email
         if email:
             validate_email(email)
         else:
-            raise ValidationError("Missing email when saving a new person without a preassigned user")
+            raise ValidationError(
+                "Missing email when saving a new person without a preassigned user",
+            )
 
         # Create user and save it to the database
         if self.user:
             # Check if the user requested to change the username
             if username != self.user.username:
                 # Check if the username already exists in the database and it is not me
-                already = User.objects.filter(username=username).exclude(pk=self.user.pk).first()
+                already = (
+                    User.objects.filter(username=username)
+                    .exclude(pk=self.user.pk)
+                    .first()
+                )
                 if already:
                     # Username already in use
-                    raise ValidationError("Username already exists in the database")
+                    raise ValidationError(
+                        "Username already exists in the database",
+                    )
                 else:
                     # Set new username
                     self.user.username = username
@@ -187,7 +236,11 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             self.user.email = email
         else:
             # Create new user
-            self.user = User.objects.create_user(username=username, email=email, password=password)
+            self.user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+            )
             # user creator of the user
             self.creator = get_current_user()
 
@@ -215,11 +268,21 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                     link = getattr(self, x.name, None)
 
                     # Check if the linked class has CodenerixMeta
-                    if link and hasattr(link, 'CodenerixMeta'):
+                    if link and hasattr(link, "CodenerixMeta"):
 
                         # Get groups and permissions from that class
-                        groups += list(getattr(link.CodenerixMeta, 'rol_groups', None) or {})
-                        permissions += list(getattr(link.CodenerixMeta, 'rol_permissions', None) or [])
+                        groups += list(
+                            getattr(link.CodenerixMeta, "rol_groups", None)
+                            or {},
+                        )
+                        permissions += list(
+                            getattr(
+                                link.CodenerixMeta,
+                                "rol_permissions",
+                                None,
+                            )
+                            or [],
+                        )
 
             # Add groups
             for groupname in set(groups):
@@ -230,23 +293,35 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                     # Check again
                     group = Group.objects.filter(name=groupname).first()
                     if group is None:
-                        raise IOError("Group '{} not found in the system. I have tried to remake groups but this group is not defined as a Role and it doesn't belong to the system either".format(groupname))
+                        raise IOError(
+                            "Group '{} not found in the system. I have tried to remake groups but this group is not defined as a Role and it doesn't belong to the system either".format(
+                                groupname,
+                            ),
+                        )
 
                 # Add the user to this group
                 self.user.groups.add(group)
 
             # Add permissions
             for permissionname in set(permissions):
-                permission = Permission.objects.filter(codename=permissionname).first()
+                permission = Permission.objects.filter(
+                    codename=permissionname,
+                ).first()
                 if permission is None:
-                    raise IOError("Permission '{}' not found in the system".format(permissionname))
+                    raise IOError(
+                        "Permission '{}' not found in the system".format(
+                            permissionname,
+                        ),
+                    )
 
                 # Add the permission to this user
                 self.user.user_permissions.add(permission)
 
         else:
             if not quiet:
-                raise IOError("You can not refresh permissions for a Person wich doesn't have an associated user")
+                raise IOError(
+                    "You can not refresh permissions for a Person wich doesn't have an associated user",
+                )
 
     @staticmethod
     def group_permissions(clss):
@@ -259,10 +334,10 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             if model and issubclass(model, GenRole):
 
                 # Check if the class has CodenerixMeta
-                if hasattr(model, 'CodenerixMeta'):
+                if hasattr(model, "CodenerixMeta"):
 
                     # Get groups and permissions
-                    groups = getattr(model.CodenerixMeta, 'rol_groups', [])
+                    groups = getattr(model.CodenerixMeta, "rol_groups", [])
 
                     # Add groups
                     if groups:
@@ -274,7 +349,9 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                             perms = []
                             if groups_is_dict:
                                 for permname in groups[groupname]:
-                                    perm = Permission.objects.filter(codename=permname).first()
+                                    perm = Permission.objects.filter(
+                                        codename=permname,
+                                    ).first()
                                     # Commented by Juan Soler on a project we
                                     # both are working on. Since this code is
                                     # preventing a proper execution, I will
@@ -314,6 +391,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         self.refresh_permissions(quiet=True)
         # Return answer
         return answer
+
 
 class GenRole(object):
     def save(self, *args, **kwargs):

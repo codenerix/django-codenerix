@@ -18,10 +18,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from django import VERSION
-
 import debug_toolbar
+from django import VERSION
 
 DEBUG_TOOLBAR_DEFAULT_PANELS = (
     "debug_toolbar.panels.versions.VersionsPanel",
@@ -75,18 +73,18 @@ def autoload(
         INSTALLED_APPS += ("django.contrib.admin",)
     if DEBUG and ADMINSITE and not CODENERIX_DISABLE_LOG:
         EXTRA_MIDDLEWARES.append(
-            "django.contrib.messages.middleware.MessageMiddleware"
+            "django.contrib.messages.middleware.MessageMiddleware",
         )
     if DEBUG and DEBUG_TOOLBAR:
         INSTALLED_APPS += ("debug_toolbar",)
         if DEBUG_PANEL:
             INSTALLED_APPS += ("debug_panel",)
             EXTRA_MIDDLEWARES.append(
-                "debug_panel.middleware.DebugPanelMiddleware"
+                "debug_panel.middleware.DebugPanelMiddleware",
             )
         else:
             EXTRA_MIDDLEWARES.append(
-                "debug_toolbar.middleware.DebugToolbarMiddleware"
+                "debug_toolbar.middleware.DebugToolbarMiddleware",
             )
     if DEBUG and SNIPPET_SCREAM:
         EXTRA_MIDDLEWARES.append("snippetscream.ProfileMiddleware")
@@ -133,7 +131,7 @@ def autourl(
                 path(
                     "admin/",
                     admin.site.urls,
-                )
+                ),
             ]
     if DEBUG and SPAGHETTI:
         URLPATTERNS += [re_path(r"^plate/", include("django_spaghetti.urls"))]

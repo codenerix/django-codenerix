@@ -17,18 +17,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from subprocess import getstatusoutput
 
-try:
-    from subprocess import getstatusoutput
-
-    pythoncmd = "python3"
-except:
-    from commands import getstatusoutput
-
-    pythoncmd = "python2"
-
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.core.management.base import BaseCommand
 
 from codenerix.lib.debugger import Debugger
 
@@ -55,12 +47,13 @@ class Command(BaseCommand, Debugger):
                     host = locationsp[0]
                     port = locationsp[1]
                 self.debug(
-                    f"Flushing all keys for {name}@Memcache located at {host}:{port}",
+                    f"Flushing all keys for {name}@Memcache located "
+                    f"at {host}:{port}",
                     color="blue",
                 )
                 # Get environment
                 status, output = getstatusoutput(
-                    f"echo 'flush_all' | nc -v -w 1 {host} {port}"
+                    f"echo 'flush_all' | nc -v -w 1 {host} {port}",
                 )
                 if status:
                     self.debug(
@@ -69,6 +62,7 @@ class Command(BaseCommand, Debugger):
                     )
                 else:
                     self.debug(
-                        f"OK at {name}@Memcache located at {host}:{port} -> {output}",
+                        f"OK at {name}@Memcache located "
+                        f"at {host}:{port} -> {output}",
                         color="green",
                     )

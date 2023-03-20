@@ -34,4 +34,3 @@ angular.module('codenerixApp', [
 .config(function(cfpLoadingBarProvider) {
     cfpLoadingBarProvider.includeSpinner = true;
 });
-

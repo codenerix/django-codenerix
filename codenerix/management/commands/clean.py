@@ -17,18 +17,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import os
+from subprocess import getstatusoutput
 
-try:
-    from subprocess import getstatusoutput
-    pythoncmd = "python3"
-except Exception:
-    from commands import getstatusoutput
-    pythoncmd = "python2"
-
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.core.management.base import BaseCommand
+from django.core.management.base import CommandError
 
 from codenerix.lib.debugger import Debugger
 
@@ -48,6 +42,9 @@ class Command(BaseCommand, Debugger):
         appname = settings.ROOT_URLCONF.split(".")[0]
         basedir = settings.BASE_DIR
         appdir = os.path.abspath("{}/{}".format(basedir, appname))
-        status, output = getstatusoutput("find {}/ -name '*.py[c|o]' -o -name __pycache__ -exec rm -rf {{}} +".format(appdir))
+        status, output = getstatusoutput(
+            f"find {appdir}/ -name '*.py[c|o]' -o "
+            "-name __pycache__ -exec rm -rf {{}} +",
+        )
         if status:
             raise CommandError(output)

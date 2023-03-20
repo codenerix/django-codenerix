@@ -17,17 +17,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import time
 import datetime
+import time
 
 from django import template
-from django.utils.translation import gettext as _
 from django.conf import settings
-from django.utils.translation import get_language
 from django.utils import formats
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
 
-from codenerix.helpers import zeropad, monthname, nameunify
+from codenerix.helpers import monthname
+from codenerix.helpers import nameunify
+from codenerix.helpers import zeropad
 
 register = template.Library()
 register.filter("digitos", zeropad)
@@ -284,20 +285,21 @@ def TrueFalse(value):
 def cdnx_beauty(value, kind=None):
     if kind:
         if kind == "skype":
-            return (
-                "<a ng-click='$event.stopPropagation();' href='tel:{0}'>{0}</a>".format(
-                    value
-                )
+            return "<a ng-click='$event.stopPropagation();' href='tel:{0}'>{0}</a>".format(
+                value,
             )
         elif kind == "image":
             return "<img ng-click='$event.stopPropagation();' src='{0}{1}'>".format(
-                settings.MEDIA_URL, value
+                settings.MEDIA_URL,
+                value,
             )
         elif kind == "nofilter":
             return value
         else:
             raise Exception(
-                "Django filter 'codenerix' got a wrong kind named '" + kind + "'"
+                "Django filter 'codenerix' got a wrong kind named '"
+                + kind
+                + "'",
             )
     else:
         if value is None:
@@ -305,10 +307,16 @@ def cdnx_beauty(value, kind=None):
         elif type(value) is bool:
             return TrueFalse(value)
         elif type(value) is datetime.datetime:
-            fmt = formats.get_format("DATETIME_INPUT_FORMATS", lang=get_language())[0]
+            fmt = formats.get_format(
+                "DATETIME_INPUT_FORMATS",
+                lang=get_language(),
+            )[0]
             value = datetime.datetime.strftime(value, fmt)
         elif type(value) is time.time:
-            fmt = formats.get_format("TIME_INPUT_FORMATS", lang=get_language())[0]
+            fmt = formats.get_format(
+                "TIME_INPUT_FORMATS",
+                lang=get_language(),
+            )[0]
             value = time.time.strftime(value, fmt)
         elif type(value) is float:
             if float(int(value)) == value:

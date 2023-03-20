@@ -17,25 +17,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.template import Library
 from django.urls import reverse
+from django.utils import formats
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
-from django.core.exceptions import ValidationError
-from django.utils import formats
-from django.conf import settings
 
 from codenerix.djng.angular_base import TupleErrorList
-
 from codenerix.helpers import model_inspect
 
 register = Library()
 
+
 @register.filter
 def widgetize(i):
     # Initialize structure
-    attrs = i.__dict__.get("field", {}).__dict__.get("widget", {}).__dict__.get('attrs', {})
+    attrs = (
+        i.__dict__.get("field", {})
+        .__dict__.get("widget", {})
+        .__dict__.get("attrs", {})
+    )
 
     # Select
     # if 'choices' in i.field.widget.__dict__:
@@ -58,25 +61,25 @@ def istype(i, kind):
     widget = i.field.widget
 
     # Get format type
-    if ('format_key' in type(widget).__dict__):
+    if "format_key" in type(widget).__dict__:
         ftype = type(widget).format_key
     else:
         ftype = None
 
     # Choose kind
-    if kind == 'datetime':
-        if ftype == 'DATETIME_INPUT_FORMATS':
-            answer = 'DATETIME_INPUT_FORMATS'
-        elif ftype == 'DATE_INPUT_FORMATS':
-            answer = 'DATE_INPUT_FORMATS'
-        elif ftype == 'TIME_INPUT_FORMATS':
-            answer = 'TIME_INPUT_FORMAT'
+    if kind == "datetime":
+        if ftype == "DATETIME_INPUT_FORMATS":
+            answer = "DATETIME_INPUT_FORMATS"
+        elif ftype == "DATE_INPUT_FORMATS":
+            answer = "DATE_INPUT_FORMATS"
+        elif ftype == "TIME_INPUT_FORMATS":
+            answer = "TIME_INPUT_FORMAT"
         else:
             answer = False
-    elif kind == 'date2time':
-        answer = 'DATE_INPUT_FORMATS'
-    elif kind == 'color':
-        answer = (ngmodel(i) == 'color')
+    elif kind == "date2time":
+        answer = "DATE_INPUT_FORMATS"
+    elif kind == "color":
+        answer = ngmodel(i) == "color"
     else:
         raise IOError("Unknown type '{0}' in 'istype' filter".format(kind))
 
@@ -144,49 +147,62 @@ def setattrs(field, attrs):
 
 @register.filter
 def ngmodel(i):
-    return getattr(i.field.widget, 'field_name', i.field.widget.attrs['ng-model'])
+    return getattr(
+        i.field.widget,
+        "field_name",
+        i.field.widget.attrs["ng-model"],
+    )
 
 
 @register.filter
 def inireadonly(attrs, i):
     field = ngmodel(i)
-    return addattr(attrs, 'ng-readonly=readonly_{0}'.format(field))
+    return addattr(attrs, "ng-readonly=readonly_{0}".format(field))
 
 
 @register.filter
 def date2timewidget(i, langcode):
-    return datewidget(i, langcode, 'date2time')
+    return datewidget(i, langcode, "date2time")
 
 
 @register.filter
-def datewidget(i, langcode, kindtype='datetime', kind=None):
+def datewidget(i, langcode, kindtype="datetime", kind=None):
     # Initialization
     final = {}
-    form = formats.get_format('DATETIME_INPUT_FORMATS', lang=langcode)[0].replace("%", "").replace('d', 'dd').replace('m', 'mm').replace('Y', 'yyyy').replace('H', 'hh').replace('M', 'ii').replace('S', 'ss')
+    form = (
+        formats.get_format("DATETIME_INPUT_FORMATS", lang=langcode)[0]
+        .replace("%", "")
+        .replace("d", "dd")
+        .replace("m", "mm")
+        .replace("Y", "yyyy")
+        .replace("H", "hh")
+        .replace("M", "ii")
+        .replace("S", "ss")
+    )
 
     if kind is None:
         kind = istype(i, kindtype)
 
-    if kind == 'DATETIME_INPUT_FORMATS':
-        final['format'] = form
-        final['startview'] = 2
-        final['minview'] = 0
-        final['maxview'] = 4
-        final['icon'] = 'calendar'
+    if kind == "DATETIME_INPUT_FORMATS":
+        final["format"] = form
+        final["startview"] = 2
+        final["minview"] = 0
+        final["maxview"] = 4
+        final["icon"] = "calendar"
 
-    elif (kind == 'DATE_INPUT_FORMATS') or (kind == 'date'):
-        final['format'] = form.split(" ")[0]
-        final['startview'] = 2
-        final['minview'] = 2
-        final['maxview'] = 4
-        final['icon'] = 'calendar'
+    elif (kind == "DATE_INPUT_FORMATS") or (kind == "date"):
+        final["format"] = form.split(" ")[0]
+        final["startview"] = 2
+        final["minview"] = 2
+        final["maxview"] = 4
+        final["icon"] = "calendar"
 
-    elif kind == 'TIME_INPUT_FORMAT':
-        final['format'] = form.split(" ")[1]
-        final['startview'] = 1
-        final['minview'] = 0
-        final['maxview'] = 1
-        final['icon'] = 'time'
+    elif kind == "TIME_INPUT_FORMAT":
+        final["format"] = form.split(" ")[1]
+        final["startview"] = 1
+        final["minview"] = 0
+        final["maxview"] = 1
+        final["icon"] = "time"
 
     else:
         raise IOError("Unknown kind '{0}' in filter 'datewidget'".format(kind))
@@ -220,10 +236,10 @@ def unlist(elements):
 
 @register.filter
 def foreignkey(element, exceptions):
-    '''
+    """
     function to determine if each select field needs a create button or not
-    '''
-    label = element.field.__dict__['label']
+    """
+    label = element.field.__dict__["label"]
     try:
         label = unicode(label)
     except NameError:
@@ -240,12 +256,12 @@ def headstyle(group):
     style = ""
 
     # Decide about colors
-    if 'color' in group and group['color']:
-        style += "color:{0};".format(group['color'])
-    if 'bgcolor' in group and group['bgcolor']:
-        style += "background-color:{0};".format(group['bgcolor'])
-    if 'textalign' in group and group['textalign']:
-        style += "text-align:{0};".format(group['textalign'])
+    if "color" in group and group["color"]:
+        style += "color:{0};".format(group["color"])
+    if "bgcolor" in group and group["bgcolor"]:
+        style += "background-color:{0};".format(group["bgcolor"])
+    if "textalign" in group and group["textalign"]:
+        style += "text-align:{0};".format(group["textalign"])
 
     # Check if we have some style
     if style:
@@ -264,7 +280,11 @@ class ColumnCounter:
             self.__columns = 0
             answer = True
         elif self.__columns > 12:
-            raise IOError("Columns max number of 12 reached, you requested to use a total of '{}'".format(self.__columns))
+            raise IOError(
+                "Columns max number of 12 reached, you requested to use a total of '{}'".format(
+                    self.__columns,
+                ),
+            )
         else:
             answer = False
         # Add new columns
@@ -289,11 +309,13 @@ def linkedinfo(element, info_input={}):
     info.update(info_input)
 
     ngmodel = element.html_name  # field.widget.attrs['ng-model']
-    return mark_safe("'{0}','{1}','{2}', '{3}s'".format(
-        getattr(settings, 'BASE_URL', ''),
-        ngmodel,
-        info['appname'],
-        info['modelname'].lower())
+    return mark_safe(
+        "'{0}','{1}','{2}', '{3}s'".format(
+            getattr(settings, "BASE_URL", ""),
+            ngmodel,
+            info["appname"],
+            info["modelname"].lower(),
+        ),
     )
 
 
@@ -305,10 +327,15 @@ def get_depa(queryset, kind):
 
 @register.filter
 def getws(form, input_name):
-    if 'autofill' in form.Meta.__dict__ and input_name in form.Meta.autofill:
-        return "'{}'".format(reverse(form.Meta.autofill[input_name][2], kwargs={'search': '__pk__'}))
+    if "autofill" in form.Meta.__dict__ and input_name in form.Meta.autofill:
+        return "'{}'".format(
+            reverse(
+                form.Meta.autofill[input_name][2],
+                kwargs={"search": "__pk__"},
+            ),
+        )
     else:
-        return 'undefined'
+        return "undefined"
 
 
 @register.filter
@@ -318,18 +345,23 @@ def get_field_list(forms):
         for field in form.fields:
             inputs.append("'{}'".format(field))
     if inputs:
-        inputs = "[{}]".format(','.join(inputs))
+        inputs = "[{}]".format(",".join(inputs))
     return inputs
 
 
 @register.filter
 def invalidator(formname, inp):
-    return mark_safe("{{'codenerix_invalid':{0}.{1}.$invalid}}".format(smart_str(formname), ngmodel(inp)))
+    return mark_safe(
+        "{{'codenerix_invalid':{0}.{1}.$invalid}}".format(
+            smart_str(formname),
+            ngmodel(inp),
+        ),
+    )
 
 
 @register.filter
-def join_list(l, string):
-    if l:
-        return string.join(l)
+def join_list(lst, string):
+    if lst:
+        return string.join(lst)
     else:
-        return ''
+        return ""

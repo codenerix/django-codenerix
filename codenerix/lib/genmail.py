@@ -17,11 +17,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import ssl
 import smtplib
-from django.core import mail
+import ssl
+
 from django.conf import settings
+from django.core import mail
 from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail.utils import DNS_NAME
 
@@ -54,7 +54,9 @@ class SSLEmailBackend(EmailBackend):
             return False
         try:
             self.connection = smtplib.SMTP_SSL(
-                self.host, self.port, local_hostname=DNS_NAME.get_fqdn()
+                self.host,
+                self.port,
+                local_hostname=DNS_NAME.get_fqdn(),
             )
 
             if self.username and self.password:

@@ -17,22 +17,52 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from django.urls import re_path
 
-from codenerix.views import LogList, LogDetails, status
-from codenerix.views import RemoteLogList, RemoteLogDetails, RemoteLogCreate
+from codenerix.views import LogDetails
+from codenerix.views import LogList
+from codenerix.views import RemoteLogCreate
+from codenerix.views import RemoteLogDetails
+from codenerix.views import RemoteLogList
+from codenerix.views import status
 
 urlpatterns = [
     # Backward compatibility
-    re_path(r'^status/(?P<status>\w+)/(?P<answer>[a-zA-Z0-9+-_/]+)$', status, name='status'),
-    re_path(r'^logs$', LogList.as_view(), name='codenerix_log_list'),
-    re_path(r'^logs/(?P<pk>\w+)$', LogDetails.as_view(), name='codenerix_log_details'),
-
-    re_path(r'^status/(?P<status>\w+)/(?P<answer>[a-zA-Z0-9+-_/]+)$', status, name='CDNX_status'),
-    re_path(r'^logs$', LogList.as_view(), name='CDNX_codenerix_log_list'),
-    re_path(r'^logs/(?P<pk>\w+)$', LogDetails.as_view(), name='CDNX_codenerix_log_details'),
-    re_path(r'^remotelogs$', RemoteLogList.as_view(), name='CDNX_remotelog_list'),
-    re_path(r'^remotelogs/add$', RemoteLogCreate.as_view(), name='CDNX_remotelog_create'),
-    re_path(r'^remotelogs/(?P<pk>\w+)$', RemoteLogDetails.as_view(), name='CDNX_remotelog_details'),
+    re_path(
+        r"^status/(?P<status>\w+)/(?P<answer>[a-zA-Z0-9+-_/]+)$",
+        status,
+        name="status",
+    ),
+    re_path(r"^logs$", LogList.as_view(), name="codenerix_log_list"),
+    re_path(
+        r"^logs/(?P<pk>\w+)$",
+        LogDetails.as_view(),
+        name="codenerix_log_details",
+    ),
+    re_path(
+        r"^status/(?P<status>\w+)/(?P<answer>[a-zA-Z0-9+-_/]+)$",
+        status,
+        name="CDNX_status",
+    ),
+    re_path(r"^logs$", LogList.as_view(), name="CDNX_codenerix_log_list"),
+    re_path(
+        r"^logs/(?P<pk>\w+)$",
+        LogDetails.as_view(),
+        name="CDNX_codenerix_log_details",
+    ),
+    re_path(
+        r"^remotelogs$",
+        RemoteLogList.as_view(),
+        name="CDNX_remotelog_list",
+    ),
+    re_path(
+        r"^remotelogs/add$",
+        RemoteLogCreate.as_view(),
+        name="CDNX_remotelog_create",
+    ),
+    re_path(
+        r"^remotelogs/(?P<pk>\w+)$",
+        RemoteLogDetails.as_view(),
+        name="CDNX_remotelog_details",
+    ),
 ]

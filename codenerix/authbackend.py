@@ -58,7 +58,10 @@ def check_auth(user, debugger=None):
 
         # Show debugger
         if debugger:
-            debugger("check_auth(): Username: '{}'".format(user), color="white")
+            debugger(
+                "check_auth(): Username: '{}'".format(user),
+                color="white",
+            )
 
         # It means that Django accepted the user and it is active
         if user.is_staff or user.is_superuser:
@@ -90,7 +93,7 @@ def check_auth(user, debugger=None):
                 if debugger:
                     debugger(
                         "check_auth(): no associated person found for user '{}'".format(
-                            user
+                            user,
                         ),
                         color="yellow",
                     )
@@ -103,7 +106,7 @@ def check_auth(user, debugger=None):
                     if debugger:
                         debugger(
                             "check_auth(): there are People associated for user '{}'".format(
-                                user
+                                user,
                             ),
                             color="cyan",
                         )
@@ -117,7 +120,7 @@ def check_auth(user, debugger=None):
                     elif debugger:
                         debugger(
                             "check_auth(): found more than One People associated for user '{}', not valid Person found!".format(
-                                user
+                                user,
                             ),
                             color="yellow",
                         )
@@ -125,7 +128,7 @@ def check_auth(user, debugger=None):
                 elif debugger:
                     debugger(
                         "check_auth(): no People found for for user '{}', not valid Person found!".format(
-                            user
+                            user,
                         ),
                         color="red",
                     )
@@ -134,7 +137,9 @@ def check_auth(user, debugger=None):
             if debugger and person:
                 debugger(
                     "check_auth(): user={} - person={} - disabled={}'".format(
-                        user, person, person.disabled
+                        user,
+                        person,
+                        person.disabled,
                     ),
                     color="cyan",
                 )
@@ -160,7 +165,8 @@ def check_auth(user, debugger=None):
 
     elif debugger:
         debugger(
-            "check_auth(): No username, access NOT granted!".format(user), color="red"
+            "check_auth(): No username, access NOT granted!",
+            color="red",
         )
 
     # Return back the final decision
@@ -249,7 +255,9 @@ class LimitedAuthMiddleware(Debugger):
 
             # Create delta for caducity by EXPIRE_WHEN_INACTIVE
             expire_when_innactive = getattr(
-                settings, "SESSION_EXPIRE_WHEN_INACTIVE", None
+                settings,
+                "SESSION_EXPIRE_WHEN_INACTIVE",
+                None,
             )
             if expire_when_innactive is not None:
                 # Get last_seen
@@ -263,7 +271,8 @@ class LimitedAuthMiddleware(Debugger):
                     except AttributeError:
                         # python2
                         nowts = float(
-                            time.mktime(now.timetuple()) + now.microsecond / 1000000.0
+                            time.mktime(now.timetuple())
+                            + now.microsecond / 1000000.0,
                         )
 
                     diff = nowts - last_seen - expire_when_innactive
@@ -282,7 +291,7 @@ class LimitedAuthMiddleware(Debugger):
                     # python2
                     last_seen = float(
                         time.mktime(last_seen.timetuple())
-                        + last_seen.microsecond / 1000000.0
+                        + last_seen.microsecond / 1000000.0,
                     )
 
                 # Remember in session
@@ -298,7 +307,12 @@ class LimitedAuthMiddleware(Debugger):
                         break
 
                 # Calculate caducity
-                kickout = datetime.datetime(now.year, now.month, now.day, delta)
+                kickout = datetime.datetime(
+                    now.year,
+                    now.month,
+                    now.day,
+                    delta,
+                )
                 try:
                     # python3
                     kickout = kickout.timestamp() - now.timestamp()
@@ -306,10 +320,11 @@ class LimitedAuthMiddleware(Debugger):
                     # python2
                     ts = float(
                         time.mktime(kickout.timetuple())
-                        + kickout.microsecond / 1000000.0
+                        + kickout.microsecond / 1000000.0,
                     )
                     tz = float(
-                        time.mktime(now.timetuple()) + now.microsecond / 1000000.0
+                        time.mktime(now.timetuple())
+                        + now.microsecond / 1000000.0,
                     )
                     kickout = ts - tz
 
@@ -374,15 +389,20 @@ class TokenAuth(ModelBackend, Debugger):
                 "Authentication request:",
                 color="white",
             )
-            self.debug("  > Username [authuser]: '{}'".format(username), color="cyan")
+            self.debug(
+                "  > Username [authuser]: '{}'".format(username),
+                color="cyan",
+            )
             self.debug(
                 "  > Token [authtoken]: '{}' <- authentication token (signed or unsigned)".format(
-                    token
+                    token,
                 ),
                 color="cyan",
             )
             self.debug(
-                "  > String [json]: '{}' <- string to be used as salt".format(string),
+                "  > String [json]: '{}' <- string to be used as salt".format(
+                    string,
+                ),
                 color="cyan",
             )
 
@@ -451,7 +471,7 @@ class TokenAuth(ModelBackend, Debugger):
                     else:
                         if self.__debugger:
                             raise IOError(
-                                "To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token"
+                                "To use a master key you have to set master_signed or master_unsigned to True and set 'master' to some valid string as your token",
                             )
                         else:
                             master = None
@@ -473,21 +493,24 @@ class TokenAuth(ModelBackend, Debugger):
                         if config["otp_unsigned"] or config["otp_signed"]:
                             if not pyotp:
                                 raise IOError(
-                                    "PYOTP library not found, you can not use OTP signed/unsigned configuration"
+                                    "PYOTP library not found, you can not use OTP signed/unsigned configuration",
                                 )
                             else:
                                 try:
                                     otp = str(
                                         pyotp.TOTP(
-                                            base64.b32encode(user_key.encode())
-                                        ).now()
+                                            base64.b32encode(
+                                                user_key.encode(),
+                                            ),
+                                        ).now(),
                                     )
                                 except TypeError:
                                     if self.__debugger:
                                         raise IOError(
                                             "To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {} key length is {} ".format(
-                                                user_key, len(user_key)
-                                            )
+                                                user_key,
+                                                len(user_key),
+                                            ),
                                         )
                                     else:
                                         otp = None
@@ -495,13 +518,15 @@ class TokenAuth(ModelBackend, Debugger):
                             otp = None
 
                         # Remove user key if not in use
-                        if (not config["user_unsigned"]) or (not config["user_signed"]):
+                        if (not config["user_unsigned"]) or (
+                            not config["user_signed"]
+                        ):
                             user_key = None
 
                     else:
                         if self.__debugger:
                             raise IOError(
-                                "To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)"
+                                "To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)",
                             )
                         else:
                             user_key = None
@@ -524,7 +549,8 @@ class TokenAuth(ModelBackend, Debugger):
                             info.append("unsigned")
                         self.debug(
                             "  > Master KEY configured: '{}' [{}]".format(
-                                master, ", ".join(info)
+                                master,
+                                ", ".join(info),
                             ),
                             color="blue",
                         )
@@ -541,7 +567,8 @@ class TokenAuth(ModelBackend, Debugger):
                             info.append("unsigned")
                         self.debug(
                             "  > User KEY configured: '{}' [{}]".format(
-                                user_key, ", ".join(info)
+                                user_key,
+                                ", ".join(info),
                             ),
                             color="blue",
                         )
@@ -558,7 +585,8 @@ class TokenAuth(ModelBackend, Debugger):
                             info.append("unsigned")
                         self.debug(
                             "  > OTP KEY configured: '{}' [{}]".format(
-                                otp, ", ".join(info)
+                                otp,
+                                ", ".join(info),
                             ),
                             color="blue",
                         )
@@ -584,7 +612,9 @@ class TokenAuth(ModelBackend, Debugger):
                     )
                     self.debug(
                         "  > tosign = '{}' = '{}' + '{}'".format(
-                            tosign, user.username, string
+                            tosign,
+                            user.username,
+                            string,
                         ),
                         color="white",
                     )
@@ -612,7 +642,9 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # keys.append("master_signed")
                         keys.append(
-                            hashlib.sha1(tosign.encode() + master.encode()).hexdigest()
+                            hashlib.sha1(
+                                tosign.encode() + master.encode(),
+                            ).hexdigest(),
                         )
 
                         # Show debugger
@@ -623,7 +655,9 @@ class TokenAuth(ModelBackend, Debugger):
                                 color = "blue"
                             self.debug(
                                 "  > Master Signed Key: {} <- sha1( {} + {} )".format(
-                                    keys[-1], tosign, master
+                                    keys[-1],
+                                    tosign,
+                                    master,
                                 ),
                                 color=color,
                             )
@@ -650,8 +684,8 @@ class TokenAuth(ModelBackend, Debugger):
                         # keys.append("user_signed")
                         keys.append(
                             hashlib.sha1(
-                                tosign.encode() + user_key.encode()
-                            ).hexdigest()
+                                tosign.encode() + user_key.encode(),
+                            ).hexdigest(),
                         )
 
                         # Show debugger
@@ -662,7 +696,9 @@ class TokenAuth(ModelBackend, Debugger):
                                 color = "blue"
                             self.debug(
                                 "  > User Signed Key: {} <- sha1( {} + {} )".format(
-                                    keys[-1], tosign, user_key
+                                    keys[-1],
+                                    tosign,
+                                    user_key,
                                 ),
                                 color=color,
                             )
@@ -688,7 +724,9 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # keys.append("otp_signed")
                         keys.append(
-                            hashlib.sha1(tosign.encode() + otp.encode()).hexdigest()
+                            hashlib.sha1(
+                                tosign.encode() + otp.encode(),
+                            ).hexdigest(),
                         )
 
                         # Show debugger
@@ -699,7 +737,9 @@ class TokenAuth(ModelBackend, Debugger):
                                 color = "blue"
                             self.debug(
                                 "  > OTP Signed Key: {} <- sha1( {} + {} )".format(
-                                    keys[-1], tosign, otp
+                                    keys[-1],
+                                    tosign,
+                                    otp,
                                 ),
                                 color=color,
                             )
@@ -724,7 +764,8 @@ class TokenAuth(ModelBackend, Debugger):
                     if self.__debugger:
                         self.debug(
                             "User '{}' NOT authenticated with tokenkey '{}'!".format(
-                                username, token
+                                username,
+                                token,
                             ),
                             color="red",
                         )
@@ -812,14 +853,26 @@ class TokenAuthMiddleware(Debugger):
                 self.debug("AUTHTOKEN='{}'".format(token), color="cyan")
 
             # Get username and json
-            username = request.GET.get("authuser", request.POST.get("authuser", None))
-            json = request.GET.get("json", request.POST.get("json", body.decode()))
+            username = request.GET.get(
+                "authuser",
+                request.POST.get("authuser", None),
+            )
+            json = request.GET.get(
+                "json",
+                request.POST.get("json", body.decode()),
+            )
             if self.__debugger:
-                self.debug("USERNAME={} - JSON={}".format(username, json), color="cyan")
+                self.debug(
+                    "USERNAME={} - JSON={}".format(username, json),
+                    color="cyan",
+                )
 
             # Authenticate user
             user = authenticate(
-                request=None, username=username, token=token, string=json
+                request=None,
+                username=username,
+                token=token,
+                string=json,
             )
             if user:
 
@@ -834,7 +887,8 @@ class TokenAuthMiddleware(Debugger):
                 # Disable CSRF checks
                 setattr(request, "_dont_enforce_csrf_checks", True)
                 json_details = request.GET.get(
-                    "authjson_details", request.POST.get("authjson_details", False)
+                    "authjson_details",
+                    request.POST.get("authjson_details", False),
                 )
                 if json_details in ["true", "1", "t", True]:
                     json_details = True
@@ -931,17 +985,20 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             ser = {}
             ser["allowed_referral_hosts"] = [("*", True)]
             con = {}
-            con["user"] = "{}\{}".format(nt4_domain, username)
+            con["user"] = f"{nt4_domain}\\{username}"
             con["password"] = password
             con["raise_exceptions"] = True
             con["authentication"] = ldap3.NTLM
             if use_ssl:
                 certfile = settings.AD_CERT_FILE
-                self.debug("ldap.ssl :: Activated - Cert file: {}".format(certfile))
+                self.debug(
+                    "ldap.ssl :: Activated - Cert file: {}".format(certfile),
+                )
                 con["auto_bind"] = ldap3.AUTO_BIND_TLS_BEFORE_BIND
                 ser["use_ssl"] = True
                 ser["tls"] = ldap3.Tls(
-                    validate=ssl.CERT_REQUIRED, version=ssl.PROTOCOL_TLSv1
+                    validate=ssl.CERT_REQUIRED,
+                    version=ssl.PROTOCOL_TLSv1,
                 )
             else:
                 con["auto_bind"] = ldap3.AUTO_BIND_NO_TLS
@@ -959,16 +1016,18 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 # The access for this user has been denied, Debug it if required
                 self.debug(
                     "LDAP connect failed 'SocketOpenError' for url '{}' with error '{}'".format(
-                        ldap_url, e
-                    )
+                        ldap_url,
+                        e,
+                    ),
                 )
                 answer = None
             except LDAPException as e:
                 # The access for this user has been denied, Debug it if required
                 self.debug(
                     "LDAP connect failed 'LDAPException' for user '{}' with error '{}'".format(
-                        username, e
-                    )
+                        username,
+                        e,
+                    ),
                 )
                 answer = False
 
@@ -1006,7 +1065,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             if user and not user.is_staff:
                 # If access was denied
                 if authorization is False or getattr(
-                    settings, "AD_LOCK_UNAUTHORIZED", False
+                    settings,
+                    "AD_LOCK_UNAUTHORIZED",
+                    False,
                 ):
                     # Deactivate the user
                     user.is_active = False
@@ -1033,8 +1094,12 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             # Prepare SEARCH fields
             mapping = getattr(settings, "AD_MAP_FIELDS", {})
             # Build the search fields
-            search_fields = ["sAMAccountName", "memberOf"] + list(mapping.values())
-            search_dns = getattr(settings, "AD_NT4_DOMAIN", "").lower().split(".")
+            search_fields = ["sAMAccountName", "memberOf"] + list(
+                mapping.values(),
+            )
+            search_dns = (
+                getattr(settings, "AD_NT4_DOMAIN", "").lower().split(".")
+            )
             # Build the dn list
             search_dnlist = []
             for token in search_dns:
@@ -1070,7 +1135,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 memberships = []
             else:
                 # Not found
-                self.debug("I didn't find any matching result for your LDAP query")
+                self.debug(
+                    "I didn't find any matching result for your LDAP query",
+                )
                 memberships = []
 
             # Validate that they are a member of review board group

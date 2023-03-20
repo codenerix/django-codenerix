@@ -17,39 +17,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-'''
+"""
 Debugger helps to debug the system
-'''
+"""
 
 __version__ = "2017082500"
 
-__all__ = ['Debugger', 'lineno']
+__all__ = ["Debugger", "lineno"]
 
 import time
 import datetime
 import inspect
 
+from typing import Dict, Any
 from codenerix.lib.colors import colors
 
 
 def lineno():
-    '''
+    """
     Returns the current line number in our program.
-    '''
+    """
     return inspect.currentframe().f_back.f_lineno
 
 
 class Debugger(object):
 
-    __indebug = {}
+    __indebug: Dict[str, Any] = {}
     __inname = None
 
     def __autoconfig(self):
         # Define debug configuration
         import sys
+
         debugger = {}
-        debugger['screen'] = (sys.stdout, ['*'])
+        debugger["screen"] = (sys.stdout, ["*"])
         # debugger['log'] = (open("log/debug.log","a"), ['*'] )
         self.set_debug(debugger)
 
@@ -60,9 +61,9 @@ class Debugger(object):
             if type(debug) is dict:
                 # Set the deepness system
                 idebug = debug.copy()
-                if 'deepness' in debug:
-                    if debug['deepness']:
-                        idebug['deepness'] -= 1
+                if "deepness" in debug:
+                    if debug["deepness"]:
+                        idebug["deepness"] -= 1
                     else:
                         idebug = {}
 
@@ -84,13 +85,23 @@ class Debugger(object):
         # Colors$
         if color in colors:
             (darkbit, subcolor) = colors[color]
-            return u"\033[%1d;%02dm" % (darkbit, subcolor)
+            return "\033[%1d;%02dm" % (darkbit, subcolor)
         else:
             if color:
-                self.debug(u"\033[1;31mColor '%s' unknown\033[1;00m\n" % (color))
-            return ''
+                self.debug(
+                    "\033[1;31mColor '%s' unknown\033[1;00m\n" % (color),
+                )
+            return ""
 
-    def debug(self, msg=None, header=None, color=None, tail=None, head=None, footer=None):
+    def debug(
+        self,
+        msg=None,
+        header=None,
+        color=None,
+        tail=None,
+        head=None,
+        footer=None,
+    ):
         # Allow better names for debug calls
         if header is None:
             if head is None:
@@ -107,22 +118,22 @@ class Debugger(object):
         clname = self.__class__.__name__
 
         # Retrieve tabular
-        if 'tabular' in self.__indebug:
-            tabular = self.__indebug['tabular']
+        if "tabular" in self.__indebug:
+            tabular = self.__indebug["tabular"]
         else:
-            tabular = ''
+            tabular = ""
 
         # For each element inside indebug
         for name in self.__indebug:
 
             # If this is no deepeness key, keep going
-            if name not in ['deepness', 'tabular']:
+            if name not in ["deepness", "tabular"]:
 
                 # Get color
-                if name != 'screen':
+                if name != "screen":
                     color = None
                 color_ini = self.color(color)
-                color_end = self.color('close')
+                color_end = self.color("close")
 
                 # Get file output handler and indebug list
                 (handler, indebug) = self.__indebug[name]
@@ -133,7 +144,9 @@ class Debugger(object):
                     handlerbuf = handler
 
                 # Look up if the name of the class is inside indebug
-                if (clname in indebug) or (('*' in indebug) and ('-%s' % (clname) not in indebug)):
+                if (clname in indebug) or (
+                    ("*" in indebug) and ("-%s" % (clname) not in indebug)
+                ):
 
                     # Set line head name
                     if self.__inname:
@@ -145,15 +158,24 @@ class Debugger(object):
                     message = color_ini
                     if header:
                         now = datetime.datetime.fromtimestamp(time.time())
-                        message += "%02d/%02d/%d %02d:%02d:%02d %-15s - %s" % (now.day, now.month, now.year, now.hour, now.minute, now.second, headname, tabular)
+                        message += "%02d/%02d/%d %02d:%02d:%02d %-15s - %s" % (
+                            now.day,
+                            now.month,
+                            now.year,
+                            now.hour,
+                            now.minute,
+                            now.second,
+                            headname,
+                            tabular,
+                        )
                     if msg:
                         try:
                             message += str(msg)
                         except UnicodeEncodeError:
-                            message += str(msg.encode('ascii', 'ignore'))
+                            message += str(msg.encode("ascii", "ignore"))
                     message += color_end
                     if tail:
-                        message += '\n'
+                        message += "\n"
 
                     # Print it on the buffer handler
                     if msg:
@@ -173,10 +195,10 @@ class Debugger(object):
             return False
 
     def warning(self, msg, header=True, tail=True):
-        self.warningerror(msg, header, 'WARNING', 'yellow', tail)
+        self.warningerror(msg, header, "WARNING", "yellow", tail)
 
     def error(self, msg, header=True, tail=True):
-        self.warningerror(msg, header, 'ERROR', 'red', tail)
+        self.warningerror(msg, header, "ERROR", "red", tail)
 
     def warningerror(self, msg, header, prefix, color, tail):
 
@@ -184,16 +206,16 @@ class Debugger(object):
         clname = self.__class__.__name__
 
         # Retrieve tabular
-        if 'tabular' in self.__indebug:
-            tabular = self.__indebug['tabular']
+        if "tabular" in self.__indebug:
+            tabular = self.__indebug["tabular"]
         else:
-            tabular = ''
+            tabular = ""
 
         # For each element inside indebug
         for name in self.__indebug:
 
             # If this is no deepeness key, keep going
-            if name not in ['deepness', 'tabular']:
+            if name not in ["deepness", "tabular"]:
 
                 # Get file output handler and indebug list
                 (handler, indebug) = self.__indebug[name]
@@ -204,10 +226,10 @@ class Debugger(object):
                     handlerbuf = handler
 
                 # Get color
-                if name != 'screen':
+                if name != "screen":
                     color = None
                 color_ini = self.color(color)
-                color_end = self.color('close')
+                color_end = self.color("close")
 
                 # Build the message
                 message = color_ini
@@ -219,15 +241,28 @@ class Debugger(object):
                         headname = clname
 
                     now = datetime.datetime.fromtimestamp(time.time())
-                    message += "\n%s - %02d/%02d/%d %02d:%02d:%02d %-15s - %s" % (prefix, now.day, now.month, now.year, now.hour, now.minute, now.second, headname, tabular)
+                    message += (
+                        "\n%s - %02d/%02d/%d %02d:%02d:%02d %-15s - %s"
+                        % (
+                            prefix,
+                            now.day,
+                            now.month,
+                            now.year,
+                            now.hour,
+                            now.minute,
+                            now.second,
+                            headname,
+                            tabular,
+                        )
+                    )
                 if msg:
                     try:
                         message += str(msg)
                     except UnicodeEncodeError:
-                        message += str(msg.encode('ascii', 'ignore'))
+                        message += str(msg.encode("ascii", "ignore"))
                 message += color_end
                 if tail:
-                    message += '\n'
+                    message += "\n"
 
                 # Print it on the buffer handler
                 handlerbuf.write(message)

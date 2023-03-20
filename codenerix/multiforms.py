@@ -17,12 +17,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from django.http import HttpResponseRedirect
 from django.db import transaction
+from django.db.models import Q  # noqa: F401
+from django.http import HttpResponseRedirect
 
 # Warning: Q objects are used inside an eval() that you can find somewhere down
-from django.db.models import Q
 
 
 class MultiForm(object):
@@ -86,9 +85,12 @@ class MultiForm(object):
             groups = None
 
         # Add special prefix support to properly support form independency
-        form.add_prefix = lambda fields_name, field_prefix=field_prefix: "%s_%s" % (
-            field_prefix,
-            fields_name,
+        form.add_prefix = (
+            lambda fields_name, field_prefix=field_prefix: "%s_%s"
+            % (
+                field_prefix,
+                fields_name,
+            )
         )
         if "autofill" not in dir(form.Meta):
             form.Meta.autofill = {}
@@ -106,11 +108,13 @@ class MultiForm(object):
                 # Locate linked element
                 if self.object:
                     related_name = formelement._meta.model._meta.get_field(
-                        linkerfield
+                        linkerfield,
                     ).related_query_name()
                     queryset = getattr(self.object, related_name)
                     if modelfilter:
-                        queryset = queryset.filter(eval("Q(%s)" % (modelfilter)))
+                        queryset = queryset.filter(
+                            eval("Q(%s)" % (modelfilter)),
+                        )
                     get_method = getattr(queryset, "get", None)
                     if get_method:
                         instance = queryset.get()
@@ -138,7 +142,9 @@ class MultiForm(object):
                     field_prefix = formelement.Meta.field_prefix
                 else:
                     # Get name from the class
-                    field_prefix = str(formelement).split("'")[1].split(".")[-1]
+                    field_prefix = (
+                        str(formelement).split("'")[1].split(".")[-1]
+                    )
                 self.field_prefix = field_prefix
 
                 # Prepare form
@@ -183,7 +189,7 @@ class MultiForm(object):
                 forms=forms,
                 open_tabs=open_tabs,
                 position_form_default=position_form_default,
-            )
+            ),
         )
 
     def post(self, request, *args, **kwargs):
@@ -223,15 +229,20 @@ class MultiForm(object):
             groups = None
 
         # Add special prefix support to properly support form independency
-        form.add_prefix = lambda fields_name, field_prefix=field_prefix: "%s_%s" % (
-            field_prefix,
-            fields_name,
+        form.add_prefix = (
+            lambda fields_name, field_prefix=field_prefix: "%s_%s"
+            % (
+                field_prefix,
+                fields_name,
+            )
         )
 
         # Check validation
         valid = form.is_valid()
         if (not valid) and ("non_field_errors" in dir(self)):
-            errors = [element[5] for element in list(self.non_field_errors())[:-1]]
+            errors = [
+                element[5] for element in list(self.non_field_errors())[:-1]
+            ]
         elif form.errors.as_data():
             errors = []
             for element in form.errors.as_data():
@@ -251,11 +262,13 @@ class MultiForm(object):
                 # Locate linked element
                 if self.object:
                     related_name = formelement._meta.model._meta.get_field(
-                        linkerfield
+                        linkerfield,
                     ).related_query_name()
                     queryset = getattr(self.object, related_name)
                     if modelfilter:
-                        queryset = queryset.filter(eval("Q(%s)" % (modelfilter)))
+                        queryset = queryset.filter(
+                            eval("Q(%s)" % (modelfilter)),
+                        )
                     get_method = getattr(queryset, "get", None)
                     if get_method:
                         instance = queryset.get()
@@ -270,11 +283,16 @@ class MultiForm(object):
                     field_prefix = formelement.Meta.field_prefix
                 else:
                     # Get name from the class
-                    field_prefix = str(formelement).split("'")[1].split(".")[-1]
+                    field_prefix = (
+                        str(formelement).split("'")[1].split(".")[-1]
+                    )
                 self.field_prefix = field_prefix
 
                 # Prepare form
-                formobj = formelement(instance=instance, data=self.request.POST)
+                formobj = formelement(
+                    instance=instance,
+                    data=self.request.POST,
+                )
                 formobj.form_name = form.form_name
 
                 # Excluded fields
@@ -295,9 +313,12 @@ class MultiForm(object):
                 valid *= formobj.is_valid()
 
                 # append error
-                if not formobj.is_valid() and ("non_field_errors" in dir(formobj)):
+                if not formobj.is_valid() and (
+                    "non_field_errors" in dir(formobj)
+                ):
                     errors += [
-                        element[5] for element in list(formobj.non_field_errors())[:-1]
+                        element[5]
+                        for element in list(formobj.non_field_errors())[:-1]
                     ]
 
             # Save fields to the list
@@ -343,7 +364,12 @@ class MultiForm(object):
         else:
             # Something went wrong, attach error and call invalid
             form.list_errors = errors
-            return self.form_invalid(form, forms, open_tabs, position_form_default)
+            return self.form_invalid(
+                form,
+                forms,
+                open_tabs,
+                position_form_default,
+            )
 
     @transaction.atomic
     def form_valid(self, form, forms):
@@ -374,5 +400,5 @@ class MultiForm(object):
                 forms=forms,
                 open_tabs=open_tabs,
                 position_form_default=position_form_default,
-            )
+            ),
         )

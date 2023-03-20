@@ -17,9 +17,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from codenerix.helpers import upload_path as upload_path_original
+
 
 def upload_path(instance, filename):
     return upload_path_original(instance, filename)
-

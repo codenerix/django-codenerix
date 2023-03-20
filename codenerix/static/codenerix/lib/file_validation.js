@@ -15,5 +15,3 @@ angular.module('fileValidation', [])
         }
     };
 })
-
-

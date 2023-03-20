@@ -1,5 +1,4 @@
 from django.db import models
-
 from multi_email_field.forms import MultiEmailField as MultiEmailFormField
 
 try:
@@ -12,15 +11,15 @@ except ImportError:
 
 class MultiEmailField(models.Field):
     description = "A multi e-mail field stored as a multi-lines text"
-    
+
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('default', [])
+        kwargs.setdefault("default", [])
         super(MultiEmailField, self).__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
         # This is a fairly standard way to set up some defaults
         # while letting the caller override them.
-        defaults = {'form_class': MultiEmailFormField}
+        defaults = {"form_class": MultiEmailFormField}
         defaults.update(kwargs)
         return super(MultiEmailField, self).formfield(**defaults)
 
@@ -43,4 +42,4 @@ class MultiEmailField(models.Field):
         return value.splitlines()
 
     def get_internal_type(self):
-        return 'TextField'
+        return "TextField"

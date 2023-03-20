@@ -247,6 +247,6 @@
             removeMarkers: removeMarkers
         });
     });
-    
+
     return rangy;
 }, this);

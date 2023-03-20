@@ -46,7 +46,7 @@ limitations under the License.
                 return $resource('/{{ws_entry_point}}/:pk/:action', { json:'{}', pk:null, action:null },{
                     query:{ method: "GET", params: { json:'@json' }, isArray: false },
                     get:{ method: "GET", params: { pk:'@pk', action:'@action' }, isArray: false },
-                }); 
+                });
             }]);
         </script>
     {% endblock %}

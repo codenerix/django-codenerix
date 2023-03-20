@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 """
 Mixin class methods to be added to django.forms.fields at runtime. These methods add additional
 error messages for AngularJS form validation.
 """
 import re
-from django.forms import fields
+
 from django.forms import widgets
-from django.utils.translation import gettext_lazy, ngettext_lazy
+from django.utils.translation import gettext_lazy
+from django.utils.translation import ngettext_lazy
 
 # from .widgets import CheckboxSelectMultiple as DjngCheckboxSelectMultiple
 
@@ -40,7 +39,10 @@ class DefaultFieldMixin(object):
                     "limit_value",
                 )
                 errors.append(
-                    ("$error.minlength", message % {"limit_value": self.min_length})
+                    (
+                        "$error.minlength",
+                        message % {"limit_value": self.min_length},
+                    ),
                 )
             if getattr(item, "code", None) == "max_length":
                 message = ngettext_lazy(
@@ -49,7 +51,10 @@ class DefaultFieldMixin(object):
                     "limit_value",
                 )
                 errors.append(
-                    ("$error.maxlength", message % {"limit_value": self.max_length})
+                    (
+                        "$error.maxlength",
+                        message % {"limit_value": self.max_length},
+                    ),
                 )
         return errors
 
@@ -73,7 +78,10 @@ class DefaultFieldMixin(object):
                 and "min_value" not in errkeys
             ):
                 errors.append(
-                    ("$error.min", item.message % {"limit_value": self.min_value})
+                    (
+                        "$error.min",
+                        item.message % {"limit_value": self.min_value},
+                    ),
                 )
                 errkeys.append("min_value")
             if (
@@ -81,7 +89,10 @@ class DefaultFieldMixin(object):
                 and "max_value" not in errkeys
             ):
                 errors.append(
-                    ("$error.max", item.message % {"limit_value": self.max_value})
+                    (
+                        "$error.max",
+                        item.message % {"limit_value": self.max_value},
+                    ),
                 )
                 errkeys.append("max_value")
         return errors
@@ -94,11 +105,16 @@ class DefaultFieldMixin(object):
                 errors.append(("$error.{0}".format(ng_error_key), msg))
                 errkeys.append(key)
         for item in self.validators:
-            if getattr(item, "code", None) == "invalid" and "invalid" not in errkeys:
+            if (
+                getattr(item, "code", None) == "invalid"
+                and "invalid" not in errkeys
+            ):
                 errmsg = getattr(
                     item,
                     "message",
-                    gettext_lazy("This input self does not contain valid data."),
+                    gettext_lazy(
+                        "This input self does not contain valid data.",
+                    ),
                 )
                 errors.append(("$error.{0}".format(ng_error_key), errmsg))
                 errkeys.append("invalid")
@@ -140,8 +156,8 @@ class EmailFieldMixin(DefaultFieldMixin):
         - Strips lookbehinds (not supported in javascript regular expressions)
         """
         validator = self.default_validators[0]
-        user_regex = validator.user_regex.pattern.replace("\Z", "@")
-        domain_patterns = [validator.domain_regex.pattern.replace("\Z", "$")]
+        user_regex = validator.user_regex.pattern.replace(r"\Z", "@")
+        domain_patterns = [validator.domain_regex.pattern.replace(r"\Z", "$")]
         domain_regex = "({0})".format("|".join(domain_patterns))
         email_regex = user_regex + domain_regex
         return re.sub(r"\(\?\<[^()]*?\)", "", email_regex)  # Strip lookbehinds

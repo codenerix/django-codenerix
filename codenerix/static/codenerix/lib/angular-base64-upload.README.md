@@ -65,7 +65,7 @@ def decode_base64
   # set file properties
   data.content_type = params[:your_model][:filetype]
   data.original_filename = params[:your_model][:filename]
-  
+
   # return data to be used as the attachment file (paperclip)
   data
 end

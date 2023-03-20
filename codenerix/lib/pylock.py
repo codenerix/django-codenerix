@@ -17,10 +17,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-'''
+"""
 Library to handle lockers over files
-'''
+"""
 
 __version__ = "2015061200"
 
@@ -29,21 +28,22 @@ import fcntl
 import unittest
 import tempfile
 
-__all__ = [ "pylock" , "AlreadyLocked" ]
+__all__ = ["pylock", "AlreadyLocked"]
+
 
 class pylock:
-    '''
+    """
     Function to control locking flags over a file
-    '''
+    """
 
     def __init__(self, lockfile, locktype):
-        '''
+        """
         Parameters:
         - `lockfile`: name of the file to check/apply the locking.
         - `locktype`: possible values are:
                 wait: on a call to lock() function, the system will wait to get the locker
                 lock: on a call to lock() function, if locked the system will raise an AlreadyLocked exception
-        '''
+        """
 
         # Save config
         self.__lockfile = lockfile
@@ -52,27 +52,27 @@ class pylock:
 
         # Check file exists and create it if it does not
         if not os.path.exists(lockfile):
-            file = open(lockfile, 'w')
+            file = open(lockfile, "w")
             file.close()
 
         # Check locktype
-        if locktype not in ['wait','lock']:
+        if locktype not in ["wait", "lock"]:
             raise TypeError("Locking type unkown")
 
     def __del__(self):
-        '''
+        """
         when dying make sure the lock become free
-        '''
+        """
         # If file was open, close it and delete it!
         if self.__fd:
             self.__fd.close()
 
     def lock(self):
-        '''
+        """
         Try to get locked the file
         - the function will wait until the file is unlocked if 'wait' was defined as locktype
         - the funciton will raise AlreadyLocked exception if 'lock' was defined as locktype
-        '''
+        """
 
         # Open file
         self.__fd = open(self.__lockfile, "w")
@@ -84,14 +84,14 @@ class pylock:
         elif self.__locktype == "lock":
             # Try to get the locker if can not raise an exception
             try:
-                fcntl.flock(self.__fd.fileno(), fcntl.LOCK_EX|fcntl.LOCK_NB)
+                fcntl.flock(self.__fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
             except IOError:
                 raise AlreadyLocked("File is already locked")
 
     def free(self):
-        '''
+        """
         Set the locked file free
-        '''
+        """
 
         # Close file
         self.__fd.close()
@@ -99,25 +99,24 @@ class pylock:
         # Delete it
         try:
             os.unlink(self.__lockfile)
-        except:
+        except Exception:  # TODO: make it more specific
             pass
-
 
 
 # Exceptions classes
 class AlreadyLocked(Exception):
-
-    def __init__(self,string):
+    def __init__(self, string):
         self.string = string
 
     def __str__(self):
         return self.string
 
+
 # Testing
 class test_pylock(unittest.TestCase):
-    '''
+    """
     Testing class for pylock
-    '''
+    """
 
     def setUp(self):
         pass
@@ -127,10 +126,10 @@ class test_pylock(unittest.TestCase):
         f = tempfile.NamedTemporaryFile(delete=False)
         f.close()
 
-        locker1 = pylock(f.name, 'lock')
+        locker1 = pylock(f.name, "lock")
         locker1.lock()
 
-        locker2 = pylock(f.name, 'lock')
+        locker2 = pylock(f.name, "lock")
         self.assertRaises(AlreadyLocked, locker2.lock)
         locker1.free()
         locker2.lock()
@@ -142,5 +141,5 @@ class test_pylock(unittest.TestCase):
 
 
 # Base call
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

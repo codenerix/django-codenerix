@@ -86,7 +86,7 @@ angular.module('codenerixControllers', [])
     }
 
 ])
-.controller("SubListStaticCtrl", ["$scope", "$uibModal","$templateCache", "$http", "$timeout","$state", 
+.controller("SubListStaticCtrl", ["$scope", "$uibModal","$templateCache", "$http", "$timeout","$state",
     function($scope, $uibModal, $templateCache, $http, $timeout, $state) {
         multisublist($scope, $uibModal, $templateCache, $http, $timeout);
         // Activate non-autorender tabs
