@@ -56,7 +56,7 @@ setup(
         "django-recaptcha>=1.2.1,<1.3",
         "django-rosetta>=0.9.8",
         "jsonfield",
-        "openpyxl",
+        "openpyxl==3.1.2",
         "Pillow",
         "Unidecode",
         "Django>=4.1.1",

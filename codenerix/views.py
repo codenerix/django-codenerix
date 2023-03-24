@@ -80,7 +80,8 @@ from django.core.exceptions import FieldDoesNotExist
 # Export to Excel
 from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, PatternFill, Color
-from openpyxl.writer.excel import save_virtual_workbook
+from io import BytesIO
+
 
 from codenerix.models import CodenerixModel
 
@@ -3497,27 +3498,40 @@ class GenList(GenBase, ListView):
             wbcell.data_type = wbcell.TYPE_NUMERIC
 
         # Prepare output
-        data_output = io.BytesIO(save_virtual_workbook(wb))
-        data_output_len = data_output.seek(-1, io.SEEK_END)
+        with BytesIO() as tmp:
+            wb.save(tmp)
+            data_output = tmp.getvalue()
 
-        size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
-        if data_output_len <= (size_max * 1000000):
-            data_output.seek(0)
-            response = HttpResponse(
-                data_output.getvalue(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;",
-                **response_kwargs
-            )
-            response["Content-Disposition"] = "attachment; filename={}.xlsx".format(
-                answer["meta"]["export_name"]
-            )
-            return response
+        if data_output:
+            size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
+            data_output_len = len(data_output)
+
+            if data_output_len <= (size_max * 1000000):
+                response = HttpResponse(
+                    data_output,
+                    content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;",
+                    **response_kwargs
+                )
+                response["Content-Disposition"] = "attachment; filename={}.xlsx".format(
+                    answer["meta"]["export_name"]
+                )
+                return response
+            else:
+                result = {
+                    "message": _(
+                        "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the config".format(
+                            data_output_len / 1000000.0
+                        )
+                    ),
+                    "file": "",
+                    "filename": "",
+                }
+                args = "json={}".format(json.dumps(result))
+                return HttpResponseRedirect("{}?{}".format(reverse("show_error"), args))
         else:
             result = {
                 "message": _(
-                    "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the config".format(
-                        data_output_len / 1000000.0
-                    )
+                    "Could not generate file"
                 ),
                 "file": "",
                 "filename": "",
