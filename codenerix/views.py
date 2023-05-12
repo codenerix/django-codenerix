@@ -115,7 +115,7 @@ def status(request, status, answer):
     if status == "accept":
         out = 202  # Accepted
     elif status == "conflict":
-        out = 409  # Conflict: everything is fine in the request but the resource can not accept the request because the actual state of the resource itself
+        out = 409  # Conflict: everything is fine in the request but the resource can not accept the request because the actual state of the resource itself # noqa: E501
     else:
         out = 501  # Not Implemented
     return HttpResponse(answerjson, status=out)
@@ -124,7 +124,8 @@ def status(request, status, answer):
 # Get rightnow value
 def grv(struct, position):
     """
-    This function helps to convert date information for showing proper filtering
+    This function helps to convert date information for showing proper
+    filtering
     """
     if position == "year":
         size = 4
@@ -276,7 +277,7 @@ class MODELINFO:
         l={}
         l['profile_people_limit']=reduce(operator_or_,criterials)
         return l
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -288,7 +289,7 @@ class MODELINFO:
         user,
         profile,
         jsonquery,
-        Mfields,
+        Mfields,  # noqa: N803
         MlimitQ,
         MsearchF,
         MsearchQ,
@@ -328,48 +329,57 @@ class MODELINFO:
             return f(self)
         else:
             if self.__Mfields:
-                e = "View {1} inside app {0} has a __fields__ attribute which is not callable".format(
-                    self.__appname, self.__viewname
+                e = (
+                    "View {1} inside app {0} has a __fields__ attribute "
+                    "which is not callable".format(
+                        self.__appname, self.__viewname
+                    )
                 )
             else:
-                e = "Model {1} inside app {0} is missing __fields__ method".format(
-                    self.__appname, self.__modelname
+                e = (
+                    "Model {1} inside app {0} is missing "
+                    "__fields__ method".format(
+                        self.__appname, self.__modelname
+                    )
                 )
             raise ImproperlyConfigured(e)
 
-    def limitQ(self):
+    def limitQ(self):  # noqa: N802
         # Get the limits from limitQ internal function
         if self.__soul:
             f = getattr(self.__soul, "__limitQ__", None)
             if callable(f):
-                limitQi = f(self)
+                limitqi = f(self)
             else:
-                limitQi = {}
+                limitqi = {}
         else:
-            limitQi = {}
+            limitqi = {}
 
         # Get the limits from limitQ external function
         if self.__MlimitQ:
             if callable(self.__MlimitQ):
-                limitQe = self.__MlimitQ(self)
+                limitqe = self.__MlimitQ(self)
             else:
-                e = "View {1} inside app {0} has a __limitQ__ attribute which is not callable".format(
-                    self.__appname, self.__viewname
+                e = (
+                    "View {1} inside app {0} has a __limitQ__ "
+                    "attribute which is not callable".format(
+                        self.__appname, self.__viewname
+                    )
                 )
                 raise ImproperlyConfigured(e)
         else:
-            limitQe = {}
+            limitqe = {}
 
         answer = {}
-        for key in limitQi:
-            answer["i_{0}".format(key)] = limitQi[key]
-        for key in limitQe:
-            answer["e_{0}".format(key)] = limitQe[key]
+        for key in limitqi:
+            answer["i_{0}".format(key)] = limitqi[key]
+        for key in limitqe:
+            answer["e_{0}".format(key)] = limitqe[key]
 
         # Return the resulting list
         return answer
 
-    def searchF(self):
+    def searchF(self):  # noqa: N802
         if self.__MsearchF:
             f = self.__MsearchF
         elif self.__soul:
@@ -380,14 +390,17 @@ class MODELINFO:
             return f(self)
         else:
             if self.__MsearchF:
-                e = "View {1} inside app {0} has a __searchF__ attribute which is not callable".format(
-                    self.__appname, self.__viewname
+                e = (
+                    "View {1} inside app {0} has a __searchF__ "
+                    "attribute which is not callable".format(
+                        self.__appname, self.__viewname
+                    )
                 )
                 raise ImproperlyConfigured(e)
             else:
                 return {}
 
-    def searchQ(self, search):
+    def searchQ(self, search):  # noqa: N802
         if search:
             if self.__MsearchQ:
                 f = self.__MsearchQ
@@ -399,8 +412,11 @@ class MODELINFO:
                 return f(self, search)
             else:
                 if self.__MsearchQ:
-                    e = "View {1} inside app {0} has a __searchQ__ attribute which is not callable".format(
-                        self.__appname, self.__viewname
+                    e = (
+                        "View {1} inside app {0} has a __searchQ__ "
+                        "attribute which is not callable".format(
+                            self.__appname, self.__viewname
+                        )
                     )
                     raise ImproperlyConfigured(e)
                 else:
@@ -418,7 +434,8 @@ def gen_auth_permission(
     permission_group=None,
     explained=False,
 ):
-    # Check if the GENPERMISSIONS settings is shutting down the PERMISSION system control from CODENERIX
+    # Check if the GENPERMISSIONS settings is shutting down the PERMISSION
+    # system control from CODENERIX
     if hasattr(settings, "GENPERMISSIONS") and not settings.GENPERMISSIONS:
         if not explained:
             return True
@@ -460,9 +477,8 @@ def gen_auth_permission(
                 cache_key += "".join(permission)
             else:
                 raise ImproperlyConfigured(
-                    "Model {1} inside app {0} is wrong configured for attribute 'permission'".format(
-                        appname, model_name
-                    )
+                    "Model {1} inside app {0} is wrong configured for "
+                    "attribute 'permission'".format(appname, model_name)
                 )
         else:
             permission = []
@@ -476,9 +492,8 @@ def gen_auth_permission(
                 cache_key += "".join(permission_group)
             else:
                 raise ImproperlyConfigured(
-                    "Model {1} inside app {0} is wrong configured for attribute 'permission_group'".format(
-                        appname, model_name
-                    )
+                    "Model {1} inside app {0} is wrong configured for "
+                    "attribute 'permission_group'".format(appname, model_name)
                 )
         else:
             permission_group = []
@@ -518,7 +533,8 @@ def gen_auth_permission(
                             auth = True
                             break
 
-                    # If not authorized yet, check unitary permissions inside groups
+                    # If not authorized yet, check unitary permissions inside
+                    # groups
                     if not auth:
 
                         # Get the list of gropus for this user
@@ -530,7 +546,8 @@ def gen_auth_permission(
                             # For each group
                             for group in group_user:
 
-                                # Check if the permission is authorized in the group
+                                # Check if the permission is authorized in
+                                # the group
                                 if group.permissions.filter(
                                     codename=perm
                                 ).exists():
@@ -544,12 +561,17 @@ def gen_auth_permission(
                                 break
 
                     if not auth:
-                        reason = "Not authorized for: permissions: {} - permission group: {}".format(
-                            ",".join(permission), ",".join(permission_group)
+                        reason = (
+                            "Not authorized for: permissions: {} - "
+                            "permission group: {}".format(
+                                ",".join(permission),
+                                ",".join(permission_group),
+                            )
                         )
 
             else:
-                # If no other permission details was set in the class, use standar checks
+                # If no other permission details was set in the class, use
+                # standar checks
                 if user.has_perm(specific_permission) or user.has_perm(
                     app_specific_permission
                 ):
@@ -662,7 +684,8 @@ class GenBase(object):
                 redir = redirect("not_authorized")
                 if getattr(settings, "DEBUG", False):
                     redir["NotAuthorizedReason"] = _(
-                        "The view/model definition requires, that this user must be a superuser"
+                        "The view/model definition requires, that this "
+                        "user must be a superuser"
                     )
                 return redir
 
@@ -672,7 +695,8 @@ class GenBase(object):
                 redir = redirect("not_authorized")
                 if getattr(settings, "DEBUG", False):
                     redir["NotAuthorizedReason"] = _(
-                        "The view/model definition requires, that this user must be from staff"
+                        "The view/model definition requires, that this "
+                        "user must be from staff"
                     )
                 return redir
 
@@ -698,9 +722,9 @@ class GenBase(object):
         if not model_name:
             if hasattr(self, "model") and self.model is not None:
                 raise IOError(
-                    "Couldn't find a model_name inside your model, did you provided a model or some other class? - Type of your object is '{}'".format(
-                        self.model.__module__
-                    )
+                    "Couldn't find a model_name inside your model, did "
+                    "you provided a model or some other class? - Type "
+                    "of your object is '{}'".format(self.model.__module__)
                 )
             else:
                 raise IOError("Did you forget to set model in your view?")
@@ -854,13 +878,15 @@ class GenBase(object):
                             )[0]
                         )
                     else:
-                        # Analize if is related with another field but it is not a reverse relationship
+                        # Analize if is related with another field but
+                        # it is not a reverse relationship
                         isrelated = getattr(value, "all", None) is not None
                         if isrelated:
                             # If the object is related, get the list of PKs
                             values = []
                             for v in value.all():
-                                # This is a recursive call to go through foreign keys
+                                # This is a recursive call to go through
+                                # foreign keys
                                 values.append(v.pk)
                             # Save the list in value
                             value = values
@@ -1027,7 +1053,8 @@ class GenBase(object):
                 tab_auto_open = tabfinal
                 first = False
 
-            # Set to open automatically the first tab from the list (this function can be improved)
+            # Set to open automatically the first tab from the
+            # list (this function can be improved)
             if "auto_open" not in tabfinal.keys():
                 tabfinal["auto_open"] = False
             elif tabfinal["auto_open"]:
@@ -1128,7 +1155,9 @@ class GenBase(object):
         else:
             raise IOError(
                 _(
-                    "You have used get_object accidentally, this function has been designed only for action_permission: detail, change and delete"
+                    "You have used get_object accidentally, this function "
+                    "has been designed only for action_permission: detail, "
+                    "change and delete"
                 )
             )
 
@@ -1174,13 +1203,13 @@ class GenBase(object):
         modelname = getattr(myclass, "modelname", info["modelname"])
 
         # Get MODELINFO
-        Mfields = None
-        MlimitQ = None
-        MsearchF = None
-        MsearchQ = None
+        Mfields = None  # noqa: N806
+        MlimitQ = None  # noqa: N806
+        MsearchF = None  # noqa: N806
+        MsearchQ = None  # noqa: N806
         if hasattr(myclass, "__limitQ__"):
-            MlimitQ = myclass().__limitQ__
-        MODELINF = MODELINFO(
+            MlimitQ = myclass().__limitQ__  # noqa: N806
+        MODELINF = MODELINFO(  # noqa: N806
             myclass.__dict__.get("model", None),
             appname,
             modelname,
@@ -1238,8 +1267,8 @@ class GenBase(object):
         return get_object_or_404(queryset, pk=pk)
 
 
-# ListView helper: https://docs.djangoproject.com/en/1.6/ref/class-based-views/flattened-index/#list-views
-# ListView flow:   https://docs.djangoproject.com/en/1.6/ref/class-based-views/generic-display/#listview
+# ListView helper: https://docs.djangoproject.com/en/1.6/ref/class-based-views/flattened-index/#list-views # noqa: E501
+# ListView flow:   https://docs.djangoproject.com/en/1.6/ref/class-based-views/generic-display/#listview # noqa: E501
 class GenList(GenBase, ListView):
     """
     Usage:
@@ -1393,7 +1422,7 @@ class GenList(GenBase, ListView):
     # You can use also custom queryset
     def custom_queryset(self, queyset, info):
         return <your customized queryset>
-    """
+    """  # noqa: E501
 
     # Default values
     json = True
@@ -1432,13 +1461,15 @@ class GenList(GenBase, ListView):
         Entry point for this class, here we decide basic stuff
         """
 
-        # Get if this class is working as only a base render and List funcionality shouldn't be enabled
+        # Get if this class is working as only a base render and List
+        # funcionality shouldn't be enabled
         onlybase = getattr(self, "onlybase", False)
 
         # REST not available when onlybase is enabled
         if not onlybase:
 
-            # Check if this is a REST query to pusth the answer to responde in JSON
+            # Check if this is a REST query to pusth the answer to responde
+            # in JSON
             if bool(self.request.META.get("HTTP_X_REST", False)) or bool(
                 self.request.GET.get("force_rest_api", False)
             ):
@@ -1456,7 +1487,9 @@ class GenList(GenBase, ListView):
                     self.request.GET = QueryDict("").copy()
                     self.request.GET.update(newget)
 
-            #                return HttpResponseBadRequest(_("The service requires you to set a GET argument named json={} which will contains all the filters you can apply to a list"))
+            #                return HttpResponseBadRequest(_("The service
+            #  requires you to set a GET argument named json={} which
+            #  will contains all the filters you can apply to a list"))
 
             # Check if this is a REST query to add an element
             if self.request.method == "POST":
@@ -1476,9 +1509,8 @@ class GenList(GenBase, ListView):
         for (depre, version) in deprecated:
             if hasattr(self, depre):
                 raise IOError(
-                    "The attribute '{}' has been deprecated in version '{}' and it is not available anymore".format(
-                        depre, version
-                    )
+                    "The attribute '{}' has been deprecated in version '{}' "
+                    "and it is not available anymore".format(depre, version)
                 )
 
         # Build extracontext
@@ -1613,7 +1645,8 @@ class GenList(GenBase, ListView):
             or (self.json is True)
         )
         if self.json_worker:
-            # Check if the request has some json query, if not, just render the template
+            # Check if the request has some json query, if not, just render
+            # the template
             if (
                 self.request.GET.get(
                     "json", self.request.POST.get("json", None)
@@ -1642,7 +1675,8 @@ class GenList(GenBase, ListView):
             json_answer = {
                 "error": True,
                 "errortxt": _(
-                    "Not allowed, this kind of requests has been prohibited for this view!"
+                    "Not allowed, this kind of requests has been prohibited "
+                    "for this view!"
                 ),
             }
             return HttpResponse(
@@ -1665,7 +1699,7 @@ class GenList(GenBase, ListView):
         # Call the base implementation
         return super(GenList, self).dispatch(*args, **kwargs)
 
-    def autoSearchF(self, MODELINF):
+    def autoSearchF(self, MODELINF):  # noqa: N802, N803
         fields_show = [x[0] for x in MODELINF.fields()]
         fields = {}
         for field in self.model._meta.get_fields():
@@ -1722,7 +1756,7 @@ class GenList(GenBase, ListView):
                     )
         return fields
 
-    def autoSearchQ(self, MODELINF, text):
+    def autoSearchQ(self, MODELINF, text):  # noqa: N802, N803
         fields_show = [x[0] for x in MODELINF.fields()]
         valid_fields = []
         for field in fields_show:
@@ -1780,18 +1814,18 @@ class GenList(GenBase, ListView):
             queryset = SearchQuerySet().models(self.model)
 
         # Optional tweak methods
-        Mfields = None
-        MlimitQ = None
-        MsearchF = None
-        MsearchQ = None
+        Mfields = None  # noqa: N806
+        MlimitQ = None  # noqa: N806
+        MsearchF = None  # noqa: N806
+        MsearchQ = None  # noqa: N806
         if hasattr(self, "__fields__"):
-            Mfields = self.__fields__
+            Mfields = self.__fields__  # noqa: N806
         if hasattr(self, "__limitQ__"):
-            MlimitQ = self.__limitQ__
+            MlimitQ = self.__limitQ__  # noqa: N806
         if hasattr(self, "__searchF__"):
-            MsearchF = self.__searchF__
+            MsearchF = self.__searchF__  # noqa: N806
         if hasattr(self, "__searchQ__"):
-            MsearchQ = self.__searchQ__
+            MsearchQ = self.__searchQ__  # noqa: N806
 
         self._viewname = self.__module__
 
@@ -1808,7 +1842,8 @@ class GenList(GenBase, ListView):
                 jsonquery = json.loads(jsonquerytxt)
             except json.JSONDecodeError:
                 raise IOError(
-                    "json argument in your GET/POST parameters is not a valid JSON string"
+                    "json argument in your GET/POST parameters is not a "
+                    "valid JSON string"
                 )
 
             # Set json context
@@ -1825,7 +1860,7 @@ class GenList(GenBase, ListView):
             jsonquery = {}
 
         # Build info for GenModel methods
-        MODELINF = MODELINFO(
+        MODELINF = MODELINFO(  # noqa: N806
             self.model,
             self._appname,
             self._modelname,
@@ -1921,7 +1956,8 @@ class GenList(GenBase, ListView):
         for key in filters_by_struct:
             # Get the value of the original filter
             value = filters_by_struct[key]
-            # If there is something to filter, filter is not being changed and filter is known by the class
+            # If there is something to filter, filter is not being
+            # changed and filter is known by the class
             try:
                 value = int(value)
             except ValueError:
@@ -1929,9 +1965,12 @@ class GenList(GenBase, ListView):
             except TypeError:
                 pass
 
-            # ORIG if (key in listfilters) and ((value>0) or (type(value) == list)):
-            # V1 if (value and type(value) == int and key in listfilters) and ((value > 0) or (type(value) == list)):
-            # V2 if (value and type(value) == int and key in listfilters) or ((value > 0) or (type(value) == list)):
+            # ORIG if (key in listfilters) and ((value>0) or
+            # (type(value) == list)):
+            # V1 if (value and type(value) == int and key in listfilters) and
+            # ((value > 0) or (type(value) == list)):
+            # V2 if (value and type(value) == int and key in listfilters) or
+            # ((value > 0) or (type(value) == list)):
             if value and key in listfilters:
                 # Add the filter to the queryset
                 rule = listfilters[key]
@@ -2095,7 +2134,7 @@ class GenList(GenBase, ListView):
 
         # Save in context
         context["search"] = search
-        datetimeQ = None
+        datetimeQ = None  # noqa: N806
         if len(search) > 0:
 
             # Get ID
@@ -2144,13 +2183,13 @@ class GenList(GenBase, ListView):
             else:
                 searchs["autoSearchQ"] &= tmp_search
             qobjects = {}
-            qobjectsCustom = {}
+            qobjectsCustom = {}  # noqa: N806
             for name in searchs:
                 # Extract the token
                 qtoken = searchs[name]
                 if qtoken == "datetime":
                     # If it is a datetime
-                    datetimeQ = name
+                    datetimeQ = name  # noqa: N806
                     continue
                 elif (type(qtoken) == str) or (type(qtoken) == list):
                     # Prepare query
@@ -2169,7 +2208,8 @@ class GenList(GenBase, ListView):
                         for word in search.split(" "):
                             # If there is a word to process
                             if len(word) > 0:
-                                # Build the key for the arguments and set the word as a value for the Q search
+                                # Build the key for the arguments and set the
+                                # word as a value for the Q search
                                 if word[0] == "-":
                                     # If negated request
                                     # key="-{}".format(hashlib.md5(word[1:].encode()).hexdigest())
@@ -2192,7 +2232,7 @@ class GenList(GenBase, ListView):
                     if qobjectsCustom:
                         qobjectsCustom |= searchs[name]
                     else:
-                        qobjectsCustom = searchs[name]
+                        qobjectsCustom = searchs[name]  # noqa: N806
 
             # Build positive/negative
             qdata = None
@@ -2234,9 +2274,8 @@ class GenList(GenBase, ListView):
             searchs = MODELINF.searchQ(search)
             for name in searchs:
                 if searchs[name] == "datetime":
-                    datetimeQ = name
+                    datetimeQ = name  # noqa: N806
                     continue
-
         # Datetime Q
         context["datetimeQ"] = datetimeQ
         if datetimeQ:
@@ -2301,7 +2340,8 @@ class GenList(GenBase, ListView):
             date_results = queryset.exclude(**exclusion).values_list(
                 datetimeQ, flat=True
             )
-            # Remove empty results (usefull when the date is allowed to be empty)
+            # Remove empty results (usefull when the date is allowed to
+            # be empty)
             if f["day"][0] != f["day"][1]:
                 if f["month"][0] == f["month"][1]:
                     date_results = date_results.datetimes(datetimeQ, "day")
@@ -2458,7 +2498,8 @@ class GenList(GenBase, ListView):
                 type_field = self.get_type_field(value[0].split(":")[-1])
             else:
                 name = value[0]
-                # not usable fields, example: fields.append((None, _('Selector'))) in airportslist
+                # not usable fields, example: fields.append((None,
+                # _('Selector'))) in airportslist
                 hash_key = hashlib.md5(value[1].encode()).hexdigest()
                 order_key = "#{}".format(hash_key)
                 type_field = None
@@ -2578,7 +2619,8 @@ class GenList(GenBase, ListView):
             else:
                 alias = rule
 
-            # If rule has a foreign key path (check first level attributes only, nfrule = no foreign rule)
+            # If rule has a foreign key path (check first level attributes
+            # only, nfrule = no foreign rule)
             nfrule = rule.split("__")
             do_select_related = False
             model = self.model
@@ -2630,8 +2672,10 @@ class GenList(GenBase, ListView):
             if nfrule in self.__columns:
 
                 ############################
-                # dejo comentada la restriccion, si se deja y hay una FK "nunca" usaria .extra ni .value
-                # no la elimino del todo por si hubiera algun fallo mas adelante,
+                # dejo comentada la restriccion, si se deja y hay una FK
+                # "nunca" usaria .extra ni .value
+                # no la elimino del todo por si hubiera algun fallo mas
+                # adelante,
                 # y se tuviera que parametrizarse de algun otro modo
                 ############################
 
@@ -2672,11 +2716,20 @@ class GenList(GenBase, ListView):
         for rename in query_renamed.keys():
             if rename in model_properties:
                 if rename in self.__foreignkeys:
-                    msg = "Invalid alias. The alias '{}' is a foreign key from model '{}' inside app '{}'"
+                    msg = (
+                        "Invalid alias. The alias '{}' is a foreign key "
+                        " from model '{}' inside app '{}'"
+                    )
                 elif rename in self.__columns:
-                    msg = "Invalid alias. The alias '{}' is a columns from model '{}' inside app '{}'"
+                    msg = (
+                        "Invalid alias. The alias '{}' is a columns "
+                        "from model '{}' inside app '{}'"
+                    )
                 elif rename in self.__related_objects:
-                    msg = "Invalid alias. The alias '{}' is a related object from model '{}' inside app '{}'"
+                    msg = (
+                        "Invalid alias. The alias '{}' is a related "
+                        "object from model '{}' inside app '{}'"
+                    )
                 raise Exception(
                     msg.format(rename, self._modelname, self._appname)
                 )
@@ -2716,7 +2769,7 @@ class GenList(GenBase, ListView):
             fields_related_model, query_verifier,
             query_verifier.sort(),autorules_keys.sort()
             ))
-        #"""
+        #"""  # noqa: E501
 
         # Check if the user requested to return a raw queryset
         if raw_query:
@@ -2851,7 +2904,8 @@ class GenList(GenBase, ListView):
                         regs += paginator.page(1)
                         desired_page_number = 2
                     except EmptyPage:
-                        # If page is out of range (e.g. 9999), deliver last page of results.
+                        # If page is out of range (e.g. 9999), deliver
+                        # last page of results.
                         if pages_to_bring == 1:
                             regs += paginator.page(paginator.num_pages)
                         # Leave bucle
@@ -2875,7 +2929,8 @@ class GenList(GenBase, ListView):
 
     def get_context_data(self, **kwargs):
         """
-        Generic list view with validation included and object transfering support
+        Generic list view with validation included and object
+        transfering support
         """
 
         # Call the base implementation first to get a context
@@ -3207,15 +3262,15 @@ class GenList(GenBase, ListView):
 
     def set_context_json(self, jsonquery):
         """
-        Get a json parameter and rebuild the context back to a dictionary (probably kwargs)
+        Get a json parameter and rebuild the context back to
+        a dictionary (probably kwargs)
         """
 
         # Make sure we are getting dicts
         if type(jsonquery) != dict:
             raise IOError(
-                "set_json_context() method can be called only with dictionaries, you gave me a '{}'".format(
-                    type(jsonquery)
-                )
+                "set_json_context() method can be called only with "
+                "dictionaries, you gave me a '{}'".format(type(jsonquery))
             )
 
         # Set we will answer json to this request
@@ -3351,7 +3406,8 @@ class GenList(GenBase, ListView):
                         tail = "__".join(rksp[1:])
                     else:
                         tail = None
-                    # value=getattr(o,head,None)  # 2016.02.24 Quitamos None para que aparezca la exception
+                    # value=getattr(o,head,None)  # 2016.02.24 Quitamos None
+                    # para que aparezca la exception
                     value = getattr(o, head)
 
                     # If value is None, return None
@@ -3360,7 +3416,8 @@ class GenList(GenBase, ListView):
                         related = getattr(value, "all", None) is not None
                         # Analize data type
                         if isinstance(rkval, dict):
-                            # This is a recursive call to go through foreign keys
+                            # This is a recursive call to go through foreign
+                            # keys
                             value = self.bodybuilder(value.all(), rkval)
                         elif isinstance(value, datetime.datetime):
                             # Convert datetime to string
@@ -3392,10 +3449,12 @@ class GenList(GenBase, ListView):
                             # Convert Decimal to float
                             value = float(value)
                         elif related:
-                            # If the object is related but nobody is taking care of it
+                            # If the object is related but nobody is taking
+                            # care of it
                             values = []
                             for v in value.all():
-                                # This is a recursive call to go through foreign keys
+                                # This is a recursive call to go through
+                                # foreign keys
                                 if tail is None:
                                     values.append(smart_str(v))
                                 else:
@@ -3407,7 +3466,8 @@ class GenList(GenBase, ListView):
                             # Save the list in value
                             value = values
                         elif "__" in rk:
-                            # This is a foreignkey, resolve with a recursive call to go through foreign keys
+                            # This is a foreignkey, resolve with a recursive
+                            # call to go through foreign keys
                             value = self.bodybuilder([value], {tail: rkval})[
                                 0
                             ][tail]
@@ -3464,9 +3524,10 @@ class GenList(GenBase, ListView):
 
             if self.export:
                 if self.export == "xlsx":
-                    answer["meta"][
-                        "content_type"
-                    ] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;"
+                    answer["meta"]["content_type"] = (
+                        "application/vnd.openxmlformats-officedocument."
+                        "spreadsheetml.sheet;charset=utf-8;"
+                    )
                     # return_xls = self.response_to_xls(answer)
                     return self.response_to_xls(answer, **response_kwargs)
                 else:
@@ -3498,7 +3559,10 @@ class GenList(GenBase, ListView):
                 ):
                     method = "bodybuilder"
                 raise TypeError(
-                    "The method {0}() from model '{1}' inside app '{2}' didn't return a JSON serializable object, we have tried to locate the exactly point for the error{3}. Error was: {4}".format(
+                    "The method {0}() from model '{1}' inside app '{2}' "
+                    "didn't return a JSON serializable object, we have "
+                    "tried to locate the exactly point for the error{3}. "
+                    "Error was: {4}".format(
                         method, self._modelname, self._appname, locator, e
                     )
                 )
@@ -3623,7 +3687,8 @@ class GenList(GenBase, ListView):
             if data_output_len <= (size_max * 1000000):
                 response = HttpResponse(
                     data_output,
-                    content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;",
+                    content_type="application/vnd.openxmlformats-"
+                    "officedocument.spreadsheetml.sheet;charset=utf-8;",
                     **response_kwargs
                 )
                 response[
@@ -3635,9 +3700,9 @@ class GenList(GenBase, ListView):
             else:
                 result = {
                     "message": _(
-                        "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the config".format(
-                            data_output_len / 1000000.0
-                        )
+                        "The file is very big ({}M). Change the parameter "
+                        "FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the "
+                        "config".format(data_output_len / 1000000.0)
                     ),
                     "file": "",
                     "filename": "",
@@ -3698,7 +3763,7 @@ class GenModify(object):
 
     angular_submit = 'submit'                       Name of the method inside AngularJS scope that will receive submit actions
     angular_delete = 'delete'                       Name of the method inside AngularJS scope that will receive delete actions
-    """
+    """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
         return super(GenModify, self).__init__(*args, **kwargs)
@@ -3763,9 +3828,8 @@ class GenModify(object):
                     key2 = keysp[1]
                 else:
                     raise TypeError(
-                        "I found a key in success_url_attr neither with 1 or 2 elements, key is '{0}'".format(
-                            key
-                        )
+                        "I found a key in success_url_attr neither "
+                        "with 1 or 2 elements, key is '{0}'".format(key)
                     )
                 attr[key1] = self.object.__dict__[key2]
             # Attach object
@@ -4027,7 +4091,8 @@ class GenModify(object):
                                 newfield["html_name"] = inp.html_name
 
                                 if newfield["type"] == "genrecaptcha":
-                                    # Say the widget to work as it was designed (not to use CODENERIX code)
+                                    # Say the widget to work as it was
+                                    # designed (not to use CODENERIX code)
                                     inp.field.widget.legacy = True
                                     # Get html code
                                     newfield["value"] = str(inp)
@@ -4043,15 +4108,19 @@ class GenModify(object):
                                 ).data:
                                     if msg and msg != "$message":
                                         if dirty == "$dirty":
-                                            # Messages for dirty status (validations for AngularJS)
+                                            # Messages for dirty status
+                                            # (validations for AngularJS)
                                             notes.append(msg)
                                         elif dirty == "$pristine":
-                                            # Messages for pristine status (validations from Django)
+                                            # Messages for pristine status
+                                            # (validations from Django)
                                             errors.append(msg)
                                         else:
                                             raise IOError(
                                                 _(
-                                                    "This shouldn't happen, state is not $dirty or $pristine"
+                                                    "This shouldn't happen, "
+                                                    "state is not $dirty or "
+                                                    "$pristine"
                                                 )
                                             )
                                 if errors:
@@ -4123,7 +4192,9 @@ class GenModify(object):
                 json_answer = json.dumps(answer, cls=DjangoJSONEncoder)
             except TypeError as e:
                 raise TypeError(
-                    "The method get_context_json() from model '{0}' inside app '{1}' didn't return a JSON serializable object. Error was: {2}".format(
+                    "The method get_context_json() from model '{0}' "
+                    "inside app '{1}' didn't return a JSON serializable "
+                    "object. Error was: {2}".format(
                         self._modelname, self._appname, e
                     )
                 )
@@ -4196,7 +4267,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
     Define generic methods for all our generic classes
     success_url = {'status':'accept','answer':''})  This is the URL where the view will go if everything goes fine (answer will be autofilled)
     get_template_names_key='delete'                 Sufix added to all templates when templates name resolution is looking for the template
-    """
+    """  # noqa: E501
 
     # get_template_names_key='delete'
     success_url = reverse_lazy(
@@ -4222,7 +4293,8 @@ class GenDelete(GenModify, GenBase, DeleteView):
                 {
                     "error": True,
                     "errortxt": _(
-                        "Method not allowed, use POST to delete or DELETE on the detail url"
+                        "Method not allowed, use POST to delete or DELETE "
+                        "on the detail url"
                     ),
                 }
             )
@@ -4347,7 +4419,7 @@ class GenDetail(GenBase, DetailView):
         values taking into account the 'group' attribute from the corresponding
         form object, which is necesary to fill the details form as it is configured
         in the 'group' attribute
-        """
+        """  # noqa: E501
         # initilize the result structure
         result = []
 
@@ -4363,14 +4435,16 @@ class GenDetail(GenBase, DetailView):
         for field in self.exclude_fields:
             if field in object_content.keys():
                 object_content.pop(field)
-        # following is going to be created an structure with the appropieate caption
+        # following is going to be created an structure with the
+        # appropieate caption
         # for every existing field in the current model
         verbose_names = {}
         for field in object_content.keys():
             verbose_names[field] = self.model._meta.get_field(
                 field
             ).verbose_name
-        # the found fields in the groups structure are going to be taked into account
+        # the found fields in the groups structure are going to be taked
+        # into account
         gr_object_content = []
 
         if subgroup:
@@ -4673,7 +4747,9 @@ class GenDetail(GenBase, DetailView):
                 json_answer = json.dumps(context)
             except TypeError as e:
                 raise TypeError(
-                    "Couldn't serialize response from model '{0}' inside app '{1}', I can not return a JSON serializable object. Error was: {2}".format(
+                    "Couldn't serialize response from model '{0}' "
+                    "inside app '{1}', I can not return a JSON "
+                    "serializable object. Error was: {2}".format(
                         self._modelname, self._appname, e
                     )
                 )
@@ -4707,7 +4783,7 @@ class GenForeignKey(GenBase, View):
             KEY: linked field name (ng-model name)
             VALUE: actual value from the linked field
         if you get a filter company:3 means your search must filter the results to all that belongs to company:3
-    """
+    """  # noqa: E501
 
     label_cached = None
     action_permission = "list"
