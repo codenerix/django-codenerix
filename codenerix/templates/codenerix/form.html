@@ -49,6 +49,9 @@ limitations under the License.
         {% block extra_form_top%}{% endblock %}
         <input type="text" id="id_elementid" name="elementid" ng-model="elementid" ng-value="elementid" style="display:none" />
         <input type="text" id="__pk__" name="__pk__" ng-model="__pk__" ng-value="{{object.pk}}" value="{{object.pk}}" style="display:none" />
+        {% for key,value in inject.items %}
+        <input type="text" id="{{key}}" name="{{key}}" ng-model="{{key}}" ng-value="{{value}}" value="{{value}}" style="display:none" />
+        {% endfor %}
         <input type="submit" value="submit" style="display:none" ng-show="false">
         {% if show_internal_name and formlist|len <= 1 %}
             <div class="col-md-12 internal-name">

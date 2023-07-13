@@ -3763,6 +3763,12 @@ class GenModify(object):
 
     angular_submit = 'submit'                       Name of the method inside AngularJS scope that will receive submit actions
     angular_delete = 'delete'                       Name of the method inside AngularJS scope that will receive delete actions
+
+    inject: inject form variables into the template (CODENERIX)
+      - Example: {'cpk': 3} -> will inject cpk variable with value 3
+      If used in dispatch you can add dynamical values:
+      - Example: {'cpk': self.var} -> will inject cpk variable with value from self.var
+
     """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
@@ -3832,6 +3838,7 @@ class GenModify(object):
                         "with 1 or 2 elements, key is '{0}'".format(key)
                     )
                 attr[key1] = self.object.__dict__[key2]
+
             # Attach object
             if self.__authtoken:
 
@@ -3911,6 +3918,9 @@ class GenModify(object):
             except TypeError:
                 # Compatiblity mode for version 20160928 and lower
                 context["cannot_delete"] = self.object.internal_lock_delete()
+
+        # Injects
+        context["inject"] = getattr(self, "inject", {})
 
         # Subscribers
         context["subscriptions"] = base64.b64encode(

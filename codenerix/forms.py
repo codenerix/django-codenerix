@@ -73,7 +73,11 @@ class BaseForm(object):
                 if lt not in valores_validos:
                     r = False
                     break
-            if not r or color[0] != "#" or not (len(color) == 4 or len(color) == 7):
+            if (
+                not r
+                or color[0] != "#"
+                or not (len(color) == 4 or len(color) == 7)
+            ):
                 self._errors["color"] = [_("Invalid color")]
                 return color
             else:
@@ -197,8 +201,9 @@ class BaseForm(object):
         =====
         - autofill: autofill system (CODENERIX)
         - extend: extended variables system (CODENERIX)
+            Example: {"attr1": ["subattr1", "subattr2"]} -> it will inject in the scope attributes "subattr1" and "subattr2" from "object.attr1" if object is available (GenUpdate)
         - widgets: widgets system (DJANGO)
-        """
+        """  # noqa: E501
 
         # Check if language is set
         if not self.__language:
@@ -251,9 +256,13 @@ class BaseForm(object):
 
             if token["name"] in html_helper:
                 if "pre" in html_helper[token["name"]]:
-                    token["html_helper_pre"] = html_helper[token["name"]]["pre"]
+                    token["html_helper_pre"] = html_helper[token["name"]][
+                        "pre"
+                    ]
                 if "post" in html_helper[token["name"]]:
-                    token["html_helper_post"] = html_helper[token["name"]]["post"]
+                    token["html_helper_post"] = html_helper[token["name"]][
+                        "post"
+                    ]
 
             styles = g[1]
             if type(styles) is tuple:
@@ -303,14 +312,20 @@ class BaseForm(object):
                             and "items" in html_helper[token["name"]]
                             and field in html_helper[token["name"]]["items"]
                         ):
-                            if "pre" in html_helper[token["name"]]["items"][field]:
-                                atr["html_helper_pre"] = html_helper[token["name"]][
-                                    "items"
-                                ][field]["pre"]
-                            if "post" in html_helper[token["name"]]["items"][field]:
-                                atr["html_helper_post"] = html_helper[token["name"]][
-                                    "items"
-                                ][field]["post"]
+                            if (
+                                "pre"
+                                in html_helper[token["name"]]["items"][field]
+                            ):
+                                atr["html_helper_pre"] = html_helper[
+                                    token["name"]
+                                ]["items"][field]["pre"]
+                            if (
+                                "post"
+                                in html_helper[token["name"]]["items"][field]
+                            ):
+                                atr["html_helper_post"] = html_helper[
+                                    token["name"]
+                                ]["items"][field]["post"]
 
                         # Process each attribute (if any)
                         dictionary = False
@@ -372,7 +387,9 @@ class BaseForm(object):
                         atr["input"] = found
                         atr["inputbool"] = foundbool
                         atr["focus"] = False
-                        atr["extend"] = self.get_extends(found.html_name, userextend)
+                        atr["extend"] = self.get_extends(
+                            found.html_name, userextend
+                        )
 
                         # Set focus
                         if focus_must is None:
@@ -384,7 +401,9 @@ class BaseForm(object):
                         # Autocomplete
                         if "autofill" in dir(self.Meta):
 
-                            autofill = self.Meta.autofill.get(found.html_name, None)
+                            autofill = self.Meta.autofill.get(
+                                found.html_name, None
+                            )
                             atr["autofill"] = autofill
 
                             if autofill:
@@ -400,19 +419,23 @@ class BaseForm(object):
                                         if autokind == "select":
 
                                             # If autofill is True for this field set the DynamicSelect widget
-                                            found.field.widget = DynamicSelect(wattrs)
+                                            found.field.widget = DynamicSelect(
+                                                wattrs
+                                            )
 
                                         elif autokind == "multiselect":
 
                                             # If autofill is True for this field set the DynamicSelect widget
-                                            found.field.widget = MultiDynamicSelect(
-                                                wattrs
+                                            found.field.widget = (
+                                                MultiDynamicSelect(wattrs)
                                             )
 
                                         elif autokind == "input":
 
                                             # If autofill is True for this field set the DynamicSelect widget
-                                            found.field.widget = DynamicInput(wattrs)
+                                            found.field.widget = DynamicInput(
+                                                wattrs
+                                            )
 
                                         else:
 
@@ -424,10 +447,18 @@ class BaseForm(object):
 
                                     # Configure widget
                                     found.field.widget.is_required = wrequired
-                                    found.field.widget.form_name = self.form_name
-                                    found.field.widget.field_name = infield.html_name
-                                    found.field.widget.autofill_deepness = autofill[1]
-                                    found.field.widget.autofill_url = autofill[2]
+                                    found.field.widget.form_name = (
+                                        self.form_name
+                                    )
+                                    found.field.widget.field_name = (
+                                        infield.html_name
+                                    )
+                                    found.field.widget.autofill_deepness = (
+                                        autofill[1]
+                                    )
+                                    found.field.widget.autofill_url = autofill[
+                                        2
+                                    ]
                                     found.field.widget.autofill = autofill[3:]
 
                                 else:
@@ -438,14 +469,24 @@ class BaseForm(object):
                                     if not userwidget:
 
                                         # If autofill is True for this field set the DynamicSelect widget
-                                        found.field.widget = DynamicSelect(wattrs)
+                                        found.field.widget = DynamicSelect(
+                                            wattrs
+                                        )
 
                                     # Configure widget
                                     found.field.widget.is_required = wrequired
-                                    found.field.widget.form_name = self.form_name
-                                    found.field.widget.field_name = infield.html_name
-                                    found.field.widget.autofill_deepness = autofill[0]
-                                    found.field.widget.autofill_url = autofill[1]
+                                    found.field.widget.form_name = (
+                                        self.form_name
+                                    )
+                                    found.field.widget.field_name = (
+                                        infield.html_name
+                                    )
+                                    found.field.widget.autofill_deepness = (
+                                        autofill[0]
+                                    )
+                                    found.field.widget.autofill_url = autofill[
+                                        1
+                                    ]
                                     found.field.widget.autofill = autofill[2:]
                         else:
 
@@ -453,7 +494,9 @@ class BaseForm(object):
                             atr["autofill"] = None
 
                         # Check if we have to replace the widget with a newer one
-                        if isinstance(found.field.widget, Select) and not isinstance(
+                        if isinstance(
+                            found.field.widget, Select
+                        ) and not isinstance(
                             found.field.widget, DynamicSelect
                         ):
                             # Replace widget if the user didn't define any and we haven't done yet
@@ -487,7 +530,9 @@ class BaseForm(object):
                         flang = getattr(found.field, "set_language", None)
                         if flang:
                             flang(self.__language)
-                        flang = getattr(found.field.widget, "set_language", None)
+                        flang = getattr(
+                            found.field.widget, "set_language", None
+                        )
                         if flang:
                             flang(self.__language)
                         # Attach the element
@@ -514,13 +559,17 @@ class BaseForm(object):
 
                     # Check if the user specified a widget
                     if "widgets" in dir(self.Meta):
-                        userwidget = self.Meta.widgets.get(infield.html_name, None)
+                        userwidget = self.Meta.widgets.get(
+                            infield.html_name, None
+                        )
                     else:
                         userwidget = None
 
                     # Check if the user specified a extend
                     if "extend" in dir(self.Meta):
-                        userextend = self.Meta.extend.get(infield.html_name, None)
+                        userextend = self.Meta.extend.get(
+                            infield.html_name, None
+                        )
                     else:
                         userextend = None
 
@@ -536,7 +585,9 @@ class BaseForm(object):
                     atr["input"] = infield
                     atr["inputbool"] = True
                     atr["focus"] = False
-                    atr["extend"] = self.get_extends(infield.html_name, userextend)
+                    atr["extend"] = self.get_extends(
+                        infield.html_name, userextend
+                    )
 
                     # Set focus
                     if focus_must is None:
@@ -548,7 +599,9 @@ class BaseForm(object):
                     # Autocomplete
                     if "autofill" in dir(self.Meta):
 
-                        autofill = self.Meta.autofill.get(infield.html_name, None)
+                        autofill = self.Meta.autofill.get(
+                            infield.html_name, None
+                        )
                         atr["autofill"] = autofill
 
                         if autofill:
@@ -565,15 +618,19 @@ class BaseForm(object):
                                     # Using new format
                                     if autokind == "select":
                                         # If autofill is True for this field set the DynamicSelect widget
-                                        infield.field.widget = DynamicSelect(wattrs)
+                                        infield.field.widget = DynamicSelect(
+                                            wattrs
+                                        )
                                     elif autokind == "multiselect":
                                         # If autofill is True for this field set the DynamicSelect widget
-                                        infield.field.widget = MultiDynamicSelect(
-                                            wattrs
+                                        infield.field.widget = (
+                                            MultiDynamicSelect(wattrs)
                                         )
                                     elif autokind == "input":
                                         # If autofill is True for this field set the DynamicSelect widget
-                                        infield.field.widget = DynamicInput(wattrs)
+                                        infield.field.widget = DynamicInput(
+                                            wattrs
+                                        )
                                     else:
                                         raise IOError(
                                             "Autofill filled using new format but autokind is '{}' and I only know 'input' or 'select'".format(
@@ -584,8 +641,12 @@ class BaseForm(object):
                                 # Configure widget
                                 infield.field.widget.is_required = wrequired
                                 infield.field.widget.form_name = self.form_name
-                                infield.field.widget.field_name = infield.html_name
-                                infield.field.widget.autofill_deepness = autofill[1]
+                                infield.field.widget.field_name = (
+                                    infield.html_name
+                                )
+                                infield.field.widget.autofill_deepness = (
+                                    autofill[1]
+                                )
                                 infield.field.widget.autofill_url = autofill[2]
                                 infield.field.widget.autofill = autofill[3:]
                             else:
@@ -595,13 +656,19 @@ class BaseForm(object):
                                 if not userwidget:
 
                                     # If autofill is True for this field set the DynamicSelect widget
-                                    infield.field.widget = DynamicSelect(wattrs)
+                                    infield.field.widget = DynamicSelect(
+                                        wattrs
+                                    )
 
                                 # Configure widget
                                 infield.field.widget.is_required = wrequired
                                 infield.field.widget.form_name = self.form_name
-                                infield.field.widget.field_name = infield.html_name
-                                infield.field.widget.autofill_deepness = autofill[0]
+                                infield.field.widget.field_name = (
+                                    infield.html_name
+                                )
+                                infield.field.widget.autofill_deepness = (
+                                    autofill[0]
+                                )
                                 infield.field.widget.autofill_url = autofill[1]
                                 infield.field.widget.autofill = autofill[2:]
                     else:
@@ -610,9 +677,9 @@ class BaseForm(object):
                         atr["autofill"] = None
 
                     # Check if we have to replace the widget with a newer one
-                    if isinstance(infield.field.widget, Select) and not isinstance(
-                        infield.field.widget, DynamicSelect
-                    ):
+                    if isinstance(
+                        infield.field.widget, Select
+                    ) and not isinstance(infield.field.widget, DynamicSelect):
 
                         # Replace widget if the user didn't define any
                         if not userwidget:
@@ -627,10 +694,12 @@ class BaseForm(object):
                                 infield.field.widget = StaticSelect(wattrs)
 
                         # Configure widget
-                        if hasattr(infield.field.widget, "choices") and hasattr(
-                            infield.field, "choices"
-                        ):
-                            infield.field.widget.choices = infield.field.choices
+                        if hasattr(
+                            infield.field.widget, "choices"
+                        ) and hasattr(infield.field, "choices"):
+                            infield.field.widget.choices = (
+                                infield.field.choices
+                            )
                         infield.field.widget.is_required = wrequired
                         infield.field.widget.form_name = self.form_name
                         infield.field.widget.field_name = infield.html_name
@@ -680,7 +749,9 @@ class BaseForm(object):
         return {}
 
 
-class GenModelForm(BaseForm, NgModelFormMixin, NgFormValidationMixin, NgModelForm):
+class GenModelForm(
+    BaseForm, NgModelFormMixin, NgFormValidationMixin, NgModelForm
+):
     pass
 
 
