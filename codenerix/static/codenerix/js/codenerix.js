@@ -1078,7 +1078,30 @@ function formsubmit(
                     }
                 } else {
                     $window.alert(
-                        'Internal error detected (Error was: ' + answer + ')')
+                        'Internal error detected (Error was: [ERROR ' + stat +
+                        '] ' + answer + ')')
+                }
+            })
+            .error(function(answer, stat) {
+                if (stat == 409) {
+                    // Detected 409 error, the form is trying to communicate
+                    // that a field has failed and is providing feedaback to
+                    // resolve de error
+                    angular.forEach(answer, function(value, key) {
+                        angular.forEach(value, function(msg) {
+                            console.log('->' + key + ':' + msg['message']);
+                            form.$valid = false;
+                            form.$invalid = true;
+                            form[key].$valid = false;
+                            form[key].$invalid = true;
+                            form[key].djng_error = true;
+                            form[key].djng_error_msg = msg['message'];
+                        });
+                    });
+                } else {
+                    $window.alert(
+                        'Internal error detected (Error was: [ERROR ' + stat +
+                        '] ' + answer + ')');
                 }
             });
     } else {

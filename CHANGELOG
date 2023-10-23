@@ -6,6 +6,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.25] - 2023-10-23
+### Added
+- Added new feature to GenModify to enable 'return_invalid_json' that will make the form to return a 409 Conflict HTTP ERROR with a json including invalid fields and the reason why they are invalid.
+- Support for data injection from views into Angular forms
+- Few of PEP8
+
+## [4.0.24] - 2023-05-12
+### Fixed
+- PEP8 refactoring and a quick mypy type revision
+- Skipped version 4.0.23
+
+## [4.0.22] - 2023-02-23
+### Fixed
+- Improved genmail to support better SSL and clean_memcache changed to clean_caches and now it supports cleaning several cache entries in configuration using settings.CACHES
+
+## [4.0.21] - 2023-02-21
+### Fixed
+- Memcache CMD correction
+
+## [4.0.20] - 2023-01-26
+### Fixed
+- Support for Pyinstruments added
+
+## [4.0.19] - 2022-11-09
+### Fixed
+- meunify upgraded for URLs since _ is not recommended on SEO, it will be replaced with -
+
 ## [4.0.18] - 2022-11-07
 ### Fixed
 - Resolved bug "AttributeError: type object 'Meta' has no attribute 'extend'"

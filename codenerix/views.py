@@ -106,7 +106,7 @@ from codenerix.templatetags.codenerix_lists import unlist
 
 # Import only when defined by the user and there is something we can work with
 if getattr(settings, "HAYSTACK_CONNECTIONS", None):
-    from haystack.query import SearchQuerySet
+    from haystack.query import SearchQuerySet  # type: ignore
 
 
 def status(request, status, answer):
@@ -1269,7 +1269,7 @@ class GenBase(object):
 
 # ListView helper: https://docs.djangoproject.com/en/1.6/ref/class-based-views/flattened-index/#list-views # noqa: E501
 # ListView flow:   https://docs.djangoproject.com/en/1.6/ref/class-based-views/generic-display/#listview # noqa: E501
-class GenList(GenBase, ListView):
+class GenList(GenBase, ListView):  # type: ignore
     """
     Usage:
     class NewList(GenList):
@@ -1442,10 +1442,10 @@ class GenList(GenBase, ListView):
                 top=Side(border_style="thin", color="FF000000"),
                 bottom=Side(border_style="thin", color="FF000000"),
                 diagonal=Side(border_style=None, color="FF000000"),
-                diagonal_direction=0,
-                outline=Side(border_style=None, color="FF000000"),
-                vertical=Side(border_style=None, color="FF000000"),
-                horizontal=Side(border_style=None, color="FF000000"),
+                diagonal_direction=None,
+                outline=False,
+                vertical=None,
+                horizontal=None,
             ),
             "fill": PatternFill(
                 patternType="solid", fill_type="solid", fgColor=Color("C4C4C4")
@@ -3764,6 +3764,8 @@ class GenModify(object):
     angular_submit = 'submit'                       Name of the method inside AngularJS scope that will receive submit actions
     angular_delete = 'delete'                       Name of the method inside AngularJS scope that will receive delete actions
 
+    return_invalid_json = False                     It will return a 409 Conflict status an a JSON document on form_invalid() instead returning the rendered page
+
     inject: inject form variables into the template (CODENERIX)
       - Example: {'cpk': 3} -> will inject cpk variable with value 3
       If used in dispatch you can add dynamical values:
@@ -3812,6 +3814,21 @@ class GenModify(object):
 
         # Call the base implementation
         return super(GenModify, self).dispatch(request, **kwargs)
+
+    def form_invalid(self, form):
+        """
+        Only when requested by the class attributes we will return
+        a 409 Conflict as an error with a JSON including
+        failed fields
+        """
+        if getattr(self, "return_invalid_json", False):
+            return HttpResponse(
+                form.errors.as_json(),
+                content_type="application/json",
+                status="409",
+            )
+        else:
+            return super().form_invalid(form)
 
     def get_success_url(self):
         if self.object is None:
@@ -3881,9 +3898,15 @@ class GenModify(object):
         context["linksavenew"] = getattr(self, "linksavenew", True)
         context["linksavehere"] = getattr(self, "linksavehere", True)
 
-        # Check submit/delete
-        context["angular_submit"] = getattr(self, "angular_submit", "submit")
-        context["angular_delete"] = getattr(self, "angular_delete", "delete")
+        # Check return invalid json
+        context["return_invalid_json"] = getattr(
+            self, "return_invalid_json", False
+        )
+
+        # Check hide internal_name
+        context["show_internal_name"] = getattr(
+            self, "show_internal_name", True
+        )
 
         # Check buttons top/bottom
         context["buttons_top"] = getattr(self, "buttons_top", True)
@@ -4218,7 +4241,7 @@ class GenModify(object):
             )
 
 
-class GenCreate(GenModify, GenBase, CreateView):
+class GenCreate(GenModify, GenBase, CreateView):  # type: ignore
     action_permission = "add"
     get_template_names_key = "add"
     success_url = reverse_lazy(
@@ -4236,7 +4259,7 @@ class GenCreateModal(GenCreate):
     is_modal = True
 
 
-class GenUpdate(GenModify, GenBase, UpdateView):
+class GenUpdate(GenModify, GenBase, UpdateView):  # type: ignore
     action_permission = "change"
     get_template_names_key = "form"
     success_url = reverse_lazy(
@@ -4272,7 +4295,7 @@ class GenUpdateModal(GenUpdate):
     is_modal = True
 
 
-class GenDelete(GenModify, GenBase, DeleteView):
+class GenDelete(GenModify, GenBase, DeleteView):  # type: ignore
     """
     Define generic methods for all our generic classes
     success_url = {'status':'accept','answer':''})  This is the URL where the view will go if everything goes fine (answer will be autofilled)
@@ -4363,7 +4386,7 @@ class GenDelete(GenModify, GenBase, DeleteView):
                     return HttpResponseForbidden(e, content_type="text/plain")
 
 
-class GenDetail(GenBase, DetailView):
+class GenDetail(GenBase, DetailView):  # type: ignore
     get_template_names_key = "details"
     action_permission = "detail"
 
@@ -4946,7 +4969,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
         default_ordering = "-action_time"
         must_be_superuser = True
 
-    class LogDetails(GenDetailModal, GenDetail):
+    class LogDetails(GenDetailModal, GenDetail):  # type: ignore
         is_modal = True
         model = Log
         linkedit = False

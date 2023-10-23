@@ -82,7 +82,10 @@ class TupleErrorList(UserList, list):
             return SafeText()
         first = self[0]
         if isinstance(first, tuple):
-            error_lists = {"$pristine": [], "$dirty": []}
+            error_lists = {
+                "$pristine": [],
+                "$dirty": [],
+            }
             for e in self:
                 li_format = (
                     e[5] == "$message"
@@ -91,6 +94,16 @@ class TupleErrorList(UserList, list):
                 )
                 err_tuple = (e[0], e[3], e[4], force_str(e[5]))
                 error_lists[e[2]].append(format_html(li_format, *err_tuple))
+            for key in error_lists.keys():
+                error_lists[key].append(
+                    format_html(
+                        self.li_format,
+                        first[0],
+                        "djng_error",
+                        "invalid",
+                        "{{" + first[0] + ".djng_error_msg}}",
+                    )
+                )
             # renders and combine both of these lists
             return mark_safe(
                 "".join(
@@ -107,7 +120,7 @@ class TupleErrorList(UserList, list):
                 )
             )
         return format_html(
-            '<ul class="errorlist">{0}</ul>',
+            '<ul class="errorlist">{0}<li></li></ul>',
             format_html_join(
                 "", "<li>{0}</li>", ((force_str(e),) for e in self)
             ),
