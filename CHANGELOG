@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.27] - 2023-10-27
+### Fixed
+- multiform have renamed their form_valid() and form_invalid() methods to multiform_valid() and multiform_invalid()
+
 ## [4.0.26] - 2023-10-27
 ### Added
 - Full update to existing code

@@ -364,11 +364,11 @@ class MultiForm:
         # Check validation result
         if valid:
             # Everything is OK, call valid
-            return self.form_valid(form, temp_forms)
+            return self.multiform_valid(form, temp_forms)
         else:
             # Something went wrong, attach error and call invalid
             form.list_errors = errors
-            return self.form_invalid(
+            return self.multiform_invalid(
                 form,
                 forms,
                 open_tabs,
@@ -376,7 +376,7 @@ class MultiForm:
             )
 
     @transaction.atomic
-    def form_valid(self, form, forms):
+    def multiform_valid(self, form, forms):
         """
         Called if all forms are valid. Creates a Recipe instance along with
         associated Ingredients and Instructions and then redirects to
@@ -395,7 +395,7 @@ class MultiForm:
                     formobj.save()
         return HttpResponseRedirect(self.get_success_url())
 
-    def form_invalid(self, form, forms, open_tabs, position_form_default):
+    def multiform_invalid(self, form, forms, open_tabs, position_form_default):
         """
         Called if a form is invalid. Re-renders the context data with
         the data-filled forms and errors.
