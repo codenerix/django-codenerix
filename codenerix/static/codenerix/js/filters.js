@@ -109,7 +109,7 @@ angular.module('codenerixFilters', [])
     function escapeRegexp(queryToEscape) {
         return queryToEscape.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1');
     };
-    
+
     return function(matchItem, query) {
         return query && matchItem ? matchItem.replace(new RegExp(escapeRegexp(query), 'gi'), '<span class="ui-select-highlight">$&</span>') : matchItem;
     };
@@ -117,9 +117,9 @@ angular.module('codenerixFilters', [])
 
 .filter('weekday', function() {
     return function(input) {
-        
+
         var result = '---';
-        
+
         if (input == 1)
             result = 'Monday'
         else if (input == 2)
@@ -134,7 +134,7 @@ angular.module('codenerixFilters', [])
             result = 'Saturday'
         else if (input == 7)
             result = 'Sunday'
-        
+
         return result;
     };
 })

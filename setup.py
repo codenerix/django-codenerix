@@ -1,5 +1,5 @@
 import os
-import sys
+
 from setuptools import setup
 
 import codenerix
@@ -25,7 +25,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     license="Apache License Version 2.0",
-    description="Codenerix it is a framework that goes on top of Django so it makes easier development and building of ERPs.",
+    description="Codenerix it is a framework that goes on top of Django so "
+    "it makes easier development and building of ERPs.",
     long_description=README,
     url="https://github.com/codenerix/django-codenerix",
     author=", ".join(codenerix.__authors__),
@@ -40,17 +41,16 @@ setup(
         "License :: Other/Proprietary License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
     # cmdclass={ 'install': CustomInstallCommand, },
     install_requires=[
-        "codenerix_lib",
+        "codenerix_lib>=1.0.23",
         "pymongo",
         "python-dateutil",
         "django-recaptcha>=1.2.1,<1.3",
@@ -68,5 +68,7 @@ setup(
         "pyotp",
         "html5lib",
         "pyinstrument",
+        "django-stubs",
+        "django-stubs-ext",
     ],
 )

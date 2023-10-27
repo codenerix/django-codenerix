@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -18,16 +17,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
 import datetime
 
 from django import template
-from django.utils.translation import gettext as _
 from django.conf import settings
-from django.utils.translation import get_language
 from django.utils import formats
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
 
-from codenerix.helpers import zeropad, monthname, nameunify
+from codenerix.helpers import monthname, nameunify, zeropad
 
 register = template.Library()
 register.filter("digitos", zeropad)
@@ -42,12 +40,12 @@ def debugme(obj, kind=None):
     elif kind == "keys":
         obj = obj.__dict__.keys()
 
-    raise IOError(obj)
+    raise OSError(obj)
 
 
 @register.filter
 def debugmedict(obj):
-    raise IOError(obj.__dict__)
+    raise OSError(obj.__dict__)
 
 
 @register.filter
@@ -99,8 +97,8 @@ def br(value):
     header = splitted[0]
     body = "<br>".join(splitted[1:])
     return (
-        "<div style='color:#5588BB'>%s</div><div style='color:#22BB00; margin-top:5px;'>%s</div>"
-        % (header, body)
+        f"<div style='color:#5588BB'>{header}/div>"
+        f"<div style='color:#22BB00; margin-top:5px;'>{body}</div>"
     )
 
 
@@ -115,7 +113,7 @@ def nicenull(value):
 @register.filter
 def nicekilometers(value):
     if value:
-        return "{0}km".format(value)
+        return f"{value}km"
     else:
         return "-"
 
@@ -123,7 +121,7 @@ def nicekilometers(value):
 @register.filter
 def niceeuronull(value):
     if value:
-        return "{0}\u20AC".format(value)
+        return f"{value}\u20AC"
     else:
         return "-"
 
@@ -249,14 +247,13 @@ def objectatrib(instance, atrib):
     """
 
     if instance != "":
-
         atrib = atrib.replace("__", ".")
         atribs = []
         atribs = atrib.split(".")
 
         obj = instance
         for atrib in atribs:
-            if type(obj) == dict:
+            if isinstance(obj, dict):
                 result = obj[atrib]
             else:
                 try:
@@ -271,8 +268,8 @@ def objectatrib(instance, atrib):
 
 
 @register.filter
-def TrueFalse(value):
-    if type(value) == bool:
+def TrueFalse(value):  # noqa: N802
+    if isinstance(value, bool):
         if value:
             return _("True")
         else:
@@ -285,32 +282,40 @@ def cdnx_beauty(value, kind=None):
     if kind:
         if kind == "skype":
             return (
-                "<a ng-click='$event.stopPropagation();' href='tel:{0}'>{0}</a>".format(
-                    value
-                )
+                "<a ng-click='$event.stopPropagation();' "
+                f"href='tel:{value}'>{value}</a>"
             )
         elif kind == "image":
-            return "<img ng-click='$event.stopPropagation();' src='{0}{1}'>".format(
-                settings.MEDIA_URL, value
+            return (
+                "<img ng-click='$event.stopPropagation();' "
+                f"src='{settings.MEDIA_URL}{value}'>"
             )
         elif kind == "nofilter":
             return value
         else:
             raise Exception(
-                "Django filter 'codenerix' got a wrong kind named '" + kind + "'"
+                "Django filter 'codenerix' got a wrong kind named '"
+                + kind
+                + "'",
             )
     else:
         if value is None:
             return nicenull(value)
-        elif type(value) is bool:
+        elif isinstance(value, bool):
             return TrueFalse(value)
-        elif type(value) is datetime.datetime:
-            fmt = formats.get_format("DATETIME_INPUT_FORMATS", lang=get_language())[0]
+        elif isinstance(value, datetime.datetime):
+            fmt = formats.get_format(
+                "DATETIME_INPUT_FORMATS",
+                lang=get_language(),
+            )[0]
             value = datetime.datetime.strftime(value, fmt)
-        elif type(value) is time.time:
-            fmt = formats.get_format("TIME_INPUT_FORMATS", lang=get_language())[0]
-            value = time.time.strftime(value, fmt)
-        elif type(value) is float:
+        elif isinstance(value, datetime.time):
+            fmt = formats.get_format(
+                "TIME_INPUT_FORMATS",
+                lang=get_language(),
+            )[0]
+            value = datetime.time.strftime(value, fmt)
+        elif isinstance(value, float):
             if float(int(value)) == value:
                 value = int(value)
 
@@ -324,9 +329,9 @@ def cdnx_angular(value):
     """
     if value is None:
         return "null"
-    elif type(value) is bool:
+    elif isinstance(value, bool):
         return str(value).lower()
-    elif type(value) is str:
+    elif isinstance(value, str):
         return '"' + value + '"'
     else:
         return value

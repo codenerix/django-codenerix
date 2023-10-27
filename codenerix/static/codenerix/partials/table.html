@@ -65,7 +65,7 @@ limitations under the License.
                                             <ui-select multiple ng-model="filter.choosen" theme="bootstrap"
                                                     on-select="selectedOptionSelect(search.filter.choosen,filter.choice)"
                                                     reset-search-input="true"
-                                                    ng-disabled="disabled" 
+                                                    ng-disabled="disabled"
                                                     ng-if="filter.kind=='multiselect'"
                                                     ng-init="filter.choice; $select.selected=options.filter.choosen; search.filter.choosen.$setViewValue(filter.choice);"
                                                     ng-change="refresh()">
@@ -76,13 +76,13 @@ limitations under the License.
                                                     </div>
                                                 </ui-select-choices>
                                             </ui-select>
-                                            <select 
-                                                ng-if="filter.kind=='select'" 
-                                                class="form-control input-sm" 
-                                                ng-model="filter.choosen" 
-                                                ng-change="refresh()" 
-                                                style="min-width:66px" 
-                                                ng-class="{'input-filter':filter.choosen}" 
+                                            <select
+                                                ng-if="filter.kind=='select'"
+                                                class="form-control input-sm"
+                                                ng-model="filter.choosen"
+                                                ng-change="refresh()"
+                                                style="min-width:66px"
+                                                ng-class="{'input-filter':filter.choosen}"
                                                 ng-init="filter.choosen=filter.choosen"
                                                 ng-options="+(index) as choice for (index, choice) in filter.choice" >
                                             </select>

@@ -1,14 +1,14 @@
 from django import forms
-from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.utils.translation import gettext_lazy as _
 
 from .widgets import MultiEmailWidget
 
 
 class MultiEmailField(forms.Field):
-    message = _('Enter valid email addresses.')
-    code = 'invalid'
+    message = _("Enter valid email addresses.")
+    code = "invalid"
     widget = MultiEmailWidget
 
     def to_python(self, value):
@@ -19,10 +19,10 @@ class MultiEmailField(forms.Field):
         return [v.strip() for v in value.splitlines() if v != ""]
 
     def validate(self, value):
-        """ Check if value consists only of valid emails. """
+        """Check if value consists only of valid emails."""
 
         # Use the parent's handling of required fields, etc.
-        super(MultiEmailField, self).validate(value)
+        super().validate(value)
         try:
             for email in value:
                 validate_email(email)

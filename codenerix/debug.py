@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -19,9 +18,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import debug_toolbar  # type: ignore[import-not-found]
 from django import VERSION
-
-import debug_toolbar
 
 DEBUG_TOOLBAR_DEFAULT_PANELS = (
     "debug_toolbar.panels.versions.VersionsPanel",
@@ -50,7 +48,7 @@ DEBUG_TOOLBAR_DEFAULT_CONFIG = {
 
 # Autoload
 def autoload(
-    INSTALLED_APPS,
+    INSTALLED_APPS,  # noqa: N803
     MIDDLEWARE,
     DEBUG=False,
     SPAGHETTI=False,
@@ -63,7 +61,7 @@ def autoload(
     CODENERIX_DISABLE_LOG=False,
     DEBUG_PYINSTRUMENT=False,
 ):
-    EXTRA_MIDDLEWARES = []
+    EXTRA_MIDDLEWARES = []  # noqa: N806
     if DEBUG and SPAGHETTI:
         INSTALLED_APPS += ("django_spaghetti",)
     if DEBUG and ROSETTA:
@@ -75,18 +73,18 @@ def autoload(
         INSTALLED_APPS += ("django.contrib.admin",)
     if DEBUG and ADMINSITE and not CODENERIX_DISABLE_LOG:
         EXTRA_MIDDLEWARES.append(
-            "django.contrib.messages.middleware.MessageMiddleware"
+            "django.contrib.messages.middleware.MessageMiddleware",
         )
     if DEBUG and DEBUG_TOOLBAR:
         INSTALLED_APPS += ("debug_toolbar",)
         if DEBUG_PANEL:
             INSTALLED_APPS += ("debug_panel",)
             EXTRA_MIDDLEWARES.append(
-                "debug_panel.middleware.DebugPanelMiddleware"
+                "debug_panel.middleware.DebugPanelMiddleware",
             )
         else:
             EXTRA_MIDDLEWARES.append(
-                "debug_toolbar.middleware.DebugToolbarMiddleware"
+                "debug_toolbar.middleware.DebugToolbarMiddleware",
             )
     if DEBUG and SNIPPET_SCREAM:
         EXTRA_MIDDLEWARES.append("snippetscream.ProfileMiddleware")
@@ -96,7 +94,7 @@ def autoload(
         EXTRA_MIDDLEWARES.append("pyinstrument.middleware.ProfilerMiddleware")
 
     # Attach new middlewares
-    if type(MIDDLEWARE) == tuple:
+    if isinstance(MIDDLEWARE, tuple):
         MIDDLEWARE += tuple(EXTRA_MIDDLEWARES)
     else:
         MIDDLEWARE += list(EXTRA_MIDDLEWARES)
@@ -107,7 +105,7 @@ def autoload(
 
 # Autourl
 def autourl(
-    URLPATTERNS,
+    URLPATTERNS,  # noqa: N803
     DEBUG,
     ROSETTA,
     ADMINSITE,
@@ -133,7 +131,7 @@ def autourl(
                 path(
                     "admin/",
                     admin.site.urls,
-                )
+                ),
             ]
     if DEBUG and SPAGHETTI:
         URLPATTERNS += [re_path(r"^plate/", include("django_spaghetti.urls"))]
@@ -143,12 +141,12 @@ def autourl(
 
 
 # Codenerix STATIC
-def codenerix_statics(DEBUG, STATIC_URL="/static/"):
-
-    # Backward compatibility for older configurations (CODENERIXSOURCE is deprecated from now!)
+def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
+    # Backward compatibility for older configurations (CODENERIXSOURCE is
+    # deprecated from now!)
     if type(STATIC_URL) is bool:
-        DEBUG = STATIC_URL
-        STATIC_URL = "/static/"
+        DEBUG = STATIC_URL  # noqa: N806
+        STATIC_URL = "/static/"  # noqa: N806
 
     locales = '\
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ar.js"></script> \
@@ -192,9 +190,10 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.ua.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.uk.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script> \
-    <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-TW.js"></script> '
+    <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-TW.js"></script> '  # noqa: E501
 
-    CODENERIX_CSS_DEBUG = ' \
+    CODENERIX_CSS_DEBUG = (  # noqa: N806
+        ' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/bootstrap3.css" rel="stylesheet"> \
@@ -214,8 +213,12 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.css" rel="stylesheet"> \
-    '
-    CODENERIX_CSS_MIN = ' \
+    '  # noqa: E501
+        + ""
+    )
+
+    CODENERIX_CSS_MIN = (  # noqa: N806
+        ' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/bootstrap3.css" rel="stylesheet"> \
@@ -235,8 +238,11 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.min.css" rel="stylesheet"> \
-    '
-    CODENERIX_JS_DEBUG = (
+    '  # noqa: E501
+        + ""
+    )
+
+    CODENERIX_JS_DEBUG = (  # noqa: N806
         ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.js"></script> \
@@ -282,10 +288,11 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-bootstrap-switch/angular-bootstrap-switch.js"></script> \
-    '
+    '  # noqa: E501
         + locales
     )
-    CODENERIX_JS_MIN = (
+
+    CODENERIX_JS_MIN = (  # noqa: N806
         ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.min.js"></script> \
@@ -330,20 +337,20 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-bootstrap-switch/angular-bootstrap-switch.min.js"></script> \
-    '
+    '  # noqa: E501
         + locales
     )
 
     # Load CODENERIX CSS
     if DEBUG:
-        CODENERIX_CSS = CODENERIX_CSS_DEBUG
+        CODENERIX_CSS = CODENERIX_CSS_DEBUG  # noqa: N806
     else:
-        CODENERIX_CSS = CODENERIX_CSS_MIN
+        CODENERIX_CSS = CODENERIX_CSS_MIN  # noqa: N806
     # Load CODENERIX JS
     if DEBUG:
-        CODENERIX_JS = CODENERIX_JS_DEBUG
+        CODENERIX_JS = CODENERIX_JS_DEBUG  # noqa: N806
     else:
-        CODENERIX_JS = CODENERIX_JS_MIN
+        CODENERIX_JS = CODENERIX_JS_MIN  # noqa: N806
     return (
         CODENERIX_CSS.format(STATIC_URL=STATIC_URL),
         CODENERIX_JS.format(STATIC_URL=STATIC_URL),

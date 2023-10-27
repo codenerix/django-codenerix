@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -22,24 +21,26 @@ import os
 
 try:
     from subprocess import getstatusoutput
+
     pythoncmd = "python3"
 except Exception:
-    from commands import getstatusoutput
+    from commands import (  # type: ignore[import-not-found,no-redef]
+        getstatusoutput,
+    )
+
     pythoncmd = "python2"
 
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 
 from codenerix.lib.debugger import Debugger
 
 
 class Command(BaseCommand, Debugger):
-
     # Show this when the user types help
     help = "Remove *.pyc files"
 
     def handle(self, *args, **options):
-
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
@@ -48,6 +49,9 @@ class Command(BaseCommand, Debugger):
         appname = settings.ROOT_URLCONF.split(".")[0]
         basedir = settings.BASE_DIR
         appdir = os.path.abspath("{}/{}".format(basedir, appname))
-        status, output = getstatusoutput("find {}/ -name '*.py[c|o]' -o -name __pycache__ -exec rm -rf {{}} +".format(appdir))
+        status, output = getstatusoutput(
+            f"find {appdir}/ -name '*.py[c|o]' -o "
+            "-name __pycache__ -exec rm -rf {{}} +",
+        )
         if status:
             raise CommandError(output)

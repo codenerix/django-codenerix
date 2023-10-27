@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -20,6 +19,6 @@
 
 from codenerix.helpers import upload_path as upload_path_original
 
+
 def upload_path(instance, filename):
     return upload_path_original(instance, filename)
-

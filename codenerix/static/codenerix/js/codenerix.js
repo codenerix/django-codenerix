@@ -1440,7 +1440,7 @@ function dynamic_fields(scope) {
     scope.selectedOptionSelect = function(
         input, value, ngchange, externalScope, selected) {
         if ((typeof (input) == 'undefined') || (input === null)) {
-            // Dummy input
+            // Placeholder input
             input = {'$setViewValue': function() {}};
         }
         if (!input.$dirty) {

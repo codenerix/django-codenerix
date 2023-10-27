@@ -213,4 +213,3 @@ $(document).on('click', '.notifyjs-yes', function() {
     // Hide notification
     $(this).trigger('notify-hide');
 });
-

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -22,24 +21,24 @@ try:
     from subprocess import getstatusoutput
 
     pythoncmd = "python3"
-except:
-    from commands import getstatusoutput
+except Exception:
+    from commands import (  # type: ignore[import-not-found,no-redef]
+        getstatusoutput,
+    )
 
     pythoncmd = "python2"
 
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.core.management.base import BaseCommand
 
 from codenerix.lib.debugger import Debugger
 
 
 class Command(BaseCommand, Debugger):
-
     # Show this when the user types help
     help = "Clean memcache"
 
     def handle(self, *args, **options):
-
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
@@ -55,12 +54,13 @@ class Command(BaseCommand, Debugger):
                     host = locationsp[0]
                     port = locationsp[1]
                 self.debug(
-                    f"Flushing all keys for {name}@Memcache located at {host}:{port}",
+                    "Flushing all keys for "
+                    f"{name}@Memcache located at {host}:{port}",
                     color="blue",
                 )
                 # Get environment
                 status, output = getstatusoutput(
-                    f"echo 'flush_all' | nc -v -w 1 {host} {port}"
+                    f"echo 'flush_all' | nc -v -w 1 {host} {port}",
                 )
                 if status:
                     self.debug(
@@ -69,6 +69,7 @@ class Command(BaseCommand, Debugger):
                     )
                 else:
                     self.debug(
-                        f"OK at {name}@Memcache located at {host}:{port} -> {output}",
+                        f"OK at {name}@Memcache located "
+                        f"at {host}:{port} -> {output}",
                         color="green",
                     )

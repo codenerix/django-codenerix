@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -18,10 +17,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ssl
 import smtplib
-from django.core import mail
+import ssl
+
 from django.conf import settings
+from django.core import mail
 from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail.utils import DNS_NAME
 
@@ -40,21 +40,23 @@ class EmailMessage(mail.EmailMessage):
                 else:
                     kwargs["to"] = [x[1] for x in settings.CLIENTS]
 
-        super(EmailMessage, self).__init__(*new_args, **kwargs)
+        super().__init__(*new_args, **kwargs)
 
 
 class SSLEmailBackend(EmailBackend):
     def __init__(self, *args, **kwargs):
         timeout = getattr(settings, "CLIENT_EMAIL_TIMEOUT", 10)
         kwargs.setdefault("timeout", timeout)
-        super(SSLEmailBackend, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def open(self):
         if self.connection:
             return False
         try:
             self.connection = smtplib.SMTP_SSL(
-                self.host, self.port, local_hostname=DNS_NAME.get_fqdn()
+                self.host,
+                self.port,
+                local_hostname=DNS_NAME.get_fqdn(),
             )
 
             if self.username and self.password:

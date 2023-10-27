@@ -1,4 +1,4 @@
-/*! 
+/*!
  * angular-hotkeys v1.7.0
  * https://chieffancypants.github.io/angular-hotkeys
  * Copyright (c) 2016 Wes Cruver

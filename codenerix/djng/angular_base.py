@@ -1,21 +1,17 @@
-# -*- coding: utf-8 -*-
 # mypy: ignore-errors
-from __future__ import unicode_literals
 
 import json
 from base64 import b64encode
 from collections import UserList
-
-from django.forms import BoundField
-from django.http import QueryDict
-import six
 from importlib import import_module
 
-from django.utils.html import format_html, format_html_join, escape
-from django.utils.encoding import force_str
-from six import python_2_unicode_compatible
-from django.utils.safestring import mark_safe, SafeText, SafeData
+import six
 from django.core.exceptions import ValidationError
+from django.forms import BoundField
+from django.http import QueryDict
+from django.utils.encoding import force_str
+from django.utils.html import escape, format_html, format_html_join
+from django.utils.safestring import SafeData, SafeText, mark_safe
 
 
 class SafeTuple(SafeData, tuple):
@@ -25,7 +21,6 @@ class SafeTuple(SafeData, tuple):
     """
 
 
-@python_2_unicode_compatible
 class TupleErrorList(UserList, list):
     """
     A list of errors, which in contrast to Django's ErrorList, can contain
@@ -52,7 +47,7 @@ class TupleErrorList(UserList, list):
     )
 
     def __init__(self, initlist=None, error_class=None, renderer=None):
-        super(TupleErrorList, self).__init__(initlist)
+        super().__init__(initlist)
 
         if error_class is None:
             self.error_class = "errorlist"
@@ -70,7 +65,7 @@ class TupleErrorList(UserList, list):
                 {
                     "message": escape(message) if escape_html else message,
                     "code": error.code or "",
-                }
+                },
             )
         return errors
 
@@ -102,7 +97,7 @@ class TupleErrorList(UserList, list):
                         "djng_error",
                         "invalid",
                         "{{" + first[0] + ".djng_error_msg}}",
-                    )
+                    ),
                 )
             # renders and combine both of these lists
             return mark_safe(
@@ -116,13 +111,15 @@ class TupleErrorList(UserList, list):
                             mark_safe("".join(list_items)),
                         )
                         for prop, list_items in error_lists.items()
-                    ]
-                )
+                    ],
+                ),
             )
         return format_html(
             '<ul class="errorlist">{0}<li></li></ul>',
             format_html_join(
-                "", "<li>{0}</li>", ((force_str(e),) for e in self)
+                "",
+                "<li>{0}</li>",
+                ((force_str(e),) for e in self),
             ),
         )
 
@@ -131,7 +128,7 @@ class TupleErrorList(UserList, list):
             return ""
         if isinstance(self[0], tuple):
             return "\n".join(
-                ["* %s" % force_str(e[5]) for e in self if bool(e[5])]
+                ["* %s" % force_str(e[5]) for e in self if bool(e[5])],
             )
         return "\n".join(["* %s" % force_str(e) for e in self])
 
@@ -201,7 +198,7 @@ class NgBoundField(BoundField):
                     else:
                         extra_field_classes = css_classes
             extra_classes.update(extra_field_classes)
-        return super(NgBoundField, self).css_classes(extra_classes)
+        return super().css_classes(extra_classes)
 
     def as_widget(self, widget=None, attrs=None, only_initial=False):
         """
@@ -216,14 +213,15 @@ class NgBoundField(BoundField):
         if css_classes:
             attrs.update({"class": css_classes})
         widget_classes = self.form.fields[self.name].widget.attrs.get(
-            "class", None
+            "class",
+            None,
         )
         if widget_classes:
             if attrs.get("class", None):
                 attrs["class"] += " " + widget_classes
             else:
                 attrs.update({"class": widget_classes})
-        return super(NgBoundField, self).as_widget(widget, attrs, only_initial)
+        return super().as_widget(widget, attrs, only_initial)
 
     def label_tag(self, contents=None, attrs=None, label_suffix=None):
         attrs = attrs or {}
@@ -248,8 +246,10 @@ class NgBoundField(BoundField):
                 css_classes.update(extra_label_classes)
         if css_classes:
             attrs.update({"class": " ".join(css_classes)})
-        return super(NgBoundField, self).label_tag(
-            contents, attrs, label_suffix=""
+        return super().label_tag(
+            contents,
+            attrs,
+            label_suffix="",
         )
 
 
@@ -263,8 +263,11 @@ class BaseFieldsModifierMetaclass(type):
     field_mixins_module = "codenerix.djng.field_mixins"
 
     def __new__(cls, name, bases, attrs):
-        new_class = super(BaseFieldsModifierMetaclass, cls).__new__(
-            cls, name, bases, attrs
+        new_class = super().__new__(
+            cls,
+            name,
+            bases,
+            attrs,
         )
         field_mixins_module = import_module(new_class.field_mixins_module)
         field_mixins_fallback_module = import_module(cls.field_mixins_module)
@@ -273,24 +276,28 @@ class BaseFieldsModifierMetaclass(type):
             FieldMixinName = field.__class__.__name__ + "Mixin"  # noqa: N806
             try:
                 FieldMixin = getattr(  # noqa: N806
-                    field_mixins_module, FieldMixinName
+                    field_mixins_module,
+                    FieldMixinName,
                 )
             except AttributeError:
                 try:
                     FieldMixin = getattr(  # noqa: N806
-                        field_mixins_fallback_module, FieldMixinName
+                        field_mixins_fallback_module,
+                        FieldMixinName,
                     )
                 except AttributeError:
                     FieldMixin = (  # noqa: N806
                         field_mixins_fallback_module.DefaultFieldMixin
                     )
             field.__class__ = type(
-                field.__class__.__name__, (field.__class__, FieldMixin), {}
+                field.__class__.__name__,
+                (field.__class__, FieldMixin),
+                {},
             )
         return new_class
 
 
-class NgFormBaseMixin(object):
+class NgFormBaseMixin:
     form_error_css_classes = "djng-form-errors"
     field_error_css_classes = "djng-field-errors"
 
@@ -301,9 +308,7 @@ class NgFormBaseMixin(object):
             # if form_name is unset, then generate a pseudo unique name, based
             # upon the class name
             form_name = (
-                b64encode(six.b(self.__class__.__name__))
-                .rstrip(six.b("="))
-                .decode()
+                b64encode(six.b(self.__class__.__name__)).rstrip(b"=").decode()
             )
         self.form_name = kwargs.pop("form_name", form_name)
         error_class = kwargs.pop("error_class", TupleErrorList)
@@ -313,7 +318,7 @@ class NgFormBaseMixin(object):
             data = self.rectify_multipart_form_data(data.copy())
         elif isinstance(data, dict):
             data = self.rectify_ajax_form_data(data.copy())
-        super(NgFormBaseMixin, self).__init__(data=data, *args, **kwargs)
+        super().__init__(data=data, *args, **kwargs)
 
     def __getitem__(self, name):
         "Returns a NgBoundField with the given name."
@@ -351,14 +356,14 @@ class NgFormBaseMixin(object):
                         "$pristine",
                         "invalid",
                         e,
-                    )
+                    ),
                 )
                 for e in errors
-            ]
+            ],
         )
 
     def non_field_errors(self):
-        errors = super(NgFormBaseMixin, self).non_field_errors()
+        errors = super().non_field_errors()
         return self.error_class(
             [
                 SafeTuple(
@@ -369,10 +374,10 @@ class NgFormBaseMixin(object):
                         "$pristine",
                         "invalid",
                         e,
-                    )
+                    ),
                 )
                 for e in errors
-            ]
+            ],
         )
 
     def get_widget_attrs(self, bound_field):

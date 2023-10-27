@@ -1,26 +1,35 @@
-# -*- coding: utf-8 -*-
 from django import VERSION
-from django.forms.forms import DeclarativeFieldsMetaclass, BaseForm
+from django.forms.forms import BaseForm, DeclarativeFieldsMetaclass
 from django.forms.models import BaseModelForm
-import six
+
 from .angular_base import BaseFieldsModifierMetaclass, NgFormBaseMixin
-from .angular_model import NgModelFormMixin
+from .angular_model import NgModelFormMixin  # noqa: F401
+
 if VERSION[:2] >= (1, 5):
-    from .angular_validation import NgFormValidationMixin
+    from .angular_validation import NgFormValidationMixin  # noqa: F401
 if VERSION[:2] < (1, 7):
-    from .models import PatchedModelFormMetaclass as ModelFormMetaclass
+    from .models import (  # type: ignore[import-not-found] # noqa: E501
+        PatchedModelFormMetaclass as ModelFormMetaclass,
+    )
 else:
     from django.forms.models import ModelFormMetaclass
 
 
-class NgDeclarativeFieldsMetaclass(BaseFieldsModifierMetaclass, DeclarativeFieldsMetaclass):
+class NgDeclarativeFieldsMetaclass(
+    BaseFieldsModifierMetaclass,
+    DeclarativeFieldsMetaclass,
+):
     pass
 
 
-class NgForm(six.with_metaclass(NgDeclarativeFieldsMetaclass, NgFormBaseMixin, BaseForm)):
+class NgForm(
+    NgFormBaseMixin,
+    BaseForm,
+    metaclass=NgDeclarativeFieldsMetaclass,
+):
     """
-    Convenience class to be used instead of Django's internal ``forms.Form`` when declaring
-    a form to be used with AngularJS.
+    Convenience class to be used instead of Django's internal ``forms.Form``
+    when declaring a form to be used with AngularJS.
     """
 
 
@@ -28,8 +37,12 @@ class NgModelFormMetaclass(BaseFieldsModifierMetaclass, ModelFormMetaclass):
     pass
 
 
-class NgModelForm(six.with_metaclass(NgModelFormMetaclass, NgFormBaseMixin, BaseModelForm)):
+class NgModelForm(
+    NgFormBaseMixin,
+    BaseModelForm,
+    metaclass=NgModelFormMetaclass,
+):
     """
-    Convenience class to be used instead of Django's internal ``forms.ModelForm`` when declaring
-    a model form to be used with AngularJS.
+    Convenience class to be used instead of Django's internal
+    ``forms.ModelForm`` when declaring a model form to be used with AngularJS.
     """

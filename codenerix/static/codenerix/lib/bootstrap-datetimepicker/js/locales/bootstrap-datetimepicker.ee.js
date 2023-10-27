@@ -1,6 +1,6 @@
 /**
  * Estonian translation for bootstrap-datetimepicker
- * Rene Korss <http://rene.korss.ee> 
+ * Rene Korss <http://rene.korss.ee>
  */
 ;(function($){
 	$.fn.datetimepicker.dates['ee'] = {

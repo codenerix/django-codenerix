@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -20,67 +19,87 @@
 
 
 from django.apps import apps
-from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
 from django.contrib.auth.management import create_permissions
-try:
-    # Django < 1.11
-    from django.contrib.contenttypes.management import update_contenttypes as create_contenttypes
-except ImportError:
-    # Django >= 1.11
-    from django.contrib.contenttypes.management import create_contenttypes
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.management import create_contenttypes
+from django.core.management.base import BaseCommand
 
 from codenerix.lib.debugger import Debugger
 
 
 class Command(BaseCommand, Debugger):
-
     # Show this when the user types help
     help = "Refresh all permissions from a project"
 
     def handle(self, *args, **options):
-
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
-        self.debug("Settings permissions for:", color='blue')
+        self.debug("Settings permissions for:", color="blue")
 
         # Get list of apps
-        self.debug("Getting list of APPs", color='blue')
+        self.debug("Getting list of APPs", color="blue")
         apps_config = apps.get_app_configs()
         apps_total = len(apps_config)
 
         # Create missins permissions
-        self.debug("Creating missing permissions", color='blue')
+        self.debug("Creating missing permissions", color="blue")
         idx = 1
         for app_config in apps_config:
-            self.debug("    -> {}/{} {}".format(idx, apps_total, app_config.label), color='cyan')
+            self.debug(
+                "    -> {}/{} {}".format(idx, apps_total, app_config.label),
+                color="cyan",
+            )
             create_permissions(app_config, apps=apps, verbosity=0)
             idx += 1
 
         # Update contenttypes
-        self.debug("Updating Content Types", color='blue')
+        self.debug("Updating Content Types", color="blue")
         idx = 1
         for app_config in apps_config:
-            self.debug("    -> {}/{} {}".format(idx, apps_total, app_config.label), color='cyan')
+            self.debug(
+                "    -> {}/{} {}".format(idx, apps_total, app_config.label),
+                color="cyan",
+            )
             create_contenttypes(app_config)
             idx += 1
 
         # Get all users from the system
         person = None
         for user in User.objects.all():
-            self.debug("    > {} ".format(user.username), color='cyan', tail=None)
-            if hasattr(user, 'person') and user.person:
-                self.debug("OK".format(user.username), color='green', header=None)
+            self.debug(
+                f"    > {user.username} ",
+                color="cyan",
+                tail=None,
+            )
+            if hasattr(user, "person") and user.person:
+                self.debug(
+                    "OK",
+                    color="green",
+                    header=None,
+                )
                 user.person.refresh_permissions()
                 person = user.person
             else:
-                self.debug("NO PERSON".format(user.username), color='red', header=None)
+                self.debug(
+                    "NO PERSON",
+                    color="red",
+                    header=None,
+                )
 
         # Remake groups permissions if we have at least one valid user
         if person:
-            self.debug("Refreshing group permissions (it may takes over a minute)... ", color='blue', tail=None)
+            self.debug(
+                "Refreshing group permissions "
+                "(it may takes over a minute)... ",
+                color="blue",
+                tail=None,
+            )
             person.__class__.group_permissions(person.__class__)
-            self.debug("DONE", color='green', header=None)
+            self.debug("DONE", color="green", header=None)
         else:
-            self.debug("Can not refresh group permissions because I didn't find a user with a Person", color='red')
+            self.debug(
+                "Can not refresh group permissions because I didn't "
+                "find a user with a Person",
+                color="red",
+            )

@@ -1,19 +1,16 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 """
-Mixin class methods to be added to django.forms.fields at runtime. These methods add additional
-error messages for AngularJS form validation.
+Mixin class methods to be added to django.forms.fields at runtime. These
+methods add additional error messages for AngularJS form validation.
 """
 import re
-from django.forms import fields
+
 from django.forms import widgets
 from django.utils.translation import gettext_lazy, ngettext_lazy
 
 # from .widgets import CheckboxSelectMultiple as DjngCheckboxSelectMultiple
 
 
-class DefaultFieldMixin(object):
+class DefaultFieldMixin:
     def get_potential_errors(self):
         return self.get_input_required_errors()
 
@@ -35,12 +32,17 @@ class DefaultFieldMixin(object):
         for item in self.validators:
             if getattr(item, "code", None) == "min_length":
                 message = ngettext_lazy(
-                    "Ensure this value has at least %(limit_value)d character",
-                    "Ensure this value has at least %(limit_value)d characters",
+                    "Ensure this value has "
+                    "at least %(limit_value)d character",
+                    "Ensure this value has "
+                    "at least %(limit_value)d characters",
                     "limit_value",
                 )
                 errors.append(
-                    ("$error.minlength", message % {"limit_value": self.min_length})
+                    (
+                        "$error.minlength",
+                        message % {"limit_value": self.min_length},
+                    ),
                 )
             if getattr(item, "code", None) == "max_length":
                 message = ngettext_lazy(
@@ -49,7 +51,10 @@ class DefaultFieldMixin(object):
                     "limit_value",
                 )
                 errors.append(
-                    ("$error.maxlength", message % {"limit_value": self.max_length})
+                    (
+                        "$error.maxlength",
+                        message % {"limit_value": self.max_length},
+                    ),
                 )
         return errors
 
@@ -73,7 +78,10 @@ class DefaultFieldMixin(object):
                 and "min_value" not in errkeys
             ):
                 errors.append(
-                    ("$error.min", item.message % {"limit_value": self.min_value})
+                    (
+                        "$error.min",
+                        item.message % {"limit_value": self.min_value},
+                    ),
                 )
                 errkeys.append("min_value")
             if (
@@ -81,7 +89,10 @@ class DefaultFieldMixin(object):
                 and "max_value" not in errkeys
             ):
                 errors.append(
-                    ("$error.max", item.message % {"limit_value": self.max_value})
+                    (
+                        "$error.max",
+                        item.message % {"limit_value": self.max_value},
+                    ),
                 )
                 errkeys.append("max_value")
         return errors
@@ -91,16 +102,21 @@ class DefaultFieldMixin(object):
         errkeys = []
         for key, msg in self.error_messages.items():
             if key == "invalid":
-                errors.append(("$error.{0}".format(ng_error_key), msg))
+                errors.append(("$error.{}".format(ng_error_key), msg))
                 errkeys.append(key)
         for item in self.validators:
-            if getattr(item, "code", None) == "invalid" and "invalid" not in errkeys:
+            if (
+                getattr(item, "code", None) == "invalid"
+                and "invalid" not in errkeys
+            ):
                 errmsg = getattr(
                     item,
                     "message",
-                    gettext_lazy("This input self does not contain valid data."),
+                    gettext_lazy(
+                        "This input self does not contain valid data.",
+                    ),
                 )
-                errors.append(("$error.{0}".format(ng_error_key), errmsg))
+                errors.append(("$error.{}".format(ng_error_key), errmsg))
                 errkeys.append("invalid")
         return errors
 
@@ -140,9 +156,9 @@ class EmailFieldMixin(DefaultFieldMixin):
         - Strips lookbehinds (not supported in javascript regular expressions)
         """
         validator = self.default_validators[0]
-        user_regex = validator.user_regex.pattern.replace("\Z", "@")
-        domain_patterns = [validator.domain_regex.pattern.replace("\Z", "$")]
-        domain_regex = "({0})".format("|".join(domain_patterns))
+        user_regex = validator.user_regex.pattern.replace(r"\Z", "@")
+        domain_patterns = [validator.domain_regex.pattern.replace(r"\Z", "$")]
+        domain_regex = "({})".format("|".join(domain_patterns))
         email_regex = user_regex + domain_regex
         return re.sub(r"\(\?\<[^()]*?\)", "", email_regex)  # Strip lookbehinds
 
@@ -177,9 +193,10 @@ class SlugFieldMixin(DefaultFieldMixin):
 
 
 class RegexFieldMixin(DefaultFieldMixin):
-    # Presumably Python Regex can't be translated 1:1 into JS regex. Any hints on how to convert these?
+    # Presumably Python Regex can't be translated 1:1 into JS regex. Any
+    # hints on how to convert these?
     def get_potential_errors(self):
-        self.widget.attrs["ng-pattern"] = "/{0}/".format(self.regex.pattern)
+        self.widget.attrs["ng-pattern"] = "/{}/".format(self.regex.pattern)
         errors = self.get_input_required_errors()
         errors.extend(self.get_min_max_length_errors())
         errors.extend(self.get_invalid_value_errors("pattern"))
@@ -195,8 +212,9 @@ class BooleanFieldMixin(DefaultFieldMixin):
 class MultipleFieldMixin(DefaultFieldMixin):
     def get_multiple_choices_required(self):
         """
-        Add only the required message, but no 'ng-required' attribute to the input fields,
-        otherwise all Checkboxes of a MultipleChoiceField would require the property "checked".
+        Add only the required message, but no 'ng-required' attribute to the
+        input fields, otherwise all Checkboxes of a MultipleChoiceField would
+        require the property "checked".
         """
         errors = []
         if self.required:

@@ -1028,7 +1028,7 @@ angular.module('ui.bootstrap.dateparser', [])
   this.timezoneToOffset = timezoneToOffset;
   this.addDateMinutes = addDateMinutes;
   this.convertTimezoneToLocal = convertTimezoneToLocal;
-  
+
   function toTimezone(date, timezone) {
     return date && timezone ? convertTimezoneToLocal(date, timezone) : date;
   }

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -22,45 +21,59 @@ import os
 
 try:
     from subprocess import getstatusoutput
-    pythoncmd="python3"
-except:
-    from commands import getstatusoutput
-    pythoncmd="python2"
 
-from django.core.management.base import BaseCommand, CommandError
+    pythoncmd = "python3"
+except Exception:
+    from commands import (  # type: ignore[import-not-found,no-redef]
+        getstatusoutput,
+    )
+
+    pythoncmd = "python2"
+
 from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 
-from codenerix.lib.debugger import Debugger
 from codenerix.lib.colors import colors
+from codenerix.lib.debugger import Debugger
+
 
 class Command(BaseCommand, Debugger):
-
     # Show this when the user types help
     help = "Show colors for Debugger"
-    
+
     def handle(self, *args, **options):
-        
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
-        
+
         # Reorder colors
         keys = []
         for key in colors.keys():
-            keys.append((colors[key][0],colors[key][1],key))
+            keys.append((colors[key][0], colors[key][1], key))
         keys.sort()
-        
+
         # Show up all colors
         for color in keys:
             # Get the color information
             (simplebit, subcolor) = colors[color[2]]
             # Show it
-            print("{0:1d}:{1:02d} - \033[{2:1d};{3:02d}m{4:<14s}\033[1;00m{5:<s}".format(simplebit, subcolor, simplebit, subcolor, color[2], color[2]))
-            
-            # Get environment
-            appname=settings.ROOT_URLCONF.split(".")[0]
-            basedir=settings.BASE_DIR
-            appdir = os.path.abspath("{}/{}".format(basedir,appname))
-            status, output = getstatusoutput("find {}/ -type f -name '*.pyc' -delete".format(appdir))
-            if status: raise CommandError(output)
+            print(
+                "{:1d}:{:02d} - \033[{:1d};{:02d}m{:<14s}\033[1;00m{:<s}".format(  # noqa: E501
+                    simplebit,
+                    subcolor,
+                    simplebit,
+                    subcolor,
+                    color[2],
+                    color[2],
+                ),
+            )
 
+            # Get environment
+            appname = settings.ROOT_URLCONF.split(".")[0]
+            basedir = settings.BASE_DIR
+            appdir = os.path.abspath("{}/{}".format(basedir, appname))
+            status, output = getstatusoutput(
+                "find {}/ -type f -name '*.pyc' -delete".format(appdir),
+            )
+            if status:
+                raise CommandError(output)

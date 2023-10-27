@@ -41,7 +41,7 @@ limitations under the License.
                             return $resource('{% url tab.ws object.id %}/:pk/:action', { json:'{}', pk:null, action:null },{
                                 query:{ method: "GET", params: { json:'@json' }, isArray: false },
                                 get:{ method: "GET", params: { pk:'@pk', action:'@action' }, isArray: false },
-                            }); 
+                            });
                         }]);
                     {% endif %}
                 {% endfor %}
@@ -71,7 +71,7 @@ limitations under the License.
 
             {% block extra_btn_up %}
             {% endblock %}
-            
+
             {% if linkback %}
                <label  class="sr-only"  for="submit_back">{% trans "Go to back" %}</label>
                <button type="button" id="submit_back" ng-click="gotoback()" class="btn btn-sm grey-cascade">{% trans "Go back" %}</button>
@@ -92,7 +92,7 @@ limitations under the License.
 
     {% block details %}
         {% for item in object_detail %}
-            
+
             {% if item.value.0.name %}
             {# if the current item have several elements in value it is a group #}
                 <div class="col-md-{{item.col}}">
@@ -115,7 +115,7 @@ limitations under the License.
                             </div>
                         </div>
                     {% else %}
-                        
+
                         <label >{{subitem.name}}:</label>
                         {{ subitem.value|cdnx_beauty:subitem.filter }}<br>
                     {% endif %}
@@ -135,7 +135,7 @@ limitations under the License.
             {% endif %}
         {% endfor %}
     {% endblock %}
-    
+
     {# BUTTONS at the bottom #}
     {% block block_bottom %}
     <div class="col-md-12 internal-buttons-bottom">
@@ -181,11 +181,11 @@ limitations under the License.
                                 {{tab.name}}{#<span class="badge">{{x}}</span>#}
                             </a>
                     </uib-accordion-heading>
-                    
+
                     <div ng-if="(tabs_autorender.tab_{{tab.id}} == true)">
                         <div class='col-md-12' ui-view></div>
                     </div>
-                    
+
                 </uib-accordion-group>
             {% endfor %}
         </uib-accordion>

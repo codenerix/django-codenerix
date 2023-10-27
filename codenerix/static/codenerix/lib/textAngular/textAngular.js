@@ -258,7 +258,7 @@ angular.module('textAngular.factories', [])
 			tag: 'i'
 		}
 	];
-	
+
 	var styleMatch = [];
 	for(var i = 0; i < convert_infos.length; i++){
 		var _partialStyle = '(' + convert_infos[i].property + ':\\s*(';
@@ -271,7 +271,7 @@ angular.module('textAngular.factories', [])
 		styleMatch.push(_partialStyle);
 	}
 	var styleRegexString = '(' + styleMatch.join('|') + ')';
-	
+
 	function wrapNested(html, wrapTag) {
 		var depth = 0;
 		var lastIndex = 0;
@@ -290,7 +290,7 @@ angular.module('textAngular.factories', [])
 			angular.element(wrapTag)[0].outerHTML.substring(wrapTag.length) +
 			html.substring(lastIndex);
 	}
-	
+
 	function transformLegacyStyles(html){
 		if(!html || !angular.isString(html) || html.length <= 0) return html;
 		var i;
@@ -338,7 +338,7 @@ angular.module('textAngular.factories', [])
 		else finalHtml += html.substring(lastIndex);
 		return finalHtml;
 	}
-	
+
 	function transformLegacyAttributes(html){
 		if(!html || !angular.isString(html) || html.length <= 0) return html;
 		// replace all align='...' tags with text-align attributes
@@ -367,7 +367,7 @@ angular.module('textAngular.factories', [])
 		// return with remaining html
 		return finalHtml + html.substring(lastIndex);
 	}
-	
+
 	return function taSanitize(unsafe, oldsafe, ignore){
 		// unsafe html should NEVER built into a DOM object via angular.element. This allows XSS to be inserted and run.
 		if ( !ignore ) {
@@ -381,7 +381,7 @@ angular.module('textAngular.factories', [])
 		// any exceptions (lets say, color for example) should be made here but with great care
 		// setup unsafe element for modification
 		unsafe = transformLegacyAttributes(unsafe);
-		
+
 		var safe;
 		try {
 			safe = $sanitize(unsafe);
@@ -390,9 +390,9 @@ angular.module('textAngular.factories', [])
 		} catch (e){
 			safe = oldsafe || '';
 		}
-		
+
 		// Do processing for <pre> tags, removing tabs and return carriages outside of them
-		
+
 		var _preTags = safe.match(/(<pre[^>]*>.*?<\/pre[^>]*>)/ig);
 		var processedSafe = safe.replace(/(&#(9|10);)*/ig, '');
 		var re = /<pre[^>]*>.*?<\/pre[^>]*>/ig;
@@ -720,39 +720,39 @@ function($window, $document, taDOM){
 		},
 		setSelection: function(el, start, end){
 			var range = rangy.createRange();
-			
+
 			range.setStart(el, start);
 			range.setEnd(el, end);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionBeforeElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionAfterElement: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNode(el);
 			range.collapse(false);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementStart: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(true);
-			
+
 			rangy.getSelection().setSingleRange(range);
 		},
 		setSelectionToElementEnd: function (el){
 			var range = rangy.createRange();
-			
+
 			range.selectNodeContents(el);
 			range.collapse(false);
 			if(el.childNodes && el.childNodes[el.childNodes.length - 1] && el.childNodes[el.childNodes.length - 1].nodeName === 'br'){
@@ -769,7 +769,7 @@ function($window, $document, taDOM){
 			var frag = _document.createDocumentFragment();
 			var children = element[0].childNodes;
 			var isInline = true;
-			
+
 			if(children.length > 0){
 				// NOTE!! We need to do the following:
 				// check for blockelements - if they exist then we have to split the current element in half (and all others up to the closest block element) and insert all children in-between.
@@ -791,7 +791,7 @@ function($window, $document, taDOM){
 				// paste text of some sort
 				lastNode = frag = _document.createTextNode(html);
 			}
-			
+
 			// Other Edge case - selected data spans multiple blocks.
 			if(isInline){
 				range.deleteContents();
@@ -816,7 +816,7 @@ function($window, $document, taDOM){
 							secondParent = parent.cloneNode();
 							// split the nodes into two lists - before and after, splitting the node with the selection into 2 text nodes.
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, range.startContainer, range.startOffset);
-							
+
 							// Escape out of the inline tags like b
 							while(!VALIDELEMENTS.test(parent.nodeName)){
 								angular.element(parent).after(secondParent);
@@ -831,12 +831,12 @@ function($window, $document, taDOM){
 							secondParent = parent.cloneNode();
 							taDOM.splitNodes(parent.childNodes, parent, secondParent, undefined, undefined, range.startOffset);
 						}
-						
+
 						angular.element(parent).after(secondParent);
 						// put cursor to end of inserted content
 						range.setStartAfter(parent);
 						range.setEndAfter(parent);
-						
+
 						if(/^(|<br(|\/)>)$/i.test(parent.innerHTML.trim())){
 							range.setStartBefore(parent);
 							range.setEndBefore(parent);
@@ -862,7 +862,7 @@ function($window, $document, taDOM){
 					range.deleteContents();
 				}
 			}
-			
+
 			range.insertNode(frag);
 			if(lastNode){
 				api.setSelectionToElementEnd(lastNode);
@@ -884,35 +884,35 @@ function($window, $document, taDOM){
 			if(element.attr(attribute) !== undefined) resultingElements.push(element);
 			return resultingElements;
 		},
-		
+
 		transferChildNodes: function(source, target){
 			// clear out target
 			target.innerHTML = '';
 			while(source.childNodes.length > 0) target.appendChild(source.childNodes[0]);
 			return target;
 		},
-		
+
 		splitNodes: function(nodes, target1, target2, splitNode, subSplitIndex, splitIndex){
 			if(!splitNode && isNaN(splitIndex)) throw new Error('taDOM.splitNodes requires a splitNode or splitIndex');
 			var startNodes = document.createDocumentFragment();
 			var endNodes = document.createDocumentFragment();
 			var index = 0;
-			
+
 			while(nodes.length > 0 && (isNaN(splitIndex) || splitIndex !== index) && nodes[0] !== splitNode){
 				startNodes.appendChild(nodes[0]); // this removes from the nodes array (if proper childNodes object.
 				index++;
 			}
-			
+
 			if(!isNaN(subSplitIndex) && subSplitIndex >= 0 && nodes[0]){
 				startNodes.appendChild(document.createTextNode(nodes[0].nodeValue.substring(0, subSplitIndex)));
 				nodes[0].nodeValue = nodes[0].nodeValue.substring(subSplitIndex);
 			}
 			while(nodes.length > 0) endNodes.appendChild(nodes[0]);
-			
+
 			taDOM.transferChildNodes(startNodes, target1);
 			taDOM.transferChildNodes(endNodes, target2);
 		},
-		
+
 		transferNodeAttributes: function(source, target){
 			for(var i = 0; i < source.attributes.length; i++) target.setAttribute(source.attributes[i].name, source.attributes[i].value);
 			return target;

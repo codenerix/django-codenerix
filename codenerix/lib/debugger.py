@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -24,12 +23,7 @@ from datetime import datetime
 from inspect import currentframe
 from os import getcwd
 from pathlib import Path
-from typing import Dict
-from typing import List
-from typing import Text
-from typing import TextIO
-from typing import Tuple
-from typing import Union
+from typing import Any, Dict, List, Optional, TextIO, Tuple, Union
 
 from codenerix_lib.colors import colors
 
@@ -62,9 +56,8 @@ def __FILE__():  # noqa: N802,N807
     return filename
 
 
-class Debugger(object):
-
-    __indebug: Dict[str, Tuple[Union[Text, Path, TextIO], List[str]]] = {}
+class Debugger:
+    __indebug: Dict[str, Tuple[Union[str, Path, TextIO], List[str]]] = {}
     __inname = None
 
     KINDS = [
@@ -89,14 +82,17 @@ class Debugger(object):
         # debugger['log'] = (open("log/debug.log","a"), ['*'] )
         self.set_debug(debugger)
 
-    def set_debug(self, debug=None):
+    def set_debug(
+        self,
+        debug: Optional[Dict[str, Any]] = None,
+    ):
         if debug is None:
             self.__autoconfig()
         else:
-            if type(debug) is dict:
+            if isinstance(debug, dict):
                 # Set the deepness system
                 idebug = debug.copy()
-                if "deepness" in debug:
+                if "deepness" in debug:  # pragma: no cover
                     if debug["deepness"]:
                         idebug["deepness"] -= 1
                     else:
@@ -110,10 +106,10 @@ class Debugger(object):
 
                 # Save internal debugger
                 self.__indebug = idebug
-            else:
-                raise IOError("Argument is not a dictionary")
+            else:  # pragma: no cover
+                raise OSError("Argument is not a dictionary")
 
-    def set_origin(self, origin):
+    def set_origin(self, origin):  # pragma: no cover
         self.origin = origin
 
     def get_debug(self):
@@ -148,9 +144,8 @@ class Debugger(object):
         origin=False,
         kind="",
     ):
-
         # If origin has been requested
-        if origin or getattr(self, "origin", False):
+        if origin or getattr(self, "origin", False):  # pragma: no cover
             origin = True
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
@@ -180,17 +175,15 @@ class Debugger(object):
         clname = self.__class__.__name__
 
         # Retrieve tabular
-        if "tabular" in self.__indebug:
+        if "tabular" in self.__indebug:  # pragma: no cover
             tabular = self.__indebug["tabular"]
         else:
             tabular = ""
 
         # For each element inside indebug
         for name in self.__indebug:
-
             # If this is no deepeness key, keep going
             if name not in ["deepness", "tabular"]:
-
                 # Get color
                 if name == "screen" or name[-1] == "*":
                     color_ini = self.color(color)
@@ -203,7 +196,7 @@ class Debugger(object):
                 (handler, indebug) = self.__indebug[name]
 
                 if not kind or "-*{}".format(kind) not in indebug:
-                    if msg and type(handler) == str:
+                    if msg and isinstance(handler, str):
                         # Open handler buffer
                         handlerbuf = open(handler, "a")
                     else:
@@ -213,7 +206,6 @@ class Debugger(object):
                     if (clname in indebug) or (
                         ("*" in indebug) and ("-%s" % (clname) not in indebug)
                     ):
-
                         # Set line head name
                         if self.__inname:
                             headname = self.__inname
@@ -255,7 +247,7 @@ class Debugger(object):
                             return True
 
                     # Autoclose handler when done
-                    if msg and type(handler) == str:
+                    if msg and isinstance(handler, str):
                         handlerbuf.close()
 
         # If we shouldn't show the output
@@ -264,7 +256,7 @@ class Debugger(object):
             return False
 
     def primary(self, msg, header=True, tail=True, show_line_info=False):
-        if show_line_info:
+        if show_line_info:  # pragma: no cover
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
                 getcwd(),
@@ -292,7 +284,7 @@ class Debugger(object):
         )
 
     def secondary(self, msg, header=True, tail=True, show_line_info=False):
-        if show_line_info:
+        if show_line_info:  # pragma: no cover
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
                 getcwd(),
@@ -320,7 +312,7 @@ class Debugger(object):
         )
 
     def success(self, msg, header=True, tail=True, show_line_info=False):
-        if show_line_info:
+        if show_line_info:  # pragma: no cover
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
                 getcwd(),
@@ -348,7 +340,7 @@ class Debugger(object):
         )
 
     def danger(self, msg, header=True, tail=True, show_line_info=False):
-        if show_line_info:
+        if show_line_info:  # pragma: no cover
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
                 getcwd(),
@@ -376,7 +368,7 @@ class Debugger(object):
         )
 
     def warning(self, msg, header=True, tail=True, show_line_info=True):
-        if show_line_info:
+        if show_line_info:  # pragma: no cover
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
                 getcwd(),
@@ -404,7 +396,7 @@ class Debugger(object):
         )
 
     def info(self, msg, header=True, tail=True, show_line_info=False):
-        if show_line_info:
+        if show_line_info:  # pragma: no cover
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
                 getcwd(),
@@ -432,7 +424,7 @@ class Debugger(object):
         )
 
     def error(self, msg, header=True, tail=True, show_line_info=True):
-        if show_line_info:
+        if show_line_info:  # pragma: no cover
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
                 getcwd(),
@@ -469,7 +461,7 @@ class Debugger(object):
         header=True,
         tail=True,
     ):
-        if show_line_info:
+        if show_line_info:  # pragma: no cover
             line = currentframe().f_back.f_lineno
             filename = currentframe().f_back.f_code.co_filename.replace(
                 getcwd(),
@@ -511,22 +503,20 @@ class Debugger(object):
         clname = self.__class__.__name__
 
         # Retrieve tabular
-        if "tabular" in self.__indebug:
+        if "tabular" in self.__indebug:  # pragma: no cover
             tabular = self.__indebug["tabular"]
         else:
             tabular = ""
 
         # For each element inside indebug
         for name in self.__indebug:
-
             # If this is no deepeness key, keep going
             if name not in ["deepness", "tabular"]:
-
                 # Get file output handler and indebug list
                 (handler, indebug) = self.__indebug[name]
 
                 if "-*{}".format(kind) not in indebug:
-                    if type(handler) == str:
+                    if isinstance(handler, str):
                         # Open handler buffer
                         handlerbuf = open(handler, "a")
                     else:
@@ -585,5 +575,5 @@ class Debugger(object):
                     handlerbuf.flush()
 
                     # Autoclose handler when done
-                    if type(handler) == str:
+                    if isinstance(handler, str):
                         handlerbuf.close()

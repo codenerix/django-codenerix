@@ -481,4 +481,3 @@ setupModuleLoader(window);
  * } }
  */
 angular.Module;
-

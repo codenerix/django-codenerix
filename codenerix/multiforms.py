@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -18,14 +17,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from django.http import HttpResponseRedirect
 from django.db import transaction
 
 # Warning: Q objects are used inside an eval() that you can find somewhere down
-from django.db.models import Q
+from django.db.models import Q  # noqa: F401
+from django.http import HttpResponseRedirect
 
 
-class MultiForm(object):
+class MultiForm:
     """
     model = Flight                                  # Main model
     form_class = FlightForm                         # Main form
@@ -42,17 +41,18 @@ class MultiForm(object):
         (None, None, None),
         (ArrivalForm, 'flight','kind="A",alternative=False')
         ]
-    """
+    """  # noqa: E501
 
     def get_form_kwargs(self):
-        kwargs = super(MultiForm, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         if "field_prefix" in self.__dict__:
             kwargs["scope_prefix"] = self.field_prefix
         return kwargs
 
     def get(self, request, *args, **kwargs):
         """
-        Handles GET requests and instantiates blank versions of the form and its inline formsets.
+        Handles GET requests and instantiates blank versions of the form and
+        its inline formsets.
         """
 
         # Prepare base
@@ -86,9 +86,12 @@ class MultiForm(object):
             groups = None
 
         # Add special prefix support to properly support form independency
-        form.add_prefix = lambda fields_name, field_prefix=field_prefix: "%s_%s" % (
-            field_prefix,
-            fields_name,
+        form.add_prefix = (
+            lambda fields_name, field_prefix=field_prefix: "%s_%s"
+            % (
+                field_prefix,
+                fields_name,
+            )
         )
         if "autofill" not in dir(form.Meta):
             form.Meta.autofill = {}
@@ -98,7 +101,7 @@ class MultiForm(object):
         # For every extra form
         forms = []
         position_form_default = 0
-        for (formelement, linkerfield, modelfilter) in self.forms:
+        for formelement, linkerfield, modelfilter in self.forms:
             if formelement is None:
                 formobj = form
                 position_form_default = len(forms)
@@ -106,11 +109,13 @@ class MultiForm(object):
                 # Locate linked element
                 if self.object:
                     related_name = formelement._meta.model._meta.get_field(
-                        linkerfield
+                        linkerfield,
                     ).related_query_name()
                     queryset = getattr(self.object, related_name)
                     if modelfilter:
-                        queryset = queryset.filter(eval("Q(%s)" % (modelfilter)))
+                        queryset = queryset.filter(
+                            eval("Q(%s)" % (modelfilter)),
+                        )
                     get_method = getattr(queryset, "get", None)
                     if get_method:
                         instance = queryset.get()
@@ -138,7 +143,9 @@ class MultiForm(object):
                     field_prefix = formelement.Meta.field_prefix
                 else:
                     # Get name from the class
-                    field_prefix = str(formelement).split("'")[1].split(".")[-1]
+                    field_prefix = (
+                        str(formelement).split("'")[1].split(".")[-1]
+                    )
                 self.field_prefix = field_prefix
 
                 # Prepare form
@@ -153,7 +160,8 @@ class MultiForm(object):
                 if linkerfield in formobj.fields:
                     del formobj.fields[linkerfield]
 
-                # Add special prefix support to properly support form independency
+                # Add special prefix support to properly support
+                # form independency
                 formobj.add_prefix = (
                     lambda fields_name, field_prefix=field_prefix: "%s_%s"
                     % (field_prefix, fields_name)
@@ -183,12 +191,14 @@ class MultiForm(object):
                 forms=forms,
                 open_tabs=open_tabs,
                 position_form_default=position_form_default,
-            )
+            ),
         )
 
     def post(self, request, *args, **kwargs):
         """
-        andles POST requests, instantiating a form instance and its inline formsets with the passed POST variables and then checking them for validity.
+        Handles POST requests, instantiating a form instance and its inline
+        formsets with the passed POST variables and then checking them
+        for validity.
         """
 
         # Prepare base
@@ -223,15 +233,20 @@ class MultiForm(object):
             groups = None
 
         # Add special prefix support to properly support form independency
-        form.add_prefix = lambda fields_name, field_prefix=field_prefix: "%s_%s" % (
-            field_prefix,
-            fields_name,
+        form.add_prefix = (
+            lambda fields_name, field_prefix=field_prefix: "%s_%s"
+            % (
+                field_prefix,
+                fields_name,
+            )
         )
 
         # Check validation
         valid = form.is_valid()
         if (not valid) and ("non_field_errors" in dir(self)):
-            errors = [element[5] for element in list(self.non_field_errors())[:-1]]
+            errors = [
+                element[5] for element in list(self.non_field_errors())[:-1]
+            ]
         elif form.errors.as_data():
             errors = []
             for element in form.errors.as_data():
@@ -243,7 +258,7 @@ class MultiForm(object):
         # For every extra form
         temp_forms = []
         position_form_default = 0
-        for (formelement, linkerfield, modelfilter) in self.forms:
+        for formelement, linkerfield, modelfilter in self.forms:
             if formelement is None:
                 formobj = form
                 position_form_default = len(temp_forms)
@@ -251,11 +266,13 @@ class MultiForm(object):
                 # Locate linked element
                 if self.object:
                     related_name = formelement._meta.model._meta.get_field(
-                        linkerfield
+                        linkerfield,
                     ).related_query_name()
                     queryset = getattr(self.object, related_name)
                     if modelfilter:
-                        queryset = queryset.filter(eval("Q(%s)" % (modelfilter)))
+                        queryset = queryset.filter(
+                            eval("Q(%s)" % (modelfilter)),
+                        )
                     get_method = getattr(queryset, "get", None)
                     if get_method:
                         instance = queryset.get()
@@ -270,11 +287,16 @@ class MultiForm(object):
                     field_prefix = formelement.Meta.field_prefix
                 else:
                     # Get name from the class
-                    field_prefix = str(formelement).split("'")[1].split(".")[-1]
+                    field_prefix = (
+                        str(formelement).split("'")[1].split(".")[-1]
+                    )
                 self.field_prefix = field_prefix
 
                 # Prepare form
-                formobj = formelement(instance=instance, data=self.request.POST)
+                formobj = formelement(
+                    instance=instance,
+                    data=self.request.POST,
+                )
                 formobj.form_name = form.form_name
 
                 # Excluded fields
@@ -295,9 +317,12 @@ class MultiForm(object):
                 valid *= formobj.is_valid()
 
                 # append error
-                if not formobj.is_valid() and ("non_field_errors" in dir(formobj)):
+                if not formobj.is_valid() and (
+                    "non_field_errors" in dir(formobj)
+                ):
                     errors += [
-                        element[5] for element in list(formobj.non_field_errors())[:-1]
+                        element[5]
+                        for element in list(formobj.non_field_errors())[:-1]
                     ]
 
             # Save fields to the list
@@ -343,21 +368,28 @@ class MultiForm(object):
         else:
             # Something went wrong, attach error and call invalid
             form.list_errors = errors
-            return self.form_invalid(form, forms, open_tabs, position_form_default)
+            return self.form_invalid(
+                form,
+                forms,
+                open_tabs,
+                position_form_default,
+            )
 
     @transaction.atomic
     def form_valid(self, form, forms):
         """
-        Called if all forms are valid. Creates a Recipe instance along with associated Ingredients and Instructions and then redirects to a success page.
+        Called if all forms are valid. Creates a Recipe instance along with
+        associated Ingredients and Instructions and then redirects to
+        a success page.
         """
         if self.object:
             form.save()
-            for (formobj, linkerfield) in forms:
+            for formobj, linkerfield in forms:
                 if form != formobj:
                     formobj.save()
         else:
             self.object = form.save()
-            for (formobj, linkerfield) in forms:
+            for formobj, linkerfield in forms:
                 if form != formobj:
                     setattr(formobj.instance, linkerfield, self.object)
                     formobj.save()
@@ -365,14 +397,17 @@ class MultiForm(object):
 
     def form_invalid(self, form, forms, open_tabs, position_form_default):
         """
-        Called if a form is invalid. Re-renders the context data with the data-filled forms and errors.
+        Called if a form is invalid. Re-renders the context data with
+        the data-filled forms and errors.
         """
-        # return self.render_to_response( self.get_context_data( form = form, forms = forms ) )
+        # return self.render_to_response(
+        #   self.get_context_data( form = form, forms = forms )
+        # )
         return self.render_to_response(
             self.get_context_data(
                 form=form,
                 forms=forms,
                 open_tabs=open_tabs,
                 position_form_default=position_form_default,
-            )
+            ),
         )

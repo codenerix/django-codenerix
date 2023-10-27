@@ -28,14 +28,14 @@ angular.module('codenerixNotify', ['ngResource'])
     return $resource('/alarmspopups/:pk/:action', { pk:null, action:null },{
         query:{ method: "GET", params: {}, isArray: false, ignoreLoadingBar: true },
         get:{ method: "GET", params: { pk:'@pk', action:'@action' }, isArray: false, ignoreLoadingBar: true },
-    }); 
+    });
 }])
 
 .controller('AlarmsCtrl', ['$scope', '$rootScope', '$timeout', '$filter', 'Notifications',
     function($scope, $rootScope, $timeout, $filter, Notifications) {
         $scope.onscreen = [];
         $scope.pubdata = {};
-        
+
         // HIDE
         $scope.notify_hide = function (id,kind) {
             // console.log("AngularJS NOTIFY: hide "+id);
@@ -57,7 +57,7 @@ angular.module('codenerixNotify', ['ngResource'])
             Notifications.get({action:"all"});
             location.reload();
         };
-        
+
         (function tick() {
 //            if (!withfocus) {
 //                    // Set a new timeout in 1 seconds because we don't have focus and we will not do anything
@@ -91,7 +91,7 @@ angular.module('codenerixNotify', ['ngResource'])
                                     $scope.onscreen=$filter('filter')($scope.onscreen, '!'+alarm_id);
                                     // Close alert
                                     inotify_close(alarm_id);
-                                    
+
                                     // Decide alertdate
                                     if (alarm.alertdate == null ) {
                                         var alertdate="";
@@ -104,7 +104,7 @@ angular.module('codenerixNotify', ['ngResource'])
                                     }
                                     // Open alert
                                     inotify(notify_msg(alarm, alertdate, alarm_id), alarm,alarm_id, true);
-                                    
+
                                     // If no style was selected, apply general one
                                     if (alarm.style=='custom') {
                                         // Calculate font color
@@ -135,7 +135,7 @@ angular.module('codenerixNotify', ['ngResource'])
                                     }
                                     // Open alert
                                     inotify(notify_msg(alarm, alertdate, alarm_id), alarm,alarm_id, true);
-                                    
+
                                     // If no style was selected, apply general one
                                     if (alarm.style=='custom') {
                                         // Calculate font color
@@ -154,7 +154,7 @@ angular.module('codenerixNotify', ['ngResource'])
                             }
                         });
                     }
-                        
+
                     // Remove from the screen all alarms that dissapeared
                     angular.forEach( $scope.onscreen , function ( screen_id ) {
                         var found=false;
@@ -169,7 +169,7 @@ angular.module('codenerixNotify', ['ngResource'])
                             inotify_close(screen_id);
                         }
                     });
-                    
+
                     // Refresh now
                     $rootScope.now = (new Date).getTime();
                     $rootScope.lastconnection = $rootScope.now;
@@ -182,7 +182,7 @@ angular.module('codenerixNotify', ['ngResource'])
                 });
 //            }
         })();
-        
+
         // Cancel timeout on page changes
         $scope.$on('$destroy', function(){
             if (angular.isDefined(promise)) {

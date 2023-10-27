@@ -1,0 +1,113 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-ast
+    -   id: check-merge-conflict
+    -   id: check-json
+    -   id: check-xml
+    -   id: check-yaml
+    -   id: debug-statements
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/psf/black
+    rev: 23.10.1
+    hooks:
+    -   id: black
+        args:
+          - --line-length=79
+          - --include='\.pyi?$'
+-   repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+    -   id: isort
+        name: isort
+        args: [--profile, black, --line-length, "79"]
+-   repo: https://github.com/asottile/add-trailing-comma
+    rev: v3.1.0
+    hooks:
+    -   id: add-trailing-comma
+        args: [--py36-plus]
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    - id: flake8
+      args:
+        - "--max-line-length=79"
+        - "--select=B,C,E,F,W,T4,B9"
+        - "--ignore=E203,W503"
+        # - "--max-complexity=18"
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.6.1'
+    hooks:
+      - id: mypy
+        additional_dependencies: [tokenize-rt==3.2.0, types-python-dateutil, types-PyYAML, types-requests, types-pytz, types-six, types-ldap3, pymongo-stubs, django-stubs, django-stubs-ext]
+        # args: [--ignore-missing-imports]
+        # exclude: codenerix/multi_email_field/
+        # args: [--python-version 3.10, --ignore-missing-imports, --disallow-untyped-defs]
+        # args: [--no-strict-optional, --ignore-missing-imports]
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+    -   id: pyupgrade
+        args: [--keep-percent-format]
+-   repo: https://github.com/keewis/blackdoc
+    rev: v0.3.8
+    hooks:
+    -   id: blackdoc
+        args: ["-l", "78"]
+        exclude: ^doc/.*
+-   repo: https://github.com/get-woke/woke
+    rev: v0.19.0
+    hooks:
+    -   id: woke-from-source
+        exclude: >
+          (?x)(
+              CHANGELOG
+            | codenerix/static/codenerix/lib/
+          )
+-   repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+    -   id: bandit
+        args: ["-r", "-lll"]
+        exclude: >
+          (?x)(
+              codenerix/management/commands/check_dependencies.py
+            | codenerix/management/commands/clean.py
+            | codenerix/management/commands/clean_caches.py
+            | codenerix/management/commands/colors.py
+            | codenerix/management/commands/locales.py
+            | codenerix/management/commands/touch.py
+          )
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-markup
+    rev: v1.0.1
+    hooks:
+    -   id: rst-linter
+
+# -   repo: https://github.com/pycqa/pylint
+#     rev: v3.0.1
+#     hooks:
+#     -   id: pylint
+#         args:
+#         - --max-line-length=80
+#         - --ignore-imports=yes
+#         - -d duplicate-code
+
+exclude: >
+  (?x)(
+      \.env
+    | \.git
+    | \.ini
+    | \.log
+    | \.sqlite3
+    | \.tox
+    | \.venv
+    | \.__pycache__
+    | _build
+    | build
+    | dist"""
+  )

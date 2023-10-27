@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-codenerix
 #
@@ -18,35 +17,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# System
-import os
-from datetime import datetime
-import random
-from dateutil.tz import tzutc
-import zipfile
-import io
-import json
-from unidecode import unidecode
-from uuid import UUID
-import time
 import decimal
 import importlib
+import io
+import json
 
+# System
+import os
+import random
+import time
+import zipfile
+from datetime import datetime
+from uuid import UUID
+
+from dateutil.tz import tzutc
+from django.conf import settings
+from django.core.cache import cache
 
 # Django
 from django.db.models import Q
-from django.utils.encoding import smart_str
-from django.utils.translation import gettext_lazy as _
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template as django_get_template
-from django.shortcuts import render
-from django.conf import settings
-from django.views.generic.base import View
-from django.core.cache import cache
-from django.utils import dateparse
-from django.http import HttpResponseRedirect
-from django.utils.http import urlsafe_base64_encode
 from django.urls import reverse_lazy
+from django.utils import dateparse
+from django.utils.encoding import smart_str
+from django.utils.http import urlsafe_base64_encode
+from django.utils.translation import gettext_lazy as _
+from django.views.generic.base import View
+from unidecode import unidecode
 
 
 def epochdate(timestamp):
@@ -59,8 +59,8 @@ def epochdate(timestamp):
     """
 
     dt = datetime.fromtimestamp(float(timestamp)).timetuple()
-    fecha = "{0:d}-{1:02d}-{2:02d}".format(dt.tm_year, dt.tm_mon, dt.tm_mday)
-    hora = "{0:02d}:{1:02d}:{2:02d}".format(dt.tm_hour, dt.tm_min, dt.tm_sec)
+    fecha = "{:d}-{:02d}-{:02d}".format(dt.tm_year, dt.tm_mon, dt.tm_mday)
+    hora = "{:02d}:{:02d}:{:02d}".format(dt.tm_hour, dt.tm_min, dt.tm_sec)
     return (fecha, hora)
 
 
@@ -89,7 +89,10 @@ def date2string(dtime, formt, default):
 def daterange_filter(value, variable):
     start = dateparse.parse_datetime(value["startDate"])
     end = dateparse.parse_datetime(value["endDate"])
-    result = {"{0}__gte".format(variable): start, "{0}__lte".format(variable): end}
+    result = {
+        "{}__gte".format(variable): start,
+        "{}__lte".format(variable): end,
+    }
     return result
 
 
@@ -198,13 +201,13 @@ def get_profiled_paths(path, user, lang, extension):
         profile = get_profile(user)
 
         # Define the base_path to use
-        paths.append("{0}.{1}".format(user.username, lang))
+        paths.append("{}.{}".format(user.username, lang))
         paths.append(user.username)
         if profile:
-            paths.append("{0}.{1}".format(profile, lang))
+            paths.append("{}.{}".format(profile, lang))
             paths.append(profile)
         if profile != "admin":
-            paths.append("user.{0}".format(lang))
+            paths.append("user.{}".format(lang))
             paths.append("user")
 
     # Add an empty path
@@ -224,7 +227,12 @@ def get_profiled_paths(path, user, lang, extension):
 
 def get_template(template, user, lang, extension="html", raise_error=True):
     # Get profiled paths
-    (templates, templatepath) = get_profiled_paths(template, user, lang, extension)
+    (templates, templatepath) = get_profiled_paths(
+        template,
+        user,
+        lang,
+        extension,
+    )
 
     # Check templates
     test = []
@@ -248,8 +256,10 @@ def get_template(template, user, lang, extension="html", raise_error=True):
         return found
     else:
         if raise_error:
-            raise IOError(
-                "I couldn't find a valid template, I have tried: {}".format(test)
+            raise OSError(
+                "I couldn't find a valid template, I have tried: {}".format(
+                    test,
+                ),
             )
         else:
             return test
@@ -312,7 +322,12 @@ def model_inspect(obj):
         model = obj.__class__
 
     namesp = str(model)
-    namesp = namesp.replace("<class ", "").replace(">", "").replace("'", "").split(".")
+    namesp = (
+        namesp.replace("<class ", "")
+        .replace(">", "")
+        .replace("'", "")
+        .split(".")
+    )
 
     # Remember information
     info["appname"] = namesp[-3]
@@ -325,8 +340,8 @@ def model_inspect(obj):
 
 def upload_path(instance, filename):
     """
-    This method is created to return the path to upload files. This path must be
-    different from any other to avoid problems.
+    This method is created to return the path to upload files. This path
+    must be different from any other to avoid problems.
     """
     path_separator = "/"
     date_separator = "-"
@@ -346,11 +361,11 @@ def upload_path(instance, filename):
     file_ext = split_filename[-1]
 
     new_filename = empty_string.join(
-        [filename, str(random.random()).split(ext_separator)[1]]
+        [filename, str(random.random()).split(ext_separator)[1]],
     )
     new_filename = ext_separator.join([new_filename, file_ext])
     string_path = path_separator.join(
-        [model_name, curr_year, curr_month, curr_day, new_filename]
+        [model_name, curr_year, curr_month, curr_day, new_filename],
     )
     # the path is built using the current date and the modelname
     return string_path
@@ -391,15 +406,14 @@ def clean_memcache_item(key, item):
         cache.set(key, result)
 
 
-class CodenerixEncoder(object):
-
+class CodenerixEncoder:
     codenerix_numeric_dic = {
         # Basic dicts
         "num": "0123456789",
         "alpha": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         "alphanc": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
         "alphanum": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "alphanumnc": "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+        "alphanumnc": "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",  # noqa: E501
         # Original dicts
         "hex36": "ENWR6MV71JOQHADUGFCYZ25X3B4L0KPTSI98",
         "hex16": "54BEF80D1C96A732",
@@ -410,7 +424,6 @@ class CodenerixEncoder(object):
         return self.codenerix_numeric_dic.keys()
 
     def numeric_encode(self, number, dic="hex36", length=None, cfill=None):
-
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
             dic = self.codenerix_numeric_dic[dic]
@@ -421,7 +434,7 @@ class CodenerixEncoder(object):
             if c not in nr:
                 nr += c
             else:
-                raise IOError(_("ERROR: dic has repeated elements"))
+                raise OSError(_("ERROR: dic has repeated elements"))
 
         # If no cfill
         if cfill is None:
@@ -453,7 +466,6 @@ class CodenerixEncoder(object):
         return string[::-1]
 
     def numeric_decode(self, string, dic="hex36"):
-
         # Get predefined dictionary
         if dic in self.codenerix_numeric_dic:
             dic = self.codenerix_numeric_dic[dic]
@@ -462,7 +474,6 @@ class CodenerixEncoder(object):
         first = True
         number = 0
         for c in string:
-
             # Not the first loop
             if not first:
                 number *= len(dic)
@@ -476,7 +487,7 @@ class CodenerixEncoder(object):
         return number
 
 
-class InMemoryZip(object):
+class InMemoryZip:
     """
     # Compress
     imz = InMemoryZip()
@@ -512,7 +523,12 @@ class InMemoryZip(object):
         self.in_memory_zip.seek(-1, io.SEEK_END)
 
         # Get a handle to the in-memory zip in append mode
-        zf = zipfile.ZipFile(self.in_memory_zip, "a", zipfile.ZIP_DEFLATED, False)
+        zf = zipfile.ZipFile(
+            self.in_memory_zip,
+            "a",
+            zipfile.ZIP_DEFLATED,
+            False,
+        )
 
         # Write the file to the in-memory zip
         zf.writestr(filename_in_zip, file_contents)
@@ -532,7 +548,12 @@ class InMemoryZip(object):
 
     def get(self, filename):
         self.in_memory_zip.seek(0)
-        zf = zipfile.ZipFile(self.in_memory_zip, "r", zipfile.ZIP_DEFLATED, False)
+        zf = zipfile.ZipFile(
+            self.in_memory_zip,
+            "r",
+            zipfile.ZIP_DEFLATED,
+            False,
+        )
         fp = zf.open(filename)
         data = fp.read()
         # Close the ZipFile
@@ -632,27 +653,32 @@ def form_answer(status, answer):
         answer["__str__"] = "OK"
 
     # Encode answer
-    answer_encoded = urlsafe_base64_encode(str.encode(json.dumps(answer))).decode()
+    answer_encoded = urlsafe_base64_encode(
+        str.encode(json.dumps(answer)),
+    ).decode()
 
     # Build success URL
     success_url = reverse_lazy(
-        "CDNX_status", kwargs={"status": "accept", "answer": answer_encoded}
+        "CDNX_status",
+        kwargs={"status": "accept", "answer": answer_encoded},
     )
 
     # Return response
     return HttpResponseRedirect(success_url)
 
 
-def JSONEncoder_newdefault(kind=["uuid", "datetime", "time", "decimal"]):
+def JSONEncoder_newdefault(  # noqa: N802
+    kind=["uuid", "datetime", "time", "decimal"],
+):
     """
     JSON Encoder newdfeault is a wrapper capable of encoding several kinds
     Usage:
         from codenerix.helpers import JSONEncoder_newdefault
         JSONEncoder_newdefault()
     """
-    JSONEncoder_olddefault = json.JSONEncoder.default
+    JSONEncoder_olddefault = json.JSONEncoder.default  # noqa: N806
 
-    def JSONEncoder_wrapped(self, o):
+    def JSONEncoder_wrapped(self, o):  # noqa: N802
         """
         json.JSONEncoder.default = JSONEncoder_newdefault
         """
@@ -680,7 +706,11 @@ def context_processors_update(context, request):
         for context_processor in template["OPTIONS"]["context_processors"]:
             path = context_processor.split(".")
             name = path.pop(-1)
-            processor = getattr(importlib.import_module(".".join(path)), name, None)
+            processor = getattr(
+                importlib.import_module(".".join(path)),
+                name,
+                None,
+            )
             if processor:
                 context.update(processor(request))
     return context
