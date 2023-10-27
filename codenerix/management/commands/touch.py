@@ -74,11 +74,10 @@ class Command(BaseCommand, Debugger):
         while keepworking:
             # Collect
             self.debug("Collecting...", color="blue")
-            status, output = getstatusoutput(
-                "{}/manage collectstatic --noinput".format(appdir),
-            )
+            cmd = f"{appdir}/manage collectstatic --noinput"
+            status, output = getstatusoutput(cmd)
             if status:
-                raise CommandError(output)
+                raise CommandError(f"{output}\nCommand was: {cmd}")
             for line in output.split("\n"):
                 if line[0:7] == "Copying":
                     path = line.split("'")[1].replace(appdir, ".")
@@ -114,9 +113,10 @@ class Command(BaseCommand, Debugger):
 
             # Clean
             self.debug("Cleaning...", color="blue")
-            status, output = getstatusoutput("{}/manage clean".format(appdir))
+            cmd = f"{appdir}/manage clean"
+            status, output = getstatusoutput(cmd)
             if status:
-                raise CommandError(output)
+                raise CommandError(f"{output}\nCommand was: {cmd}")
 
             # Touch
             self.debug("Touch...", color="blue", tail=False)
@@ -124,11 +124,10 @@ class Command(BaseCommand, Debugger):
             filenames.sort()
             for name in filenames:
                 if name[0:4] == "wsgi" or name[-4:] == "wsgi":
-                    status, output = getstatusoutput(
-                        "/usr/bin/touch {}/{}".format(appdir, name),
-                    )
+                    cmd = f"/usr/bin/touch {appdir}/{name}"
+                    status, output = getstatusoutput(cmd)
                     if status:
-                        raise CommandError(output)
+                        raise CommandError(f"{output}\nCommand was: {cmd}")
                     self.debug(
                         " [{}]".format(name),
                         color="cyan",

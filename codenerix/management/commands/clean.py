@@ -49,9 +49,10 @@ class Command(BaseCommand, Debugger):
         appname = settings.ROOT_URLCONF.split(".")[0]
         basedir = settings.BASE_DIR
         appdir = os.path.abspath("{}/{}".format(basedir, appname))
-        status, output = getstatusoutput(
+        cmd = (
             f"find {appdir}/ -name '*.py[c|o]' -o "
-            "-name __pycache__ -exec rm -rf {{}} +",
+            "-name __pycache__ -exec rm -rf {} +"
         )
+        status, output = getstatusoutput(cmd)
         if status:
-            raise CommandError(output)
+            raise CommandError(f"{output}\nCommand was: {cmd}")
