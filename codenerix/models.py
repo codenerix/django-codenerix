@@ -605,14 +605,18 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
 
                             if hasattr(ffield, "verbose_name"):
                                 try:
-                                    string_checks = [unicode, str]
-                                except NameError:
-                                    string_checks = [str]
+                                    is_string = isinstance(
+                                        ffield.verbose_name,
+                                        unicode,
+                                    ) or isinstance(ffield.verbose_name, str)
 
-                                if isinstance(
-                                    ffield.verbose_name,
-                                    string_checks,
-                                ):
+                                except NameError:
+                                    is_string = isinstance(
+                                        ffield.verbose_name,
+                                        str,
+                                    )
+
+                                if is_string:
                                     ffield_verbose_name = ffield.verbose_name
                                 else:
                                     ffield_verbose_name = str(
@@ -747,11 +751,15 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
 
                 if hasattr(ffield, "verbose_name"):
                     try:
-                        string_checks = [unicode, str]
-                    except NameError:
-                        string_checks = [str]
+                        is_string = isinstance(
+                            ffield.verbose_name,
+                            unicode,
+                        ) or isinstance(ffield.verbose_name, str)
 
-                    if isinstance(ffield.verbose_name, string_checks):
+                    except NameError:
+                        is_string = isinstance(ffield.verbose_name, str)
+
+                    if is_string:
                         ffield_verbose_name = ffield.verbose_name
                     else:
                         ffield_verbose_name = str(ffield.verbose_name)

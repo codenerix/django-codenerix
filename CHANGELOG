@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.29] - 2023-11-07
+### Fixed
+- important error on GenLog that prevent Log dependent models from saving data as expected
+
 ## [4.0.28] - 2023-10-27
 ### Added
 - Addedm missing migration file for LOG model
