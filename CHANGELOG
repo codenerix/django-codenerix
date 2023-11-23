@@ -6,9 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.31] - 2023-11-23
+### Fixed
+- GenLog, corrected a bug that prevented data gathering from related fields when deleting an object.
+
+## [4.0.30] - 2023-11-10
+### Fixed
+- Bug that prevented forms from behaving as expected on invalid form fields
+
 ## [4.0.29] - 2023-11-07
 ### Fixed
-- important error on GenLog that prevent Log dependent models from saving data as expected
+- Important error on GenLog that prevent Log dependent models from saving data as expected
 
 ## [4.0.28] - 2023-10-27
 ### Added

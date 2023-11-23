@@ -309,7 +309,7 @@ def linkedinfo(element, info_input={}):
     info.update(info_input)
 
     ngmodel = element.html_name  # field.widget.attrs['ng-model']
-    baseurl = (getattr(settings, "BASE_URL", ""),)
+    baseurl = getattr(settings, "BASE_URL", "")
     return mark_safe(
         f"'{baseurl}','{ngmodel}','{info['appname']}', "
         f"'{info['modelname'].lower()}s'",
@@ -350,7 +350,7 @@ def get_field_list(forms):
 @register.filter
 def invalidator(formname, inp):
     return mark_safe(
-        "{{'codenerix_invalid':"
+        "{'codenerix_invalid':"
         f"{smart_str(formname)}.{ngmodel(inp)}.$invalid}}",
     )
 

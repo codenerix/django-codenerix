@@ -138,7 +138,7 @@ djng_forms_module.directive('ngModel', function() {
                     restoreTextArea(modelCtrl, field);
                     break;
                 default:
-                    console.log('Unknown field type');
+                    // console.log('Unknown field type');
                     break;
             }
             // restore the form's pristine state

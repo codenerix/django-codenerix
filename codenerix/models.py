@@ -735,39 +735,40 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
                 else:
                     field = getattr(instance, key, None)
 
-                value = getattr(instance, ffield.name)
-                if isinstance(value, CodenerixModel):
-                    attrs[ffield.name] = value.pk
-                else:
-                    try:
-                        json.dump(value, default=json_util.default)
-                        attrs[ffield.name] = value
-                    except TypeError:
-                        # If related, we don't do anything
-                        if getattr(value, "all", None) is None:
-                            # value = str(value)
-                            value = smart_str(value)
-                            attrs[ffield.name] = value
-
-                if hasattr(ffield, "verbose_name"):
-                    try:
-                        is_string = isinstance(
-                            ffield.verbose_name,
-                            unicode,
-                        ) or isinstance(ffield.verbose_name, str)
-
-                    except NameError:
-                        is_string = isinstance(ffield.verbose_name, str)
-
-                    if is_string:
-                        ffield_verbose_name = ffield.verbose_name
+                # If we have information to register
+                if field is not None:
+                    if isinstance(field, CodenerixModel):
+                        attrs[key] = field.pk
                     else:
-                        ffield_verbose_name = str(ffield.verbose_name)
+                        try:
+                            json.dump(field, default=json_util.default)
+                            attrs[key] = field
+                        except TypeError:
+                            # If related, we don't do anything
+                            if getattr(field, "all", None) is None:
+                                # field_str = str(field)
+                                field_str = smart_str(field)
+                                attrs[key] = field_str
 
-                    attrs_txt[ffield_verbose_name] = force_str(
-                        field,
-                        errors="replace",
-                    )
+                    if hasattr(ffield, "verbose_name"):
+                        try:
+                            is_string = isinstance(
+                                ffield.verbose_name,
+                                unicode,
+                            ) or isinstance(ffield.verbose_name, str)
+
+                        except NameError:
+                            is_string = isinstance(ffield.verbose_name, str)
+
+                        if is_string:
+                            ffield_verbose_name = ffield.verbose_name
+                        else:
+                            ffield_verbose_name = str(ffield.verbose_name)
+
+                        attrs_txt[ffield_verbose_name] = force_str(
+                            field,
+                            errors="replace",
+                        )
 
             log = Log()
             log.user_id = user_id
