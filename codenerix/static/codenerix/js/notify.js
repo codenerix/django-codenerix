@@ -58,7 +58,9 @@ angular
         [
             '$resource',
             function($resource) {
-                return $resource('/userbehaviour/', null, {
+                // WARNING: Space is needed at the end of the URL to prevent
+                // AngularJS from removing it
+                return $resource('/userbehaviour/ ', null, {
                     register: {
                                method: 'POST',
                                data: '@absurl',

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.33] - 2023-11-23
+### Fixed
+- On UserBehaviour it prevents Angular JS from removing the last slash on URL
+
 ## [4.0.32] - 2023-11-23
 ### Added
 - Add support for UserBehaviour automatic logger, that logs into the server the actual Location of the user to /userbehaviour (documentation can be found at /codenerix/static/codenerix/js/notify.js). This funtionality is enabled only if cnf_user_behaviour is set to true in JS environment.
