@@ -125,17 +125,18 @@ angular
 
                 // Check if user behaviour is configured
                 try {
-                    var user_behaviour = cnf_user_behaviour == true;
+                    var user_behaviour_uuid = cnf_user_behaviour_uuid;
                 } catch (e) {
                     // Not configured, set to disabled
-                    var user_behaviour = false;
+                    var user_behaviour_uuid = null;
                 }
 
                 // Check if user behaviour is enabled
-                if (user_behaviour) {
+                if (user_behaviour_uuid) {
                     // User behaviour
                     UserBehaviour.register({
                         // === Absolute URL ===
+                        'uuid': user_behaviour_uuid,
                         // Full URL representation with all segments encoded
                         // according to rules specified in RFC 3986. Given URL:
                         // http://example.com/#/some/path?foo=bar&baz=xoxo
