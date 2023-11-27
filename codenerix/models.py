@@ -183,6 +183,15 @@ class CodenerixModel(CodenerixModelBase):
     def lock_update(self, request=None):
         return None
 
+    @property
+    def codenerix_uuid(self):
+        return self.__codenerix_uuid
+
+    @codenerix_uuid.setter
+    def codenerix_uuid(self, uuid):
+        self.__codenerix_uuid = uuid
+        return uuid
+
     def internal_lock_delete(self):
         # if we have a specific lock delete from model
         answer = self.lock_delete()
@@ -216,8 +225,9 @@ class CodenerixModel(CodenerixModelBase):
 
     # check lock update
     def clean(self):
-        if self.lock_update() is not None:
-            raise ValidationError(self.lock_update())
+        locked = self.lock_update()
+        if locked is not None:
+            raise ValidationError(locked)
         else:
             return super().clean()
 

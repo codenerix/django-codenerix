@@ -17,6 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from uuid import uuid4
+
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -29,8 +31,8 @@ def codenerix(request):
     Codenerix CONTEXT
     """
     # Get values
-    DEBUG = getattr(settings, "DEBUG", False)
-    VERSION = getattr(
+    DEBUG = getattr(settings, "DEBUG", False)  # noqa: N806
+    VERSION = getattr(  # noqa: N806
         settings,
         "VERSION",
         _(
@@ -44,6 +46,7 @@ def codenerix(request):
         "DEBUG": DEBUG,
         "VERSION": VERSION,
         "CODENERIX_VERSION": __version__,
+        "CODENERIX_UUID": str(uuid4()),
     }
 
 
@@ -51,19 +54,38 @@ def codenerix_js(request):
     cnf = {}
 
     # Get values
-    CONNECTION_ERROR = getattr(settings, "CONNECTION_ERROR", None)
-    ALARMS_LOOPTIME = getattr(settings, "ALARMS_LOOPTIME", None)
-    ALARMS_QUICKLOOP = getattr(settings, "ALARMS_QUICKLOOP", None)
-    ALARMS_ERRORLOOP = getattr(settings, "ALARMS_ERRORLOOP", None)
-    DEBUG = getattr(settings, "DEBUG", False)
-    DATERANGEPICKER_OPTIONS = getattr(
+    CONNECTION_ERROR = getattr(  # noqa: N806
+        settings,
+        "CONNECTION_ERROR",
+        None,
+    )
+    USER_BEHAVIOUR = getattr(settings, "USER_BEHAVIOUR", None)  # noqa: N806
+    ALARMS_LOOPTIME = getattr(settings, "ALARMS_LOOPTIME", None)  # noqa: N806
+    ALARMS_QUICKLOOP = getattr(  # noqa: N806
+        settings,
+        "ALARMS_QUICKLOOP",
+        None,
+    )
+    ALARMS_ERRORLOOP = getattr(  # noqa: N806
+        settings,
+        "ALARMS_ERRORLOOP",
+        None,
+    )
+    DEBUG = getattr(settings, "DEBUG", False)  # noqa: N806
+    DATERANGEPICKER_OPTIONS = getattr(  # noqa: N806
         settings,
         "DATERANGEPICKER_OPTIONS",
         None,
     )
-    DATETIME_RANGE_FORMAT = getattr(settings, "DATETIME_RANGE_FORMAT", None)
+    DATETIME_RANGE_FORMAT = getattr(  # noqa: N806
+        settings,
+        "DATETIME_RANGE_FORMAT",
+        None,
+    )
 
     # Set values
+    if USER_BEHAVIOUR is not None:
+        cnf["user_behaviour"] = USER_BEHAVIOUR is True
     if CONNECTION_ERROR is not None:
         cnf["connection_error"] = CONNECTION_ERROR
     if ALARMS_LOOPTIME is not None:

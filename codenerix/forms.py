@@ -37,6 +37,7 @@ class BaseForm:
     def __init__(self, *args, **kwargs):
         self.__language = None
         self.attributes = {}
+        self.__codenerix_uuid = None
         return super().__init__(*args, **kwargs)
 
     def set_language(self, language):
@@ -111,6 +112,15 @@ class BaseForm:
 
     def __groups__(self):
         return []
+
+    @property
+    def codenerix_uuid(self):
+        return self.__codenerix_uuid
+
+    @codenerix_uuid.setter
+    def codenerix_uuid(self, uuid):
+        self.__codenerix_uuid = uuid
+        return uuid
 
     def get_groups(self, gs=None, processed=[], initial=True):
         """

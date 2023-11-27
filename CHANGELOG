@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.35] - 2023-11-27
+### Added
+- Support for CODENERIX UUID on submirts
+- Passes through CODENERIX UUID to views, forms and models
+### Changed
+- The way that UserBehaviour is logged, now it uses CODENERIX UUID instead of a generic UUID
+- Windows focus is also sent as an UserBehaviour variable
+
 ## [4.0.34] - 2023-11-24
 ### Fixed
 - Added UUID field to UserBehaviour

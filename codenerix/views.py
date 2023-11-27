@@ -3827,7 +3827,17 @@ class GenModify:
     """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
+        self.__codenerix_uuid = None
         return super().__init__(*args, **kwargs)
+
+    @property
+    def codenerix_uuid(self):
+        return self.__codenerix_uuid
+
+    @codenerix_uuid.setter
+    def codenerix_uuid(self, uuid):
+        self.__codenerix_uuid = uuid
+        return uuid
 
     def dispatch(self, *args, **kwargs):
         """
@@ -3845,6 +3855,9 @@ class GenModify:
             or bool(self.request.GET.get("force_rest_api", False))
         )
         self.__authtoken = bool(getattr(self.request, "authtoken", False))
+
+        # Get request UUID if available in headers
+        self.codenerix_uuid = self.request.headers.get("Codenerix-Uuid", None)
 
         # Check if this is an AJAX request
         if (
@@ -3939,6 +3952,11 @@ class GenModify:
             ] = urlsafe_base64_encode(str.encode(json.dumps(attr)))
         # Let the system decide next step
         return super().get_success_url()
+
+    def get_object(self, *args, **kwargs):
+        obj = super().get_object(*args, **kwargs)
+        obj.codenerix_uuid = self.__codenerix_uuid
+        return obj
 
     def get_context_data(self, **kwargs):
         # Get actual context
@@ -4268,6 +4286,9 @@ class GenModify:
         Set form groups to the groups specified in the view if defined
         """
         formobj = super().get_form(form_class)
+
+        # Set uuid into the form object
+        formobj.codenerix_uuid = self.codenerix_uuid
 
         # Set requested group to this form
         selfgroups = getattr(self, "form_groups", None)

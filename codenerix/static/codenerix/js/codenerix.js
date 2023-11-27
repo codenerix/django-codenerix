@@ -936,8 +936,16 @@ function formsubmit(
     next,
     kind) {
     if (form.$dirty && form.$valid) {
+        // Check if codenerix uuid is configure
+        try {
+            var uuid = codenerix_uuid;
+            // console.log('CODENERIX UUID detected: ' + uuid);
+        } catch (e) {
+            var uuid = null;
+            // console.log('NO CODENERIX UUID detected');
+        }
         // Build in data
-        var in_data = {};
+        var in_data = {'codenerix_uuid': uuid};
         var form_name = form.$name;
 
         angular.forEach($scope.field_list, function(field) {
@@ -986,10 +994,10 @@ function formsubmit(
         $http
             .post(url, in_data, {
                 headers: {
-                    'Content-Type':
-                        'application/x-www-form-urlencoded; charset=UTF-8'
-                }
-            })
+                          'Content-Type':
+                        'application/x-www-form-urlencoded; charset=UTF-8', 'Codenerix-Uuid': uuid,
+                          }
+        })
             .success(function(answer, stat) {
                 // If the request was accepted
                 if (stat == 202) {

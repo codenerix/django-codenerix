@@ -123,44 +123,59 @@ angular
                 //
                 //
 
-                // Check if user behaviour is configured
+                // Get UUID (user may didn't configure it)
                 try {
-                    var user_behaviour_uuid = cnf_user_behaviour_uuid;
+                    var uuid = codenerix_uuid;
                 } catch (e) {
                     // Not configured, set to disabled
-                    var user_behaviour_uuid = null;
+                    var uuid = null;
                 }
 
-                // Check if user behaviour is enabled
-                if (user_behaviour_uuid) {
-                    // User behaviour
-                    UserBehaviour.register({
-                        // === Absolute URL ===
-                        'uuid': user_behaviour_uuid,
-                        // Full URL representation with all segments encoded
-                        // according to rules specified in RFC 3986. Given URL:
-                        // http://example.com/#/some/path?foo=bar&baz=xoxo
-                        // => "http://example.com/#/some/path?foo=bar&baz=xoxo"
-                        'absurl': $location.$$absUrl,
-                        //
-                        // === URL ===
-                        // URL (e.g. /path?a=b#hash) when called without
-                        // any parameter. Given URL:
-                        // http://example.com/#/some/path?foo=bar&baz=xoxo
-                        // => "/some/path?foo=bar&baz=xoxo"
-                        'url': $location.$$url,
-                        //
-                        // === Path ===
-                        // Path called without any parameter given URL:
-                        // http://example.com/#/some/path?foo=bar&baz=xoxo
-                        // => "/some/path"
-                        'path': $location.$$path,
-                        //
-                        // === Server information ===
-                        'protocol': $location.$$protocol,  // Protocol
-                        'host': $location.$$host,          // Host
-                        'port': $location.$$port,          // Port
-                    });
+                // Check if we have an UUID
+                if (uuid) {
+                    // Check if user behaviour is configured
+                    try {
+                        var user_behaviour = cnf_user_behaviour;
+                    } catch (e) {
+                        // Not configured, set to disabled
+                        var user_behaviour = null;
+                    }
+
+                    // Check if user behaviour is enabled
+                    if (user_behaviour && uuid) {
+                        // Register behaviour
+                        UserBehaviour.register({
+                            // === Absolute URL ===
+                            'uuid': uuid,
+                            // Full URL representation with all segments encoded
+                            // according to rules specified in RFC 3986. Given
+                            // URL:
+                            // http://example.com/#/some/path?foo=bar&baz=xoxo
+                            // =>
+                            // "http://example.com/#/some/path?foo=bar&baz=xoxo"
+                            'absurl': $location.$$absUrl,
+                            //
+                            // === URL ===
+                            // URL (e.g. /path?a=b#hash) when called without
+                            // any parameter. Given URL:
+                            // http://example.com/#/some/path?foo=bar&baz=xoxo
+                            // => "/some/path?foo=bar&baz=xoxo"
+                            'url': $location.$$url,
+                            //
+                            // === Path ===
+                            // Path called without any parameter given URL:
+                            // http://example.com/#/some/path?foo=bar&baz=xoxo
+                            // => "/some/path"
+                            'path': $location.$$path,
+                            //
+                            // === Server information ===
+                            'protocol': $location.$$protocol,  // Protocol
+                            'host': $location.$$host,          // Host
+                            'port': $location.$$port,          // Port
+                            // === Behaviour ===
+                            'withfocus': withfocus,  // Focus
+                        });
+                    }
                 }
 
                 // Notifications
