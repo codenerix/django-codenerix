@@ -38,6 +38,7 @@ class BaseForm:
         self.__language = None
         self.attributes = {}
         self.__codenerix_uuid = None
+        self.__codenerix_request = None
         return super().__init__(*args, **kwargs)
 
     def set_language(self, language):
@@ -121,6 +122,15 @@ class BaseForm:
     def codenerix_uuid(self, uuid):
         self.__codenerix_uuid = uuid
         return uuid
+
+    @property
+    def codenerix_request(self):
+        return self.__codenerix_request
+
+    @codenerix_request.setter
+    def codenerix_request(self, request):
+        self.__codenerix_request = request
+        return request
 
     def get_groups(self, gs=None, processed=[], initial=True):
         """
@@ -781,6 +791,15 @@ class GenModelForm(
     NgFormValidationMixin,
     NgModelForm,
 ):
+    def save(self, *args, **kwargs):
+        # Prepare the instance
+        self.instance.codenerix_uuid = self.codenerix_uuid
+        self.instance.codenerix_request = self.codenerix_request
+        # Save the object
+        obj = super().save(*args, **kwargs)
+        # Return the object
+        return obj
+
     pass
 
 

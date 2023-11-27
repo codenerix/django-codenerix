@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.36] - 2023-11-27
+### Added
+- Enabled access to request object in Forms and Models in addition to Views (Djanog) using self.codenerix_request
+### Changed
+- CODENERIX UUID is now accesible by self.codenerix_uuid in Views, Forms and Models
+
 ## [4.0.35] - 2023-11-27
 ### Added
 - Support for CODENERIX UUID on submirts

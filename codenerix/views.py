@@ -3828,6 +3828,7 @@ class GenModify:
 
     def __init__(self, *args, **kwargs):
         self.__codenerix_uuid = None
+        self.__codenerix_request = None
         return super().__init__(*args, **kwargs)
 
     @property
@@ -3838,6 +3839,15 @@ class GenModify:
     def codenerix_uuid(self, uuid):
         self.__codenerix_uuid = uuid
         return uuid
+
+    @property
+    def codenerix_request(self):
+        return self.__codenerix_request
+
+    @codenerix_request.setter
+    def codenerix_request(self, request):
+        self.__codenerix_request = request
+        return request
 
     def dispatch(self, *args, **kwargs):
         """
@@ -3856,7 +3866,10 @@ class GenModify:
         )
         self.__authtoken = bool(getattr(self.request, "authtoken", False))
 
-        # Get request UUID if available in headers
+        # Remember Request
+        self.codenerix_request = self.request
+
+        # Get CODENERIX UUID if available in headers
         self.codenerix_uuid = self.request.headers.get("Codenerix-Uuid", None)
 
         # Check if this is an AJAX request
@@ -3956,6 +3969,7 @@ class GenModify:
     def get_object(self, *args, **kwargs):
         obj = super().get_object(*args, **kwargs)
         obj.codenerix_uuid = self.__codenerix_uuid
+        obj.codenerix_request = self.__codenerix_request
         return obj
 
     def get_context_data(self, **kwargs):
@@ -4289,6 +4303,7 @@ class GenModify:
 
         # Set uuid into the form object
         formobj.codenerix_uuid = self.codenerix_uuid
+        formobj.codenerix_request = self.codenerix_request
 
         # Set requested group to this form
         selfgroups = getattr(self, "form_groups", None)

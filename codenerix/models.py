@@ -160,6 +160,8 @@ class CodenerixModel(CodenerixModelBase):
 
     def __init__(self, *args, **kwards):
         self.CodenerixMeta = CodenerixMetaType()
+        self.codenerix_uuid = None
+        self.codenerix_request = None
         return super().__init__(*args, **kwards)
 
     def __strlog_add__(self):
@@ -191,6 +193,15 @@ class CodenerixModel(CodenerixModelBase):
     def codenerix_uuid(self, uuid):
         self.__codenerix_uuid = uuid
         return uuid
+
+    @property
+    def codenerix_request(self):
+        return self.__codenerix_request
+
+    @codenerix_request.setter
+    def codenerix_request(self, request):
+        self.__codenerix_request = request
+        return request
 
     def internal_lock_delete(self):
         # if we have a specific lock delete from model
