@@ -4,13 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+<!-- towncrier release notes start -->
+
+## [4.0.36] - 2023-11-30
+### Features
+ - Added support for towncrier
+
 
 ## [4.0.36] - 2023-11-27
 ### Added
 - Enabled access to request object in Forms and Models in addition to Views (Djanog) using self.codenerix_request
 ### Changed
 - CODENERIX UUID is now accesible by self.codenerix_uuid in Views, Forms and Models
+
 
 ## [4.0.35] - 2023-11-27
 ### Added
@@ -20,29 +26,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The way that UserBehaviour is logged, now it uses CODENERIX UUID instead of a generic UUID
 - Windows focus is also sent as an UserBehaviour variable
 
+
 ## [4.0.34] - 2023-11-24
 ### Fixed
 - Added UUID field to UserBehaviour
+
 
 ## [4.0.33] - 2023-11-23
 ### Fixed
 - On UserBehaviour it prevents Angular JS from removing the last slash on URL
 
+
 ## [4.0.32] - 2023-11-23
 ### Added
 - Add support for UserBehaviour automatic logger, that logs into the server the actual Location of the user to /userbehaviour (documentation can be found at /codenerix/static/codenerix/js/notify.js). This funtionality is enabled only if cnf_user_behaviour is set to true in JS environment.
+
 
 ## [4.0.31] - 2023-11-23
 ### Fixed
 - GenLog, corrected a bug that prevented data gathering from related fields when deleting an object.
 
+
 ## [4.0.30] - 2023-11-10
 ### Fixed
 - Bug that prevented forms from behaving as expected on invalid form fields
 
+
 ## [4.0.29] - 2023-11-07
 ### Fixed
 - Important error on GenLog that prevent Log dependent models from saving data as expected
+
 
 ## [4.0.28] - 2023-10-27
 ### Added
@@ -51,9 +64,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed some bugs in management commands
 
+
 ## [4.0.27] - 2023-10-27
 ### Fixed
 - multiform have renamed their form_valid() and form_invalid() methods to multiform_valid() and multiform_invalid()
+
 
 ## [4.0.26] - 2023-10-27
 ### Added
@@ -65,90 +80,111 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Several bugs repaired
 
+
 ## [4.0.25] - 2023-10-23
 ### Added
 - Added new feature to GenModify to enable 'return_invalid_json' that will make the form to return a 409 Conflict HTTP ERROR with a json including invalid fields and the reason why they are invalid.
 - Support for data injection from views into Angular forms
 - Few of PEP8
 
+
 ## [4.0.24] - 2023-05-12
 ### Fixed
 - PEP8 refactoring and a quick mypy type revision
 - Skipped version 4.0.23
 
+
 ## [4.0.22] - 2023-02-23
 ### Fixed
 - Improved genmail to support better SSL and clean_memcache changed to clean_caches and now it supports cleaning several cache entries in configuration using settings.CACHES
+
 
 ## [4.0.21] - 2023-02-21
 ### Fixed
 - Memcache CMD correction
 
+
 ## [4.0.20] - 2023-01-26
 ### Fixed
 - Support for Pyinstruments added
+
 
 ## [4.0.19] - 2022-11-09
 ### Fixed
 - meunify upgraded for URLs since _ is not recommended on SEO, it will be replaced with -
 
+
 ## [4.0.18] - 2022-11-07
 ### Fixed
 - Resolved bug "AttributeError: type object 'Meta' has no attribute 'extend'"
+
 
 ## [4.0.17] - 2022-10-27
 ### Added
 - Extend system on forms
 - Translations
 
+
 ## [4.0.16] - 2022-10-21
 ### Fixed
 - Resolved bug "type object 'Meta' has no attribute 'widgets'"
+
 
 ## [4.0.15] - 2022-10-21
 ### Added
 - CODENERIX will respect the widgets added by the user in the Meta section of the forms
 
+
 ## [4.0.14] - 2022-09-12
 ### Fixed
 - On forms resolves "'EmailValidator' object has no attribute 'domain_whitelist'" which is deprectated on Django >= 4.0.6
 
+
 ## [4.0.13] - 2022-09-12
 ### Fixed
 - On GenList frontend, it prevents empty cells when rendering columns which renders lists with duplicated entries
+
 
 ## [4.0.12] - 2022-08-16
 ### Added
 - Added support on DynamicSelects to allow Angular JS query the selected element details
 - Style cleanup on widgets.py
 
+
 ## [4.0.11] - 2022-07-14
 ### Fixed
 - Added missing dependency over codenerix_lib package
+
 
 ## [4.0.10] - 2022-07-11
 ### Changed
 - Push all sites to prevent BUG CVE-2022-34265: SQL injection on Trunc() and Extract()
 
+
 ## [4.0.9] - 2022-06-18
 ### Changed
 - Dependency system simplified for setup.py and restricted to Django>=4.0.1 (Python 2.x not supported anymore)
+
 
 ## [4.0.8] - 2022-06-18
 ### Fixed
 - Repaired GenForm that was preventing rendering of forms on specific situations
 
+
 ## [4.0.7] - 2022-06-18
 ### Fixed
 - "authjson_details" is using DjangoJSONEncoder for json.dumps(), which prevents authjson_details from failing on newer Django.
+
 
 ## [4.0.6] - 2022-06-13
 ### Changed
 - AUTHENTICATION_DEBUG improved debugging output
 
+
 ## [4.0.5] - 2022-06-12
 ###  Added
 - Support for AUTHENTICATION_DEBUG in config which helps debugging Authentication problems
+
 
 ## [4.0.4] - 2022-05-27
 ### Changed
@@ -158,9 +194,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - New templatetags in codenerix_special library for templates: static64, media64 and file64 to serve files from disk as base64 text. Intended to embed binary data in templates.
 
+
 ## [4.0.2] - 2022-05-18
 ### Added
 - Added missing folder in last published version in pypy
+
 
 ## [4.0.1] - 2022-05-17
 ### Added

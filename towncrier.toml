@@ -1,0 +1,7 @@
+[tool.towncrier]
+filename = "CHANGELOG"
+directory = "newsfragments/"
+package = "_codenerix"  # It will avoid reading the installed package
+underlines = ["", "", ""]
+start_string = "<!-- towncrier release notes start -->\n"
+template = "towncrier.md"
