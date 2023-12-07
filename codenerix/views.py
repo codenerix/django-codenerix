@@ -943,7 +943,11 @@ class GenBase:
             if myurl:
                 myurl = myurl.split("?")[0]
             mydetailsurl = "{}/0".format(myurl)
-            mydetailsclss = get_class(resolve(mydetailsurl).func)
+            try:
+                mydetailsclss = get_class(resolve(mydetailsurl).func)
+            except Http404:
+                logger.error(f"URL {mydetailsurl} not found!")
+                mydetailsclss = self
         else:
             mydetailsclss = self
 
@@ -953,9 +957,14 @@ class GenBase:
             if js:
                 for tab in mydetailsextra.get("tabs", []):
                     # Get destination LIST class
-                    tabdetailsclss = get_class(
-                        resolve(reverse(tab["ws"], kwargs={"pk": 0})).func,
-                    )
+                    try:
+                        tabdetailsclss = get_class(
+                            resolve(reverse(tab["ws"], kwargs={"pk": 0})).func,
+                        )
+                    except Http404:
+                        msg = (f"URL {tab['ws']} not found!",)
+                        logger.error(msg)
+                        raise OSError(msg)
 
                     # Build the sublist tab
                     tabfinal = tab.copy()

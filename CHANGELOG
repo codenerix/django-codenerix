@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.38] - 2023-12-07
+### Bugfixes
+ - Prevent GenList from raising a Http404 error when the DetailView is not found.
+
+
 ## [4.0.37] - 2023-12-07
 ### Features
  - Improved permission system to provide better information when a user is denied access to a resource.
