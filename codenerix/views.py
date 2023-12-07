@@ -4708,10 +4708,17 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                         if related:
                             value = ", ".join([str(x) for x in value.all()])
                         else:
-                            if "request" in value.__code__.co_varnames:
-                                args["request"] = self.request
-                                # Call the method
-                            value = value(**args)
+                            if hasattr(value, "__code__"):
+                                # Functions with arguments used for custom
+                                # functions as a field
+                                if "request" in value.__code__.co_varnames:
+                                    args["request"] = self.request
+                                    # Call the method
+                                value = value(**args)
+                            else:
+                                # Functions without arguments used
+                                # for get_XXXX_display() mostly
+                                value = value()
 
                     sublist.append(
                         {

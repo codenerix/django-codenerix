@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.39] - 2023-12-07
+### Bugfixes
+ - Allow detail view to show functions as a fields when the function is not a custom function from the user that has a first argument as a request. This is commonly used for get_XXXXX_display() functions.
+
+
 ## [4.0.38] - 2023-12-07
 ### Bugfixes
  - Prevent GenList from raising a Http404 error when the DetailView is not found.
