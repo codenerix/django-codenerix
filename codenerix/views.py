@@ -26,6 +26,7 @@ import calendar
 import datetime
 import hashlib
 import json
+import logging
 
 # System
 import os
@@ -48,6 +49,7 @@ from django.core.exceptions import (
     FieldDoesNotExist,
     FieldError,
     ImproperlyConfigured,
+    PermissionDenied,
     ValidationError,
 )
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -101,6 +103,8 @@ from codenerix.templatetags.codenerix_lists import unlist
 # Import only when defined by the user and there is something we can work with
 if getattr(settings, "HAYSTACK_CONNECTIONS", None):
     from haystack.query import SearchQuerySet  # type: ignore
+
+logger = logging.getLogger(__name__)
 
 
 def status(request, status, answer):
@@ -686,34 +690,39 @@ class GenBase:
         # Check if user is_admin is required
         if hasattr(self, "must_be_superuser") and self.must_be_superuser:
             if not self.request.user.is_superuser:
-                redir = redirect("not_authorized")
                 if getattr(settings, "DEBUG", False):
-                    redir["NotAuthorizedReason"] = _(
+                    msg = _(
                         "The view/model definition requires, that this "
                         "user must be a superuser",
                     )
-                return redir
+                    logger.error(msg)
+                    raise PermissionDenied(msg)
+                else:
+                    return redirect("not_authorized")
 
         # Check if user is_staff is required
         if hasattr(self, "must_be_staff") and self.must_be_staff:
             if not self.request.user.is_staff:
-                redir = redirect("not_authorized")
                 if getattr(settings, "DEBUG", False):
-                    redir["NotAuthorizedReason"] = _(
+                    msg = _(
                         "The view/model definition requires, that this "
                         "user must be from staff",
                     )
-                return redir
+                    logger.error(msg)
+                    raise PermissionDenied(msg)
+                else:
+                    return redirect("not_authorized")
 
         (authorized, reason) = self.auth_permission(
             self.action_permission,
             explained=True,
         )
         if not authorized:
-            redir = redirect("not_authorized")
             if getattr(settings, "DEBUG", False):
-                redir["NotAuthorizedReason"] = reason
-            return redir
+                logger.error(reason)
+                raise PermissionDenied(reason)
+            else:
+                return redirect("not_authorized")
 
         # Keep going with dispatch
         return super().dispatch(*args, **kwargs)
@@ -1287,10 +1296,12 @@ class GenList(GenBase, ListView):  # type: ignore
         must_be_staff = True                        # If True it will request to be from staff
 
         permission = 'permission1'                  # Allowed only if user has permission1
+        permission = 'peope.list_person'            # Example
         permission = ['perm2', 'perm3', ... ]       # Allowed only if user has perm2 or perm3
 
-        permission_group = 'permission1'            # Allowed only if user group has permission1
-        permission_group = ['perm2', 'perm3', ... ] # Allowed only if user group has perm2 or perm3
+        permission_group = 'group1'                 # Allowed only if user belongs to group1
+        permission_group = 'Administrator'          # Example
+        permission_group = ['group2', 'group3', ... ] # Allowed only if user belongs to group2 or group3
 
         user = <User Instance>                      # User object that GenView will use for all the process (except permissions checks)
 
