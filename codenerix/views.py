@@ -451,159 +451,168 @@ def gen_auth_permission(
         # Checking authorization, initialize auth
         auth = False
 
-        # Rename action_permission for special case (detail -> view)
-        if action_permission == "detail":
-            action_permission = "view"
+        # If the user is a superuser
+        if user.is_superuser:
+            # The user is authorized
+            auth = True
 
-        # Set specific permission
-        specific_permission = "{}_{}".format(action_permission, model_name)
-        app_specific_permission = "{}.{}_{}".format(
-            appname,
-            action_permission,
-            model_name,
-        )
-
-        # Calculate hash
-        # YES HAS PERMS:
-        #   1_flights_pilot_add_list_pilots
-        #   1_flights_pilot_add_list_pilotslist_planes
-        # NO DOESN'T HAVE PERMS:
-        #   1_flights_pilot_add
-        hash_key = hashlib.sha1(
-            settings.SECRET_KEY.encode(),
-            usedforsecurity=False,
-        ).hexdigest()
-        cache_key = "{}_{}_{}_{}_{}_".format(
-            hash_key,
-            user.pk,
-            appname,
-            model_name,
-            action_permission,
-        )
-
-        if permission:
-            if isinstance(permission, str):
-                cache_key += "".join(permission)
-                permission = [permission]
-            elif isinstance(permission, list):
-                cache_key += "".join(permission)
-            else:
-                raise ImproperlyConfigured(
-                    "Model {1} inside app {0} is wrong configured for "
-                    "attribute 'permission'".format(appname, model_name),
-                )
         else:
-            permission = []
+            # Rename action_permission for special case (detail -> view)
+            if action_permission == "detail":
+                action_permission = "view"
 
-        if permission_group:
-            cache_key += "_"
-            if isinstance(permission_group, str):
-                cache_key += permission_group
-                permission_group = [permission_group]
-            elif isinstance(permission_group, list):
-                cache_key += "".join(permission_group)
-            else:
-                raise ImproperlyConfigured(
-                    "Model {1} inside app {0} is wrong configured for "
-                    "attribute 'permission_group'".format(appname, model_name),
-                )
-        else:
-            permission_group = []
-
-        # Look for the key in cache
-        hash_key = hashlib.sha1(
-            cache_key.encode(),
-            usedforsecurity=False,
-        ).hexdigest()
-        result = cache.get(hash_key)
-
-        # If I found it in cache
-        if result is not None:
-            # Get result from cache
-            auth = result
-            reason = "Found in cache! (KEY:{} - HASH:{})".format(
-                cache_key,
-                hash_key,
+            # Set specific permission
+            specific_permission = "{}_{}".format(action_permission, model_name)
+            app_specific_permission = "{}.{}_{}".format(
+                appname,
+                action_permission,
+                model_name,
             )
-        else:
-            # Check if some authorization system was set
-            if permission or permission_group:
-                # Check if the user is in an authorized group
-                if permission_group:
-                    auth = user.groups.filter(
-                        name__in=permission_group,
-                    ).exists()
 
-                # If we couldn't authorize yet, check unitary permissions
-                if not auth and permission:
-                    # Check all permissions set in the class
-                    for perm in permission:
-                        # Check if user has permission
-                        if user.has_perm(perm):
-                            # The permission is authorized
-                            auth = True
-                            break
+            # Calculate hash
+            # YES HAS PERMS:
+            #   1_flights_pilot_add_list_pilots
+            #   1_flights_pilot_add_list_pilotslist_planes
+            # NO DOESN'T HAVE PERMS:
+            #   1_flights_pilot_add
+            hash_key = hashlib.sha1(
+                settings.SECRET_KEY.encode(),
+                usedforsecurity=False,
+            ).hexdigest()
+            cache_key = "{}_{}_{}_{}_{}_".format(
+                hash_key,
+                user.pk,
+                appname,
+                model_name,
+                action_permission,
+            )
 
-                    # If not authorized yet, check unitary permissions inside
-                    # groups
-                    if not auth:
-                        # Get the list of gropus for this user
-                        group_user = user.groups.all()
+            if permission:
+                if isinstance(permission, str):
+                    cache_key += "".join(permission)
+                    permission = [permission]
+                elif isinstance(permission, list):
+                    cache_key += "".join(permission)
+                else:
+                    raise ImproperlyConfigured(
+                        "Model {1} inside app {0} is wrong configured for "
+                        "attribute 'permission'".format(appname, model_name),
+                    )
+            else:
+                permission = []
 
-                        # For each permission
+            if permission_group:
+                cache_key += "_"
+                if isinstance(permission_group, str):
+                    cache_key += permission_group
+                    permission_group = [permission_group]
+                elif isinstance(permission_group, list):
+                    cache_key += "".join(permission_group)
+                else:
+                    raise ImproperlyConfigured(
+                        "Model {1} inside app {0} is wrong configured for "
+                        "attribute 'permission_group'".format(
+                            appname,
+                            model_name,
+                        ),
+                    )
+            else:
+                permission_group = []
+
+            # Look for the key in cache
+            hash_key = hashlib.sha1(
+                cache_key.encode(),
+                usedforsecurity=False,
+            ).hexdigest()
+            result = cache.get(hash_key)
+
+            # If I found it in cache
+            if result is not None:
+                # Get result from cache
+                auth = result
+                reason = "Found in cache! (KEY:{} - HASH:{})".format(
+                    cache_key,
+                    hash_key,
+                )
+            else:
+                # Check if some authorization system was set
+                if permission or permission_group:
+                    # Check if the user is in an authorized group
+                    if permission_group:
+                        auth = user.groups.filter(
+                            name__in=permission_group,
+                        ).exists()
+
+                    # If we couldn't authorize yet, check unitary permissions
+                    if not auth and permission:
+                        # Check all permissions set in the class
                         for perm in permission:
-                            # For each group
-                            for group in group_user:
-                                # Check if the permission is authorized in
-                                # the group
-                                if group.permissions.filter(
-                                    codename=perm,
-                                ).exists():
-                                    # The permission is authorized
-                                    auth = True
-                                    break
-
-                            # If already authorized, leave the bucle
-                            if auth:
+                            # Check if user has permission
+                            if user.has_perm(perm):
+                                # The permission is authorized
+                                auth = True
                                 break
 
-                    if not auth:
-                        reason = (
-                            "Not authorized for: permissions: {} - "
-                            "permission group: {}".format(
-                                ",".join(permission),
-                                ",".join(permission_group),
+                        # If not authorized yet, check unitary permissions
+                        # inside groups
+                        if not auth:
+                            # Get the list of gropus for this user
+                            group_user = user.groups.all()
+
+                            # For each permission
+                            for perm in permission:
+                                # For each group
+                                for group in group_user:
+                                    # Check if the permission is authorized in
+                                    # the group
+                                    if group.permissions.filter(
+                                        codename=perm,
+                                    ).exists():
+                                        # The permission is authorized
+                                        auth = True
+                                        break
+
+                                # If already authorized, leave the bucle
+                                if auth:
+                                    break
+
+                        if not auth:
+                            reason = (
+                                "Not authorized for: permissions: {} - "
+                                "permission group: {}".format(
+                                    ",".join(permission),
+                                    ",".join(permission_group),
+                                )
                             )
-                        )
 
-            else:
-                # If no other permission details was set in the class, use
-                # standar checks
-                if user.has_perm(specific_permission) or user.has_perm(
-                    app_specific_permission,
-                ):
-                    auth = True
                 else:
-                    for group in user.groups.all():
-                        if group.permissions.filter(
-                            codename=specific_permission,
-                        ).exists():
-                            auth = True
-                            break
-                        elif group.permissions.filter(
-                            codename=app_specific_permission,
-                        ).exists():
-                            auth = True
-                            break
+                    # If no other permission details was set in the class, use
+                    # standar checks
+                    if user.has_perm(specific_permission) or user.has_perm(
+                        app_specific_permission,
+                    ):
+                        auth = True
+                    else:
+                        for group in user.groups.all():
+                            if group.permissions.filter(
+                                codename=specific_permission,
+                            ).exists():
+                                auth = True
+                                break
+                            elif group.permissions.filter(
+                                codename=app_specific_permission,
+                            ).exists():
+                                auth = True
+                                break
 
-                    if not auth:
-                        reason = "Not authorized for {} or {}".format(
-                            specific_permission,
-                            app_specific_permission,
-                        )
+                        if not auth:
+                            reason = "Not authorized for {} or {}".format(
+                                specific_permission,
+                                app_specific_permission,
+                            )
 
-            # Set cache
-            getattr(cache, "set")(cache_key, auth)
+                # Set cache
+                getattr(cache, "set")(cache_key, auth)
 
     # Return result
     if not explained:
