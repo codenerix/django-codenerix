@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.43] - 2023-12-13
+### Features
+ - Added a new filter to support rounding of values in AngularJS templates (Usage: round:8 & codenerix:round:7)
+ - Translations to Spanish
+
+
+## [4.0.42] - 2023-12-13
+### Features
+ - Added SearchFAutoFilter to helper library so it makes quicker to build serachF filters
+
+
 ## [4.0.41] - 2023-12-12
 ### Bugfixes
  - Correction on permission system

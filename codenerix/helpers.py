@@ -714,3 +714,41 @@ def context_processors_update(context, request):
             if processor:
                 context.update(processor(request))
     return context
+
+
+class SearchFAutoFilter:
+    """
+    Class for helping buildin filters
+    """
+
+    @classmethod
+    def factory(cls, field, label):
+        return (
+            label,
+            cls.get_lambda(field),
+            cls.get_options(),
+        )
+
+    @classmethod
+    def get_options(cls):
+        return [
+            (f"{operation}{value}", label)
+            for (label, operation, value) in cls.options
+        ]
+
+    @classmethod
+    def get_lambda(cls, counterfield):
+        def filtercount(filtering):
+            filt = {counterfield: 0}
+            for label, operation, value in cls.options:
+                key = f"{operation}{value}"
+                if filtering == key:
+                    if operation is None:
+                        filt = {f"{counterfield}": value}
+                    else:
+                        filt = {f"{counterfield}__{operation}": value}
+                    break
+            print(filt)
+            return Q(**filt)
+
+        return filtercount
