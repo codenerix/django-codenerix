@@ -90,6 +90,7 @@ angular
             UserBehaviour) {
             $scope.onscreen = [];
             $scope.pubdata = {};
+            $scope.userbehaviour = {};
 
             // HIDE
             $scope.notify_hide = function(id, kind) {
@@ -144,37 +145,43 @@ angular
                     // Check if user behaviour is enabled
                     if (user_behaviour && uuid) {
                         // Register behaviour
-                        UserBehaviour.register({
-                            // === Absolute URL ===
-                            'uuid': uuid,
-                            // Full URL representation with all segments encoded
-                            // according to rules specified in RFC 3986. Given
-                            // URL:
-                            // http://example.com/#/some/path?foo=bar&baz=xoxo
-                            // =>
-                            // "http://example.com/#/some/path?foo=bar&baz=xoxo"
-                            'absurl': $location.$$absUrl,
-                            //
-                            // === URL ===
-                            // URL (e.g. /path?a=b#hash) when called without
-                            // any parameter. Given URL:
-                            // http://example.com/#/some/path?foo=bar&baz=xoxo
-                            // => "/some/path?foo=bar&baz=xoxo"
-                            'url': $location.$$url,
-                            //
-                            // === Path ===
-                            // Path called without any parameter given URL:
-                            // http://example.com/#/some/path?foo=bar&baz=xoxo
-                            // => "/some/path"
-                            'path': $location.$$path,
-                            //
-                            // === Server information ===
-                            'protocol': $location.$$protocol,  // Protocol
-                            'host': $location.$$host,          // Host
-                            'port': $location.$$port,          // Port
-                            // === Behaviour ===
-                            'withfocus': withfocus,  // Focus
-                        });
+                        $scope.udata = UserBehaviour.register(
+                            {
+                                // === Absolute URL ===
+                                'uuid': uuid,
+                                // Full URL representation with all segments
+                                // encoded
+                                // according to rules specified in RFC 3986.
+                                // Given
+                                // URL:
+                                // http://example.com/#/some/path?foo=bar&baz=xoxo
+                                // =>
+                                // "http://example.com/#/some/path?foo=bar&baz=xoxo"
+                                'absurl': $location.$$absUrl,
+                                //
+                                // === URL ===
+                                // URL (e.g. /path?a=b#hash) when called without
+                                // any parameter. Given URL:
+                                // http://example.com/#/some/path?foo=bar&baz=xoxo
+                                // => "/some/path?foo=bar&baz=xoxo"
+                                'url': $location.$$url,
+                                //
+                                // === Path ===
+                                // Path called without any parameter given URL:
+                                // http://example.com/#/some/path?foo=bar&baz=xoxo
+                                // => "/some/path"
+                                'path': $location.$$path,
+                                //
+                                // === Server information ===
+                                'protocol': $location.$$protocol,  // Protocol
+                                'host': $location.$$host,          // Host
+                                'port': $location.$$port,          // Port
+                                                           // === Behaviour ===
+                                'withfocus': withfocus,  // Focus
+                            },
+                            function() {
+                                $scope.userbehaviour = $scope.udata;
+                            });
                     }
                 }
 
