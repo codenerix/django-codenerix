@@ -177,10 +177,10 @@ def nameunify(name, url=False):
     return result
 
 
-def get_profile(user):
+def get_profile(user, admingroup="Admins"):
     # Check if it has admin rights admin
     try:
-        is_admin = bool(user.is_superuser or user.groups.get(name="Admins"))
+        is_admin = bool(user.is_superuser or user.groups.get(name=admingroup))
     except Exception:
         is_admin = False
 

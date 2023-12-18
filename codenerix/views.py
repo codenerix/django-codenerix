@@ -3483,8 +3483,10 @@ class GenList(GenBase, ListView):  # type: ignore
                     # para que aparezca la exception
                     value = getattr(o, head)
 
-                    # If value is None, return None
-                    if value is not None:
+                    # If value is None or a basic type, return as is
+                    if (value is not None) and (
+                        type(value) not in [int, bool, float]
+                    ):
                         # Analize if is related
                         related = getattr(value, "all", None) is not None
                         # Analize data type

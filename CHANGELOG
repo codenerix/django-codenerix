@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.46] - 2023-12-18
+### Features
+ - Added a new method decorator to control group access to a method.
+
+
+## [4.0.45] - 2023-12-15
+### Bugfixes
+ - Basic types where being converted to string during lists answer generation. Now int, float and bool won't be converted to string and they will be returned as they are.
+
+
 ## [4.0.44] - 2023-12-15
 ### Features
  - At AngularJS userbehaviour answer is copied to the $scope
