@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.47] - 2023-12-29
+### Features
+ - Class attributes 'codenerix_request' and 'codenerix_uuid' are now generally available in all classes that inherit from GenBase, GenList, GenCreate, GenUpdate, GenDelete, GenDetail, GenForeignKey, CodenerixModel, CodenerixForm & CodenerixModelForm
+
+
 ## [4.0.46] - 2023-12-18
 ### Features
  - Added a new method decorator to control group access to a method.
