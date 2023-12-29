@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-13 11:56+0100\n"
+"POT-Creation-Date: 2023-12-19 11:39+0100\n"
 "PO-Revision-Date: 2020-01-10 14:01-0015\n"
 "Last-Translator: b'  <juanmi@juanmitaboada.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -492,7 +492,7 @@ msgstr "Editando"
 msgid "You will loose all your changes, are you sure?"
 msgstr "Perderá todos sus cambios, ¿está seguro?"
 
-#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3672
+#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3674
 msgid "List"
 msgstr "Lista"
 
@@ -632,7 +632,7 @@ msgstr "Todos"
 msgid "Unknown"
 msgstr "Desconocidos"
 
-#: codenerix/views.py:3785
+#: codenerix/views.py:3787
 msgid ""
 "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in "
 "Megabytes) of the config"
@@ -640,36 +640,36 @@ msgstr ""
 "Este fichero es demasiado grande ({}M). Cambie el parámetro "
 "FILE_DOWNLOAD_SIZE_MAX (en Megabytes) en la configuración"
 
-#: codenerix/views.py:3798
+#: codenerix/views.py:3800
 msgid "Could not generate file"
 msgstr ""
 
-#: codenerix/views.py:4280
+#: codenerix/views.py:4282
 msgid "This shouldn't happen, state is not $dirty or $pristine"
 msgstr "Esto no debería ocurrir, el estado no es ni $dirty ni $pristine"
 
-#: codenerix/views.py:4471
+#: codenerix/views.py:4473
 msgid "Method not allowed, use POST to delete or DELETE on the detail url"
 msgstr ""
 "Método no permitido, use POST para borrar o DELETE en la vista de detalles"
 
-#: codenerix/views.py:5129 codenerix/views.py:5170
+#: codenerix/views.py:5131 codenerix/views.py:5172
 msgid "Manager"
 msgstr "Gestor"
 
-#: codenerix/views.py:5129
+#: codenerix/views.py:5131
 msgid "Log"
 msgstr "Log"
 
-#: codenerix/views.py:5145
+#: codenerix/views.py:5147
 msgid "Identification"
 msgstr "Identificación"
 
-#: codenerix/views.py:5155
+#: codenerix/views.py:5157
 msgid "Changes"
 msgstr "Cambios"
 
-#: codenerix/views.py:5170
+#: codenerix/views.py:5172
 msgid "RemoteLog"
 msgstr "Log Remoto"
 

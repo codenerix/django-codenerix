@@ -682,10 +682,40 @@ class GenBase:
         "codenerix/partials/summary.html",
     )
 
+    def __init__(self, *args, **kwargs):
+        self.__codenerix_uuid = None
+        self.__codenerix_request = None
+        return super().__init__(*args, **kwargs)
+
+    @property
+    def codenerix_uuid(self):
+        return self.__codenerix_uuid
+
+    @codenerix_uuid.setter
+    def codenerix_uuid(self, uuid):
+        self.__codenerix_uuid = uuid
+        return uuid
+
+    @property
+    def codenerix_request(self):
+        return self.__codenerix_request
+
+    @codenerix_request.setter
+    def codenerix_request(self, request):
+        self.__codenerix_request = request
+        return request
+
     def dispatch(self, *args, **kwargs):
+        # Remember Request
+        self.codenerix_request = self.request
+
+        # Get CODENERIX UUID if available in headers
+        self.codenerix_uuid = self.request.headers.get("Codenerix-Uuid", None)
+
         # Save arguments in the environment
-        self.__args = kwargs
+        self.__args = args
         self.__kwargs = kwargs
+
         # Prepare
         if getattr(self, "public", False):
             # Django's original dispatch
@@ -1298,8 +1328,15 @@ class GenBase:
         if distinct:
             queryset = queryset.distinct()
 
+        # Lookup for the object
+        obj = get_object_or_404(queryset, pk=pk)
+
+        # Fill it with CODENERIX UUID and Request
+        obj.codenerix_uuid = self.codenerix_uuid
+        obj.codenerix_request = self.codenerix_request
+
         # Return result
-        return get_object_or_404(queryset, pk=pk)
+        return obj
 
 
 # ListView helper: https://docs.djangoproject.com/en/1.6/ref/class-based-views/flattened-index/#list-views # noqa: E501
@@ -3415,14 +3452,18 @@ class GenList(GenBase, ListView):  # type: ignore
         body = []
 
         # Process all the list
-        for o in object_list:
+        for obj in object_list:
             # Initialize our token
             token = {}
 
+            # Attach uuid and request
+            obj.codenerix_uuid = self.codenerix_uuid
+            obj.codenerix_request = self.codenerix_request
+
             # Check if we got a dict (optimized answer)
-            if isinstance(o, dict):
+            if isinstance(obj, dict):
                 # Check all items if they need conversion
-                for key, value in o.items():
+                for key, value in obj.items():
                     # Rewrite values if required
                     if isinstance(value, datetime.datetime):
                         # Convert datetime to string
@@ -3481,7 +3522,7 @@ class GenList(GenBase, ListView):  # type: ignore
                         tail = None
                     # value=getattr(o,head,None)  # 2016.02.24 Quitamos None
                     # para que aparezca la exception
-                    value = getattr(o, head)
+                    value = getattr(obj, head)
 
                     # If value is None or a basic type, return as is
                     if (value is not None) and (
@@ -3556,7 +3597,7 @@ class GenList(GenBase, ListView):  # type: ignore
                                 hasattr(value, "__code__")
                                 and "request" in value.__code__.co_varnames
                             ):
-                                args["request"] = self.request
+                                args["request"] = self.codenerix_request
                             # Call the method
                             value = value(**args)
                         else:
@@ -3857,29 +3898,6 @@ class GenModify:
 
     """  # noqa: E501
 
-    def __init__(self, *args, **kwargs):
-        self.__codenerix_uuid = None
-        self.__codenerix_request = None
-        return super().__init__(*args, **kwargs)
-
-    @property
-    def codenerix_uuid(self):
-        return self.__codenerix_uuid
-
-    @codenerix_uuid.setter
-    def codenerix_uuid(self, uuid):
-        self.__codenerix_uuid = uuid
-        return uuid
-
-    @property
-    def codenerix_request(self):
-        return self.__codenerix_request
-
-    @codenerix_request.setter
-    def codenerix_request(self, request):
-        self.__codenerix_request = request
-        return request
-
     def dispatch(self, *args, **kwargs):
         """
         Entry point for this class, here we decide basic stuff
@@ -3896,12 +3914,6 @@ class GenModify:
             or bool(self.request.GET.get("force_rest_api", False))
         )
         self.__authtoken = bool(getattr(self.request, "authtoken", False))
-
-        # Remember Request
-        self.codenerix_request = self.request
-
-        # Get CODENERIX UUID if available in headers
-        self.codenerix_uuid = self.request.headers.get("Codenerix-Uuid", None)
 
         # Check if this is an AJAX request
         if (
@@ -3996,12 +4008,6 @@ class GenModify:
             ] = urlsafe_base64_encode(str.encode(json.dumps(attr)))
         # Let the system decide next step
         return super().get_success_url()
-
-    def get_object(self, *args, **kwargs):
-        obj = super().get_object(*args, **kwargs)
-        obj.codenerix_uuid = self.__codenerix_uuid
-        obj.codenerix_request = self.__codenerix_request
-        return obj
 
     def get_context_data(self, **kwargs):
         # Get actual context
