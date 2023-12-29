@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.48] - 2023-12-29
+### Bugfixes
+- Rewritten the places where class attributes 'codenerix_request' and 'codenerix_uuid' are set
+- Moved the class attributes 'codenerix_request' and 'codenerix_uuid' in bodybuilder to the if statement where objects are processed not fixed values from optimized queries
+
+
 ## [4.0.47] - 2023-12-29
 ### Features
  - Class attributes 'codenerix_request' and 'codenerix_uuid' are now generally available in all classes that inherit from GenBase, GenList, GenCreate, GenUpdate, GenDelete, GenDetail, GenForeignKey, CodenerixModel, CodenerixForm & CodenerixModelForm

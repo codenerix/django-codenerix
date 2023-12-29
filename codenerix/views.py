@@ -706,12 +706,6 @@ class GenBase:
         return request
 
     def dispatch(self, *args, **kwargs):
-        # Remember Request
-        self.codenerix_request = self.request
-
-        # Get CODENERIX UUID if available in headers
-        self.codenerix_uuid = self.request.headers.get("Codenerix-Uuid", None)
-
         # Save arguments in the environment
         self.__args = args
         self.__kwargs = kwargs
@@ -802,6 +796,12 @@ class GenBase:
         """
         Entry point for this class, here we decide basic stuff
         """
+
+        # Remember Request
+        self.codenerix_request = request
+
+        # Get CODENERIX UUID if available in headers
+        self.codenerix_uuid = request.headers.get("Codenerix-Uuid", None)
 
         # Get details from self
         info = model_inspect(self)
@@ -3456,10 +3456,6 @@ class GenList(GenBase, ListView):  # type: ignore
             # Initialize our token
             token = {}
 
-            # Attach uuid and request
-            obj.codenerix_uuid = self.codenerix_uuid
-            obj.codenerix_request = self.codenerix_request
-
             # Check if we got a dict (optimized answer)
             if isinstance(obj, dict):
                 # Check all items if they need conversion
@@ -3500,6 +3496,10 @@ class GenList(GenBase, ListView):  # type: ignore
                     token[key] = value
 
             else:
+                # Attach uuid and request
+                obj.codenerix_uuid = self.codenerix_uuid
+                obj.codenerix_request = self.codenerix_request
+
                 # Process all rules
                 for rktemp in rules:
                     # Get the value
