@@ -895,10 +895,12 @@ function refresh($scope, $timeout, Register, callback, internal) {
         // Update ordering
         $scope.query.ordering = $scope.data.table.head.ordering;
     }
+
     // Update elementid
     $scope.query.elementid = $scope.elementid;
-    // Refresh now
-    var wrapper_callback = function() {
+
+    // === SUCCESS PROCESSING ===
+    var wrapper_success_callback = function() {
         $scope.data = $scope.tempdata;
         // Callback passed as an argument
         if (callback != undefined) {
@@ -910,16 +912,30 @@ function refresh($scope, $timeout, Register, callback, internal) {
             $scope.refresh_callback();
         }
     };
+
+    // === ERROR PROCESSING ===
+    var wrapper_error_callback = function() {
+        // Callback preinstalled in the scope when there is an error
+        if ((internal === true) && ($scope.refresh_promise != undefined)) {
+            $timeout(function() {
+                refresh($scope, $timeout, Register, callback, internal);
+            }, $scope.data.meta.autorefresh);
+        }
+    };
+
     // Prepare arguments
     if (typeof ($scope.RegisterParams) == 'undefined') {
         var register_args = {};
     } else {
         var register_args = $scope.RegisterParams;
     }
+
     // Attach json
     register_args['json'] = $scope.query;
+
     // Call the service for the data
-    $scope.tempdata = Register.query(register_args, wrapper_callback);
+    $scope.tempdata = Register.query(
+        register_args, wrapper_success_callback, wrapper_error_callback);
 };
 
 function formsubmit(
@@ -3396,8 +3412,26 @@ function multilist(
             callback: $scope.print_excel
         });
     }
-    // First query
-    refresh($scope, $timeout, Register, callback);
+
+    // Refresh recurrent function
+    function autorefresh() {
+        if ($scope.data.meta.autorefresh) {
+            $scope.refresh_promise = $timeout(function() {
+                refresh($scope, $timeout, Register, autorefresh, true);
+            }, $scope.data.meta.autorefresh);
+        }
+    };
+
+    // First refresh required to get data first time
+    refresh($scope, $timeout, Register, autorefresh, true);
+
+    // Cancel autorefresh if refresh_promise exists
+    $scope.$on('$destroy', function() {
+        if (angular.isDefined($scope.refresh_promise)) {
+            $timeout.cancel($scope.refresh_promise);
+            $scope.refresh_promise = undefined;
+        }
+    });
 };
 
 function multiadd(

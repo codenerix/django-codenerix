@@ -1388,6 +1388,8 @@ class GenList(GenBase, ListView):  # type: ignore
                                                     # will be set to true automaticall if the class get a request which includes a "json" argument
                                                     # inside the GET parameters with a valid JSON string. IMPORTANT:  By default json is set to True.
 
+        autorefresh = 5000                          # If set to a number (in miliseconds) the system will refresh the list automatically
+
         client_context = {}                         # Contains information for filters in the client side, this structure will be returned inside
                                                     # the meta structure from JSON answers
 
@@ -1589,6 +1591,9 @@ class GenList(GenBase, ListView):  # type: ignore
                     "and it is not available anymore".format(depre, version),
                 )
 
+        # Prepare autorefresh
+        if not hasattr(self, "autorefresh"):
+            self.autorefresh = None
         # Build extracontext
         if not hasattr(self, "extra_context"):
             self.extra_context = {}
@@ -3160,6 +3165,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 a["getval"] = context["getval"][key]
 
         # Set data
+        a["autorefresh"] = self.autorefresh
         a["username"] = self.user.username
         a["context"] = self.client_context
         a["url_media"] = settings.MEDIA_URL
