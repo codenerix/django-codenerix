@@ -917,9 +917,14 @@ function refresh($scope, $timeout, Register, callback, internal) {
     var wrapper_error_callback = function() {
         // Callback preinstalled in the scope when there is an error
         if ((internal === true) && ($scope.refresh_promise != undefined)) {
-            $timeout(function() {
-                refresh($scope, $timeout, Register, callback, internal);
-            }, $scope.data.meta.autorefresh);
+            if ((angular.isDefined($scope.data)) &&
+                (angular.isDefined($scope.data.meta)) &&
+                (angular.isDefined($scope.data.meta.autorefresh)) &&
+                ($scope.data.meta.autorefresh)) {
+                $timeout(function() {
+                    refresh($scope, $timeout, Register, callback, internal);
+                }, $scope.data.meta.autorefresh);
+            }
         }
     };
 
@@ -3415,7 +3420,10 @@ function multilist(
 
     // Refresh recurrent function
     function autorefresh() {
-        if ($scope.data.meta.autorefresh) {
+        if ((angular.isDefined($scope.data)) &&
+            (angular.isDefined($scope.data.meta)) &&
+            (angular.isDefined($scope.data.meta.autorefresh)) &&
+            ($scope.data.meta.autorefresh)) {
             $scope.refresh_promise = $timeout(function() {
                 refresh($scope, $timeout, Register, autorefresh, true);
             }, $scope.data.meta.autorefresh);
