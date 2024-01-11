@@ -2890,7 +2890,9 @@ class GenList(GenBase, ListView):  # type: ignore
                 self.default_rows_per_page,
             )
             pages_to_bring = jsondata.get("pages_to_bring", 1)
-            if total_rows_per_page == "All" or self.export:
+            if total_rows_per_page is None:
+                total_rows_per_page = self.default_rows_per_page
+            elif total_rows_per_page == "All" or self.export:
                 total_rows_per_page = queryset.count()
             paginator = Paginator(queryset, total_rows_per_page)
             total_registers = paginator.count

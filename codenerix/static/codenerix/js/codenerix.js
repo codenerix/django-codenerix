@@ -2798,7 +2798,7 @@ function multilist(
         $scope.wsbase = ws + '/';
         $scope.page = 1;
         $scope.pages_to_bring = 1;
-        $scope.rowsperpage = 1;
+        $scope.rowsperpage = null;
         $scope.filters = [];
         $scope.ordering = [];
         $scope.options = {};
@@ -2817,7 +2817,7 @@ function multilist(
             'search': '',
             'page': 1,
             'pages_to_bring': 1,
-            'rowsperpage': 50,
+            'rowsperpage': null,
             'filters': {},
             'ordering': [],
             'year': null,
@@ -3020,7 +3020,7 @@ function multilist(
             'elementid': null,
             'search': '',
             'page': 1,
-            'rowsperpage': 50,
+            'rowsperpage': null,
             'filters': {},
             'ordering': [],
             'year': null,
