@@ -285,6 +285,8 @@ class MODELINFO:
         viewname,
         request,
         user,
+        codenerix_request,
+        codenerix_uuid,
         profile,
         jsonquery,
         Mfields,  # noqa: N803
@@ -312,6 +314,8 @@ class MODELINFO:
         self.elementid = elementid
         self.request = request
         self.user = user
+        self.codenerix_request = codenerix_request
+        self.codenerix_uuid = codenerix_uuid
         self.jsonquery = jsonquery
         self.profile = profile
         self.kwargs = kwargs
@@ -1273,7 +1277,13 @@ class GenBase:
         MsearchF = None  # noqa: N806
         MsearchQ = None  # noqa: N806
         if hasattr(myclass, "__limitQ__"):
-            MlimitQ = myclass().__limitQ__  # noqa: N806
+            Mclass = myclass()
+            Mclass.request = self.request
+            Mclass.user = self.user
+            Mclass.codenerix_request = self.codenerix_request
+            Mclass.codenerix_uuid = self.codenerix_uuid
+            Mclass.profile = self.profile
+            MlimitQ = Mclass.__limitQ__  # noqa: N806
         MODELINF = MODELINFO(  # noqa: N806
             myclass.__dict__.get("model", None),
             appname,
@@ -1281,6 +1291,8 @@ class GenBase:
             myclass.__module__,
             self.request,
             self.user,
+            self.codenerix_request,
+            self.codenerix_uuid,
             profile,
             jsonquery,
             Mfields,
@@ -1963,6 +1975,8 @@ class GenList(GenBase, ListView):  # type: ignore
             self._viewname,
             self.request,
             self.user,
+            self.codenerix_request,
+            self.codenerix_uuid,
             self.profile,
             jsonquery,
             Mfields,

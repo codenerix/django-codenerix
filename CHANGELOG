@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.52] - 2024-01-18
+### Features
+ - Added support for 'request', 'user', 'codenerix_uuid' and 'codenerix_request' to be able to use it on GenDetail while using limitQ on GenList
+
+
 ## [4.0.51] - 2024-01-11
 ### Bugfixes
 - On GenList 'default_rows_per_page' now behaves as expected
