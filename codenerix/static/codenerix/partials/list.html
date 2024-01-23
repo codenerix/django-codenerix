@@ -94,6 +94,26 @@ limitations under the License.
                                         <span class="fa fa-file-excel-o"></span>
                                     </button>
                                 </span>
+                                <span ng-if="data.meta.export_csv" class="input-group-btn">
+                                    <button type="button" class="btn btn-default btn-sm" ng-click="print_csv()" popover-placement="top" uib-popover="{{data.meta.gentranslate.PrintCSV}}" popover-trigger="mouseenter">
+                                        <span class="fa fa-file-excel-o"></span>
+                                    </button>
+                                </span>
+                                <span ng-if="data.meta.export_json" class="input-group-btn">
+                                    <button type="button" class="btn btn-default btn-sm" ng-click="print_json()" popover-placement="top" uib-popover="{{data.meta.gentranslate.PrintJSON}}" popover-trigger="mouseenter">
+                                        <span class="fa fa-file-code-o"></span>
+                                    </button>
+                                </span>
+                                <span ng-if="data.meta.export_jsonl" class="input-group-btn">
+                                    <button type="button" class="btn btn-default btn-sm" ng-click="print_jsonl()" popover-placement="top" uib-popover="{{data.meta.gentranslate.PrintJSONL}}" popover-trigger="mouseenter">
+                                        <span class="fa fa-file-text-o"></span>
+                                    </button>
+                                </span>
+                                <span ng-if="data.meta.export_bson" class="input-group-btn">
+                                    <button type="button" class="btn btn-default btn-sm" ng-click="print_bson()" popover-placement="top" uib-popover="{{data.meta.gentranslate.PrintBSON}}" popover-trigger="mouseenter">
+                                        <span class="fa fa-file-archive-o"></span>
+                                    </button>
+                                </span>
                             </div>
                         </form>
                     <!--}}}1--></div>

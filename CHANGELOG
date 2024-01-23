@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.52] - 2024-01-23
+### Features
+ - Suppot for new export formats like: CSV, JSON, JSONL and BSON (all of them disabled by default, use export_csv=True, export_json=True, export_jsonl=True, export=bson=True to enable them on GenList views)
+ - __searchF__ filtering function support lists or tuples for choices (before was only lists)
+
+### Bugfixes
+ - Export to Excel now works with newer versions of openpyxl
+
+
 ## [4.0.52] - 2024-01-18
 ### Features
  - Added support for 'request', 'user', 'codenerix_uuid' and 'codenerix_request' to be able to use it on GenDetail while using limitQ on GenList

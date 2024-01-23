@@ -3047,6 +3047,26 @@ function multilist(
                   $scope.data.meta.request.query_string + '&export=xlsx';
         window.open(url, '_blank');
     };
+    $scope.print_csv = function() {
+        var url = $scope.data.meta.request.path_info + '?' +
+                  $scope.data.meta.request.query_string + '&export=csv';
+        window.open(url, '_blank');
+    };
+    $scope.print_json = function() {
+        var url = $scope.data.meta.request.path_info + '?' +
+                  $scope.data.meta.request.query_string + '&export=json';
+        window.open(url, '_blank');
+    };
+    $scope.print_jsonl = function() {
+        var url = $scope.data.meta.request.path_info + '?' +
+                  $scope.data.meta.request.query_string + '&export=jsonl';
+        window.open(url, '_blank');
+    };
+    $scope.print_bson = function() {
+        var url = $scope.data.meta.request.path_info + '?' +
+                  $scope.data.meta.request.query_string + '&export=bson';
+        window.open(url, '_blank');
+    };
 
     // Get details
     $scope.list_modal = function(id) {

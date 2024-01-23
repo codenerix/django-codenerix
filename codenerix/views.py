@@ -23,6 +23,7 @@ Base library to handle CODENERIX system
 
 import base64
 import calendar
+import csv
 import datetime
 import hashlib
 import json
@@ -35,9 +36,10 @@ import re
 import string
 import time
 from decimal import Decimal
-from io import BytesIO
+from io import BytesIO, StringIO
 from typing import Any, Dict, List, Optional
 
+import bson
 import pytz
 from dateutil import tz
 from dateutil.parser import parse
@@ -658,6 +660,10 @@ class GenBase:
         "PageNumber": _("Page number"),
         "PleaseWait": _("Please wait"),
         "PrintExcel": _("Print Excel"),
+        "PrintCSV": _("Print CSV"),
+        "PrintJSON": _("Print JSON"),
+        "PrintJSONL": _("Print JSONL"),
+        "PrintBSON": _("Print BSON"),
         "Save": _("Save"),
         "Save_here": _("Save here"),
         "Save_and_new": _("Save & new"),
@@ -1412,6 +1418,10 @@ class GenList(GenBase, ListView):  # type: ignore
         vtable = False                              # With 'True' it will use one-page-only lists with scroll detection for autoloading rows
         ngincludes = {'name':'path_to_partial'}     # Keep trace for ngincludes extra partials
         export_excel = True                         # Show button 'Export to excel' in the list
+        export_csv = True                           # Show button 'Export to csv' in the list
+        export_json = True                          # Show button 'Export to 'json' in the list
+        export_jsonl = True                         # Show button 'Export to 'jsonl' in the list
+        export_bson = True                          # Show button 'Export to 'bson' in the list
         export = 'xlsx'                             # Force the download the list as file. Default None
         export_name = 'list'                        # Filename as a result of export
 
@@ -2147,7 +2157,7 @@ class GenList(GenBase, ListView):  # type: ignore
         filters = []
         for key in listfilters:
             typekind = listfilters[key][2]
-            if isinstance(typekind, list):
+            if isinstance(typekind, list) or isinstance(typekind, tuple):
                 # Compatibility: set typekind and fv in the old fassion
                 choice = [_("All")]
                 for value in typekind:
@@ -3074,6 +3084,10 @@ class GenList(GenBase, ListView):  # type: ignore
 
         # Export to excel
         context["export_excel"] = getattr(self, "export_excel", True)
+        context["export_csv"] = getattr(self, "export_csv", False)
+        context["export_json"] = getattr(self, "export_json", False)
+        context["export_jsonl"] = getattr(self, "export_jsonl", False)
+        context["export_bson"] = getattr(self, "export_bson", False)
         context["export_name"] = getattr(self, "export_name", "list")
 
         # Check ngincludes
@@ -3192,6 +3206,10 @@ class GenList(GenBase, ListView):  # type: ignore
         a["linkadd"] = context["linkadd"]
         a["vtable"] = context["vtable"]
         a["export_excel"] = context["export_excel"]
+        a["export_csv"] = context["export_csv"]
+        a["export_json"] = context["export_json"]
+        a["export_jsonl"] = context["export_jsonl"]
+        a["export_bson"] = context["export_bson"]
         a["export_name"] = context["export_name"]
         a["ngincludes"] = context["ngincludes"]
         a["linkedit"] = context["linkedit"]
@@ -3670,6 +3688,23 @@ class GenList(GenBase, ListView):  # type: ignore
                     )
                     # return_xls = self.response_to_xls(answer)
                     return self.response_to_xls(answer, **response_kwargs)
+                elif self.export == "csv":
+                    answer["meta"]["content_type"] = "text/csv"
+                    # return_xls = self.response_to_xls(answer)
+                    return self.response_to_csv(answer, **response_kwargs)
+                elif self.export == "json":
+                    answer["meta"]["content_type"] = "application/json"
+                    # return_xls = self.response_to_xls(answer)
+                    return self.response_to_json(answer, **response_kwargs)
+                elif self.export == "jsonl":
+                    answer["meta"]["content_type"] = "application/jsonl"
+                    # return_xls = self.response_to_xls(answer)
+                    return self.response_to_jsonl(answer, **response_kwargs)
+                elif self.export == "bson":
+                    answer["meta"]["content_type"] = "application/bson"
+                    # return_xls = self.response_to_xls(answer)
+                    return self.response_to_bson(answer, **response_kwargs)
+
                 else:
                     raise Exception("Export to {} invalid".format(self.export))
             else:
@@ -3729,6 +3764,56 @@ class GenList(GenBase, ListView):  # type: ignore
             string = chr(65 + remainder) + string
         cell = "{}{}".format(string, row)
         return cell
+
+    def response_export(
+        self,
+        answer,
+        data_output,
+        mimetype,
+        extension,
+        **response_kwargs,
+    ):
+        if data_output:
+            size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
+            data_output_len = len(data_output)
+
+            if data_output_len <= (size_max * 1000000):
+                response = HttpResponse(
+                    data_output,
+                    content_type=mimetype,
+                    **response_kwargs,
+                )
+                response[
+                    "Content-Disposition"
+                ] = "attachment; filename={}.{}".format(
+                    answer["meta"]["export_name"],
+                    extension,
+                )
+                return response
+            else:
+                result = {
+                    "message": _(
+                        "The file is very big ({}M). Change the parameter "
+                        "FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the "
+                        "config".format(data_output_len / 1000000.0),
+                    ),
+                    "file": "",
+                    "filename": "",
+                }
+                args = "json={}".format(json.dumps(result))
+                return HttpResponseRedirect(
+                    "{}?{}".format(reverse("show_error"), args),
+                )
+        else:
+            result = {
+                "message": _("Could not generate file"),
+                "file": "",
+                "filename": "",
+            }
+            args = "json={}".format(json.dumps(result))
+            return HttpResponseRedirect(
+                "{}?{}".format(reverse("show_error"), args),
+            )
 
     def response_to_xls(self, answer, **response_kwargs):
         wb = Workbook()
@@ -3797,10 +3882,14 @@ class GenList(GenBase, ListView):  # type: ignore
                 except TypeError:
                     value = None
                 if value:
-                    dims[cell.column_letter] = (
+                    try:
+                        column_letter = cell.column
+                    except AttributeError:
+                        column_letter = cell.column_letter
+                    dims[column_letter] = (
                         max(
                             (
-                                dims.get(cell.column_letter, 0),
+                                dims.get(column_letter, 0),
                                 len(smart_str(cell.value)),
                             ),
                         )
@@ -3827,47 +3916,280 @@ class GenList(GenBase, ListView):  # type: ignore
             wb.save(tmp)
             data_output = tmp.getvalue()
 
-        if data_output:
-            size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
-            data_output_len = len(data_output)
+        return self.response_export(
+            answer,
+            data_output,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;",  # noqa: E501
+            "xlsx",
+            **response_kwargs,
+        )
 
-            if data_output_len <= (size_max * 1000000):
-                response = HttpResponse(
-                    data_output,
-                    content_type="application/vnd.openxmlformats-"
-                    "officedocument.spreadsheetml.sheet;charset=utf-8;",
-                    **response_kwargs,
-                )
-                response[
-                    "Content-Disposition"
-                ] = "attachment; filename={}.xlsx".format(
-                    answer["meta"]["export_name"],
-                )
-                return response
-            else:
-                result = {
-                    "message": _(
-                        "The file is very big ({}M). Change the parameter "
-                        "FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the "
-                        "config".format(data_output_len / 1000000.0),
-                    ),
-                    "file": "",
-                    "filename": "",
-                }
-                args = "json={}".format(json.dumps(result))
-                return HttpResponseRedirect(
-                    "{}?{}".format(reverse("show_error"), args),
-                )
-        else:
-            result = {
-                "message": _("Could not generate file"),
-                "file": "",
-                "filename": "",
-            }
-            args = "json={}".format(json.dumps(result))
-            return HttpResponseRedirect(
-                "{}?{}".format(reverse("show_error"), args),
-            )
+    def response_to_csv(self, answer, **response_kwargs):
+        with StringIO() as tmpfile:
+            # Prepare writer
+            writer = csv.writer(tmpfile, delimiter=";")
+
+            # Write header
+            header = []
+            columns = []
+            for col in answer["table"]["head"]["columns"]:
+                header.append(col["name"])
+                columns.append(col["id"])
+            writer.writerow(header)
+
+            for key_row, row in enumerate(answer["table"]["body"]):
+                tmp = []
+                for key_col, id in enumerate(columns):
+                    # print(key_row, key_col)
+                    if not isinstance(row[id], list):
+                        if row[id] and not isinstance(row[id], float):
+                            # Rewrite row[id] if required
+                            if isinstance(row[id], datetime.datetime):
+                                # Convert datetime to string
+                                t = row[id].strftime(
+                                    formats.get_format(
+                                        "DATETIME_INPUT_FORMATS",
+                                        lang=self.language,
+                                    )[0],
+                                )
+                            elif isinstance(row[id], datetime.date):
+                                # Convert datetime to string
+                                t = row[id].strftime(
+                                    formats.get_format(
+                                        "DATE_INPUT_FORMATS",
+                                        lang=self.language,
+                                    )[0],
+                                )
+                            elif isinstance(row[id], datetime.time):
+                                # Convert datetime to string
+                                t = row[id].strftime(
+                                    formats.get_format(
+                                        "TIME_INPUT_FORMATS",
+                                        lang=self.language,
+                                    )[0],
+                                )
+                            elif isinstance(row[id], Decimal):
+                                # Convert Decimal to float
+                                t = float(row[id])
+                            else:
+                                t = row[id]
+
+                        else:
+                            t = row[id]
+                        tmp.append(t)
+                    else:
+                        tmp.append("\n".join(row[id]))
+                writer.writerow(tmp)
+
+            # Get content
+            data_output = tmpfile.getvalue()
+
+        return self.response_export(
+            answer,
+            data_output,
+            "text/csv",
+            "csv",
+            **response_kwargs,
+        )
+
+    def response_to_json(self, answer, **response_kwargs):
+        # Write header
+        header = []
+        columns = []
+        for col in answer["table"]["head"]["columns"]:
+            header.append(col["name"])
+            columns.append(col["id"])
+
+        # Prepare answer
+        janswer = {}
+        janswer["head"] = header
+        janswer["body"] = []
+
+        for key_row, row in enumerate(answer["table"]["body"]):
+            tmp = []
+            for key_col, id in enumerate(columns):
+                # print(key_row, key_col)
+                if not isinstance(row[id], list):
+                    if row[id] and not isinstance(row[id], float):
+                        # Rewrite row[id] if required
+                        if isinstance(row[id], datetime.datetime):
+                            # Convert datetime to string
+                            t = row[id].strftime(
+                                formats.get_format(
+                                    "DATETIME_INPUT_FORMATS",
+                                    lang=self.language,
+                                )[0],
+                            )
+                        elif isinstance(row[id], datetime.date):
+                            # Convert datetime to string
+                            t = row[id].strftime(
+                                formats.get_format(
+                                    "DATE_INPUT_FORMATS",
+                                    lang=self.language,
+                                )[0],
+                            )
+                        elif isinstance(row[id], datetime.time):
+                            # Convert datetime to string
+                            t = row[id].strftime(
+                                formats.get_format(
+                                    "TIME_INPUT_FORMATS",
+                                    lang=self.language,
+                                )[0],
+                            )
+                        elif isinstance(row[id], Decimal):
+                            # Convert Decimal to float
+                            t = float(row[id])
+                        else:
+                            t = row[id]
+                    else:
+                        t = row[id]
+                    tmp.append(t)
+                else:
+                    tmp.append("\n".join(row[id]))
+            janswer["body"].append(tmp)
+
+            # Get content
+            data_output = json.dumps(janswer)
+
+        return self.response_export(
+            answer,
+            data_output,
+            "application/json",
+            "json",
+            **response_kwargs,
+        )
+
+    def response_to_jsonl(self, answer, **response_kwargs):
+        with StringIO() as tmpfile:
+            # Write header
+            header = []
+            columns = []
+            for col in answer["table"]["head"]["columns"]:
+                header.append(col["name"])
+                columns.append(col["id"])
+
+            for key_row, row in enumerate(answer["table"]["body"]):
+                tmp = {}
+                for key_col, id in enumerate(columns):
+                    # print(key_row, key_col)
+                    if not isinstance(row[id], list):
+                        if row[id] and not isinstance(row[id], float):
+                            # Rewrite row[id] if required
+                            if isinstance(row[id], datetime.datetime):
+                                # Convert datetime to string
+                                t = row[id].strftime(
+                                    formats.get_format(
+                                        "DATETIME_INPUT_FORMATS",
+                                        lang=self.language,
+                                    )[0],
+                                )
+                            elif isinstance(row[id], datetime.date):
+                                # Convert datetime to string
+                                t = row[id].strftime(
+                                    formats.get_format(
+                                        "DATE_INPUT_FORMATS",
+                                        lang=self.language,
+                                    )[0],
+                                )
+                            elif isinstance(row[id], datetime.time):
+                                # Convert datetime to string
+                                t = row[id].strftime(
+                                    formats.get_format(
+                                        "TIME_INPUT_FORMATS",
+                                        lang=self.language,
+                                    )[0],
+                                )
+                            elif isinstance(row[id], Decimal):
+                                # Convert Decimal to float
+                                t = float(row[id])
+                            else:
+                                t = row[id]
+                        else:
+                            t = row[id]
+                        tmp[id] = t
+                    else:
+                        tmp[id] = "\n".join(row[id])
+
+                # Get content
+                tmpfile.write("{}\n".format(json.dumps(tmp)))
+
+            # Get content
+            data_output = tmpfile.getvalue()
+
+        return self.response_export(
+            answer,
+            data_output,
+            "application/jsonl",
+            "jsonl",
+            **response_kwargs,
+        )
+
+    def response_to_bson(self, answer, **response_kwargs):
+        # Write header
+        header = []
+        columns = []
+        for col in answer["table"]["head"]["columns"]:
+            header.append(col["name"])
+            columns.append(col["id"])
+
+        # Prepare answer
+        janswer = {}
+        janswer["head"] = header
+        janswer["body"] = []
+
+        for key_row, row in enumerate(answer["table"]["body"]):
+            tmp = []
+            for key_col, id in enumerate(columns):
+                # print(key_row, key_col)
+                if not isinstance(row[id], list):
+                    if row[id] and not isinstance(row[id], float):
+                        # Rewrite row[id] if required
+                        if isinstance(row[id], datetime.datetime):
+                            # Convert datetime to string
+                            t = row[id].strftime(
+                                formats.get_format(
+                                    "DATETIME_INPUT_FORMATS",
+                                    lang=self.language,
+                                )[0],
+                            )
+                        elif isinstance(row[id], datetime.date):
+                            # Convert datetime to string
+                            t = row[id].strftime(
+                                formats.get_format(
+                                    "DATE_INPUT_FORMATS",
+                                    lang=self.language,
+                                )[0],
+                            )
+                        elif isinstance(row[id], datetime.time):
+                            # Convert datetime to string
+                            t = row[id].strftime(
+                                formats.get_format(
+                                    "TIME_INPUT_FORMATS",
+                                    lang=self.language,
+                                )[0],
+                            )
+                        elif isinstance(row[id], Decimal):
+                            # Convert Decimal to float
+                            t = float(row[id])
+                        else:
+                            t = row[id]
+                    else:
+                        t = row[id]
+                    tmp.append(t)
+                else:
+                    tmp.append("\n".join(row[id]))
+            janswer["body"].append(tmp)
+
+            # Get content
+            data_output = bson.encode(janswer)
+
+        return self.response_export(
+            answer,
+            data_output,
+            "application/bson",
+            "bson",
+            **response_kwargs,
+        )
 
 
 class GenListModal(GenList):
