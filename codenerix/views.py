@@ -3854,7 +3854,7 @@ class GenList(GenBase, ListView):  # type: ignore
 
                     if row[id] and not isinstance(row[id], float):
                         try:
-                            t = parse(row[id])
+                            t = parse(str(row[id]))
                             if types[key_col] == "DateTimeField":
                                 cells["DateTimeField"].append(cell)
                             elif isinstance(t, models.DateField):
