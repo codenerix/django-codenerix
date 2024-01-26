@@ -41,6 +41,7 @@ var codenerix_libraries = [
     'codenerixControllers',
     'codenerixServices',
     'codenerixFilters',
+    'customFilters',
     'codenerixNotify',
     'naif.base64',
     'fileValidation',

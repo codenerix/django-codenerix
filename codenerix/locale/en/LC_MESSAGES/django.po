@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-23 14:18+0100\n"
+"POT-Creation-Date: 2024-01-25 07:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -483,7 +483,7 @@ msgstr ""
 msgid "You will loose all your changes, are you sure?"
 msgstr ""
 
-#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3817
+#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3822
 msgid "List"
 msgstr ""
 
@@ -635,41 +635,41 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#: codenerix/views.py:3791
+#: codenerix/views.py:3796
 msgid ""
 "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in "
 "Megabytes) of the config"
 msgstr ""
 
-#: codenerix/views.py:3804
+#: codenerix/views.py:3809
 msgid "Could not generate file"
 msgstr ""
 
-#: codenerix/views.py:4640
+#: codenerix/views.py:4632
 msgid "This shouldn't happen, state is not $dirty or $pristine"
 msgstr ""
 
-#: codenerix/views.py:4831
+#: codenerix/views.py:4823
 msgid "Method not allowed, use POST to delete or DELETE on the detail url"
 msgstr ""
 
-#: codenerix/views.py:5489 codenerix/views.py:5530
+#: codenerix/views.py:5481 codenerix/views.py:5522
 msgid "Manager"
 msgstr ""
 
-#: codenerix/views.py:5489
+#: codenerix/views.py:5481
 msgid "Log"
 msgstr ""
 
-#: codenerix/views.py:5505
+#: codenerix/views.py:5497
 msgid "Identification"
 msgstr ""
 
-#: codenerix/views.py:5515
+#: codenerix/views.py:5507
 msgid "Changes"
 msgstr ""
 
-#: codenerix/views.py:5530
+#: codenerix/views.py:5522
 msgid "RemoteLog"
 msgstr ""
 
