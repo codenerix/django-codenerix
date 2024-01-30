@@ -59,7 +59,7 @@ setup(
         "openpyxl==3.1.2",
         "Pillow",
         "Unidecode",
-        "Django>=4.1.1",
+        "Django>=4.1.1,<5",
         "ldap3",
         "django-haystack>=2.6.1",
         "pytz",
