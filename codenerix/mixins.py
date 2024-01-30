@@ -19,6 +19,7 @@
 
 import json
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 
 
@@ -43,7 +44,7 @@ class JSONResponseMixin:
         # to do much more complex handling to ensure that arbitrary
         # objects -- such as Django model instances or querysets
         # -- can be serialized as JSON.
-        return json.dumps(context)
+        return json.dumps(context, cls=DjangoJSONEncoder)
 
 
 class AjaxableResponseMixin:
@@ -53,7 +54,7 @@ class AjaxableResponseMixin:
     """
 
     def render_to_json_response(self, context, **response_kwargs):
-        data = json.dumps(context)
+        data = json.dumps(context, cls=DjangoJSONEncoder)
         response_kwargs["content_type"] = "application/json"
         return HttpResponse(data, **response_kwargs)
 

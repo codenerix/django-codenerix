@@ -1770,6 +1770,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 if getattr(self, "show_details", False):
                     self.extra_context["tabs_js"] = json.dumps(
                         self.get_tabs_js(),
+                        cls=DjangoJSONEncoder,
                     )
 
                 # Silence the normal execution from this class
@@ -1794,7 +1795,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 ),
             }
             return HttpResponse(
-                json.dumps(json_answer),
+                json.dumps(json_answer, cls=DjangoJSONEncoder),
                 content_type="application/json",
             )
 
@@ -2134,7 +2135,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 filters_struct[key] = value
 
         # Rewrite filters_json updated
-        filters_json = json.dumps(filters_struct)
+        filters_json = json.dumps(filters_struct, cls=DjangoJSONEncoder)
 
         # Build the clean get for filters
         get = context["get"]
@@ -2686,7 +2687,10 @@ class GenList(GenBase, ListView):  # type: ignore
                 sort[order_key]["size"] = size
                 sort[order_key]["class"] = sort_class
                 if order_key and order_key[0] != "*":
-                    sort[order_key]["ordering"] = json.dumps(ordering).replace(
+                    sort[order_key]["ordering"] = json.dumps(
+                        ordering,
+                        cls=DjangoJSONEncoder,
+                    ).replace(
                         '"',
                         '\\"',
                     )
@@ -3712,7 +3716,7 @@ class GenList(GenBase, ListView):  # type: ignore
 
             # Try to serialize it as a JSON string
             try:
-                json_answer = json.dumps(answer)
+                json_answer = json.dumps(answer, cls=DjangoJSONEncoder)
             except TypeError as e:
                 # Try to locate where the problem is happening
                 try:
@@ -3800,7 +3804,9 @@ class GenList(GenBase, ListView):  # type: ignore
                     "file": "",
                     "filename": "",
                 }
-                args = "json={}".format(json.dumps(result))
+                args = "json={}".format(
+                    json.dumps(result, cls=DjangoJSONEncoder),
+                )
                 return HttpResponseRedirect(
                     "{}?{}".format(reverse("show_error"), args),
                 )
@@ -3810,7 +3816,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 "file": "",
                 "filename": "",
             }
-            args = "json={}".format(json.dumps(result))
+            args = "json={}".format(json.dumps(result, cls=DjangoJSONEncoder))
             return HttpResponseRedirect(
                 "{}?{}".format(reverse("show_error"), args),
             )
@@ -4049,7 +4055,7 @@ class GenList(GenBase, ListView):  # type: ignore
             janswer["body"].append(tmp)
 
             # Get content
-            data_output = json.dumps(janswer)
+            data_output = json.dumps(janswer, cls=DjangoJSONEncoder)
 
         return self.response_export(
             answer,
@@ -4111,7 +4117,9 @@ class GenList(GenBase, ListView):  # type: ignore
                         tmp[id] = "\n".join(row[id])
 
                 # Get content
-                tmpfile.write("{}\n".format(json.dumps(tmp)))
+                tmpfile.write(
+                    "{}\n".format(json.dumps(tmp, cls=DjangoJSONEncoder)),
+                )
 
             # Get content
             data_output = tmpfile.getvalue()
@@ -4274,7 +4282,10 @@ class GenModify:
                     isinstance(post[key], dict)
                     and "__JSON_DATA__" in post[key]
                 ):
-                    post[key] = json.dumps(post[key]["__JSON_DATA__"])
+                    post[key] = json.dumps(
+                        post[key]["__JSON_DATA__"],
+                        cls=DjangoJSONEncoder,
+                    )
 
             request.POST.update(post)
 
@@ -4345,11 +4356,15 @@ class GenModify:
         try:
             self.success_url.__dict__["_proxy____kw"]["kwargs"][
                 "answer"
-            ] = urlsafe_base64_encode(str.encode(json.dumps(attr))).decode()
+            ] = urlsafe_base64_encode(
+                str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
+            ).decode()
         except AttributeError:
             self.success_url.__dict__["_proxy____kw"]["kwargs"][
                 "answer"
-            ] = urlsafe_base64_encode(str.encode(json.dumps(attr)))
+            ] = urlsafe_base64_encode(
+                str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
+            )
         # Let the system decide next step
         return super().get_success_url()
 
@@ -4425,6 +4440,7 @@ class GenModify:
         context["subscriptions"] = base64.b64encode(
             json.dumps(
                 getattr(self.form_class.Meta, "subscriptions", None),
+                cls=DjangoJSONEncoder,
             ).encode("utf-8"),
         ).decode()
 
@@ -4824,6 +4840,7 @@ class GenDelete(GenModify, GenBase, DeleteView):  # type: ignore
                         "on the detail url",
                     ),
                 },
+                cls=DjangoJSONEncoder,
             )
             return HttpResponse(json_answer, content_type="application/json")
 
@@ -4857,7 +4874,7 @@ class GenDelete(GenModify, GenBase, DeleteView):  # type: ignore
                 json_struct = {"error": lock, "__pk__": obj.pk}
                 if self.__authtoken and api_obj is not None:
                     json_struct["__obj__"] = api_obj
-                json_answer = json.dumps(json_struct)
+                json_answer = json.dumps(json_struct, cls=DjangoJSONEncoder)
                 return HttpResponse(
                     json_answer,
                     content_type="application/json",
@@ -4872,7 +4889,10 @@ class GenDelete(GenModify, GenBase, DeleteView):  # type: ignore
                     json_struct = {"error": e, "__pk__": obj.pk}
                     if self.__authtoken and api_obj is not None:
                         json_struct["__obj__"] = api_obj
-                    json_answer = json.dumps(json_struct)
+                    json_answer = json.dumps(
+                        json_struct,
+                        cls=DjangoJSONEncoder,
+                    )
                     return HttpResponse(
                         json_answer,
                         content_type="application/json",
@@ -5285,7 +5305,7 @@ class GenDetail(GenBase, DetailView):  # type: ignore
         if self.json_worker:
             # Try to serialize it as a JSON string
             try:
-                json_answer = json.dumps(context)
+                json_answer = json.dumps(context, cls=DjangoJSONEncoder)
             except TypeError as e:
                 raise TypeError(
                     "Couldn't serialize response from model '{}' "
@@ -5456,7 +5476,7 @@ class GenForeignKey(GenBase, View):
         custom_answer = self.custom_answer(final_answer)
 
         # Convert the answer to JSON
-        json_answer = json.dumps(custom_answer)
+        json_answer = json.dumps(custom_answer, cls=DjangoJSONEncoder)
 
         # Send it
         return HttpResponse(json_answer, content_type="application/json")
@@ -5547,6 +5567,6 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             obj.save()
             # Return an answer
             return HttpResponse(
-                json.dumps({"pk": obj.pk}),
+                json.dumps({"pk": obj.pk}, cls=DjangoJSONEncoder),
                 content_type="application/json",
             )

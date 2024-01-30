@@ -31,6 +31,7 @@ from captcha.widgets import ReCaptcha  # type: ignore[import-not-found]
 from django import forms
 from django.conf import settings
 from django.core.files.base import File
+from django.core.serializers.json import DjangoJSONEncoder
 from django.urls import resolve, reverse
 from django.utils import formats
 from django.utils.encoding import smart_str
@@ -258,12 +259,16 @@ class StaticSelect(forms.widgets.Select):
         if is_multiple:
             if value:
                 if isinstance(value, list):
-                    valuejs = json.dumps([int(x) for x in value])
+                    valuejs = json.dumps(
+                        [int(x) for x in value],
+                        cls=DjangoJSONEncoder,
+                    )
                 else:
                     valuejs = json.dumps(
                         [
                             int(value),
                         ],
+                        cls=DjangoJSONEncoder,
                     )
 
                 html += ' ng-init="{}={}"'.format(vmodel, valuejs)
@@ -347,10 +352,16 @@ class StaticSelect(forms.widgets.Select):
             html += "{}.{}.$setViewValue({});".format(
                 vform,
                 vmodel,
-                json.dumps(list_value).replace('"', "'"),
+                json.dumps(list_value, cls=DjangoJSONEncoder).replace(
+                    '"',
+                    "'",
+                ),
             )
             # html += u"$parent.{1}.$setViewValue({2});".format(vform,
-            # vmodel,json.dumps(list_value).replace('"', "'"))
+            # vmodel,json.dumps(
+            #     list_value,
+            #     cls=DjangoJSONEncoder
+            # ).replace('"', "'"))
 
         html += ' "'
         # Build the rest of the tag

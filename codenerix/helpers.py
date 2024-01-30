@@ -33,6 +33,7 @@ from uuid import UUID
 from dateutil.tz import tzutc
 from django.conf import settings
 from django.core.cache import cache
+from django.core.serializers.json import DjangoJSONEncoder
 
 # Django
 from django.db.models import Q
@@ -609,7 +610,7 @@ def trace_json_error(struct, path=[]):
             idx += 1
     else:
         try:
-            json.dumps(struct)
+            json.dumps(struct, cls=DjangoJSONEncoder)
         except Exception:
             found = path
 
@@ -654,7 +655,7 @@ def form_answer(status, answer):
 
     # Encode answer
     answer_encoded = urlsafe_base64_encode(
-        str.encode(json.dumps(answer)),
+        str.encode(json.dumps(answer, cls=DjangoJSONEncoder)),
     ).decode()
 
     # Build success URL

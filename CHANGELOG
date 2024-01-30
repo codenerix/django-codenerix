@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.56] - 2024-01-30
+### Bugfixes
+ - Improved JSON encoding with DjangoJSONEncoder in a few places where no other encoder was used
+
+
 ## [4.0.55] - 2024-01-26
 ### Bugfixes
  - Added CustomFilters dependency to AngularJS so the user Custom Filters will work as expected
