@@ -1,4 +1,4 @@
-__version__ = "4.0.58"
+__version__ = "4.0.59"
 
 __authors__ = [
     "Juanmi Taboada",

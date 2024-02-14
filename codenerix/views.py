@@ -84,6 +84,7 @@ from django_stubs_ext import StrOrPromise
 
 # Export to Excel
 from openpyxl import Workbook
+from openpyxl.cell.cell import TYPE_NUMERIC
 from openpyxl.styles import Border, Color, Font, PatternFill, Side
 
 from codenerix.helpers import (
@@ -3831,9 +3832,10 @@ class GenList(GenBase, ListView):  # type: ignore
         tmp = []
         types = []
         for col in answer["table"]["head"]["columns"]:
-            tmp.append(col["name"])
-            columns.append(col["id"])
-            types.append(col["type"])
+            if col["id"] is not None:
+                tmp.append(col["name"])
+                columns.append(col["id"])
+                types.append(col["type"])
         ws1.append(tmp)
 
         for col in range(len(columns)):
@@ -3853,29 +3855,31 @@ class GenList(GenBase, ListView):  # type: ignore
         }
         for key_row, row in enumerate(answer["table"]["body"]):
             tmp = []
-            for key_col, id in enumerate(columns):
-                # print(key_row, key_col)
-                if not isinstance(row[id], list):
+            for key_col, cid in enumerate(columns):
+                # print(key_row, key_col, cid, row[cid])
+                if isinstance(row[cid], list):
+                    tmp.append("\n".join(row[cid]))
+                elif isinstance(row[cid], dict):
+                    tmp.append(json.dumps(row[cid]))
+                else:
                     cell = self.__cell_format(key_col + 1, key_row + 2, "{}")
 
-                    if row[id] and not isinstance(row[id], float):
+                    if row[cid] and not isinstance(row[cid], float):
                         try:
-                            t = parse(str(row[id]))
+                            t = parse(str(row[cid]))
                             if types[key_col] == "DateTimeField":
                                 cells["DateTimeField"].append(cell)
                             elif isinstance(t, models.DateField):
                                 cells["DateTimeField"].append(cell)
                             else:
-                                t = row[id]
+                                t = row[cid]
                         except OverflowError:
-                            t = row[id]
+                            t = row[cid]
                         except ValueError:
-                            t = row[id]
+                            t = row[cid]
                     else:
-                        t = row[id]
+                        t = row[cid]
                     tmp.append(t)
-                else:
-                    tmp.append("\n".join(row[id]))
             ws1.append(tmp)
 
         # Autoajust columns
@@ -3907,12 +3911,12 @@ class GenList(GenBase, ListView):  # type: ignore
         for cell in cells["DateTimeField"]:
             wbcell = wb.active[cell]
             # wbcell.style = Style()
-            wbcell.data_type = wbcell.TYPE_NUMERIC
+            wbcell.data_type = TYPE_NUMERIC
 
         for cell in cells["DateField"]:
             wbcell = wb.active[cell]
             # wbcell.style = Style()
-            wbcell.data_type = wbcell.TYPE_NUMERIC
+            wbcell.data_type = TYPE_NUMERIC
 
         # Prepare output
         with BytesIO() as tmp:
@@ -3942,46 +3946,48 @@ class GenList(GenBase, ListView):  # type: ignore
 
             for key_row, row in enumerate(answer["table"]["body"]):
                 tmp = []
-                for key_col, id in enumerate(columns):
+                for key_col, cid in enumerate(columns):
                     # print(key_row, key_col)
-                    if not isinstance(row[id], list):
-                        if row[id] and not isinstance(row[id], float):
-                            # Rewrite row[id] if required
-                            if isinstance(row[id], datetime.datetime):
+                    if isinstance(row[cid], list):
+                        tmp.append("\n".join(row[cid]))
+                    elif isinstance(row[cid], dict):
+                        tmp.append(json.dumps(row[cid]))
+                    else:
+                        if row[cid] and not isinstance(row[cid], float):
+                            # Rewrite row[cid] if required
+                            if isinstance(row[cid], datetime.datetime):
                                 # Convert datetime to string
-                                t = row[id].strftime(
+                                t = row[cid].strftime(
                                     formats.get_format(
                                         "DATETIME_INPUT_FORMATS",
                                         lang=self.language,
                                     )[0],
                                 )
-                            elif isinstance(row[id], datetime.date):
+                            elif isinstance(row[cid], datetime.date):
                                 # Convert datetime to string
-                                t = row[id].strftime(
+                                t = row[cid].strftime(
                                     formats.get_format(
                                         "DATE_INPUT_FORMATS",
                                         lang=self.language,
                                     )[0],
                                 )
-                            elif isinstance(row[id], datetime.time):
+                            elif isinstance(row[cid], datetime.time):
                                 # Convert datetime to string
-                                t = row[id].strftime(
+                                t = row[cid].strftime(
                                     formats.get_format(
                                         "TIME_INPUT_FORMATS",
                                         lang=self.language,
                                     )[0],
                                 )
-                            elif isinstance(row[id], Decimal):
+                            elif isinstance(row[cid], Decimal):
                                 # Convert Decimal to float
-                                t = float(row[id])
+                                t = float(row[cid])
                             else:
-                                t = row[id]
+                                t = row[cid]
 
                         else:
-                            t = row[id]
+                            t = row[cid]
                         tmp.append(t)
-                    else:
-                        tmp.append("\n".join(row[id]))
                 writer.writerow(tmp)
 
             # Get content
@@ -4010,45 +4016,47 @@ class GenList(GenBase, ListView):  # type: ignore
 
         for key_row, row in enumerate(answer["table"]["body"]):
             tmp = []
-            for key_col, id in enumerate(columns):
+            for key_col, cid in enumerate(columns):
                 # print(key_row, key_col)
-                if not isinstance(row[id], list):
-                    if row[id] and not isinstance(row[id], float):
-                        # Rewrite row[id] if required
-                        if isinstance(row[id], datetime.datetime):
+                if isinstance(row[cid], list):
+                    tmp.append("\n".join(row[cid]))
+                elif isinstance(row[cid], dict):
+                    tmp.append(json.dumps(row[cid]))
+                else:
+                    if row[cid] and not isinstance(row[cid], float):
+                        # Rewrite row[cid] if required
+                        if isinstance(row[cid], datetime.datetime):
                             # Convert datetime to string
-                            t = row[id].strftime(
+                            t = row[cid].strftime(
                                 formats.get_format(
                                     "DATETIME_INPUT_FORMATS",
                                     lang=self.language,
                                 )[0],
                             )
-                        elif isinstance(row[id], datetime.date):
+                        elif isinstance(row[cid], datetime.date):
                             # Convert datetime to string
-                            t = row[id].strftime(
+                            t = row[cid].strftime(
                                 formats.get_format(
                                     "DATE_INPUT_FORMATS",
                                     lang=self.language,
                                 )[0],
                             )
-                        elif isinstance(row[id], datetime.time):
+                        elif isinstance(row[cid], datetime.time):
                             # Convert datetime to string
-                            t = row[id].strftime(
+                            t = row[cid].strftime(
                                 formats.get_format(
                                     "TIME_INPUT_FORMATS",
                                     lang=self.language,
                                 )[0],
                             )
-                        elif isinstance(row[id], Decimal):
+                        elif isinstance(row[cid], Decimal):
                             # Convert Decimal to float
-                            t = float(row[id])
+                            t = float(row[cid])
                         else:
-                            t = row[id]
+                            t = row[cid]
                     else:
-                        t = row[id]
+                        t = row[cid]
                     tmp.append(t)
-                else:
-                    tmp.append("\n".join(row[id]))
             janswer["body"].append(tmp)
 
             # Get content
@@ -4073,45 +4081,47 @@ class GenList(GenBase, ListView):  # type: ignore
 
             for key_row, row in enumerate(answer["table"]["body"]):
                 tmp = {}
-                for key_col, id in enumerate(columns):
+                for key_col, cid in enumerate(columns):
                     # print(key_row, key_col)
-                    if not isinstance(row[id], list):
-                        if row[id] and not isinstance(row[id], float):
-                            # Rewrite row[id] if required
-                            if isinstance(row[id], datetime.datetime):
+                    if isinstance(row[cid], list):
+                        tmp[cid] = "\n".join(row[cid])
+                    elif isinstance(row[cid], dict):
+                        tmp[cid] = json.dumps(row[cid])
+                    else:
+                        if row[cid] and not isinstance(row[cid], float):
+                            # Rewrite row[cid] if required
+                            if isinstance(row[cid], datetime.datetime):
                                 # Convert datetime to string
-                                t = row[id].strftime(
+                                t = row[cid].strftime(
                                     formats.get_format(
                                         "DATETIME_INPUT_FORMATS",
                                         lang=self.language,
                                     )[0],
                                 )
-                            elif isinstance(row[id], datetime.date):
+                            elif isinstance(row[cid], datetime.date):
                                 # Convert datetime to string
-                                t = row[id].strftime(
+                                t = row[cid].strftime(
                                     formats.get_format(
                                         "DATE_INPUT_FORMATS",
                                         lang=self.language,
                                     )[0],
                                 )
-                            elif isinstance(row[id], datetime.time):
+                            elif isinstance(row[cid], datetime.time):
                                 # Convert datetime to string
-                                t = row[id].strftime(
+                                t = row[cid].strftime(
                                     formats.get_format(
                                         "TIME_INPUT_FORMATS",
                                         lang=self.language,
                                     )[0],
                                 )
-                            elif isinstance(row[id], Decimal):
+                            elif isinstance(row[cid], Decimal):
                                 # Convert Decimal to float
-                                t = float(row[id])
+                                t = float(row[cid])
                             else:
-                                t = row[id]
+                                t = row[cid]
                         else:
-                            t = row[id]
-                        tmp[id] = t
-                    else:
-                        tmp[id] = "\n".join(row[id])
+                            t = row[cid]
+                        tmp[cid] = t
 
                 # Get content
                 tmpfile.write(
@@ -4144,45 +4154,47 @@ class GenList(GenBase, ListView):  # type: ignore
 
         for key_row, row in enumerate(answer["table"]["body"]):
             tmp = []
-            for key_col, id in enumerate(columns):
+            for key_col, cid in enumerate(columns):
                 # print(key_row, key_col)
-                if not isinstance(row[id], list):
-                    if row[id] and not isinstance(row[id], float):
-                        # Rewrite row[id] if required
-                        if isinstance(row[id], datetime.datetime):
+                if isinstance(row[cid], list):
+                    tmp.append("\n".join(row[cid]))
+                elif isinstance(row[cid], dict):
+                    tmp.append(json.dumps(row[cid]))
+                else:
+                    if row[cid] and not isinstance(row[cid], float):
+                        # Rewrite row[cid] if required
+                        if isinstance(row[cid], datetime.datetime):
                             # Convert datetime to string
-                            t = row[id].strftime(
+                            t = row[cid].strftime(
                                 formats.get_format(
                                     "DATETIME_INPUT_FORMATS",
                                     lang=self.language,
                                 )[0],
                             )
-                        elif isinstance(row[id], datetime.date):
+                        elif isinstance(row[cid], datetime.date):
                             # Convert datetime to string
-                            t = row[id].strftime(
+                            t = row[cid].strftime(
                                 formats.get_format(
                                     "DATE_INPUT_FORMATS",
                                     lang=self.language,
                                 )[0],
                             )
-                        elif isinstance(row[id], datetime.time):
+                        elif isinstance(row[cid], datetime.time):
                             # Convert datetime to string
-                            t = row[id].strftime(
+                            t = row[cid].strftime(
                                 formats.get_format(
                                     "TIME_INPUT_FORMATS",
                                     lang=self.language,
                                 )[0],
                             )
-                        elif isinstance(row[id], Decimal):
+                        elif isinstance(row[cid], Decimal):
                             # Convert Decimal to float
-                            t = float(row[id])
+                            t = float(row[cid])
                         else:
-                            t = row[id]
+                            t = row[cid]
                     else:
-                        t = row[id]
+                        t = row[cid]
                     tmp.append(t)
-                else:
-                    tmp.append("\n".join(row[id]))
             janswer["body"].append(tmp)
 
             # Get content

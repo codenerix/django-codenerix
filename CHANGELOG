@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.59] - 2024-02-14
+### Features
+ - Verified to work with Django 5.x
+### Bugfixes
+ - Repair export lists in any format when having None columns and complex columns with dictionaries inside them
+
+
 ## [4.0.58] - 2024-02-14
 ### Bugfixes
  - Repair exporting lists in XLS format
