@@ -17,11 +17,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List, Optional, Tuple
+
 from django.db import transaction
 
 # Warning: Q objects are used inside an eval() that you can find somewhere down
 from django.db.models import Q  # noqa: F401
-from django.http import HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 
 
 class MultiForm:
@@ -49,7 +51,7 @@ class MultiForm:
             kwargs["scope_prefix"] = self.field_prefix
         return kwargs
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs):
         """
         Handles GET requests and instantiates blank versions of the form and
         its inline formsets.
@@ -57,10 +59,10 @@ class MultiForm:
 
         # Prepare base
         if "pk" in kwargs:
-            self.object = self.get_object()
+            self.object = self.get_object()  # type: ignore[attr-defined]
         else:
             self.object = None
-        form_class = self.get_form_class()
+        form_class = self.get_form_class()  # type: ignore[attr-defined]
 
         # Get prefix
         if "field_prefix" in form_class.Meta.__dict__:
@@ -72,12 +74,12 @@ class MultiForm:
         self.field_prefix = field_prefix
 
         # Build form
-        form = self.get_form(form_class)
+        form = self.get_form(form_class)  # type: ignore[attr-defined]
 
         # Find groups
         if "groups" in dir(self):
             # Save groups
-            groups = self.groups
+            groups = self.groups  # type: ignore[attr-defined]
             # Redefine groups inside the form
             form.__groups__ = lambda: groups
             # Initialize list of fields
@@ -99,9 +101,11 @@ class MultiForm:
             form.Meta.extend = {}
 
         # For every extra form
-        forms = []
+        forms: List[
+            Tuple[Optional[HttpRequest], Optional[str], Optional[str]]
+        ] = []
         position_form_default = 0
-        for formelement, linkerfield, modelfilter in self.forms:
+        for formelement, linkerfield, modelfilter in self.forms:  # type: ignore[attr-defined] # noqa: E501
             if formelement is None:
                 formobj = form
                 position_form_default = len(forms)
@@ -185,8 +189,8 @@ class MultiForm:
             form.list_fields = fields
 
         # Add context and return new context
-        return self.render_to_response(
-            self.get_context_data(
+        return self.render_to_response(  # type: ignore[attr-defined]
+            self.get_context_data(  # type: ignore[attr-defined]
                 form=form,
                 forms=forms,
                 open_tabs=open_tabs,

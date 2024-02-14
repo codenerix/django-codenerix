@@ -3888,10 +3888,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 except TypeError:
                     value = None
                 if value:
-                    try:
-                        column_letter = cell.column
-                    except AttributeError:
-                        column_letter = cell.column_letter
+                    column_letter = cell.column_letter
                     dims[column_letter] = (
                         max(
                             (
