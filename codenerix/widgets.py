@@ -34,6 +34,7 @@ from django.core.files.base import File
 from django.core.serializers.json import DjangoJSONEncoder
 from django.urls import resolve, reverse
 from django.utils import formats
+from django.utils.choices import BlankChoiceIterator
 from django.utils.encoding import smart_str
 from django.utils.html import escapejs
 from django.utils.translation import get_language
@@ -114,7 +115,9 @@ class StaticSelectMulti(forms.widgets.Select):
                         key,
                         escapejs(smart_str(label)),
                     )
-            elif isinstance(self.choices, list):
+            elif (isinstance(self.choices, BlankChoiceIterator)) or (
+                isinstance(self.choices, list)
+            ):
                 for key, label in self.choices:
                     if value == key:
                         valuejs.append(
@@ -305,7 +308,9 @@ class StaticSelect(forms.widgets.Select):
                     escapejs(smart_str(label)),
                 )
                 index += 1
-        elif isinstance(self.choices, list):
+        elif (isinstance(self.choices, BlankChoiceIterator)) or (
+            isinstance(self.choices, list)
+        ):
             for key, label in self.choices:
                 if value == key:
                     ini = index

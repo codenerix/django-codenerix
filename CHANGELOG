@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.60] - 2024-03-04
+### Bugfixes
+ - Repair StaticSelect widget to process properly Django 5.x choices detecting BlankChoiceIterator as a list object instead a queryset
+ - Repair get_success_url() method to work correctly on Django 5.x and stay compatible with Django 4.x
+
+
 ## [4.0.59] - 2024-02-14
 ### Features
  - Verified to work with Django 5.x

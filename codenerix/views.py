@@ -4363,17 +4363,36 @@ class GenModify:
 
         # Set the pk in the success url
         try:
-            self.success_url.__dict__["_proxy____kw"]["kwargs"][
+            # Try using decode first
+            self.success_url.__dict__["_kw"]["kwargs"][
                 "answer"
             ] = urlsafe_base64_encode(
                 str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
             ).decode()
         except AttributeError:
-            self.success_url.__dict__["_proxy____kw"]["kwargs"][
-                "answer"
-            ] = urlsafe_base64_encode(
-                str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
-            )
+            try:
+                # Try without decode
+                self.success_url.__dict__["_kw"]["kwargs"][
+                    "answer"
+                ] = urlsafe_base64_encode(
+                    str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
+                )
+            except AttributeError:
+                # Django <= 4.x key
+                try:
+                    # Try using decode first
+                    self.success_url.__dict__["_proxy____kw"]["kwargs"][
+                        "answer"
+                    ] = urlsafe_base64_encode(
+                        str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
+                    ).decode()
+                except AttributeError:
+                    # Try without decode
+                    self.success_url.__dict__["_proxy____kw"]["kwargs"][
+                        "answer"
+                    ] = urlsafe_base64_encode(
+                        str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
+                    )
         # Let the system decide next step
         return super().get_success_url()
 
