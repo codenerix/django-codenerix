@@ -34,13 +34,18 @@ from django.core.files.base import File
 from django.core.serializers.json import DjangoJSONEncoder
 from django.urls import resolve, reverse
 from django.utils import formats
-from django.utils.choices import BlankChoiceIterator
 from django.utils.encoding import smart_str
 from django.utils.html import escapejs
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 
 from codenerix.helpers import get_class
+
+try:
+    from django.utils.choices import BlankChoiceIterator
+except ModuleNotFoundError:
+    # Django 4.x compatibility
+    BlankChoiceIterator = list
 
 
 class StaticSelectMulti(forms.widgets.Select):

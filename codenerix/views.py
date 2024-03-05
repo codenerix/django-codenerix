@@ -1284,7 +1284,7 @@ class GenBase:
         MsearchF = None  # noqa: N806
         MsearchQ = None  # noqa: N806
         if hasattr(myclass, "__limitQ__"):
-            Mclass = myclass()
+            Mclass = myclass()  # noqa: N806
             Mclass.request = self.request
             Mclass.user = self.user
             Mclass.codenerix_request = self.codenerix_request
@@ -4361,39 +4361,29 @@ class GenModify:
                     # Add the object information
                     attr["__obj__"] = api_obj
 
+        # Choose key
+        if "_kw" in self.success_url.__dict__:
+            # Django >= 5.x key
+            success_key = "_kw"
+        else:
+            # Django <= 4.x key
+            success_key = "_proxy____kw"
         # Set the pk in the success url
         try:
             # Try using decode first
-            self.success_url.__dict__["_kw"]["kwargs"][
+            self.success_url.__dict__[success_key]["kwargs"][
                 "answer"
             ] = urlsafe_base64_encode(
                 str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
             ).decode()
         except AttributeError:
-            try:
-                # Try without decode
-                self.success_url.__dict__["_kw"]["kwargs"][
-                    "answer"
-                ] = urlsafe_base64_encode(
-                    str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
-                )
-            except AttributeError:
-                # Django <= 4.x key
-                try:
-                    # Try using decode first
-                    self.success_url.__dict__["_proxy____kw"]["kwargs"][
-                        "answer"
-                    ] = urlsafe_base64_encode(
-                        str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
-                    ).decode()
-                except AttributeError:
-                    # Try without decode
-                    self.success_url.__dict__["_proxy____kw"]["kwargs"][
-                        "answer"
-                    ] = urlsafe_base64_encode(
-                        str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
-                    )
-        # Let the system decide next step
+            # Try without decode
+            self.success_url.__dict__[success_key]["kwargs"][
+                "answer"
+            ] = urlsafe_base64_encode(
+                str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
+            )
+
         return super().get_success_url()
 
     def get_context_data(self, **kwargs):
