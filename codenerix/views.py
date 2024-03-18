@@ -446,7 +446,10 @@ def gen_auth_permission(
 ):
     # Check if the GENPERMISSIONS settings is shutting down the PERMISSION
     # system control from CODENERIX
-    if hasattr(settings, "GENPERMISSIONS") and not settings.GENPERMISSIONS:
+    if (
+        hasattr(settings, "GENPERMISSIONS")
+        and not settings.GENPERMISSIONS  # type: ignore[misc]
+    ):
         if not explained:
             return True
         else:
