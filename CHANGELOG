@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.64] - 2024-03-06
+### Feature
+ - Typing and error detection added on GenList authorization system
+
+
+## [4.0.63] - 2024-03-06
+### Bugfixes
+ - Export feature will process all registers and not only those selected by the user on the screen
+
+
 ## [4.0.62] - 2024-03-05
 ### Bugfixes
  - Repair Django 4.x compatibility

@@ -37,7 +37,7 @@ import string
 import time
 from decimal import Decimal
 from io import BytesIO, StringIO
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import bson
 import pytz
@@ -440,9 +440,9 @@ def gen_auth_permission(
     action_permission,
     model_name,
     appname,
-    permission=None,
-    permission_group=None,
-    explained=False,
+    permission: Optional[Union[str, List]] = None,
+    permission_group: Optional[Union[str, List]] = None,
+    explained: bool = False,
 ):
     # Check if the GENPERMISSIONS settings is shutting down the PERMISSION
     # system control from CODENERIX
@@ -771,37 +771,55 @@ class GenBase:
         # Keep going with dispatch
         return super().dispatch(*args, **kwargs)
 
-    def auth_permission(self, action_permission, explained=False):
-        permission = getattr(self, "permission", None)
-        permission_group = getattr(self, "permission_group", None)
-
-        model_name = getattr(self.model, "_meta", None) and getattr(
-            self.model._meta,
-            "model_name",
+    def auth_permission(self, action_permission, explained: bool = False):
+        permission: Optional[Union[str, List]] = getattr(
+            self,
+            "permission",
+            None,
         )
-        if not model_name:
-            if hasattr(self, "model") and self.model is not None:
-                raise OSError(
-                    "Couldn't find a model_name inside your model, did "
-                    "you provided a model or some other class? - Type "
-                    "of your object is '{}'".format(self.model.__module__),
+        permission_group: Optional[Union[str, List]] = getattr(
+            self,
+            "permission_group",
+            None,
+        )
+
+        # Check if we have a model
+        if hasattr(self, "model") and self.model is not None:
+            # Check if we have a request
+            if hasattr(self, "request") and hasattr(self.request, "user"):
+                # Get the model name
+                model_name = getattr(self.model, "_meta", None) and getattr(
+                    self.model._meta,
+                    "model_name",
                 )
-            else:
-                raise OSError("Did you forget to set model in your view?")
+                if model_name:
+                    # Get the authorization
+                    (authorized, reason) = gen_auth_permission(
+                        self.request.user,
+                        action_permission,
+                        model_name,
+                        self._appname,
+                        permission,
+                        permission_group,
+                        explained=True,
+                    )
 
-        (authorized, reason) = gen_auth_permission(
-            self.request.user,
-            action_permission,
-            model_name,
-            self._appname,
-            permission,
-            permission_group,
-            explained=True,
-        )
-        if not explained:
-            return authorized
+                    # Decide whether to return the reason
+                    if not explained:
+                        return authorized
+                    else:
+                        return (authorized, reason)
+
+                else:
+                    raise OSError(
+                        "Couldn't find a model_name inside your model, did "
+                        "you provided a model or some other class? - Type "
+                        "of your object is '{}'".format(self.model.__module__),
+                    )
+            else:
+                raise OSError("Request not found!")
         else:
-            return (authorized, reason)
+            raise OSError("Did you forget to set model in your view?")
 
     def _setup(self, request):
         """
@@ -2919,9 +2937,14 @@ class GenList(GenBase, ListView):  # type: ignore
                 self.default_rows_per_page,
             )
             pages_to_bring = jsondata.get("pages_to_bring", 1)
-            if total_rows_per_page is None:
+            if self.export:
+                # Bring all pages overriding any other action
+                total_rows_per_page = queryset.count()
+            elif total_rows_per_page is None:
+                # Bring default pages
                 total_rows_per_page = self.default_rows_per_page
-            elif total_rows_per_page == "All" or self.export:
+            elif total_rows_per_page == "All":
+                # Bring all pages
                 total_rows_per_page = queryset.count()
             paginator = Paginator(queryset, total_rows_per_page)
             total_registers = paginator.count
