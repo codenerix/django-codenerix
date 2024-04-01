@@ -69,6 +69,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  - Added CustomFilters dependency to AngularJS so the user Custom Filters will work as expected
 
 
+## [4.0.55] - 2024-01-24
+### Features
+ - Requirements updated
+
 ## [4.0.54] - 2024-01-24
 ### Bugfixes
  - Little bug corrected when tryin to parse dates on Export to Excel
