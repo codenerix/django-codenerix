@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.66] - 2024-04-01
+### Feature
+ - On lists, it will show an hyphen symbol when a multi elements cell is empty
+
+
 ## [4.0.65] - 2024-03-18
 ### Feature
  - Avoid mypy warning when validating GENPERMISSIONS attribute in settings

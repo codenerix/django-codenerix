@@ -25,7 +25,8 @@ limitations under the License.
 
 <td ng-repeat="column in data.table.head.columns" ng-switch="isList(row[column.id])">
     <ul ng-switch-when="true" ng-init="key=getKey(column.id)">
-        <li ng-repeat="info in row[column.id] track by $index">{{info}}</li>
+        <li ng-if="row[column.id].length==0" style="list-style:none">-</li>
+        <li ng-if="row[column.id].length>0" ng-repeat="info in row[column.id] track by $index">{{info}}</li>
     </ul>
     <span ng-switch-when="false">
         <span codenerix-html-compile='row[column.id]|codenerix:column.filter'>

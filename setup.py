@@ -50,7 +50,7 @@ setup(
     ],
     # cmdclass={ 'install': CustomInstallCommand, },
     install_requires=[
-        "codenerix_lib>=1.0.23",
+        "codenerix_lib>=1.0.24",
         "pymongo",
         "python-dateutil",
         "django-recaptcha>=1.2.1,<1.3",
