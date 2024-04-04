@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.68] - 2024-04-04
+### Feature
+- Properties are now usable on GenList inside __fields__() method
+### Added
+- A readonly=True attribute has been added to GenList as an alias for linkadd=False and linkedit=False
+- A readonly=True attribute has been added to GenDetails as an alias for linkedit=False, linkdelete=False
+- A readonly=True attribute has been added to GenModify as an alias for linkdelete=False, linksavenew=False and linksavehere=False
+
+## [4.0.67] - 2024-04-01
+#### Changed
+- requirements updated
+
 ## [4.0.66] - 2024-04-01
 ### Feature
  - On lists, it will show an hyphen symbol when a multi elements cell is empty

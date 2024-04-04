@@ -1398,8 +1398,6 @@ class GenList(GenBase, ListView):  # type: ignore
         permission_group = 'Administrator'          # Example
         permission_group = ['group2', 'group3', ... ] # Allowed only if user belongs to group2 or group3
 
-        readonly = False                            # It is an alias that set linkadd and linkedit to False
-
         user = <User Instance>                      # User object that GenView will use for all the process (except permissions checks)
 
         default_rows_per_page = 50                  # Number of rows to use on each page (by default is 50)
@@ -1435,6 +1433,7 @@ class GenList(GenBase, ListView):  # type: ignore
         client_context = {}                         # Contains information for filters in the client side, this structure will be returned inside
                                                     # the meta structure from JSON answers
 
+        readonly = False                            # It is an alias that set linkadd and linkedit to False
         linkadd = False                             # With 'False' it will disable add button (by default this is enabled, 'True')
         linkedit = False                            # With 'False' it will disable edit autolink for rows (by default this is enabled, 'True')
         show_details = True                         # With 'True' it will show the details panel before editing the register (by default this is disabled, 'False')
@@ -4430,10 +4429,16 @@ class GenModify:
         context["show_details"] = getattr(self, "show_details", False)
 
         # Check links
-        context["linkdelete"] = getattr(self, "linkdelete", True)
         context["linkback"] = getattr(self, "linkback", True)
-        context["linksavenew"] = getattr(self, "linksavenew", True)
-        context["linksavehere"] = getattr(self, "linksavehere", True)
+        context["readonly"] = getattr(self, "readonly", False)
+        if not context["readonly"]:
+            context["linkdelete"] = getattr(self, "linkdelete", True)
+            context["linksavenew"] = getattr(self, "linksavenew", True)
+            context["linksavehere"] = getattr(self, "linksavehere", True)
+        else:
+            context["linkdelete"] = False
+            context["linksavenew"] = False
+            context["linksavehere"] = False
 
         # Check return invalid json
         context["return_invalid_json"] = getattr(
@@ -5187,6 +5192,9 @@ class GenDetail(GenBase, DetailView):  # type: ignore
         # Get tabs_autorender information
         self.extra_context["tabs_autorender"] = self.get_tabs_autorender()
 
+        # Check linkback
+        context["linkback"] = getattr(self, "linkback", True)
+
         # Check readonly
         context["readonly"] = getattr(self, "readonly", False)
         if not context["readonly"]:
@@ -5203,46 +5211,51 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                 "linkdelete",
                 True,
             ) and self.auth_permission("delete")
+
+            # Check lock delete
+            try:
+                if (
+                    "internal_lock_delete" in object_property
+                    and self.object.internal_lock_delete(self.request)
+                    is not None
+                ):
+                    context[
+                        "cannot_delete"
+                    ] = self.object.internal_lock_delete(
+                        self.request,
+                    )
+            except TypeError:
+                # Compatiblity mode for version 20160928 and lower
+                if (
+                    "internal_lock_delete" in object_property
+                    and self.object.internal_lock_delete() is not None
+                ):
+                    context[
+                        "cannot_delete"
+                    ] = self.object.internal_lock_delete()
+
+            # Check lock update
+            try:
+                if (
+                    "lock_update" in object_property
+                    and self.object.lock_update(self.request) is not None
+                ):
+                    context["cannot_update"] = self.object.lock_update(
+                        self.request,
+                    )
+            except TypeError:
+                # Compatiblity mode for version 20160928 and lower
+                if (
+                    "lock_update" in object_property
+                    and self.object.lock_update() is not None
+                ):
+                    context["cannot_update"] = self.object.lock_update()
+
         else:
             context["linkedit"] = False
             context["linkdelete"] = False
-
-        # Check linkback
-        context["linkback"] = getattr(self, "linkback", True)
-
-        # Check lock delete
-        try:
-            if (
-                "internal_lock_delete" in object_property
-                and self.object.internal_lock_delete(self.request) is not None
-            ):
-                context["cannot_delete"] = self.object.internal_lock_delete(
-                    self.request,
-                )
-        except TypeError:
-            # Compatiblity mode for version 20160928 and lower
-            if (
-                "internal_lock_delete" in object_property
-                and self.object.internal_lock_delete() is not None
-            ):
-                context["cannot_delete"] = self.object.internal_lock_delete()
-
-        # Check lock update
-        try:
-            if (
-                "lock_update" in object_property
-                and self.object.lock_update(self.request) is not None
-            ):
-                context["cannot_update"] = self.object.lock_update(
-                    self.request,
-                )
-        except TypeError:
-            # Compatiblity mode for version 20160928 and lower
-            if (
-                "lock_update" in object_property
-                and self.object.lock_update() is not None
-            ):
-                context["cannot_update"] = self.object.lock_update()
+            context["cannot_delete"] = True
+            context["cannot_update"] = True
 
         # Update context
         context.update(self.extra_context)
@@ -5280,19 +5293,24 @@ class GenDetail(GenBase, DetailView):  # type: ignore
             meta["version"] = getattr(settings, "VERSION", None)
             meta["version_api"] = getattr(settings, "VERSION_API", None)
 
-        # Check linkedit
-        meta["linkedit"] = getattr(
-            self,
-            "linkedit",
-            True,
-        ) and self.auth_permission("change")
+        context["readonly"] = getattr(self, "readonly", False)
+        if not context["readonly"]:
+            # Check linkedit
+            meta["linkedit"] = getattr(
+                self,
+                "linkedit",
+                True,
+            ) and self.auth_permission("change")
 
-        # Check linkdelete
-        meta["linkdelete"] = getattr(
-            self,
-            "linkdelete",
-            True,
-        ) and self.auth_permission("delete")
+            # Check linkdelete
+            meta["linkdelete"] = getattr(
+                self,
+                "linkdelete",
+                True,
+            ) and self.auth_permission("delete")
+        else:
+            meta["linkedit"] = False
+            meta["linkdelete"] = False
 
         # Check linkback
         meta["linkback"] = getattr(self, "linkback", True)
