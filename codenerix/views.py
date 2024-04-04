@@ -1398,6 +1398,8 @@ class GenList(GenBase, ListView):  # type: ignore
         permission_group = 'Administrator'          # Example
         permission_group = ['group2', 'group3', ... ] # Allowed only if user belongs to group2 or group3
 
+        readonly = False                            # It is an alias that set linkadd and linkedit to False
+
         user = <User Instance>                      # User object that GenView will use for all the process (except permissions checks)
 
         default_rows_per_page = 50                  # Number of rows to use on each page (by default is 50)
@@ -1922,7 +1924,7 @@ class GenList(GenBase, ListView):  # type: ignore
             obj = self.model
 
         field_callable = getattr(obj, names[0], None)
-        if callable(field_callable):
+        if callable(field_callable) or isinstance(field_callable, property):
             # methods
             return None
         else:
@@ -3128,19 +3130,26 @@ class GenList(GenBase, ListView):  # type: ignore
                 "table"
             ] = "{}codenerix/partials/table.html".format(settings.STATIC_URL)
 
-        # Check linkadd
-        context["linkadd"] = getattr(
-            self,
-            "linkadd",
-            self.auth_permission("add") or getattr(self, "public", False),
-        )
+        # Check readonly
+        context["readonly"] = getattr(self, "readonly", False)
+        if not context["readonly"]:
+            # Check linkadd
+            context["linkadd"] = getattr(
+                self,
+                "linkadd",
+                self.auth_permission("add") or getattr(self, "public", False),
+            )
 
-        # Check linkedit
-        context["linkedit"] = getattr(
-            self,
-            "linkedit",
-            self.auth_permission("change") or getattr(self, "public", False),
-        )
+            # Check linkedit
+            context["linkedit"] = getattr(
+                self,
+                "linkedit",
+                self.auth_permission("change")
+                or getattr(self, "public", False),
+            )
+        else:
+            context["linkadd"] = False
+            context["linkedit"] = False
 
         # Check showdetails
         context["show_details"] = getattr(self, "show_details", False)
@@ -4265,6 +4274,7 @@ class GenModify:
     json = True                                     When 'True' it will return a JSON answer (default: True)
     json_details = True                             When 'True' it will add details to JSON answer (default: True)
 
+    readonly = False                                It is an alias that set linkdelete, linksavenew and linksavehere to False
     linkdelete = True                               When 'True' it will show "Delete" button on forms (default: True)
     linkback = True                                 When 'True' it will show "Go back" button on forms (default: True)
     linksavenew = True                              When 'True' it will show "Save and new" button on forms (default: True)
@@ -5177,19 +5187,25 @@ class GenDetail(GenBase, DetailView):  # type: ignore
         # Get tabs_autorender information
         self.extra_context["tabs_autorender"] = self.get_tabs_autorender()
 
-        # Check linkedit
-        context["linkedit"] = getattr(
-            self,
-            "linkedit",
-            True,
-        ) and self.auth_permission("change")
+        # Check readonly
+        context["readonly"] = getattr(self, "readonly", False)
+        if not context["readonly"]:
+            # Check linkedit
+            context["linkedit"] = getattr(
+                self,
+                "linkedit",
+                True,
+            ) and self.auth_permission("change")
 
-        # Check linkdelete
-        context["linkdelete"] = getattr(
-            self,
-            "linkdelete",
-            True,
-        ) and self.auth_permission("delete")
+            # Check linkdelete
+            context["linkdelete"] = getattr(
+                self,
+                "linkdelete",
+                True,
+            ) and self.auth_permission("delete")
+        else:
+            context["linkedit"] = False
+            context["linkdelete"] = False
 
         # Check linkback
         context["linkback"] = getattr(self, "linkback", True)
