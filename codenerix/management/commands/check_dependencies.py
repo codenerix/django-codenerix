@@ -17,9 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from codenerix_lib.debugger import Debugger
 from django.core.management.base import BaseCommand
-
-from codenerix.lib.debugger import Debugger
 
 try:
     from subprocess import getstatusoutput

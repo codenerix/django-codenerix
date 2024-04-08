@@ -30,11 +30,10 @@ except Exception:
 
     pythoncmd = "python2"
 
+from codenerix_lib.colors import colors
+from codenerix_lib.debugger import Debugger
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-
-from codenerix.lib.colors import colors
-from codenerix.lib.debugger import Debugger
 
 
 class Command(BaseCommand, Debugger):

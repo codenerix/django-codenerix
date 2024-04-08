@@ -18,79 +18,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Colors definition
+Deprecated library in favor for codenerix-lib
 """
-from colorama import init
 
-init()
+import inspect
+import sys
+from os import getcwd
 
-__version__ = "201109111106"
+from codenerix_lib.colors import *  # noqa: F403,F401
 
+# Show a warning message with information about who is importing this library
+cf = inspect.currentframe()
+me = True
+who = None
+while cf:
+    if cf.f_code.co_name == "<module>":
+        if me:
+            me = False
+        else:
+            who = (
+                cf.f_code.co_filename.replace(getcwd(), "."),
+                cf.f_lineno,
+                cf.f_code.co_name,
+            )
+            break
+    cf = cf.f_back
+if not who:
+    who = ("<unknown>", 0, "<unknown>")
 
-__all__ = ["colors"]
+print(
+    f"""
 
+========================== W A R N I N G =============================
+DJANGO-CODENERIX: you have imported 'lib.colors' which is DEPRECATED
+it will not work in newer versions, instead use 'codenerix_lib.colors'
+from codenerix-lib package", please update your code. This message was
+shown because is being imported by:
+'{who[0]}' at line {who[1]}
+======================================================================
 
-colors = {}
-
-colors["simplegrey"] = (0, 30)
-colors["simplered"] = (0, 31)
-colors["simplegreen"] = (0, 32)
-colors["simpleyellow"] = (0, 33)
-colors["simpleblue"] = (0, 34)
-colors["simplepurple"] = (0, 35)
-colors["simplecyan"] = (0, 36)
-colors["simplewhite"] = (0, 37)
-
-colors["grey"] = (1, 30)
-colors["red"] = (1, 31)
-colors["green"] = (1, 32)
-colors["yellow"] = (1, 33)
-colors["blue"] = (1, 34)
-colors["purple"] = (1, 35)
-colors["cyan"] = (1, 36)
-colors["white"] = (1, 37)
-
-colors["close"] = (1, 0)
-
-
-def colorize(msg, color=None):
-    # Colors
-    if color in colors:
-        (darkbit, subcolor) = colors[color]
-    else:
-        (darkbit, subcolor) = (1, 0)
-
-    # Prepare the message
-    result = "\033[%1d;%02dm" % (darkbit, subcolor)
-    result += msg
-    result += "\033[%1d;%02dm" % (1, 0)
-
-    # Return the result
-    return result
-
-
-def get_colors():
-    # Reorder colors
-    keys = []
-    for key in colors.keys():
-        keys.append((colors[key][0], colors[key][1], key))
-    keys.sort()
-
-    # Show up all colors
-    buffer = ""
-    for color in keys:
-        # Get the color information
-        (simplebit, subcolor) = colors[color[2]]
-        if len(buffer) > 0:
-            buffer += "\n"
-        # Show it
-        buffer += (
-            f"{simplebit:1d}:{subcolor:02d} - "
-            f"\033[{simplebit:1d};{subcolor:02d}m{color[2]:<14s}"
-            f"\033[1;00m{color[2]:<s}"
-        )
-    return buffer
-
-
-if __name__ == "__main__":
-    print(get_colors())
+      """,
+    file=sys.stderr,
+)
