@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.70] - 2024-04-09
+### Changed
+- New translations
+### Removed
+- Managemente command 'check_dependencies' has been removed
+
 ## [4.0.69] - 2024-04-08
 ### Changed
 - Removed all depencendies on django-codenerix lib.debugger library which is now DEPRECATED
