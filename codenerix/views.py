@@ -5080,11 +5080,15 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                     # sublist.append(self.get_filled_structure([item_element]))
                 else:
                     filter_field = None
+                    cols = 12
                     # Check if it is a list
                     if isinstance(item_element, list):
                         # if it is a list, that means that can be found the
                         # corresponding values for colums and any other
                         field = item_element[0]
+                        if len(item_element) >= 2:
+                            cols = item_element[1]
+
                         # take into account that field caption can be passed as
                         # third list element
                         if len(item_element) >= 3 and item_element[2]:
@@ -5160,14 +5164,18 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                                 # for get_XXXX_display() mostly
                                 value = value()
 
-                    sublist.append(
-                        {
-                            "name": _(verbose_names[field]),
-                            "value": value,
-                            "filter": filter_field,
-                            "field": field,
-                        },
-                    )
+                    # Show if cols
+                    if cols is not None:
+                        sublist.append(
+                            {
+                                "name": _(verbose_names[field]),
+                                "value": value,
+                                "filter": filter_field,
+                                "field": field,
+                            },
+                        )
+
+                    # Remember it was processed
                     gr_object_content.append(field)
 
             item["value"] = sublist
@@ -5532,7 +5540,10 @@ class GenForeignKey(GenBase, View):
         answer = []
         if self.request.GET.get("def", "0") == "1":
             answer.append({"id": None, "label": "---------"})
-        qscount = qs.count()
+        if isinstance(qs, list):
+            qstotal = len(qs)
+        else:
+            qstotal = qs.count()
         for e in qs[0:limit]:
             answer.append(
                 self.custom_choice(
@@ -5540,7 +5551,7 @@ class GenForeignKey(GenBase, View):
                     {"id": e.pk, "label": self.build_label(e)},
                 ),
             )
-        if qscount > limit:
+        if qstotal > limit:
             answer.append({"id": "", "label": "..."})
 
         # Convert the answer

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.72] - 2024-05-23
+### Feature
+- On GenDetails, inside groups, cols for each field maybe None so it won't be shown in the DetailView
+
+## [4.0.71] - 2024-05-23
+### Feature
+- Allow get_foreignkey() processor to understand lists and querysets as an answer
+
 ## [4.0.70] - 2024-04-09
 ### Changed
 - New translations
