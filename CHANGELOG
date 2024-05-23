@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.73] - 2024-05-23
+### Feature
+- Support for keyboard event to submit & new when alt+enter is pressed in a form
+
 ## [4.0.72] - 2024-05-23
 ### Feature
 - On GenDetails, inside groups, cols for each field maybe None so it won't be shown in the DetailView

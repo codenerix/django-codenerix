@@ -957,6 +957,9 @@ function formsubmit(
     form,
     next,
     kind) {
+    // console.log(
+    //     'formsubmit(): listid=' + listid + ' url=' + url + ' form=' + form +
+    //     ' next=' + next + ' kind=' + kind);
     if (form.$dirty && form.$valid) {
         // Check if codenerix uuid is configure
         try {
@@ -1271,6 +1274,7 @@ function inlinked(
                             'here',
                             action);
                     };
+
                     // Set delete function
                     $scope.delete = function(msg, url) {
                         if (confirm(msg)) {
@@ -3547,10 +3551,22 @@ function multiadd(
 
     // Update this element
     $scope.submit = function(
-        form, next, target, nlistid, nurl, nform, nnext, naction) {
+        form,
+        next,
+        target,
+        nlistid,
+        nurl,
+        nform,
+        nnext,
+        naction,
+        keyeventnext) {
         if (form instanceof KeyboardEvent) {
             form = $scope[$scope.form_name];
-            next = 'list';
+            if (typeof (keyeventnext) == 'undefined') {
+                next = 'list';
+            } else {
+                next = keyeventnext;
+            }
         }
         if (typeof (nlistid) == 'undefined') {
             var ulistid = listid;
@@ -3594,6 +3610,20 @@ function multiadd(
         } else {
             $scope[target](ulistid, uurl, uform, unext, uaction);
         }
+    };
+    $scope.submit_new = function(
+        form, next, target, nlistid, nurl, nform, nnext, naction) {
+        $scope.submit(
+            // form, 'new', 'submit', nlistid, nurl, nform, nnext, naction);
+            form,
+            next,
+            target,
+            nlistid,
+            nurl,
+            nform,
+            nnext,
+            naction,
+            'new');
     };
 
     $scope.gotourl = function(url) {
@@ -3653,6 +3683,12 @@ function multiadd(
             description: 'Save',
             allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
             callback: $scope.submit
+        });
+        hotkeysrv.add({
+            combo: 'alt+enter',
+            description: 'Save',
+            allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+            callback: $scope.submit_new
         });
     }
 };
@@ -3973,10 +4009,22 @@ function multiedit(
 
     // Update this element
     $scope.submit = function(
-        form, next, target, nlistid, nurl, nform, nnext, naction) {
+        form,
+        next,
+        target,
+        nlistid,
+        nurl,
+        nform,
+        nnext,
+        naction,
+        keyeventnext) {
         if (form instanceof KeyboardEvent) {
             form = $scope[$scope.form_name];
-            next = 'list';
+            if (typeof (keyeventnext) == 'undefined') {
+                next = 'list';
+            } else {
+                next = keyeventnext;
+            }
         }
         if (typeof (nlistid) == 'undefined') {
             var ulistid = listid;
@@ -4022,6 +4070,11 @@ function multiedit(
                 ulistid, uurl, uform, unext, uaction, $stateParams.pk);
         }
     };
+    $scope.submit_new = function(
+        form, next, target, nlistid, nurl, nform, nnext, naction) {
+        $scope.submit(
+            form, next, target, nlistid, nurl, nform, nnext, naction, 'new');
+    };
 
     var fields = [];
     $scope.preUpdateField = function(field_o, field_d) {
@@ -4051,6 +4104,12 @@ function multiedit(
             description: 'Save',
             allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
             callback: $scope.submit
+        });
+        hotkeysrv.add({
+            combo: 'alt+enter',
+            description: 'Save',
+            allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+            callback: $scope.submit_new
         });
     }
 };
