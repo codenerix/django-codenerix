@@ -211,6 +211,12 @@ def get_profiled_paths(path, user, lang, extension):
             paths.append("user.{}".format(lang))
             paths.append("user")
 
+        # Add group paths
+        if user.groups.count():
+            for group in user.groups.all():
+                paths.append("{}.{}".format(group.name.lower(), lang))
+                paths.append(group.name.lower())
+
     # Add an empty path
     paths.append(lang)
     paths.append("")
