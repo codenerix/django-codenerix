@@ -215,7 +215,8 @@ limitations under the License.
     <div class="col-md-12 column ">
         <div class="form-inline panelfilters panelfilters-bottom" role="form">
             <div class="panel panel-default pull-right">
-                    <div class="pull-right" ng-if="!data.meta.vtable && data.meta.row_total && data.meta.rowsperpageallowed.length"><!-- ROWS {{{1 -->
+                <div class="panel-body listfilters">
+                    <div class="pull-right" ng-if="!data.meta.vtable && data.meta.row_total && data.meta.rowsperpageallowed.length"><!-- ROWS -->
                         <div class='center-block'>
                             <ul class="pagination pagination-sm">
                                 <li><a href="#" popover-placement="top" uib-popover="{{data.meta.gentranslate.RowsPerPage}}" popover-trigger="mouseenter"><span class="glyphicon glyphicon-th-list"></span></a></li>
@@ -227,8 +228,8 @@ limitations under the License.
 
                             </ul>
                         </div>
-                    <!--}}}1--></div>
-                    <div class="pull-right" ng-if="!data.meta.vtable && data.meta.pages"><!-- PAGINATION {{{1-->
+                    </div>
+                    <div class="pull-right" ng-if="!data.meta.vtable && data.meta.pages"><!-- PAGINATION -->
                         <div class='center-block'>
                             <ul class="pagination pagination-sm">
                                 <li><a href="#" popover-placement="top" uib-popover="N&uacute;mero de p&aacute;gina" popover-trigger="mouseenter"><span class="glyphicon glyphicon-list-alt"></span></a></li>
@@ -238,14 +239,12 @@ limitations under the License.
                                     ng-click="page_change(page)"><a>{{page}}</a></li>
                             </ul>
                         </div>
-                    </div><!--}}}1-->
-                    <div class="pull-right"><!-- RESULT {{{1 -->
+                    </div>
+                    <div class="pull-right"><!-- RESULT -->
                         <h5 class="text-right text-nowrap results">
                             <strong>{{data.meta.row_total}} {{data.meta.gentranslate.registers}}<span ng-if="!data.meta.vtable && data.meta.row_last"> [ {{data.meta.row_first}} - {{data.meta.row_last}} ]</span></strong>
                         </h5>
-                <!--}}}1--></div>
-                </div>
-            </div>
+                    </div>
                 </div>
             </div>
         </div>
