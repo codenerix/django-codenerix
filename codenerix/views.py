@@ -322,6 +322,7 @@ class MODELINFO:
         self.jsonquery = jsonquery
         self.profile = profile
         self.kwargs = kwargs
+        self.searchQ_search = None
 
     def fields(self):
         if self.__Mfields:
@@ -410,6 +411,7 @@ class MODELINFO:
                 return {}
 
     def searchQ(self, search):  # noqa: N802
+        self.searchQ_search = search
         if search:
             if self.__MsearchQ:
                 f = self.__MsearchQ
@@ -2088,6 +2090,170 @@ class GenList(GenBase, ListView):  # type: ignore
         except Exception:
             filters_by_struct = []
 
+        # Search filter button
+        search_filter_button = jsondata.get("search_filter_button", None)
+        if search_filter_button is not None:
+            self.search_filter_button = search_filter_button
+
+        # Search text in all fields
+        search = jsondata.get("search", "").lower()
+        # Remove extra spaces
+        newlen = len(search)
+        oldlen = 0
+        while newlen != oldlen:
+            oldlen = newlen
+            search = search.replace("  ", " ")
+            newlen = len(search)
+        if len(search) > 0 and search[0] == " ":
+            search = search[1:]
+        if len(search) > 0 and search[-1] == " ":
+            search = search[:-1]
+
+        # Save in context
+        context["search"] = search
+        datetimeQ = None  # noqa: N806
+        if len(search) > 0:
+            # Get ID
+            tid = None
+            if "id:" in search:
+                tid = search.split(":")[1].split(" ")[0]
+                # Decide if it is what we expect
+                try:
+                    tid = int(tid)
+                except Exception:
+                    tid = None
+                # Remove the token
+                if tid:
+                    search = search.replace("id:%s" % (tid), "")
+                    search = search.replace("  ", " ")
+
+            # Get PK
+            tpk = None
+            if "pk:" in search:
+                tpk = search.split(":")[1].split(" ")[0]
+                # Decide if it is what we expect
+                try:
+                    tpk = int(tpk)
+                except Exception:
+                    tpk = None
+                # Remove the token
+                if tpk:
+                    search = search.replace("pk:%s" % (tpk), "")
+                    search = search.replace("  ", " ")
+
+            # Spaces on front and behind
+            search = search.strip()
+
+            # Prepare searchs
+            searchs = {}
+            # Autofilter system
+            if self.autofiltering:
+                searchs.update(self.autoSearchQ(MODELINF, search))
+
+            # Fields to search in from the MODELINF
+            tmp_search = MODELINF.searchQ(search)
+            if isinstance(tmp_search, dict):
+                searchs.update(tmp_search)
+            else:
+                searchs["autoSearchQ"] &= tmp_search
+            qobjects = {}
+            qobjectsCustom = {}  # noqa: N806
+            for name in searchs:
+                # Extract the token
+                qtoken = searchs[name]
+                if qtoken == "datetime":
+                    # If it is a datetime
+                    datetimeQ = name  # noqa: N806
+                    continue
+                elif (isinstance(qtoken, str)) or (isinstance(qtoken, list)):
+                    # Prepare query
+                    if isinstance(qtoken, tuple):
+                        (query, func) = qtoken
+                    else:
+
+                        def lambdax(x):
+                            return x
+
+                        func = lambdax
+                        query = qtoken
+
+                    # If it is a string
+                    if search:
+                        for word in search.split(" "):
+                            # If there is a word to process
+                            if len(word) > 0:
+                                # Build the key for the arguments and set the
+                                # word as a value for the Q search
+                                if word[0] == "-":
+                                    # If negated request
+                                    # key="-{}".format(hashlib.md5(word[1:].encode()).hexdigest())
+                                    qdict = {
+                                        "{}".format(query): func(word[1:]),
+                                    }
+                                    qtokens_element = ~Q(**qdict)
+                                else:
+                                    # If positive request
+                                    # key="-{}".format(hashlib.md5(word[1:].encode()).hexdigest())
+                                    qdict = {"{}".format(query): func(word)}
+                                    qtokens_element = Q(**qdict)
+
+                                # Safe the token
+                                if word in qobjects:
+                                    qobjects[word].append(qtokens_element)
+                                else:
+                                    qobjects[word] = [qtokens_element]
+                else:
+                    if qobjectsCustom:
+                        qobjectsCustom |= searchs[name]
+                    else:
+                        qobjectsCustom = searchs[name]  # noqa: N806
+
+            # Build positive/negative
+            qdata = None
+            if search and qobjects:
+                for word in search.split(" "):
+                    if word.split(":")[0] not in ["id", "pk"]:
+                        if word[0] == "-":
+                            negative = True
+                        else:
+                            negative = False
+                        qword = None
+                        for token in qobjects[word]:
+                            if qword:
+                                if negative:
+                                    qword &= token
+                                else:
+                                    qword |= token
+                            else:
+                                qword = token
+                        if qword:
+                            if qdata:
+                                qdata &= qword
+                            else:
+                                qdata = qword
+
+            # Process ID/PK specific searches
+            searchq_objects = Q()
+            if tid:
+                searchq_objects = searchq_objects & Q(id=tid)
+            if tpk:
+                searchq_objects = searchq_objects & Q(pk=tpk)
+            # Add custom Q-objects
+            if qobjectsCustom:
+                searchq_objects = searchq_objects & qobjectsCustom
+            # Add word by word search Q-objects
+            if qdata:
+                searchq_objects = searchq_objects & qdata
+            queryset = queryset.filter(searchq_objects)
+        else:
+            # Look for datetimeQ field
+            searchs = MODELINF.searchQ(search)
+            for name in searchs:
+                if searchs[name] == "datetime":
+                    datetimeQ = name  # noqa: N806
+                    continue
+
+        # Prepare searchF
         listfilters = {}
         # Autofilter system
         if self.autofiltering:
@@ -2260,168 +2426,6 @@ class GenList(GenBase, ListView):  # type: ignore
         # Save all filters
         context["filters"] = filters
 
-        # Search filter button
-        search_filter_button = jsondata.get("search_filter_button", None)
-        if search_filter_button is not None:
-            self.search_filter_button = search_filter_button
-
-        # Search text in all fields
-        search = jsondata.get("search", "").lower()
-        # Remove extra spaces
-        newlen = len(search)
-        oldlen = 0
-        while newlen != oldlen:
-            oldlen = newlen
-            search = search.replace("  ", " ")
-            newlen = len(search)
-        if len(search) > 0 and search[0] == " ":
-            search = search[1:]
-        if len(search) > 0 and search[-1] == " ":
-            search = search[:-1]
-
-        # Save in context
-        context["search"] = search
-        datetimeQ = None  # noqa: N806
-        if len(search) > 0:
-            # Get ID
-            tid = None
-            if "id:" in search:
-                tid = search.split(":")[1].split(" ")[0]
-                # Decide if it is what we expect
-                try:
-                    tid = int(tid)
-                except Exception:
-                    tid = None
-                # Remove the token
-                if tid:
-                    search = search.replace("id:%s" % (tid), "")
-                    search = search.replace("  ", " ")
-
-            # Get PK
-            tpk = None
-            if "pk:" in search:
-                tpk = search.split(":")[1].split(" ")[0]
-                # Decide if it is what we expect
-                try:
-                    tpk = int(tpk)
-                except Exception:
-                    tpk = None
-                # Remove the token
-                if tpk:
-                    search = search.replace("pk:%s" % (tpk), "")
-                    search = search.replace("  ", " ")
-
-            # Spaces on front and behind
-            if len(search) > 0 and search[0] == " ":
-                search = search[1:]
-            if len(search) > 0 and search[-1] == " ":
-                search = search[:-1]
-
-            searchs = {}
-            # Autofilter system
-            if self.autofiltering:
-                searchs.update(self.autoSearchQ(MODELINF, search))
-
-            # Fields to search in from the MODELINF
-            tmp_search = MODELINF.searchQ(search)
-            if isinstance(tmp_search, dict):
-                searchs.update(tmp_search)
-            else:
-                searchs["autoSearchQ"] &= tmp_search
-            qobjects = {}
-            qobjectsCustom = {}  # noqa: N806
-            for name in searchs:
-                # Extract the token
-                qtoken = searchs[name]
-                if qtoken == "datetime":
-                    # If it is a datetime
-                    datetimeQ = name  # noqa: N806
-                    continue
-                elif (isinstance(qtoken, str)) or (isinstance(qtoken, list)):
-                    # Prepare query
-                    if isinstance(qtoken, tuple):
-                        (query, func) = qtoken
-                    else:
-
-                        def lambdax(x):
-                            return x
-
-                        func = lambdax
-                        query = qtoken
-
-                    # If it is a string
-                    if search:
-                        for word in search.split(" "):
-                            # If there is a word to process
-                            if len(word) > 0:
-                                # Build the key for the arguments and set the
-                                # word as a value for the Q search
-                                if word[0] == "-":
-                                    # If negated request
-                                    # key="-{}".format(hashlib.md5(word[1:].encode()).hexdigest())
-                                    qdict = {
-                                        "{}".format(query): func(word[1:]),
-                                    }
-                                    qtokens_element = ~Q(**qdict)
-                                else:
-                                    # If positive request
-                                    # key="-{}".format(hashlib.md5(word[1:].encode()).hexdigest())
-                                    qdict = {"{}".format(query): func(word)}
-                                    qtokens_element = Q(**qdict)
-
-                                # Safe the token
-                                if word in qobjects:
-                                    qobjects[word].append(qtokens_element)
-                                else:
-                                    qobjects[word] = [qtokens_element]
-                else:
-                    if qobjectsCustom:
-                        qobjectsCustom |= searchs[name]
-                    else:
-                        qobjectsCustom = searchs[name]  # noqa: N806
-
-            # Build positive/negative
-            qdata = None
-            if search and qobjects:
-                for word in search.split(" "):
-                    if word.split(":")[0] not in ["id", "pk"]:
-                        if word[0] == "-":
-                            negative = True
-                        else:
-                            negative = False
-                        qword = None
-                        for token in qobjects[word]:
-                            if qword:
-                                if negative:
-                                    qword &= token
-                                else:
-                                    qword |= token
-                            else:
-                                qword = token
-                        if qword:
-                            if qdata:
-                                qdata &= qword
-                            else:
-                                qdata = qword
-
-            # Process ID/PK specific searches
-            if tid:
-                queryset = queryset.filter(id=tid)
-            if tpk:
-                queryset = queryset.filter(pk=tpk)
-            # Add custom Q-objects
-            if qobjectsCustom:
-                queryset = queryset.filter(qobjectsCustom)
-            # Add word by word search Q-objects
-            if qdata:
-                queryset = queryset.filter(qdata)
-        else:
-            # Look for datetimeQ field
-            searchs = MODELINF.searchQ(search)
-            for name in searchs:
-                if searchs[name] == "datetime":
-                    datetimeQ = name  # noqa: N806
-                    continue
         # Datetime Q
         context["datetimeQ"] = datetimeQ
         if datetimeQ:
