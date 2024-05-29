@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.77] - 2024-05-29
+### Bugfix
+- Corrected partial for automatic Log rendering
+
+## [4.0.76] - 2024-05-29
+### Bugfix
+- Corrected save() arguments for GenLog and GenRemoteLog to standarize
+
+
 ## [4.0.75] - 2024-05-28
 ### Feature
 - Support autodiscovery for templates, partials and controllers using group names

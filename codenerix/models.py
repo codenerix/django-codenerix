@@ -505,7 +505,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             # custom post save from application
             pass
 
-        def save(self, **kwargs):
+        def save(self, *args, **kwargs):
             user = get_current_user()
             if user:
                 user_id = user.pk
@@ -699,7 +699,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             else:
                 log.snapshot_txt = obj.__strlog_update__(self)
 
-            aux = super().save(**kwargs)
+            aux = super().save(*args, **kwargs)
             if pk is None:
                 # if new element, get pk
                 log.object_id = self.pk
@@ -837,7 +837,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             fields.append(("username", _("Original user")))
             return fields
 
-        def save(self, **kwargs):
+        def save(self, *args, **kwargs):
             if self.user:
                 self.username = self.user.username
-            super().__init__(**kwargs)
+            super().__init__(*args, **kwargs)
