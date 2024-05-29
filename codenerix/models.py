@@ -675,7 +675,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             log.username = username
             log.content_type_id = ContentType.objects.get_for_model(self).pk
             log.object_id = pk
-            log.object_repr = force_str(self, errors="replace")
+            log.object_repr = force_str(self, errors="replace")[:200]
             try:
                 log.change_json = json.dumps(attrs, default=json_util.default)
             except UnicodeDecodeError:
@@ -798,7 +798,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
                 instance,
             ).pk
             log.object_id = instance.pk
-            log.object_repr = force_str(instance)
+            log.object_repr = force_str(instance)[:200]
             log.change_json = json.dumps(attrs, default=json_util.default)
             log.change_txt = json.dumps(attrs_txt, default=json_util.default)
             log.snapshot_txt = instance.__strlog_delete__()
