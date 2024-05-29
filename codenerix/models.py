@@ -754,7 +754,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
                 ]:
                     field = None
                 else:
-                    field = getattr(instance, key, None)
+                    try:
+                        field = getattr(instance, key, None)
+                    except Exception:
+                        field = None
 
                 # If we have information to register
                 if field is not None:
@@ -791,6 +794,11 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
                             errors="replace",
                         )
 
+            try:
+                representation = force_str(instance)[:200]
+            except Exception:
+                representation = "*Unknown*"
+
             log = Log()
             log.user_id = user_id
             log.username = username
@@ -798,7 +806,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
                 instance,
             ).pk
             log.object_id = instance.pk
-            log.object_repr = force_str(instance)[:200]
+            log.object_repr = representation
             log.change_json = json.dumps(attrs, default=json_util.default)
             log.change_txt = json.dumps(attrs_txt, default=json_util.default)
             log.snapshot_txt = instance.__strlog_delete__()

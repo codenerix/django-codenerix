@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.80] - 2024-05-29
+### Bugfix
+- Resolved bug on GenLog while deleting all elements in a model and the object can not be represented
+
+
 ## [4.0.79] - 2024-05-29
 ### Bugfix
 - Limit Log.object_repr to 200 characters to avoid errors when saving logs with long object_repr
