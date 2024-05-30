@@ -1793,8 +1793,10 @@ class GenList(GenBase, ListView):  # type: ignore
             ):
                 # Calculate tabs
                 if getattr(self, "show_details", False):
+                    tabs = self.get_tabs_js()
+                    self.extra_context["tabs_js_obj"] = tabs
                     self.extra_context["tabs_js"] = json.dumps(
-                        self.get_tabs_js(),
+                        tabs,
                         cls=DjangoJSONEncoder,
                     )
 
@@ -4842,6 +4844,7 @@ class GenUpdate(GenModify, GenBase, UpdateView):  # type: ignore
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["self_pk"] = self.object.pk
         try:
             lock_delete = self.object.internal_lock_delete(self.request)
         except TypeError:
@@ -5196,6 +5199,7 @@ class GenDetail(GenBase, DetailView):  # type: ignore
 
     def get_context_data_html(self, object_property, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["self_pk"] = self.object.pk
         context["object_detail"] = self.get_filled_structure()
 
         # Get if this is a modal window
@@ -5290,6 +5294,7 @@ class GenDetail(GenBase, DetailView):  # type: ignore
 
     def get_context_data_json(self, object_property, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["self_pk"] = self.object.pk
         info = self.get_filled_structure()
 
         body = json.loads(

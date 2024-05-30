@@ -35,6 +35,9 @@ limitations under the License.
     <script type="text/javascript" src="{{ static_app_row }}"></script>
     <script type="text/javascript" src="{% static "codenerix/js/controllers.js" %}"></script>
     {% if static_controllers_row %}<script type="text/javascript" src="{{ static_controllers_row }}"></script>{% endif %}
+    {% for tab in tabs_js_obj %}
+        {% if tab.static_controllers_row %}<script type="text/javascript" src="{% static tab.static_controllers_row %}"></script>{% endif %}
+    {% endfor %}
     {% block angular_app_service %}
         <script type="text/javascript">
             var ws_entry_point="{{ws_entry_point}}";

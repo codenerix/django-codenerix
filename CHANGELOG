@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.82] - 2024-05-30
+### Feature
+- Translations
+
+
+## [4.0.81] - 2024-05-30
+### Features
+- Added parent_pk with the main PK of the Detailed Object and is available in Sublists inside GenDetail view
+- Added static_controllers_row loading for Sublists
+- Brought to template tabs_js_obj as an object
+- GenUpdate and GenDetail includde in Django's context self_pk with the actual PK of the object
+
+
 ## [4.0.80] - 2024-05-29
 ### Bugfix
 - Resolved bug on GenLog while deleting all elements in a model and the object can not be represented
