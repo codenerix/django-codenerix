@@ -288,6 +288,8 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-bootstrap-switch/angular-bootstrap-switch.js"></script> \
+    <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-qr/qrcode.js"></script> \
+    <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-qr/angular-qr.js"></script> \
     '  # noqa: E501
         + locales
     )
@@ -337,6 +339,8 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-bootstrap-switch/angular-bootstrap-switch.min.js"></script> \
+    <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-qr/qrcode.min.js"></script> \
+    <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-qr/angular-qr.min.js"></script> \
     '  # noqa: E501
         + locales
     )

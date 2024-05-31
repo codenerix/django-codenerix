@@ -365,6 +365,141 @@ class LimitedAuthMiddleware(Debugger):
         return response
 
 
+class OTPAuth(ModelBackend, Debugger):
+    """
+    Authentication system based on a One Time Password (OTP)
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Configure debugger
+        self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
+        if self.__debugger:
+            self.set_debug()
+
+        # Keep going with super
+        super().__init__(*args, **kwargs)
+
+    def authenticate(self, *args, **kwargs):
+        # Initialize answer
+        answer = None
+
+        # Show debugger
+        if self.__debugger:
+            self.debug("Started authenticate()", color="blue")
+
+        # Check pyotp exists
+        if pyotp:
+            # Get our arguments
+            username = kwargs.get("username", None)
+            password = kwargs.get("password", None)
+            remote_otp = kwargs.get("otptoken", None)
+
+            # Show debug
+            if self.__debugger:
+                self.debug(
+                    "Authentication request:",
+                    color="white",
+                )
+                self.debug(
+                    f"  > Username: '{username}'",
+                    color="cyan",
+                )
+                self.debug(
+                    f"  > Password: '{password}'",
+                    color="cyan",
+                )
+                self.debug(
+                    f"  > Remote OTP Token: '{remote_otp}'",
+                    color="cyan",
+                )
+
+            if (
+                username is not None
+                and password is not None
+                and remote_otp is not None
+            ):
+                # Try to find the user
+                try:
+                    # Get the requested username
+                    user = User.objects.get(username=username)
+                except User.DoesNotExist:
+                    user = None
+
+                # If we got an user
+                if user and user.check_password(password):
+                    # Show debug
+                    if self.__debugger:
+                        self.debug(
+                            "User '{}' found!".format(username),
+                            color="green",
+                        )
+
+                    # Check if user first_name is filled
+                    if user.first_name:
+                        # Get user first_name as user_key
+                        user_key = user.first_name
+
+                        # Calculate OTP token
+                        try:
+                            local_otp = str(
+                                pyotp.TOTP(
+                                    base64.b32encode(
+                                        user_key.encode(),
+                                    ),
+                                ).now(),
+                            )
+                        except TypeError:
+                            if self.__debugger:
+                                raise OSError(
+                                    f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                )
+                            else:
+                                local_otp = None
+
+                        if self.__debugger:
+                            self.debug(
+                                f"  > Local OTP Token: '{local_otp}'",
+                                color="cyan",
+                            )
+
+                        # Check if the OTP token is valid
+                        if remote_otp == local_otp:
+                            answer = user
+
+                            # Show debug
+                            if self.__debugger:
+                                self.debug(
+                                    "User '{}' authenticated!".format(
+                                        username,
+                                    ),
+                                    color="green",
+                                )
+                        else:
+                            if self.__debugger:
+                                self.debug(
+                                    "User '{}' NOT authenticated with "
+                                    "otptoken '{}'!".format(
+                                        username,
+                                        remote_otp,
+                                    ),
+                                    color="red",
+                                )
+
+                    else:
+                        if self.__debugger:
+                            raise OSError(
+                                "To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)",  # noqa: E501
+                            )
+
+        else:
+            raise OSError(
+                "PYOTP library not found, you can not use OTPAuth",
+            )
+
+        # Return final answer
+        return answer
+
+
 class TokenAuth(ModelBackend, Debugger):
     """
     Authentication system based on a Token key

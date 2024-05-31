@@ -22,6 +22,11 @@ import importlib
 import io
 import json
 
+try:
+    import pyotp
+except ImportError:
+    pyotp = None  # type: ignore
+
 # System
 import os
 import random
@@ -768,3 +773,13 @@ class SearchFAutoFilter:
             return Q(**filt)
 
         return filtercount
+
+
+def otpauth(issuer, label, secret):
+    if secret and pyotp:
+        return pyotp.totp.TOTP(secret).provisioning_uri(
+            name=label,
+            issuer_name=issuer,
+        )
+    else:
+        return None

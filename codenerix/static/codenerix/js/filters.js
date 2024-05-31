@@ -43,6 +43,43 @@ angular
                 } else if (kind == 'skype') {
                     return '<a ng-click=\'$event.stopPropagation();\' href=\'tel:' +
                            input + '\'>' + input + '</a>';
+                } else if (kind == 'qr') {
+                    if ((input === null) || (input === undefined) ||
+                        (input === '')) {
+                        return `<button
+                                    ng-click="$event.stopPropagation();"
+                                    ng-disabled="true"
+                                    class="btn btn-danger btn-xs">
+                                    <i class="fa fa-qrcode" aria-hidden="true"></i>
+                                </button>`;
+                    } else {
+                        return `<div
+                                ng-click="$event.stopPropagation();"
+                                ng-init="iconsize=10;bigsize=200;qrsize=iconsize">
+                                <button
+                                    class="btn btn-info btn-xs"
+                                    ng-show="qrsize==iconsize"
+                                    ng-click="$event.stopPropagation();qrsize=bigsize">
+                                        <i class="fa fa-qrcode" aria-hidden="true"></i>
+                                </button>
+                                <button
+                                    class="btn btn-xs"
+                                    ng-hide="qrsize==iconsize"
+                                    ng-click="$event.stopPropagation();qrsize=iconsize">
+                                    <qr
+                                        type-number="0"
+                                        correction-level="'M'"
+                                        ng-model="qrsize"
+                                        size="qrsize"
+                                        input-mode="'8bit'"
+                                        text="'` +
+                               input + `'"
+                                        image="true">
+                                    </qr>
+                                </button>
+                            </div>`;
+                    }
+
                 } else if (kind == 'link') {
                     return '<a ng-click=\'$event.stopPropagation();\' href=\'' +
                            input +

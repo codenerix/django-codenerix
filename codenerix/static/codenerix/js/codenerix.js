@@ -52,6 +52,7 @@ var codenerix_libraries = [
     'ngQuill',
     'cfp.hotkeys',
     'frapontillo.bootstrap-switch',
+    'ja.qr',
 ];
 
 // Default configuration
@@ -2876,6 +2877,49 @@ function multilist(
             $rootScope.elementid = value;
             $rootScope.elementname = name;
         }
+    };
+
+    // Quick OK modal to show information
+    $scope.infomodal = function(title, content, timeout) {
+        var static_url = $scope.data.meta.url_static;
+        var template = `
+            <div class="modal-header ng-scope">
+                <h3 class="modal-title text-center">` +
+                       title + `</h3>
+            </div>
+            <div class="row clearfix ng-scope">
+                <div class="modal-body">
+                    <div class='modal-body text-center h1' codenerix-html-compile="'` +
+                       content + `'"></div>
+                </div>
+            </div>
+            <div class="modal-footer ng-scope">
+                <button type="button" class="btn btn-sm btn-primary" ng-click="close()">OK</button>
+            </div>`;
+
+        var functions = function(scope) {
+            scope.close = function() {
+                scope.$dismiss('cancel');
+            };
+            if (timeout != undefined) {
+                $timeout(function() {
+                    scope.$dismiss('cancel');
+                }, timeout);
+            }
+        };
+
+        var callback = function(scope) {};
+        var callback_cancel = function(scope) {};
+        openmodal(
+            $scope,
+            $timeout,
+            $uibModal,
+            'md',
+            functions,
+            callback,
+            true,
+            callback_cancel,
+            template);
     };
 
     $scope.addnew = function() {
