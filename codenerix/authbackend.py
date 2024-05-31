@@ -33,6 +33,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Group, User
+from django.shortcuts import redirect
 from django.utils import timezone
 from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
 
@@ -202,7 +203,7 @@ class LimitedAuth(ModelBackend, Debugger):
     def authenticate(self, *args, **kwargs):
         # Show debugger
         if self.__debugger:
-            self.debug("Started authenticate()", color="blue")
+            self.debug("Started authenticate(LimitedAuth)", color="blue")
 
         # Launch default django authentication
         user = super().authenticate(*args, **kwargs)
@@ -235,7 +236,10 @@ class LimitedAuthMiddleware(Debugger):
     def process_request(self, request):
         # Show debugger
         if self.__debugger:
-            self.debug("Started process_request()", color="blue")
+            self.debug(
+                "Started process_request(LimitedAuthMiddleware)",
+                color="blue",
+            )
 
         # If the user is authenticated and shouldn't be
         if request.user.is_authenticated:
@@ -379,20 +383,18 @@ class OTPAuth(ModelBackend, Debugger):
         # Keep going with super
         super().__init__(*args, **kwargs)
 
-    def authenticate(self, *args, **kwargs):
+    def authenticate(self, request, username, password, authtoken):
         # Initialize answer
         answer = None
 
         # Show debugger
         if self.__debugger:
-            self.debug("Started authenticate()", color="blue")
+            self.debug("Started authenticate(OTPAuth)", color="blue")
 
         # Check pyotp exists
         if pyotp:
-            # Get our arguments
-            username = kwargs.get("username", None)
-            password = kwargs.get("password", None)
-            remote_otp = kwargs.get("authtoken", None)
+            # Remake the name of the variable
+            remote_otp = authtoken
 
             # Show debug
             if self.__debugger:
@@ -404,8 +406,9 @@ class OTPAuth(ModelBackend, Debugger):
                     f"  > Username: '{username}'",
                     color="cyan",
                 )
+                opassword = "*" * len(password)
                 self.debug(
-                    f"  > Password: '{password}'",
+                    f"  > Password: '{opassword}'",
                     color="cyan",
                 )
                 self.debug(
@@ -443,9 +446,7 @@ class OTPAuth(ModelBackend, Debugger):
                         try:
                             local_otp = str(
                                 pyotp.TOTP(
-                                    base64.b32encode(
-                                        user_key.encode(),
-                                    ),
+                                    user_key,
                                 ).now(),
                             )
                         except TypeError:
@@ -464,6 +465,7 @@ class OTPAuth(ModelBackend, Debugger):
 
                         # Check if the OTP token is valid
                         if remote_otp == local_otp:
+                            user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"  # noqa: E501
                             answer = user
 
                             # Show debug
@@ -500,6 +502,100 @@ class OTPAuth(ModelBackend, Debugger):
         return answer
 
 
+class OTPAuthMiddleware(Debugger):
+    """
+    Check for every request if the user is not loged in, so we can log it
+    in with a TOKEN
+
+    NOTE 1: install in your MIDDLEWARE setting after (order matters):
+        'django.contrib.auth.middleware.AuthenticationMiddleware'
+
+    NOTE 2: if you are using POST with HTTPS, Django will require to
+        send Referer, to avoid this problem you must add to the view
+        of your url definition csrf_exempt(), as follows:
+
+        from django.views.decorators.csrf import csrf_exempt
+        urlpatterns = patterns(
+            # ...
+            # Will exclude `/api/v1/test` from CSRF
+            url(r'^api/v1/test', csrf_exempt(TestApiHandler.as_view()))
+            # ...
+        )
+
+        Check: http://stackoverflow.com/questions/11374382/how-can-i-disable-djangos-csrf-protection-only-in-certain-cases
+        They recommend in this post to use the decorator, but we didn't manage to make it work
+        in the post() method inside our class-view. Probably this will work in the dispatch().
+    """  # noqa: E501
+
+    def __init__(self, get_response=None):
+        # Configure debugger
+        self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
+        if self.__debugger:
+            self.set_debug()
+
+        # Get response
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Show debugger
+        if self.__debugger:
+            self.debug(
+                "Started process_request(OTPAuthMiddleware)",
+                color="blue",
+            )
+
+        # Get token
+        authtoken = request.GET.get(
+            "authtoken",
+            request.POST.get("authtoken", ""),
+        )
+
+        # If the user is authenticated and shouldn't be
+        if authtoken:
+            # Get username and password
+            username = request.GET.get(
+                "username",
+                request.POST.get("username", None),
+            )
+            password = request.GET.get(
+                "password",
+                request.POST.get("password", None),
+            )
+
+            # Authenticate user
+            user = authenticate(
+                request=request,
+                username=username,
+                password=password,
+                authtoken=authtoken,
+            )
+
+            if user:
+                # Show debug
+                if self.__debugger:
+                    self.debug("User authenticated", color="green")
+
+                # Log user in
+                login(request=request, user=user)
+
+                # Redirect to next or LOGIN_REDIRECT_URL if not set
+                next_url = request.GET.get("next", None)
+                if next_url:
+                    return redirect(next_url)
+                else:
+                    return redirect(settings.LOGIN_REDIRECT_URL)
+
+            elif self.__debugger:
+                self.debug("User not authenticated", color="red")
+
+        elif self.__debugger:
+            self.debug("No authtoken found in your request", color="yellow")
+
+        # Return as usually
+        response = self.get_response(request)
+        return response
+
+
 class TokenAuth(ModelBackend, Debugger):
     """
     Authentication system based on a Token key
@@ -517,7 +613,7 @@ class TokenAuth(ModelBackend, Debugger):
     def authenticate(self, *args, **kwargs):
         # Show debugger
         if self.__debugger:
-            self.debug("Started authenticate()", color="blue")
+            self.debug("Started authenticate(TokenAuth)", color="blue")
 
         # Get our arguments
         username = kwargs.get("username", None)
@@ -940,7 +1036,10 @@ class TokenAuthMiddleware(Debugger):
     def process_request(self, request):
         # Show debugger
         if self.__debugger:
-            self.debug("Started process_request()", color="blue")
+            self.debug(
+                "Started process_request(TokenAuthMiddleware)",
+                color="blue",
+            )
 
         # By default we are not in authtoken
         request.authtoken = False
