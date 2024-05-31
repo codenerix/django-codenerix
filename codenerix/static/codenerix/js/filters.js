@@ -43,7 +43,8 @@ angular
                 } else if (kind == 'skype') {
                     return '<a ng-click=\'$event.stopPropagation();\' href=\'tel:' +
                            input + '\'>' + input + '</a>';
-                } else if (kind == 'qr') {
+                } else if (kind.substring(0, 2) == 'qr') {
+                    // qr:size
                     if ((input === null) || (input === undefined) ||
                         (input === '')) {
                         return `<button
@@ -53,19 +54,26 @@ angular
                                     <i class="fa fa-qrcode" aria-hidden="true"></i>
                                 </button>`;
                     } else {
+                        var kind = kind.substring(3);
+                        if (kind.length) {
+                            bigsize = kind;
+                        } else {
+                            var bigsize = 200;
+                        }
                         return `<div
                                 ng-click="$event.stopPropagation();"
-                                ng-init="iconsize=10;bigsize=200;qrsize=iconsize">
+                                ng-init="qrsize=null; bigsize=` +
+                               bigsize + `">
                                 <button
                                     class="btn btn-info btn-xs"
-                                    ng-show="qrsize==iconsize"
+                                    ng-show="qrsize==null"
                                     ng-click="$event.stopPropagation();qrsize=bigsize">
                                         <i class="fa fa-qrcode" aria-hidden="true"></i>
                                 </button>
                                 <button
                                     class="btn btn-xs"
-                                    ng-hide="qrsize==iconsize"
-                                    ng-click="$event.stopPropagation();qrsize=iconsize">
+                                    ng-hide="qrsize==null"
+                                    ng-click="$event.stopPropagation();qrsize=null">
                                     <qr
                                         type-number="0"
                                         correction-level="'M'"

@@ -392,7 +392,7 @@ class OTPAuth(ModelBackend, Debugger):
             # Get our arguments
             username = kwargs.get("username", None)
             password = kwargs.get("password", None)
-            remote_otp = kwargs.get("otptoken", None)
+            remote_otp = kwargs.get("authtoken", None)
 
             # Show debug
             if self.__debugger:
