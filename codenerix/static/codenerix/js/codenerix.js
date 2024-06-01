@@ -2100,6 +2100,30 @@ var codenerix_directive_autofocus = [
     ]
 ];
 
+var codenerix_directive_copytoclipboard = [
+    'codenerixCopyToClipboard',
+    [
+        '$timeout',
+        function($timeout) {
+            return {
+                restrict: 'AC',
+                link: function(_scope, _element, _attrs) {
+                    _element.click(function() {
+                        if (_attrs.codenerixCopyToClipboard) {
+                            var $temp_input = $('<input>');
+                            $('body').append($temp_input);
+                            $temp_input.val(_attrs.codenerixCopyToClipboard)
+                                .select();
+                            document.execCommand('copy');
+                            $temp_input.remove();
+                        }
+                    });
+                }
+            };
+        }
+    ]
+];
+
 // We got the example code from https://stackoverflow.com/users/1957251/khanh-to
 // from Khanh TO We then adapted his version from $modal to $uibModal which is
 // the one we use with CODENERIX and we renamed it to codenerixReallyClick
@@ -2422,6 +2446,9 @@ function codenerix_builder(libraries, routes, redirects) {
             .directive(
                 codenerix_directive_reallyclick[0],
                 codenerix_directive_reallyclick[1])
+            .directive(
+                codenerix_directive_copytoclipboard[0],
+                codenerix_directive_copytoclipboard[1])
 
             // Set routing system
             .run(codenerix_run);
@@ -2880,7 +2907,7 @@ function multilist(
     };
 
     // Quick OK modal to show information
-    $scope.infomodal = function(title, content, timeout) {
+    $scope.modalinfo = function(title, content, timeout) {
         var static_url = $scope.data.meta.url_static;
         var template = `
             <div class="modal-header ng-scope">

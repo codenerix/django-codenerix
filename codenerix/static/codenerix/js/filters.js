@@ -88,13 +88,66 @@ angular
                             </div>`;
                     }
 
-                } else if (kind == 'link') {
-                    return '<a ng-click=\'$event.stopPropagation();\' href=\'' +
-                           input +
-                           '\'><i class=\'glyphicon glyphicon-download-alt\'></i></a>';
-                } else if (kind == 'link_blank') {
-                    return '<a ng-click=\'$event.stopPropagation();\' href=\'' +
-                           input + '\' target="_blank">' + input + '</a>';
+                } else if (kind.substring(0, 4) == 'link') {
+                    if ((input == null) || (input == undefined) ||
+                        (input == '')) {
+                        return '-';
+                    } else {
+                        var kind = kind.substring(5);
+                        var kindsp = kind.split(':');
+                        var blank = '';
+                        var icon = '';
+                        var text = input;
+                        for (var i = 0; i < kindsp.length; i++) {
+                            if (kindsp[i] == 'blank') {
+                                blank = ' target="_blank"';
+                            } else if (kindsp[i] == 'icon') {
+                                icon =
+                                    '<i class=\'glyphicon glyphicon-download-alt\'></i>';
+                            } else if (kindsp[i] == 'onlyicon') {
+                                icon =
+                                    '<i class=\'glyphicon glyphicon-download-alt\'></i>';
+                                text = '';
+                            }
+                        }
+                        return `<a ng-click='$event.stopPropagation();' ` +
+                               blank + ` href='` + input + `'>` + icon + ' ' +
+                               text + `</a>`;
+                    }
+                } else if (kind.substring(0, 15) == 'copytoclipboard') {
+                    if ((input == null) || (input == undefined) ||
+                        (input == '')) {
+                        return '-';
+                    } else {
+                        var kind = kind.substring(16);
+                        if (kind.length) {
+                            kingsp = kind.split(':');
+                            if (kingsp.length == 1) {
+                                var title = 'Info';
+                                var body = kingsp[0];
+                            } else {
+                                var title = kingsp[0];
+                                var body = kingsp[1];
+                            }
+                            var ngclick = `ng-click="modalinfo('` + title +
+                                          `','` + body + `');"`;
+                        } else {
+                            var ngclick = '';
+                        }
+
+                        return `<a href="#" ng-click="$event.stopPropagation();">
+                                <div
+                                    ` +
+                               ngclick + `
+                                    codenerix-copy-to-clipboard="` +
+                               input + `">
+                                    <i
+                                        class='fa fa-clipboard'
+                                        aria-hidden='true'></i> ` +
+                               input + `
+                            </div>
+                           </a>`;
+                    }
                 } else if (kind.substring(0, 5) == 'image') {
                     if ((input == null) || (input == undefined) ||
                         (input == '')) {

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.85] - 2024-06-01
+### Feature
+- Improvements to link filter and added codenerix-copy-to-clipboard directive
+
 
 ## [4.0.84] - 2024-06-01
 ### Feature
