@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- towncrier release notes start -->
 
 
+## [4.0.84] - 2024-06-01
+### Feature
+- Added new Angular filter 'link_blank'
+
+
 ## [4.0.83] - 2024-05-31
 ### Feature
 - Angular QR filter and helpers to generate QR codes

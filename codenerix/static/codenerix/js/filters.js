@@ -92,6 +92,9 @@ angular
                     return '<a ng-click=\'$event.stopPropagation();\' href=\'' +
                            input +
                            '\'><i class=\'glyphicon glyphicon-download-alt\'></i></a>';
+                } else if (kind == 'link_blank') {
+                    return '<a ng-click=\'$event.stopPropagation();\' href=\'' +
+                           input + '\' target="_blank">' + input + '</a>';
                 } else if (kind.substring(0, 5) == 'image') {
                     if ((input == null) || (input == undefined) ||
                         (input == '')) {
