@@ -6,9 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.87] - 2024-06-02
+### Feature
+- Added a new kind 'bool' for 'codenerix' Angular filter
+
+
 ## [4.0.86] - 2024-06-02
 ### Feature
 - More confortable copytoclipboard filter
+
 
 ## [4.0.85] - 2024-06-01
 ### Feature

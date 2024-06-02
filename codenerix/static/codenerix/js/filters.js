@@ -40,6 +40,13 @@ angular
                     }
                 } else if ((kind == 'none') || (kind == '')) {
                     return input;
+                } else if (kind == 'bool') {
+                    if ((input === null) || (input === undefined) ||
+                        (input === '') || (!input)) {
+                        return '<i class="autofalse text-danger glyphicon glyphicon-remove"></i>';
+                    } else {
+                        return '<i class="autotrue text-success glyphicon glyphicon-ok"></i>';
+                    }
                 } else if (kind == 'skype') {
                     return '<a ng-click=\'$event.stopPropagation();\' href=\'tel:' +
                            input + '\'>' + input + '</a>';
