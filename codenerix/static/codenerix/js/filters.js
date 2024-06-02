@@ -130,7 +130,7 @@ angular
                                 var body = kingsp[1];
                             }
                             var ngclick = `ng-click="modalinfo('` + title +
-                                          `','` + body + `');"`;
+                                          `','` + body + `', 2000);"`;
                         } else {
                             var ngclick = '';
                         }
