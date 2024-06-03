@@ -9,15 +9,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-01 05:26+0000\n"
-"PO-Revision-Date: 2024-01-19 11:03+0100\n"
-"Last-Translator: abcdabcdabcdabcd  <yo@br0th3r.com>\n"
+"PO-Revision-Date: 2024-06-03 12:08+0000\n"
+"Last-Translator: YEQ4I2TTZ2NYWM44BP24WJFMHUVQC5RM  <juanmi@juanmitaboada.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Translated-Using: django-rosetta 0.9.8\n"
+"X-Translated-Using: django-rosetta 0.10.0\n"
 
 #: codenerix/constants.py:24
 msgid "Kilogram"
@@ -112,8 +112,8 @@ msgid ""
 "WARNING: No version set to this code, add VERSION contant to your "
 "configuration"
 msgstr ""
-"ATENCIÓN: No hay un número de versión configurada para este código, añade la "
-"constante VERSION a tu configuración"
+"ATENCIÓN: No hay un número de versión configurada para este código, añade la"
+" constante VERSION a tu configuración"
 
 #: codenerix/context.py:102
 msgid "WARNING: CODENERIX_CSS is not set in your configuration!!!"
@@ -235,7 +235,8 @@ msgstr "Diciembre"
 #, python-format
 msgid "Ensure this value has at least %(limit_value)d character"
 msgid_plural "Ensure this value has at least %(limit_value)d characters"
-msgstr[0] "Asegúrate de que este valor tiene al menos %(limit_value)d carácter"
+msgstr[0] ""
+"Asegúrate de que este valor tiene al menos %(limit_value)d carácter"
 msgstr[1] ""
 "Asegúrate de que este valor tiene al menos %(limit_value)d caracteres"
 
@@ -296,7 +297,8 @@ msgstr "Actualizado"
 #: codenerix/models.py:226
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
-msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
+msgstr ""
+"No se puede borrar el elemento, existe una relación con %(model_name)s"
 
 #: codenerix/models.py:302 codenerix/models.py:402 codenerix/views.py:650
 msgid "Add"
@@ -400,7 +402,7 @@ msgstr "Apellidos"
 
 #: codenerix/models_people.py:65 codenerix/models_people.py:103
 msgid "Disabled from"
-msgstr "Desabilitado desde"
+msgstr "Deshabilitado desde"
 
 #: codenerix/models_people.py:97
 msgid "User"
@@ -623,8 +625,8 @@ msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
 msgstr ""
-"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
-"add_permission: detail, change y delete"
+"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para"
+" add_permission: detail, change y delete"
 
 #: codenerix/views.py:1820
 msgid "Not allowed, this kind of requests has been prohibited for this view!"
