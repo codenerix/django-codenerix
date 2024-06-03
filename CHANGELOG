@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.88] - 2024-06-03
+### Feature
+- Added callback argument to Angular modalinfo()
+
+
 ## [4.0.87] - 2024-06-02
 ### Feature
 - Added a new kind 'bool' for 'codenerix' Angular filter

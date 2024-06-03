@@ -2907,7 +2907,7 @@ function multilist(
     };
 
     // Quick OK modal to show information
-    $scope.modalinfo = function(title, content, timeout) {
+    $scope.modalinfo = function(title, content, timeout, callback) {
         var static_url = $scope.data.meta.url_static;
         var template = `
             <div class="modal-header ng-scope">
@@ -2925,17 +2925,27 @@ function multilist(
             </div>`;
 
         var functions = function(scope) {
+            scope.callback = callback;
+            scope.closed = false;
             scope.close = function() {
                 scope.$dismiss('cancel');
+                if ((scope.callback !== undefined) && (!scope.closed)) {
+                    scope.closed = true;
+                    scope.callback();
+                }
             };
             if (timeout != undefined) {
                 $timeout(function() {
                     scope.$dismiss('cancel');
+                    if ((scope.callback !== undefined) && (!scope.closed)) {
+                        scope.closed = true;
+                        scope.callback();
+                    }
                 }, timeout);
             }
         };
 
-        var callback = function(scope) {};
+        var callback_internal = function(scope) {};
         var callback_cancel = function(scope) {};
         openmodal(
             $scope,
@@ -2943,7 +2953,7 @@ function multilist(
             $uibModal,
             'md',
             functions,
-            callback,
+            callback_internal,
             true,
             callback_cancel,
             template);
