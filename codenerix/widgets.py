@@ -65,7 +65,7 @@ class StaticSelectMulti(forms.widgets.Select):
             # static
             self.choices = targs.get("choices", "")
             # dynamic
-            self.autofill_deepness = targs.get("autofill_deepness", 3)
+            self.autofill_deepness = targs.get("autofill_deepness", 2)
             self.autofill_url = targs.get("autofill_url", "")
             self.autofill = targs.get("autofill_related", [])
         return super().__init__(*args, **kwargs)
@@ -480,7 +480,7 @@ class DynamicSelectInputWidget:
             self.is_required = targs.get("is_required", False)
             self.form_name = targs.get("form_name", "")
             self.field_name = targs.get("field_name", "")
-            self.autofill_deepness = targs.get("autofill_deepness", 3)
+            self.autofill_deepness = targs.get("autofill_deepness", 2)
             self.autofill_url = targs.get("autofill_url", "")
             self.autofill = targs.get("autofill_related", [])
 
