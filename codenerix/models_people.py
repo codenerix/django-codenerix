@@ -184,7 +184,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def get_grouppermit(self):
         return self.user.groups.all()
 
-    def presave(self, username, password, email, confirm):
+    def presave(self, username, password, email, confirm, unusable=False):
         self.clean_memcache()
         # Check username
         # Rewrite username
@@ -198,14 +198,15 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             )
 
         # Check passwords
-        if password and confirm and password != confirm:
-            raise ValidationError("Passwords do not match")
-        if password and (len(password) < settings.PASSWORD_MIN_SIZE):
-            raise ValidationError(
-                "Password can not be smaller than {} characters".format(
-                    settings.PASSWORD_MIN_SIZE,
-                ),
-            )
+        if not unusable:
+            if password and confirm and password != confirm:
+                raise ValidationError("Passwords do not match")
+            if password and (len(password) < settings.PASSWORD_MIN_SIZE):
+                raise ValidationError(
+                    "Password can not be smaller than {} characters".format(
+                        settings.PASSWORD_MIN_SIZE,
+                    ),
+                )
 
         # Check email
         if email:
@@ -237,17 +238,27 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                     self.user.username = username
 
             # Update password if any
-            if password:
+            if unusable:
+                self.user.set_unusable_password()
+
+            elif password:
                 self.user.set_password(password)
             # Update email address
             self.user.email = email
         else:
+            # Extra args
+            if unusable:
+                extra_args = {}
+            else:
+                extra_args = {"password": password}
             # Create new user
             self.user = User.objects.create_user(
                 username=username,
                 email=email,
-                password=password,
+                **extra_args,
             )
+            if unusable:
+                self.user.set_unusable_password()
             # user creator of the user
             self.creator = get_current_user()
 

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.91] - 2024-06-04
+### Feature
+- Allow to create People with unusable password on GenPerson
+
+
 ## [4.0.90] - 2024-06-04
 ### Feature
 - Dynamic search now requires 2 characters to start searching instead 3 characters
