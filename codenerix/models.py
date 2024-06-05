@@ -315,9 +315,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
         )
         user = models.ForeignKey(  # type: ignore[var-annotated]
             settings.AUTH_USER_MODEL,
-            on_delete=models.DO_NOTHING,
+            on_delete=models.SET_NULL,
             blank=True,
             null=True,
+            related_name="log",
         )
         username = models.CharField(  # type: ignore[var-annotated]
             "Username",
@@ -328,9 +329,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
         )
         content_type = models.ForeignKey(  # type: ignore[var-annotated]
             ContentType,
-            on_delete=models.DO_NOTHING,
+            on_delete=models.SET_NULL,
             blank=True,
             null=True,
+            related_name="log",
         )
         object_id = models.TextField(  # type: ignore[var-annotated]
             "Object id",
@@ -820,9 +822,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
 
         user = models.ForeignKey(  # type: ignore[var-annotated]
             settings.AUTH_USER_MODEL,
-            on_delete=models.DO_NOTHING,
+            on_delete=models.SET_NULL,
             blank=True,
             null=True,
+            related_name="remotelog",
         )
         username = models.CharField(  # type: ignore[var-annotated]
             "Username",
