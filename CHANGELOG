@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.95] - 2024-06-05
+### Bugfix
+- Detail Modal now avoid loading codenerixInlineServices from Detail view
+
+
 ## [4.0.94] - 2024-06-05
 ### Feature
 - Support for 'datetime_filter="field_name"' on GenList to get filtered the list by a datetime field
