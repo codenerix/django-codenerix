@@ -1462,6 +1462,7 @@ class GenList(GenBase, ListView):  # type: ignore
         field_check = None                          # None don't show checkbox, else show checkbox. if 'True' checked ('None', 'True', 'False')
 
         search_filter_button = True                 # Enable filtering system by default
+        datetime_filter = 'field'                   # It will force the datetie filter on the specified 'field'
         autofiltering = False                       # Disable autofiltering system
         haystack = True                             # Enable Haystack support
         onlybase = True                             # Will set the GenList to work only as a Base render for another View but not as a List itself
@@ -2113,7 +2114,7 @@ class GenList(GenBase, ListView):  # type: ignore
 
         # Save in context
         context["search"] = search
-        datetimeQ = None  # noqa: N806
+        datetimeQ = getattr(self, "datetime_filter", None)  # noqa: N806
         if len(search) > 0:
             # Get ID
             tid = None
@@ -2164,9 +2165,10 @@ class GenList(GenBase, ListView):  # type: ignore
                 # Extract the token
                 qtoken = searchs[name]
                 if qtoken == "datetime":
-                    # If it is a datetime
-                    datetimeQ = name  # noqa: N806
-                    continue
+                    if not datetimeQ:
+                        # If it is a datetime
+                        datetimeQ = name  # noqa: N806
+                        continue
                 elif (isinstance(qtoken, str)) or (isinstance(qtoken, list)):
                     # Prepare query
                     if isinstance(qtoken, tuple):
@@ -2247,13 +2249,6 @@ class GenList(GenBase, ListView):  # type: ignore
             if qdata:
                 searchq_objects = searchq_objects & qdata
             queryset = queryset.filter(searchq_objects)
-        else:
-            # Look for datetimeQ field
-            searchs = MODELINF.searchQ(search)
-            for name in searchs:
-                if searchs[name] == "datetime":
-                    datetimeQ = name  # noqa: N806
-                    continue
 
         # Prepare searchF
         listfilters = {}
@@ -2294,6 +2289,9 @@ class GenList(GenBase, ListView):  # type: ignore
                         fv = typekind[value - 1][0]
                         queryset = queryset.filter(rule[1](fv))
                         typekind = "select"
+                elif typekind == "datetime":
+                    # It has been already processed
+                    pass
                 elif typekind == "select":
                     # Get selected value from rule
                     if isinstance(value, int):
@@ -5600,6 +5598,8 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
         }
         default_ordering = "-action_time"
         must_be_superuser = True
+        search_filter_button = True
+        datetime_filter = "action_time"
 
     class LogDetails(GenDetailModal, GenDetail):  # type: ignore
         is_modal = True

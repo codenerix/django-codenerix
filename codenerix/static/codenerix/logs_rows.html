@@ -19,12 +19,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 -->
-<td>{{row.action_time}}</td>
-<td>{{row.user__username}}</td>
-<td>{{row.username}}</td>
-<td>{{row.get_action_flag_display}}</td>
-<td>{{row.content_type}}</td>
-<td>{{row.content_type__app_label}}</td>
-<td>{{row.content_type__model}}</td>
-<td>{{row.object_id}}</td>
-<td><div ng-bind-html="row.show">{{row.show}}</div></td>
+<td>{{row.action_time|codenerix}}</td>
+<td>{{row.user__username|codenerix}}</td>
+<td>{{row.username|codenerix}}</td>
+<td>{{row.get_action_flag_display|codenerix}}</td>
+<td>{{row.content_type|codenerix}}</td>
+<td>{{row.content_type__app_label|codenerix}}</td>
+<td>{{row.content_type__model|codenerix}}</td>
+<td>{{row.object_id|codenerix}}</td>
+<td><div ng-bind-html="row.show">{{row.show|codenerix}}</div></td>
