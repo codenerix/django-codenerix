@@ -105,18 +105,45 @@ angular
                         var blank = '';
                         var icon = '';
                         var text = input;
+                        var flag_icon = false;
+                        var flag_onlyicon = false;
+                        var flag_icon_link = true;
+                        var flag_icon_download = false;
                         for (var i = 0; i < kindsp.length; i++) {
                             if (kindsp[i] == 'blank') {
                                 blank = ' target="_blank"';
                             } else if (kindsp[i] == 'icon') {
-                                icon =
-                                    '<i class=\'glyphicon glyphicon-download-alt\'></i>';
+                                flag_icon = true;
+                                flag_onlyicon = false;
                             } else if (kindsp[i] == 'onlyicon') {
-                                icon =
-                                    '<i class=\'glyphicon glyphicon-download-alt\'></i>';
-                                text = '';
+                                flag_icon = true;
+                                flag_onlyicon = true;
+                            } else if (kindsp[i] == 'link') {
+                                flag_icon_link = true;
+                                flag_icon_download = false;
+                            } else if (kindsp[i] == 'download') {
+                                flag_icon_link = false;
+                                flag_icon_download = true;
                             }
                         }
+
+                        // Choose icon and text
+                        if (flag_icon) {
+                            if (flag_icon_link) {
+                                icon =
+                                    '<i class=\'glyphicon glyphicon-link\'></i>';
+                            }
+                            if (flag_icon_download) {
+                                icon =
+                                    '<i class=\'glyphicon glyphicon-download-alt\'></i>';
+                            }
+                        }
+
+                        // Only icon
+                        if (flag_onlyicon) {
+                            text = '';
+                        }
+
                         return `<a ng-click='$event.stopPropagation();' ` +
                                blank + ` href='` + input + `'>` + icon + ' ' +
                                text + `</a>`;
