@@ -394,6 +394,10 @@ function openmodal(
                         $uibModalInstance.dismiss('cancel');
                     };
 
+                    $scope.gotoback = function() {
+                        $uibModalInstance.dismiss('cancel');
+                    };
+
                     // Enable dynamic select
                     $scope.http = $http;
                     dynamic_fields($scope);

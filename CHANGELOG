@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [4.0.96] - 2024-06-06
+### Bugfix
+- Added missing gotoback() function on modal windows
+
+
 ## [4.0.95] - 2024-06-05
 ### Bugfix
 - Detail Modal now avoid loading codenerixInlineServices from Detail view
