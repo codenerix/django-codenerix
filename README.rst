@@ -29,8 +29,7 @@ Features
 * integrated API system as standard
 * several authentication methods' including OTP (One Time Password)
 * ready for authentication with Microsoft Active Directory
-* checked from Python 3.4 to Python 3.9
-* checked from Django 2.2.9 to Django 4.0.4
+* ready for the latest Python and Django versions
 * hotkeys support
 * `Haystack <http://haystacksearch.org>`_ support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
 * nice packages with plenty of icons ready to use (Glyphicon, Font Awesome & Font Awesome Animation)
@@ -167,12 +166,13 @@ Francisco Torrejon                  Core                He was one of the first 
 Several technologies have been used to build CODENERIX:
 
 =================================== =================== =========================== =========================================================
-Project name                        License             Owner                       Link to project
+Project name                        License             Maintainer                  Link to project
 =================================== =================== =========================== =========================================================
 Angular Material Design             MIT                 Google, Inc.                https://github.com/angular/material
 AngularJS                           MIT                 Google, Inc.                https://github.com/angular/angular.js
 AngularJS Color Contrast Directive  MIT                 Everton Yoshitani           https://github.com/evert0n/angular-color-contrast/
 AngularJS reCaptcha                 MIT                 VividCortex                 https://github.com/VividCortex/angular-recaptcha
+angular-qr                          MIT                 Jan Antala                  https://github.com/janantala/angular-qr
 AngularUI                           MIT                 AngularUI Team              https://github.com/angular-ui
 angular-base64-upload               MIT                 pitogo.adones@gmail.com     https://github.com/adonespitogo/angular-base64-upload
 angular-bootstrap-colorpicker       MIT                 Michal Zielenkiewicz        https://github.com/buberdds/angular-bootstrap-colorpicker

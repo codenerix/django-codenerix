@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-01 05:26+0000\n"
+"POT-Creation-Date: 2024-06-10 07:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -275,7 +275,7 @@ msgstr ""
 msgid "ERROR: dic has repeated elements"
 msgstr ""
 
-#: codenerix/models.py:144 codenerix/models.py:843
+#: codenerix/models.py:144 codenerix/models.py:846
 #: codenerix/models_people.py:101
 msgid "Created"
 msgstr ""
@@ -289,15 +289,15 @@ msgstr ""
 msgid "Cannot delete item, relationship with %(model_name)s"
 msgstr ""
 
-#: codenerix/models.py:302 codenerix/models.py:402 codenerix/views.py:650
+#: codenerix/models.py:302 codenerix/models.py:404 codenerix/views.py:650
 msgid "Add"
 msgstr ""
 
-#: codenerix/models.py:303 codenerix/models.py:404 codenerix/views.py:652
+#: codenerix/models.py:303 codenerix/models.py:406 codenerix/views.py:652
 msgid "Change"
 msgstr ""
 
-#: codenerix/models.py:304 codenerix/models.py:406
+#: codenerix/models.py:304 codenerix/models.py:408
 #: codenerix/templates/codenerix/details.html:81
 #: codenerix/templates/codenerix/details.html:82
 #: codenerix/templates/codenerix/details.html:84
@@ -313,75 +313,83 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: codenerix/models.py:345 codenerix/models.py:417 codenerix/models.py:474
+#: codenerix/models.py:347 codenerix/models.py:419 codenerix/models.py:476
 msgid "Action"
 msgstr ""
 
-#: codenerix/models.py:414 codenerix/models.py:469 codenerix/views.py:654
+#: codenerix/models.py:416 codenerix/models.py:471 codenerix/views.py:654
 msgid "Date"
 msgstr ""
 
-#: codenerix/models.py:415 codenerix/models.py:480 codenerix/models.py:844
+#: codenerix/models.py:417 codenerix/models.py:482 codenerix/models.py:847
 msgid "Actual user"
 msgstr ""
 
-#: codenerix/models.py:416 codenerix/models.py:485 codenerix/models.py:845
+#: codenerix/models.py:418 codenerix/models.py:487 codenerix/models.py:848
 msgid "Original user"
 msgstr ""
 
-#: codenerix/models.py:419
+#: codenerix/models.py:421
 msgid "APP Name"
 msgstr ""
 
-#: codenerix/models.py:420 codenerix/models.py:490
+#: codenerix/models.py:422 codenerix/models.py:492
 msgid "APP Label"
 msgstr ""
 
-#: codenerix/models.py:421
+#: codenerix/models.py:423
 msgid "APP Model"
 msgstr ""
 
-#: codenerix/models.py:422 codenerix/models.py:478 codenerix/models.py:842
+#: codenerix/models.py:424 codenerix/models.py:480 codenerix/models.py:845
 msgid "ID"
 msgstr ""
 
-#: codenerix/models.py:424
+#: codenerix/models.py:426
 msgid "Txt"
 msgstr ""
 
-#: codenerix/models.py:435
+#: codenerix/models.py:437
 msgid "add"
 msgstr ""
 
-#: codenerix/models.py:436
+#: codenerix/models.py:438
 msgid "addition"
 msgstr ""
 
-#: codenerix/models.py:442
+#: codenerix/models.py:444
 msgid "change"
 msgstr ""
 
-#: codenerix/models.py:443
+#: codenerix/models.py:445
 msgid "changed"
 msgstr ""
 
-#: codenerix/models.py:449
+#: codenerix/models.py:451
 msgid "edit"
 msgstr ""
 
-#: codenerix/models.py:450
+#: codenerix/models.py:452
 msgid "edition"
 msgstr ""
 
-#: codenerix/models.py:456
+#: codenerix/models.py:458
 msgid "delete"
 msgstr ""
 
-#: codenerix/models.py:457
+#: codenerix/models.py:459
 msgid "deleted"
 msgstr ""
 
 #: codenerix/models_people.py:53 codenerix/models_people.py:98
+#: codenerix_geodata/models.py:36 codenerix_geodata/models.py:46
+#: codenerix_geodata/models.py:115 codenerix_geodata/models.py:125
+#: codenerix_geodata/models.py:135 codenerix_geodata/views.py:78
+#: codenerix_geodata/views.py:95 codenerix_geodata/views.py:155
+#: codenerix_geodata/views.py:181 codenerix_geodata/views.py:261
+#: codenerix_geodata/views.py:297 codenerix_geodata/views.py:389
+#: codenerix_geodata/views.py:435 codenerix_geodata/views.py:577
+#: codenerix_geodata/views.py:624
 msgid "Name"
 msgstr ""
 
@@ -406,12 +414,12 @@ msgid "Active"
 msgstr ""
 
 #: codenerix/models_people.py:127
-#: codenerix/templatetags/codenerix_common.py:140 codenerix/views.py:1876
+#: codenerix/templatetags/codenerix_common.py:140 codenerix/views.py:1877
 msgid "Yes"
 msgstr ""
 
 #: codenerix/models_people.py:127
-#: codenerix/templatetags/codenerix_common.py:142 codenerix/views.py:1876
+#: codenerix/templatetags/codenerix_common.py:142 codenerix/views.py:1877
 msgid "No"
 msgstr ""
 
@@ -443,16 +451,16 @@ msgid "Edit"
 msgstr ""
 
 #: codenerix/templates/codenerix/details.html:76
-#: codenerix/templates/codenerix/detailsmodal_log.html:41
+#: codenerix/templates/codenerix/detailsmodal_log.html:43
 msgid "Go to back"
 msgstr ""
 
 #: codenerix/templates/codenerix/details.html:77
 #: codenerix/templates/codenerix/details.html:155
 #: codenerix/templates/codenerix/details.html:156
-#: codenerix/templates/codenerix/detailsmodal_log.html:42
-#: codenerix/templates/codenerix/detailsmodal_log.html:97
-#: codenerix/templates/codenerix/detailsmodal_log.html:98
+#: codenerix/templates/codenerix/detailsmodal_log.html:44
+#: codenerix/templates/codenerix/detailsmodal_log.html:99
+#: codenerix/templates/codenerix/detailsmodal_log.html:100
 #: codenerix/views.py:662
 msgid "Go back"
 msgstr ""
@@ -475,7 +483,7 @@ msgstr ""
 msgid "You will loose all your changes, are you sure?"
 msgstr ""
 
-#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3869
+#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3867
 msgid "List"
 msgstr ""
 
@@ -496,7 +504,7 @@ msgstr ""
 msgid "Clean filters"
 msgstr ""
 
-#: codenerix/views.py:655 codenerix/views.py:3319
+#: codenerix/views.py:655 codenerix/views.py:3317
 msgid "Day"
 msgstr ""
 
@@ -516,15 +524,15 @@ msgstr ""
 msgid "Filters"
 msgstr ""
 
-#: codenerix/views.py:663 codenerix/views.py:3321 codenerix/widgets.py:906
+#: codenerix/views.py:663 codenerix/views.py:3319 codenerix/widgets.py:906
 msgid "Hour"
 msgstr ""
 
-#: codenerix/views.py:664 codenerix/views.py:3317
+#: codenerix/views.py:664 codenerix/views.py:3315
 msgid "Month"
 msgstr ""
 
-#: codenerix/views.py:665 codenerix/views.py:3323
+#: codenerix/views.py:665 codenerix/views.py:3321
 msgid "Minute"
 msgstr ""
 
@@ -576,7 +584,7 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
-#: codenerix/views.py:679 codenerix/views.py:3325
+#: codenerix/views.py:679 codenerix/views.py:3323
 msgid "Second"
 msgstr ""
 
@@ -592,7 +600,7 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
-#: codenerix/views.py:683 codenerix/views.py:3315
+#: codenerix/views.py:683 codenerix/views.py:3313
 msgid "Year"
 msgstr ""
 
@@ -614,42 +622,42 @@ msgid ""
 "for action_permission: detail, change and delete"
 msgstr ""
 
-#: codenerix/views.py:1820
+#: codenerix/views.py:1821
 msgid "Not allowed, this kind of requests has been prohibited for this view!"
 msgstr ""
 
-#: codenerix/views.py:2354 codenerix/views.py:2367 codenerix/views.py:2973
-#: codenerix/views.py:3025
+#: codenerix/views.py:2352 codenerix/views.py:2365 codenerix/views.py:2971
+#: codenerix/views.py:3023
 msgid "All"
 msgstr ""
 
-#: codenerix/views.py:3327
+#: codenerix/views.py:3325
 msgid "Unknown"
 msgstr ""
 
-#: codenerix/views.py:3841
+#: codenerix/views.py:3839
 msgid ""
 "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in "
 "Megabytes) of the config"
 msgstr ""
 
-#: codenerix/views.py:3856
+#: codenerix/views.py:3854
 msgid "Could not generate file"
 msgstr ""
 
-#: codenerix/views.py:4713
+#: codenerix/views.py:4711
 msgid "This shouldn't happen, state is not $dirty or $pristine"
 msgstr ""
 
-#: codenerix/views.py:4905
+#: codenerix/views.py:4903
 msgid "Method not allowed, use POST to delete or DELETE on the detail url"
 msgstr ""
 
-#: codenerix/views.py:5599 codenerix/views.py:5640
+#: codenerix/views.py:5597 codenerix/views.py:5640
 msgid "Manager"
 msgstr ""
 
-#: codenerix/views.py:5599
+#: codenerix/views.py:5597
 msgid "Log"
 msgstr ""
 
@@ -699,4 +707,131 @@ msgstr ""
 
 #: codenerix/widgets.py:1266
 msgid "We are working on this plugin, it will be ready for next version"
+msgstr ""
+
+#: codenerix_geodata/forms.py:46 codenerix_geodata/forms.py:62
+#: codenerix_geodata/forms.py:78 codenerix_geodata/forms.py:94
+#: codenerix_geodata/forms.py:110 codenerix_geodata/forms.py:125
+msgid "Details"
+msgstr ""
+
+#: codenerix_geodata/management/commands/populate_geodata.py:235
+msgid "Populates Continent, Country and City models"
+msgstr ""
+
+#: codenerix_geodata/models.py:51 codenerix_geodata/models.py:67
+#: codenerix_geodata/models.py:77 codenerix_geodata/models.py:82
+#: codenerix_geodata/models.py:99 codenerix_geodata/models.py:110
+#: codenerix_geodata/models.py:141 codenerix_geodata/models.py:158
+#: codenerix_geodata/models.py:168 codenerix_geodata/models.py:174
+#: codenerix_geodata/models.py:191 codenerix_geodata/models.py:201
+#: codenerix_geodata/views.py:154 codenerix_geodata/views.py:260
+#: codenerix_geodata/views.py:388
+msgid "Code"
+msgstr ""
+
+#: codenerix_geodata/models.py:83 codenerix_geodata/models.py:100
+msgid "Continent"
+msgstr ""
+
+#: codenerix_geodata/models.py:140 codenerix_geodata/models.py:157
+#: codenerix_geodata/models.py:206 codenerix_geodata/models.py:225
+#: codenerix_geodata/models.py:234 codenerix_geodata/models.py:254
+#: codenerix_geodata/views.py:582
+msgid "Country"
+msgstr ""
+
+#: codenerix_geodata/models.py:173 codenerix_geodata/models.py:190
+#: codenerix_geodata/models.py:207 codenerix_geodata/models.py:235
+#: codenerix_geodata/models.py:255
+msgid "Region"
+msgstr ""
+
+#: codenerix_geodata/models.py:208 codenerix_geodata/models.py:236
+#: codenerix_geodata/models.py:256 codenerix_geodata/views.py:580
+msgid "Province"
+msgstr ""
+
+#: codenerix_geodata/models.py:209
+msgid "Timezone"
+msgstr ""
+
+#: codenerix_geodata/models.py:226
+msgid "Time zone"
+msgstr ""
+
+#: codenerix_geodata/models.py:237 codenerix_geodata/models.py:258
+msgid "City"
+msgstr ""
+
+#: codenerix_geodata/models.py:238 codenerix_geodata/models.py:257
+msgid "Town"
+msgstr ""
+
+#: codenerix_geodata/models.py:239
+msgid "Zip code"
+msgstr ""
+
+#: codenerix_geodata/models.py:240 codenerix_geodata/models.py:260
+msgid "Address"
+msgstr ""
+
+#: codenerix_geodata/models.py:241 codenerix_geodata/models.py:261
+msgid "Phone"
+msgstr ""
+
+#: codenerix_geodata/models.py:259
+msgid "Zipcode"
+msgstr ""
+
+#: codenerix_geodata/views.py:156 codenerix_geodata/views.py:182
+#: codenerix_geodata/views.py:264 codenerix_geodata/views.py:302
+#: codenerix_geodata/views.py:394 codenerix_geodata/views.py:443
+#: codenerix_geodata/views.py:583 codenerix_geodata/views.py:632
+msgid "Code continent"
+msgstr ""
+
+#: codenerix_geodata/views.py:157 codenerix_geodata/views.py:265
+#: codenerix_geodata/views.py:303 codenerix_geodata/views.py:395
+#: codenerix_geodata/views.py:444 codenerix_geodata/views.py:584
+#: codenerix_geodata/views.py:633
+msgid "Name continent"
+msgstr ""
+
+#: codenerix_geodata/views.py:183
+msgid "Continent name"
+msgstr ""
+
+#: codenerix_geodata/views.py:262 codenerix_geodata/views.py:392
+#: codenerix_geodata/views.py:581
+msgid "Code country"
+msgstr ""
+
+#: codenerix_geodata/views.py:263 codenerix_geodata/views.py:300
+#: codenerix_geodata/views.py:393 codenerix_geodata/views.py:441
+#: codenerix_geodata/views.py:630
+msgid "Name country"
+msgstr ""
+
+#: codenerix_geodata/views.py:299 codenerix_geodata/views.py:437
+#: codenerix_geodata/views.py:440 codenerix_geodata/views.py:626
+#: codenerix_geodata/views.py:629
+msgid "Code self"
+msgstr ""
+
+#: codenerix_geodata/views.py:390
+msgid "Code region"
+msgstr ""
+
+#: codenerix_geodata/views.py:391 codenerix_geodata/views.py:438
+#: codenerix_geodata/views.py:627
+msgid "Name region"
+msgstr ""
+
+#: codenerix_geodata/views.py:578
+msgid "Time Zone"
+msgstr ""
+
+#: codenerix_geodata/views.py:579
+msgid "Code province"
 msgstr ""
