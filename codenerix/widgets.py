@@ -48,7 +48,7 @@ except ModuleNotFoundError:
     BlankChoiceIterator = list
 
 
-class StaticSelectMulti(forms.widgets.Select):
+class StaticSelectMulti(forms.widgets.SelectMultiple):
     __language = None
 
     def __init__(self, *args, **kwargs):
@@ -73,6 +73,21 @@ class StaticSelectMulti(forms.widgets.Select):
     def set_language(self, language):
         self.__language = language
 
+    def value_from_datadict(self, data, files, name):
+        # Get value
+        value = super().value_from_datadict(data, files, name)
+
+        # Decompress list(list) to list
+        if (
+            isinstance(value, list)
+            and len(value) == 1
+            and isinstance(value[0], list)
+        ):
+            value = value[0]
+
+        # Let Django do its work
+        return value
+
     def render(self, name, value, attrs=None, choices=(), renderer=None):
         # Initialization
         # required=self.attrs.get('ng-required','false')
@@ -80,14 +95,18 @@ class StaticSelectMulti(forms.widgets.Select):
         # vid=attrs.get('id','id_{0}'.format(name))
         # vstyle=attrs.get('style','')
         vform = self.form_name
-        if self.static:
-            placeholder = escapejs(_("Press * and select an option"))
-        else:
-            placeholder = _("Press * or start typing")
+        placeholder = escapejs(_("Press * and select an option"))
+        if value is None:
+            value = []
+        valuejs = []
 
+        # Prepare dynamic search
+        if self.dynamic:
+            # Check if autofill_url is defined
             if not self.autofill_url:
                 raise OSError("autofill_url not defined")
 
+            # Prepare link
             vurl = reverse(self.autofill_url, kwargs={"search": "a"})[:-1]
             # Get access to the get_label() method and request for the
             # label of the bound input
@@ -96,67 +115,10 @@ class StaticSelectMulti(forms.widgets.Select):
                 clss = get_class(func)
                 if self.__language:
                     clss.language = self.__language
-                label = clss().get_label(value)
+                # label = clss().get_label(value)
 
-        if value is None:
-            value = []
-
-        valuejs = []
-
-        if self.static:
-            init = ""
-            if not value:
-                value = []
-            if hasattr(self, "field"):
-                for key, label in self.field.choices:
-                    if value == key:
-                        valuejs.append(
-                            '{{"id":"{0}","label":"{1}"}},'.format(
-                                key,
-                                escapejs(smart_str(label)),
-                            ),
-                        )
-                    init += '{{"id":"{0}","label":"{1}"}},'.format(
-                        key,
-                        escapejs(smart_str(label)),
-                    )
-            elif (isinstance(self.choices, BlankChoiceIterator)) or (
-                isinstance(self.choices, list)
-            ):
-                for key, label in self.choices:
-                    if value == key:
-                        valuejs.append(
-                            '{{"id":"{0}","label":"{1}"}},'.format(
-                                key,
-                                escapejs(smart_str(label)),
-                            ),
-                        )
-                    init += '{{"id":"{0}","label":"{1}"}},'.format(
-                        key,
-                        escapejs(smart_str(label)),
-                    )
-            else:
-                # FORCE RELOAD DATAS
-                elements = self.choices.queryset
-                elements._result_cache = None
-                for choice in elements:
-                    init += '{{"id":"{0}","label":"{1}"}},'.format(
-                        choice.pk,
-                        escapejs(smart_str(choice)),
-                    )
-                    if (
-                        value
-                        and isinstance(value, list)
-                        and (choice.pk in value)
-                    ):
-                        valuejs.append(
-                            '{{"id":"{0}","label":"{1}"}},'.format(
-                                int(choice.pk),
-                                escapejs(smart_str(choice)),
-                            ),
-                        )
-        else:
-            init = "getForeignKeys(http,'{0}',amc_items,{{".format(vurl)
+            # Prepare foreign params
+            foreign_params = "http,'{0}',amc_items,{{".format(vurl)
             comma = False
             for field in self.autofill:
                 if ":" in field:
@@ -165,30 +127,89 @@ class StaticSelectMulti(forms.widgets.Select):
                 else:
                     field_filter = field
                 if comma:
-                    init += ","
+                    foreign_params += ","
                 else:
                     comma = True
-                init += "'{}':{}.{}".format(field, vform, field_filter)
-            init += "}},'{0}',{0},$select.search,{1})\"".format(
-                vmodel,
-                self.autofill_deepness,
+                foreign_params += "'{}':{}.{}".format(
+                    field,
+                    vform,
+                    field_filter,
+                )
+            foreign_params += (
+                "}},amc_select.{0},amc_searchText.{0},{1}".format(
+                    vmodel,
+                    self.autofill_deepness,
+                )
             )
+        else:
+            foreign_params = None
 
+        # Prepare initialization string
+        init = ""
+        if not value:
+            value = []
+        if self.static and hasattr(self, "field"):
+            for key, label in self.field.choices:
+                if value == key:
+                    valuejs.append(
+                        '{{"id":"{0}","label":"{1}"}},'.format(
+                            key,
+                            escapejs(smart_str(label)),
+                        ),
+                    )
+                init += '{{"id":"{0}","label":"{1}"}},'.format(
+                    key,
+                    escapejs(smart_str(label)),
+                )
+        elif (isinstance(self.choices, BlankChoiceIterator)) or (
+            isinstance(self.choices, list)
+        ):
+            for key, label in self.choices:
+                if value == key:
+                    valuejs.append(
+                        '{{"id":"{0}","label":"{1}"}},'.format(
+                            key,
+                            escapejs(smart_str(label)),
+                        ),
+                    )
+                init += '{{"id":"{0}","label":"{1}"}},'.format(
+                    key,
+                    escapejs(smart_str(label)),
+                )
+        else:
+            # FORCE RELOAD DATAS
+            elements = self.choices.queryset
+            elements._result_cache = None
+            if self.dynamic and value and isinstance(value, list):
+                elements = elements.filter(pk__in=value)
+            for choice in elements:
+                init += '{{"id":"{0}","label":"{1}"}},'.format(
+                    choice.pk,
+                    escapejs(smart_str(choice)),
+                )
+                if value and isinstance(value, list) and (choice.pk in value):
+                    valuejs.append(
+                        '{{"id":"{0}","label":"{1}"}},'.format(
+                            int(choice.pk),
+                            escapejs(smart_str(choice)),
+                        ),
+                    )
+
+        # Build HTML
         html = (
             '<md-chips ng-model="amc_select.{0}" '
             'md-autocomplete-snap id="{0}" name="{0}" '.format(vmodel)
         )
         html += '    md-transform-chip="amc_transformChip($chip)"'
         # html += u'    initial = "loadVegetables()"'
-        html += "    ng-init = 'amc_items.{} = [".format(vmodel)
-        #        {"name":"Broccoli","type":"Brassica","_lowername":"broccoli","_lowertype":"brassica"}
-        html += init
+        html += "    ng-init = 'amc_items.{} = ".format(vmodel)
+        html += "[" + init + "]"
         if valuejs:
             # html += u" ng-init = 'amc_select.{0} = [".format(vmodel)
-            html += "]; amc_select.{} = [".format(vmodel)
+            html += "; amc_select.{} = [".format(vmodel)
             html += "".join(valuejs)
             html += "]'"
-        html += "]'"
+        html += "'"
         html += '    md-require-match="amc_autocompleteDemoRequireMatch">'
         html += "    <md-autocomplete"
         html += '            md-selected-item="amc_selectedItem.{}"'.format(
@@ -197,8 +218,14 @@ class StaticSelectMulti(forms.widgets.Select):
         html += '            md-search-text="amc_searchText.{}"'.format(vmodel)
         html += (
             '            md-items="item in amc_querySearch('
-            "amc_searchText.{0}, '{0}', '{0}')\"".format(vmodel)
+            "amc_searchText.{0}, '{0}'".format(vmodel)
         )
+
+        # Add the params for dynamic search
+        if self.dynamic:
+            html += "," + foreign_params
+
+        html += ')"'
         html += '            md-item-text="item.id"'
         html += '            placeholder="{}">'.format(placeholder)
         html += '        <span md-highlight-text="amc_searchText.{}">'.format(
@@ -655,10 +682,12 @@ class DynamicSelect(DynamicSelectInputWidget, forms.widgets.Select):
 
 class MultiStaticSelect(StaticSelectMulti):
     static = True
+    dynamic = False
 
 
 class MultiDynamicSelect(StaticSelectMulti):
     static = False
+    dynamic = True
 
 
 class MultiStaticSelect_old(StaticSelect):  # noqa: N801

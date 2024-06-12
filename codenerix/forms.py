@@ -17,8 +17,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django.core.exceptions import ValidationError
 from django.forms import NullBooleanField
-from django.forms.widgets import CheckboxInput, Select
+from django.forms.widgets import CheckboxInput, Select, SelectMultiple
 from django.utils.translation import gettext as _
 
 from codenerix.djng import NgForm, NgFormValidationMixin, NgModelForm
@@ -63,6 +64,80 @@ class BaseForm:
 
     def __errors__(self):
         return []
+
+    def clean(self):
+        for field in self.fields:
+            # If field not found in cleaned_data, lets try to validate the
+            # value directly
+            if field not in self.cleaned_data:
+                # If widget is SelectMultiple remake the cleaned_data
+                if isinstance(self.fields[field].widget, SelectMultiple):
+                    # Validate the pks is a list of positive integers
+                    pks = self.data.get(field) + ["34a434434"]
+                    try:
+                        pks = [int(pk) for pk in pks]
+                    except ValueError:
+                        raise ValidationError(
+                            _("Invalid value detected in SelectMultiple"),
+                        )
+
+                    # Set the cleaned_data as a queryset with the
+                    # selected values
+                    self.cleaned_data[field] = self.fields[
+                        field
+                    ].choices.queryset.filter(pk__in=pks)
+
+                    # If field was in errors, remove it
+                    if field in self._errors:
+                        self._errors.pop(field)
+
+        # Call the parent method normally
+        super().clean()
+
+    # def clean_dev(self):
+    #     print("clean")
+    #     # print all fields being verified
+    #     print(self.errors)
+    #     print(type(self.errors))
+
+    #     for field in self.fields:
+    #         print(f"field: {field}")
+    #         print(f"field errors: {self.errors.get(field)}")
+    #         # show the value of the field
+    #         print(f"field value: {self.data.get(field)}")
+    #         # show the type of the field
+    #         print(f"field type: {self.fields[field].__class__}")
+    #         # show the widget of the field
+    #         print(f"field widget: {self.fields[field].widget.__class__}")
+    #         # if field not found in cleaned_data, get the post value
+    #         if field not in self.cleaned_data:
+    #             # if widget is selectmultiple remake the cleaned_data
+    #             if isinstance(self.fields[field].widget, SelectMultiple):
+    #                 # Show the model this field is related to
+    #                 for choice in self.fields[field].choices:
+    #                     print(f"choice: {choice} - {choice[0]}")
+    #                 print(dir(self.fields[field].choices))
+    #                 self.cleaned_data[field] = self.fields[
+    #                     field
+    #                 ].choices.queryset.filter(pk__in=self.data.get(field))
+    #                 if field in self._errors:
+    #                     self._errors.pop(field)
+    #         # show the type of the cleaned_data
+    #         print(f"field errors: {self.errors.get(field)}")
+    #         print(f"cleaned_data type: {self.cleaned_data[field].__class__}")
+    #         print(f"field value: {self.cleaned_data[field]}")
+    #         print("")
+
+    #     # Call the parent method
+    #     super().clean()
+
+    #     # Get the errors
+    #     errors = self.get_errors()
+
+    #     # If there are errors
+    #     if errors:
+    #         # Raise an error
+    #         raise OSError(errors)
 
     def clean_color(self):
         color = self.cleaned_data["color"]
@@ -252,7 +327,7 @@ class BaseForm:
             ("label", True),
             ("extra", None),
             ("extra_div", None),
-            ("foreign_info", {}),
+            ("foreign_info", None),
         ]
         labels = [x[0] for x in attributes]
 
@@ -544,8 +619,22 @@ class BaseForm:
                                     )
                                 )
                             ):
-                                found.field.widget = StaticSelect(wattrs)
-                            found.field.widget.choices = found.field.choices
+                                if isinstance(
+                                    found.field.widget,
+                                    SelectMultiple,
+                                ):
+                                    found.field.widget = MultiStaticSelect(
+                                        wattrs,
+                                    )
+                                else:
+                                    found.field.widget = StaticSelect(wattrs)
+                            if hasattr(
+                                found.field.widget,
+                                "choices",
+                            ) and hasattr(found.field, "choices"):
+                                found.field.widget.choices = (
+                                    found.field.choices
+                                )
                             found.field.widget.is_required = wrequired
                             found.field.widget.form_name = self.form_name
                             found.field.widget.field_name = infield.html_name
@@ -554,6 +643,14 @@ class BaseForm:
                         for attribute, default in attributes:
                             if attribute not in atr.keys():
                                 atr[attribute] = default
+
+                        # Check if we have to remove foreignkey buttons
+                        if isinstance(
+                            found.field.widget,
+                            SelectMultiple,
+                        ):
+                            atr["foreign_info"] = None
+
                         # Fill label
                         if atr["label"] is True:
                             atr["label"] = found.label
@@ -726,7 +823,15 @@ class BaseForm:
                                 infield.field.widget,
                                 MultiDynamicSelect,
                             ):
-                                infield.field.widget = StaticSelect(wattrs)
+                                if isinstance(
+                                    infield.field.widget,
+                                    SelectMultiple,
+                                ):
+                                    infield.field.widget = MultiStaticSelect(
+                                        wattrs,
+                                    )
+                                else:
+                                    infield.field.widget = StaticSelect(wattrs)
 
                         # Configure widget
                         if hasattr(
@@ -744,6 +849,14 @@ class BaseForm:
                     for attribute, default in attributes:
                         if attribute not in atr.keys():
                             atr[attribute] = default
+
+                    # Check if we have to remove foreignkey buttons
+                    if isinstance(
+                        infield.field.widget,
+                        SelectMultiple,
+                    ):
+                        atr["foreign_info"] = None
+
                     # Fill label
                     if atr["label"] is True:
                         atr["label"] = infield.label

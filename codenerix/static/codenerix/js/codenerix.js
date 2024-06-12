@@ -290,6 +290,7 @@ function openmodal(
             controller: [
                 '$scope',
                 '$rootScope',
+                '$q',
                 '$http',
                 '$window',
                 '$uibModal',
@@ -302,6 +303,7 @@ function openmodal(
                 function(
                     $scope,
                     $rootScope,
+                    $q,
                     $http,
                     $window,
                     $uibModal,
@@ -321,6 +323,7 @@ function openmodal(
                         formsubmit(
                             $scope,
                             $rootScope,
+                            $q,
                             $http,
                             $window,
                             $state,
@@ -401,7 +404,7 @@ function openmodal(
                     // Enable dynamic select
                     $scope.http = $http;
                     dynamic_fields($scope);
-                    angularmaterialchip($scope);
+                    angularmaterialchip($scope, $q);
                     if (typeof (codenerix_extensions) != 'undefined') {
                         codenerix_extensions($scope, $timeout);
                     }
@@ -424,6 +427,7 @@ function openmodal(
                         inlinked(
                             $scope,
                             $rootScope,
+                            $q,
                             $http,
                             $window,
                             $uibModal,
@@ -952,6 +956,7 @@ function refresh($scope, $timeout, Register, callback, internal) {
 function formsubmit(
     $scope,
     $rootScope,
+    $q,
     $http,
     $window,
     $state,
@@ -1153,6 +1158,7 @@ function formsubmit(
 function inlinked(
     $scope,
     $rootScope,
+    $q,
     $http,
     $window,
     $uibModal,
@@ -1204,6 +1210,7 @@ function inlinked(
             controller: [
                 '$scope',
                 '$rootScope',
+                '$q',
                 '$http',
                 '$window',
                 '$uibModal',
@@ -1217,6 +1224,7 @@ function inlinked(
                 function(
                     $scope,
                     $rootScope,
+                    $q,
                     $http,
                     $window,
                     $uibModal,
@@ -1233,6 +1241,7 @@ function inlinked(
                         multiedit(
                             $scope,
                             $rootScope,
+                            $q,
                             $timeout,
                             $http,
                             $window,
@@ -1249,6 +1258,7 @@ function inlinked(
                         multiadd(
                             $scope,
                             $rootScope,
+                            $q,
                             $timeout,
                             $http,
                             $window,
@@ -1268,6 +1278,7 @@ function inlinked(
                         formsubmit(
                             $scope,
                             $rootScope,
+                            $q,
                             $http,
                             $window,
                             $state,
@@ -1630,7 +1641,16 @@ function dynamic_fields(scope) {
         modelname,
         modelvalue,
         search,
-        deepness) {
+        deepness,
+        default_entry) {
+
+        // Be default we want to get default entry (---)
+        if ((default_entry != undefined) && (!default_entry)) {
+            default_entry = 0;
+        } else {
+            default_entry = 1;
+        }
+
         if ((search.length >= deepness) || (search == '*')) {
             var filter2 = {};
             angular.forEach(filter, function(value, key) {
@@ -1641,11 +1661,11 @@ function dynamic_fields(scope) {
                 }
             });
             // Prepare URL
-            var url =
-                baseurl + search + '?def=1&filter=' + angular.toJson(filter2)
+            var url = baseurl + search + '?def=' + default_entry +
+                      '&filter=' + angular.toJson(filter2)
 
             // Send the request
-            http.get(url, {}, {}).success(function(answer, stat) {
+            return http.get(url, {}, {}).success(function(answer, stat) {
                 scope.valuegetforeingkey[modelname] = answer;
                 if ('clear' in answer) {
                     answer = answer['rows'];
@@ -1653,7 +1673,13 @@ function dynamic_fields(scope) {
                 options[modelname] = answer;
             });
         } else if (modelvalue == undefined) {
-            options[modelname] = [{'id': null, 'label': '---------'}];
+            if (default_entry) {
+                options[modelname] = [{'id': null, 'label': '---------'}];
+            }
+            return null;
+        } else {
+            console.log('???');
+            return null;
         }
     };
 
@@ -2803,6 +2829,7 @@ function codenerix_builder(libraries, routes, redirects) {
 function multilist(
     $scope,
     $rootScope,
+    $q,
     $timeout,
     $location,
     $uibModal,
@@ -2876,7 +2903,7 @@ function multilist(
     $scope.http = $http;
     // Set dynamic foreign fields controller functions
     dynamic_fields($scope);
-    angularmaterialchip($scope);
+    angularmaterialchip($scope, $q);
     if (typeof (codenerix_extensions) != 'undefined') {
         codenerix_extensions($scope, $timeout);
     }
@@ -3555,6 +3582,7 @@ function multilist(
 function multiadd(
     $scope,
     $rootScope,
+    $q,
     $timeout,
     $http,
     $window,
@@ -3597,6 +3625,7 @@ function multiadd(
         inlinked(
             $scope,
             $rootScope,
+            $q,
             $http,
             $window,
             $uibModal,
@@ -3619,7 +3648,7 @@ function multiadd(
 
     // Set dynamic foreign fields controller functions
     dynamic_fields($scope);
-    angularmaterialchip($scope);
+    angularmaterialchip($scope, $q);
     if (typeof (codenerix_extensions) != 'undefined') {
         codenerix_extensions($scope, $timeout);
     }
@@ -3682,6 +3711,7 @@ function multiadd(
             formsubmit(
                 $scope,
                 $rootScope,
+                $q,
                 $http,
                 $window,
                 $state,
@@ -3781,6 +3811,7 @@ function multiadd(
 function multidetails(
     $scope,
     $rootScope,
+    $q,
     $timeout,
     $http,
     $window,
@@ -3875,6 +3906,7 @@ function multidetails(
 function multiedit(
     $scope,
     $rootScope,
+    $q,
     $timeout,
     $http,
     $window,
@@ -3910,6 +3942,7 @@ function multiedit(
         inlinked(
             $scope,
             $rootScope,
+            $q,
             $http,
             $window,
             $uibModal,
@@ -3932,7 +3965,7 @@ function multiedit(
 
     // Set dynamic foreign fields controller functions
     dynamic_fields($scope);
-    angularmaterialchip($scope);
+    angularmaterialchip($scope, $q);
     if (typeof (codenerix_extensions) != 'undefined') {
         codenerix_extensions($scope, $timeout);
     }
@@ -4140,6 +4173,7 @@ function multiedit(
             formsubmit(
                 $scope,
                 $rootScope,
+                $q,
                 $http,
                 $window,
                 $state,
@@ -4337,7 +4371,7 @@ function changeEstimatedDateFlight($scope) {
     }
 };
 
-function multisublist($scope, $uibModal, $templateCache, $http, $timeout) {
+function multisublist($scope, $q, $uibModal, $templateCache, $http, $timeout) {
     modal_manager($scope, $timeout, $uibModal, $templateCache, $http, $scope);
 
     $scope.reload = undefined;
@@ -4471,7 +4505,7 @@ function printURL(xthis, url) {
     iframe.src = url;
 };
 
-function angularmaterialchip(scope) {
+function angularmaterialchip(scope, q) {
     /**
      * Return the proper object when the append is called.
      */
@@ -4489,22 +4523,81 @@ function angularmaterialchip(scope) {
     /**
      * Search for elements.
      */
-    function querySearch(query, items, id) {
+    function querySearch(
+        query,
+        id,
+        http,
+        baseurl,
+        options,
+        filter,
+        modelvalue,
+        search,
+        deepness) {
+        // Set default values
         if (scope.amc_items == undefined) {
             scope.amc_items = [];
         }
-        if (scope.amc_select[items] == undefined) {
-            scope.amc_select[items] = [];
+        if (scope.amc_select[id] == undefined) {
+            scope.amc_select[id] = [];
         }
-        if (scope.amc_items[items] == undefined) {
-            scope.amc_items[items] = {};
+        if (scope.amc_items[id] == undefined) {
+            scope.amc_items[id] = {};
         }
+
+        // When working with dynamic querysearch
+        if (http != undefined) {
+            var promise = scope.getForeignKeys(
+                http,
+                baseurl,
+                options,
+                filter,
+                id,
+                modelvalue,
+                search,
+                deepness,
+                false);
+
+            // If we got a promise we can work on it
+            if (promise != null) {
+                // Prepare a promise
+                var deferer = q.defer();
+
+                // When foreign key is ready
+                promise.then(function(data) {
+                    // Sanitize answer converting IDs to Strings
+                    var values = [];
+                    angular.forEach(options[id], function(value) {
+                        values.push({
+                            'id': value['id'].toString(),
+                            'label': value['label']
+                        });
+                    });
+
+                    // Assign the new values to the scope
+                    scope.amc_items[id] = values;
+
+                    // Select them
+                    if (query == '*') {
+                        var results = scope.amc_items[id].slice(0, 50);
+                    } else {
+                        var results = query ? scope.amc_items[id].filter(
+                                                  createFilterFor(query)) :
+                                              [];
+                    }
+                    deferer.resolve(results);
+                });
+
+                // Return promise
+                return deferer.promise;
+            }
+        }
+
+        // By default filter results
         if (query == '*') {
-            var results = scope.amc_items[items].slice(0, 50);
+            var results = scope.amc_items[id].slice(0, 50);
         } else {
             var results =
-                query ? scope.amc_items[items].filter(createFilterFor(query)) :
-                        [];
+                query ? scope.amc_items[id].filter(createFilterFor(query)) : [];
         }
         return results;
     }

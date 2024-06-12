@@ -19,83 +19,357 @@
  * limitations under the License.
  */
 
- 'use strict';
+'use strict';
 
 // Angular codenerix Controllers
-angular.module('codenerixControllers', [])
+angular
+    .module('codenerixControllers', [])
 
-// List Controllers
-.controller('ListCtrl', ['$scope', '$rootScope', '$timeout', '$location', '$uibModal', '$templateCache', '$http', '$state', 'Register', 'ListMemory', 'hotkeys',
-    function($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, hotkeys) {
-        if (ws_entry_point==undefined) { ws_entry_point=""; }
-        multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, 0, "/"+ws_entry_point, undefined, undefined, hotkeys);
-    }
-])
-.controller('DetailsCtrl', ['$scope', '$rootScope', '$timeout', '$http', '$window', '$uibModal', '$state', '$stateParams', '$templateCache', 'Register', 'hotkeys',
-    function($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, hotkeys) {
-        if (ws_entry_point==undefined) { ws_entry_point=""; }
-        multidetails($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeys);
-    }
-])
-.controller('FormAddCtrl', ['$scope', '$rootScope', '$timeout', '$http', '$window', '$uibModal', '$state', '$stateParams', '$templateCache', 'Register','hotkeys',
-    function ($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, hotkeys) {
-        if (ws_entry_point==undefined) { ws_entry_point=""; }
-        $scope.options = [];
-        multiadd($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeys);
-    }
-])
-.controller('FormEditCtrl', ['$scope', '$rootScope', '$timeout', '$http', '$window', '$uibModal', '$state', '$stateParams', '$templateCache', 'Register','hotkeys',
-    function($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, hotkeys) {
-        if (ws_entry_point==undefined) { ws_entry_point=""; }
-        $scope.options = [];
-        multiedit($scope, $rootScope, $timeout, $http, $window, $uibModal, $state, $stateParams, $templateCache, Register, 0, "/"+ws_entry_point, hotkeys);
-    }
-])
-.controller('AlarmsCtrl', ['$scope', '$rootScope', '$timeout', '$location', '$uibModal', '$templateCache', '$http', '$state', 'Register', 'ListMemory','hotkeys',
-    function($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, hotkeys) {
-        if (ws_entry_point==undefined) { ws_entry_point=""; }
-        multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, 0, "/"+ws_entry_point, undefined, undefined, hotkeys);
-
-    }
-])
-.controller('SubListCtrl', ['$scope', '$rootScope', '$timeout', '$location', '$uibModal', '$templateCache', '$http', '$state', 'Register', 'ListMemory','hotkeys',
-    function($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, Register, ListMemory, hotkeys) {
-        if (ws_entry_point==undefined) { ws_entry_point=""; }
-        var listid=$state.params.listid;
-        if (listid!='') {
-            if (CDNX_tabsref==undefined) {
-                angular.forEach($scope.tabs_autorender, function(value,key) {
-                    $scope.tabs_autorender['t'+key]=false;
-                });
-                $scope.tabs_autorender['t'+$scope.tabsref[listid]]=true;
-                CDNX_tabsref=$scope.tabsref;
+    // List Controllers
+    .controller(
+        'ListCtrl',
+        [
+            '$scope',
+            '$rootScope',
+            '$q',
+            '$timeout',
+            '$location',
+            '$uibModal',
+            '$templateCache',
+            '$http',
+            '$state',
+            'Register',
+            'ListMemory',
+            'hotkeys',
+            function(
+                $scope,
+                $rootScope,
+                $q,
+                $timeout,
+                $location,
+                $uibModal,
+                $templateCache,
+                $http,
+                $state,
+                Register,
+                ListMemory,
+                hotkeys) {
+                if (ws_entry_point == undefined) {
+                    ws_entry_point = '';
+                }
+                multilist(
+                    $scope,
+                    $rootScope,
+                    $q,
+                    $timeout,
+                    $location,
+                    $uibModal,
+                    $templateCache,
+                    $http,
+                    $state,
+                    Register,
+                    ListMemory,
+                    0,
+                    '/' + ws_entry_point,
+                    undefined,
+                    undefined,
+                    hotkeys);
             }
-            $state.go('details0.sublist'+listid+'.rows',{'listid':listid});
-            var register = angular.injector(['codenerixInlineServices']).get('Register'+listid);
-            hotkeys = undefined; // Don't use it rignt now on sublist
-            multilist($scope, $rootScope, $timeout, $location, $uibModal, $templateCache, $http, $state, register, ListMemory, listid, subws_entry_point[listid], undefined, true, hotkeys);
-        } else {
-            // Activate autorender tabs
-            angular.forEach(tabs_js, function(tab, i){
-                if (tab.auto_open) {
-                    $state.go('details0.sublist'+i+'.rows',{'listid':i});
+        ])
+    .controller(
+        'DetailsCtrl',
+        [
+            '$scope',
+            '$rootScope',
+            '$q',
+            '$timeout',
+            '$http',
+            '$window',
+            '$uibModal',
+            '$state',
+            '$stateParams',
+            '$templateCache',
+            'Register',
+            'hotkeys',
+            function(
+                $scope,
+                $rootScope,
+                $q,
+                $timeout,
+                $http,
+                $window,
+                $uibModal,
+                $state,
+                $stateParams,
+                $templateCache,
+                Register,
+                hotkeys) {
+                if (ws_entry_point == undefined) {
+                    ws_entry_point = '';
+                }
+                multidetails(
+                    $scope,
+                    $rootScope,
+                    $q,
+                    $timeout,
+                    $http,
+                    $window,
+                    $uibModal,
+                    $state,
+                    $stateParams,
+                    $templateCache,
+                    Register,
+                    0,
+                    '/' + ws_entry_point,
+                    hotkeys);
+            }
+        ])
+    .controller(
+        'FormAddCtrl',
+        [
+            '$scope',
+            '$rootScope',
+            '$q',
+            '$timeout',
+            '$http',
+            '$window',
+            '$uibModal',
+            '$state',
+            '$stateParams',
+            '$templateCache',
+            'Register',
+            'hotkeys',
+            function(
+                $scope,
+                $rootScope,
+                $q,
+                $timeout,
+                $http,
+                $window,
+                $uibModal,
+                $state,
+                $stateParams,
+                $templateCache,
+                Register,
+                hotkeys) {
+                if (ws_entry_point == undefined) {
+                    ws_entry_point = '';
+                }
+                $scope.options = [];
+                multiadd(
+                    $scope,
+                    $rootScope,
+                    $q,
+                    $timeout,
+                    $http,
+                    $window,
+                    $uibModal,
+                    $state,
+                    $stateParams,
+                    $templateCache,
+                    Register,
+                    0,
+                    '/' + ws_entry_point,
+                    hotkeys);
+            }
+        ])
+    .controller(
+        'FormEditCtrl',
+        [
+            '$scope',
+            '$rootScope',
+            '$q',
+            '$timeout',
+            '$http',
+            '$window',
+            '$uibModal',
+            '$state',
+            '$stateParams',
+            '$templateCache',
+            'Register',
+            'hotkeys',
+            function(
+                $scope,
+                $rootScope,
+                $q,
+                $timeout,
+                $http,
+                $window,
+                $uibModal,
+                $state,
+                $stateParams,
+                $templateCache,
+                Register,
+                hotkeys) {
+                if (ws_entry_point == undefined) {
+                    ws_entry_point = '';
+                }
+                $scope.options = [];
+                multiedit(
+                    $scope,
+                    $rootScope,
+                    $q,
+                    $timeout,
+                    $http,
+                    $window,
+                    $uibModal,
+                    $state,
+                    $stateParams,
+                    $templateCache,
+                    Register,
+                    0,
+                    '/' + ws_entry_point,
+                    hotkeys);
+            }
+        ])
+    .controller(
+        'AlarmsCtrl',
+        [
+            '$scope',
+            '$rootScope',
+            '$q',
+            '$timeout',
+            '$location',
+            '$uibModal',
+            '$templateCache',
+            '$http',
+            '$state',
+            'Register',
+            'ListMemory',
+            'hotkeys',
+            function(
+                $scope,
+                $rootScope,
+                $q,
+                $timeout,
+                $location,
+                $uibModal,
+                $templateCache,
+                $http,
+                $state,
+                Register,
+                ListMemory,
+                hotkeys) {
+                if (ws_entry_point == undefined) {
+                    ws_entry_point = '';
+                }
+                multilist(
+                    $scope,
+                    $rootScope,
+                    $q,
+                    $timeout,
+                    $location,
+                    $uibModal,
+                    $templateCache,
+                    $http,
+                    $state,
+                    Register,
+                    ListMemory,
+                    0,
+                    '/' + ws_entry_point,
+                    undefined,
+                    undefined,
+                    hotkeys);
+            }
+        ])
+    .controller(
+        'SubListCtrl',
+        [
+            '$scope',
+            '$rootScope',
+            '$q',
+            '$timeout',
+            '$location',
+            '$uibModal',
+            '$templateCache',
+            '$http',
+            '$state',
+            'Register',
+            'ListMemory',
+            'hotkeys',
+            function(
+                $scope,
+                $rootScope,
+                $q,
+                $timeout,
+                $location,
+                $uibModal,
+                $templateCache,
+                $http,
+                $state,
+                Register,
+                ListMemory,
+                hotkeys) {
+                if (ws_entry_point == undefined) {
+                    ws_entry_point = '';
+                }
+                var listid = $state.params.listid;
+                if (listid != '') {
+                    if (CDNX_tabsref == undefined) {
+                        angular.forEach(
+                            $scope.tabs_autorender, function(value, key) {
+                                $scope.tabs_autorender['t' + key] = false;
+                            });
+                        $scope.tabs_autorender['t' + $scope.tabsref[listid]] =
+                            true;
+                        CDNX_tabsref = $scope.tabsref;
+                    }
+                    $state.go(
+                        'details0.sublist' + listid + '.rows',
+                        {'listid': listid});
+                    var register = angular.injector(['codenerixInlineServices'])
+                                       .get('Register' + listid);
+                    hotkeys = undefined;  // Don't use it rignt now on sublist
+                    multilist(
+                        $scope,
+                        $rootScope,
+                        $q,
+                        $timeout,
+                        $location,
+                        $uibModal,
+                        $templateCache,
+                        $http,
+                        $state,
+                        register,
+                        ListMemory,
+                        listid,
+                        subws_entry_point[listid],
+                        undefined,
+                        true,
+                        hotkeys);
+                } else {
+                    // Activate autorender tabs
+                    angular.forEach(tabs_js, function(tab, i) {
+                        if (tab.auto_open) {
+                            $state.go(
+                                'details0.sublist' + i + '.rows',
+                                {'listid': i});
+                            return;
+                        }
+                    });
+                }
+            }
+
+        ])
+    .controller('SubListStaticCtrl', [
+        '$scope',
+        '$q',
+        '$uibModal',
+        '$templateCache',
+        '$http',
+        '$timeout',
+        '$state',
+        function(
+            $scope, $q, $uibModal, $templateCache, $http, $timeout, $state) {
+            multisublist(
+                $scope, $q, $uibModal, $templateCache, $http, $timeout);
+            // Activate non-autorender tabs
+            angular.forEach(tabs_js, function(tab, i) {
+                if (!tab.auto) {
+                    $state.go('details0.sublist' + i + '.rows', {'listid': i});
                     return;
                 }
             });
         }
-    }
-
-])
-.controller("SubListStaticCtrl", ["$scope", "$uibModal","$templateCache", "$http", "$timeout","$state",
-    function($scope, $uibModal, $templateCache, $http, $timeout, $state) {
-        multisublist($scope, $uibModal, $templateCache, $http, $timeout);
-        // Activate non-autorender tabs
-        angular.forEach(tabs_js, function(tab, i){
-            if (!tab.auto) {
-                $state.go('details0.sublist'+i+'.rows',{'listid':i});
-                return;
-            }
-        });
-    }
-]);
+    ]);
 var CDNX_tabsref = undefined;
