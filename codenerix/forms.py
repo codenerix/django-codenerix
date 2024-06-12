@@ -75,13 +75,16 @@ class BaseForm:
                 if isinstance(self.fields[field].widget, SelectMultiple):
                     # Validate the pks is a list of positive integers
                     pks = self.data.get(field)
-                    try:
-                        pks = [int(pk) for pk in pks]
-                    except ValueError as e:
-                        msg = _("Invalid ID detected in SelectMultiple")
-                        if settings.DEBUG:
-                            msg += f": {e}"
-                        raise ValidationError(msg)
+                    if pks:
+                        try:
+                            pks = [int(pk) for pk in pks]
+                        except ValueError as e:
+                            msg = _("Invalid ID detected in SelectMultiple")
+                            if settings.DEBUG:
+                                msg += f": {e}"
+                            raise ValidationError(msg)
+                    else:
+                        pks = []
 
                     # Set the cleaned_data as a queryset with the
                     # selected values

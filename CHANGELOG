@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.1] - 2024-06-12
+### Feature
+- Major version number will match with lates Django version supported
+### Bugfix
+- Corrected bug when MultiStaticSelect or MultiDynamicSelect are filled and then made empty.
+
+
 ## [4.0.98] - 2024-06-12
 ### Bugfix
 - Corrected typo at clean method for SelectMultiple
