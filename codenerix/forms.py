@@ -17,6 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms import NullBooleanField
 from django.forms.widgets import CheckboxInput, Select, SelectMultiple
@@ -73,13 +74,14 @@ class BaseForm:
                 # If widget is SelectMultiple remake the cleaned_data
                 if isinstance(self.fields[field].widget, SelectMultiple):
                     # Validate the pks is a list of positive integers
-                    pks = self.data.get(field) + ["34a434434"]
+                    pks = self.data.get(field)
                     try:
                         pks = [int(pk) for pk in pks]
-                    except ValueError:
-                        raise ValidationError(
-                            _("Invalid value detected in SelectMultiple"),
-                        )
+                    except ValueError as e:
+                        msg = _("Invalid ID detected in SelectMultiple")
+                        if settings.DEBUG:
+                            msg += f": {e}"
+                        raise ValidationError(msg)
 
                     # Set the cleaned_data as a queryset with the
                     # selected values

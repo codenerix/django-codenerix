@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-10 07:56+0200\n"
+"POT-Creation-Date: 2024-06-12 13:06+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -264,6 +264,10 @@ msgid "Error verifying input, please try again."
 msgstr ""
 
 #: codenerix/forms.py:81
+msgid "Invalid ID detected in SelectMultiple"
+msgstr ""
+
+#: codenerix/forms.py:158
 msgid "Invalid color"
 msgstr ""
 
@@ -524,7 +528,7 @@ msgstr ""
 msgid "Filters"
 msgstr ""
 
-#: codenerix/views.py:663 codenerix/views.py:3319 codenerix/widgets.py:906
+#: codenerix/views.py:663 codenerix/views.py:3319 codenerix/widgets.py:935
 msgid "Hour"
 msgstr ""
 
@@ -673,39 +677,39 @@ msgstr ""
 msgid "RemoteLog"
 msgstr ""
 
-#: codenerix/widgets.py:84
+#: codenerix/widgets.py:98
 msgid "Press * and select an option"
 msgstr ""
 
-#: codenerix/widgets.py:86 codenerix/widgets.py:550 codenerix/widgets.py:554
-msgid "Press * or start typing"
-msgstr ""
-
-#: codenerix/widgets.py:254
+#: codenerix/widgets.py:281
 msgid "Select an option"
 msgstr ""
 
-#: codenerix/widgets.py:1028
+#: codenerix/widgets.py:577 codenerix/widgets.py:581
+msgid "Press * or start typing"
+msgstr ""
+
+#: codenerix/widgets.py:1057
 msgid "Text Angular"
 msgstr ""
 
-#: codenerix/widgets.py:1029
+#: codenerix/widgets.py:1058
 msgid "NG Quill"
 msgstr ""
 
-#: codenerix/widgets.py:1030
+#: codenerix/widgets.py:1059
 msgid "Source code"
 msgstr ""
 
-#: codenerix/widgets.py:1031
+#: codenerix/widgets.py:1060
 msgid "Preview"
 msgstr ""
 
-#: codenerix/widgets.py:1192
+#: codenerix/widgets.py:1221
 msgid "Field deleted in the template"
 msgstr ""
 
-#: codenerix/widgets.py:1266
+#: codenerix/widgets.py:1295
 msgid "We are working on this plugin, it will be ready for next version"
 msgstr ""
 

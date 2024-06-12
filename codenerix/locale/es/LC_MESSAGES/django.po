@@ -8,10 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-10 07:56+0200\n"
-"PO-Revision-Date: 2024-06-03 12:08+0000\n"
-"Last-Translator: YEQ4I2TTZ2NYWM44BP24WJFMHUVQC5RM  <juanmi@juanmitaboada."
-"com>\n"
+"POT-Creation-Date: 2024-06-12 13:06+0200\n"
+"PO-Revision-Date: 2024-06-12 13:07+0200\n"
+"Last-Translator: abcdabcdabcdabcd  <yo@br0th3r.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -113,8 +112,8 @@ msgid ""
 "WARNING: No version set to this code, add VERSION contant to your "
 "configuration"
 msgstr ""
-"ATENCIÓN: No hay un número de versión configurada para este código, añade la "
-"constante VERSION a tu configuración"
+"ATENCIÓN: No hay un número de versión configurada para este código, añade la"
+" constante VERSION a tu configuración"
 
 #: codenerix/context.py:102
 msgid "WARNING: CODENERIX_CSS is not set in your configuration!!!"
@@ -236,7 +235,8 @@ msgstr "Diciembre"
 #, python-format
 msgid "Ensure this value has at least %(limit_value)d character"
 msgid_plural "Ensure this value has at least %(limit_value)d characters"
-msgstr[0] "Asegúrate de que este valor tiene al menos %(limit_value)d carácter"
+msgstr[0] ""
+"Asegúrate de que este valor tiene al menos %(limit_value)d carácter"
 msgstr[1] ""
 "Asegúrate de que este valor tiene al menos %(limit_value)d caracteres"
 
@@ -274,6 +274,10 @@ msgid "Error verifying input, please try again."
 msgstr "Error verificando la entrada, por favor inténtelo de nuevo."
 
 #: codenerix/forms.py:81
+msgid "Invalid ID detected in SelectMultiple"
+msgstr "ID no válido detectado en SelectMultiple"
+
+#: codenerix/forms.py:158
 msgid "Invalid color"
 msgstr "Color inválido"
 
@@ -297,7 +301,8 @@ msgstr "Actualizado"
 #: codenerix/models.py:226
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
-msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
+msgstr ""
+"No se puede borrar el elemento, existe una relación con %(model_name)s"
 
 #: codenerix/models.py:302 codenerix/models.py:404 codenerix/views.py:650
 msgid "Add"
@@ -534,7 +539,7 @@ msgstr "Error"
 msgid "Filters"
 msgstr "Filtros"
 
-#: codenerix/views.py:663 codenerix/views.py:3319 codenerix/widgets.py:906
+#: codenerix/views.py:663 codenerix/views.py:3319 codenerix/widgets.py:935
 msgid "Hour"
 msgstr "Hora"
 
@@ -632,8 +637,8 @@ msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
 msgstr ""
-"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
-"add_permission: detail, change y delete"
+"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para"
+" add_permission: detail, change y delete"
 
 #: codenerix/views.py:1821
 msgid "Not allowed, this kind of requests has been prohibited for this view!"
@@ -690,39 +695,39 @@ msgstr "Cambios"
 msgid "RemoteLog"
 msgstr "Log Remoto"
 
-#: codenerix/widgets.py:84
+#: codenerix/widgets.py:98
 msgid "Press * and select an option"
 msgstr "Presione * y selección una opción"
 
-#: codenerix/widgets.py:86 codenerix/widgets.py:550 codenerix/widgets.py:554
-msgid "Press * or start typing"
-msgstr "Presione * o comience a escribir"
-
-#: codenerix/widgets.py:254
+#: codenerix/widgets.py:281
 msgid "Select an option"
 msgstr "Seleccione una opción"
 
-#: codenerix/widgets.py:1028
+#: codenerix/widgets.py:577 codenerix/widgets.py:581
+msgid "Press * or start typing"
+msgstr "Presione * o comience a escribir"
+
+#: codenerix/widgets.py:1057
 msgid "Text Angular"
 msgstr "Text Angular"
 
-#: codenerix/widgets.py:1029
+#: codenerix/widgets.py:1058
 msgid "NG Quill"
 msgstr "NG Quill"
 
-#: codenerix/widgets.py:1030
+#: codenerix/widgets.py:1059
 msgid "Source code"
 msgstr "Código fuente"
 
-#: codenerix/widgets.py:1031
+#: codenerix/widgets.py:1060
 msgid "Preview"
 msgstr "Previsualización"
 
-#: codenerix/widgets.py:1192
+#: codenerix/widgets.py:1221
 msgid "Field deleted in the template"
 msgstr "Campo borrado en el template"
 
-#: codenerix/widgets.py:1266
+#: codenerix/widgets.py:1295
 msgid "We are working on this plugin, it will be ready for next version"
 msgstr ""
 "Estamos trabajando en este plugin, estará listo en la siguiente versión"
