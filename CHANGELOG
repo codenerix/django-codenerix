@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.2] - 2024-06-14
+### Bugfix
+- Corrected bug that prevented StaticSelect and DynamicSelect to use their foreignkey buttons.
+
+
 ## [5.0.1] - 2024-06-12
 ### Feature
 - Major version number will match with lates Django version supported

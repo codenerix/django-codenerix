@@ -332,7 +332,7 @@ class BaseForm:
             ("label", True),
             ("extra", None),
             ("extra_div", None),
-            ("foreign_info", None),
+            ("foreign_info", {}),
         ]
         labels = [x[0] for x in attributes]
 
