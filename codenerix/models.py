@@ -416,11 +416,11 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             fields.append(("action_time", _("Date")))
             fields.append(("user__username", _("Actual user")))
             fields.append(("username", _("Original user")))
-            fields.append(("get_action_flag_display", _("Action")))
             # fields.append(('content_type__name', _('APP Name')))
             fields.append(("content_type", _("APP Name")))
-            fields.append(("content_type__app_label", _("APP Label")))
-            fields.append(("content_type__model", _("APP Model")))
+            fields.append(("get_action_flag_display", _("Action")))
+            # fields.append(("content_type__app_label", _("APP Label")))
+            # fields.append(("content_type__model", _("APP Model")))
             fields.append(("object_id", _("ID")))
             # fields.append(('object_repr', _('Representation')))
             fields.append(("show", _("Txt")))
@@ -488,9 +488,35 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
                 lambda x: Q(username__icontains=x),
                 "input",
             )
-            tf["content_type__app_label"] = (
-                _("APP Label"),
-                lambda x: Q(content_type__app_label__icontains=x),
+            tf["content_type"] = (
+                _("APP Name"),
+                lambda x: Q(content_type__pk=x),
+                sorted(
+                    [
+                        (obj["pk"], f"{obj['app_label']} | {obj['model']}")
+                        for obj in ContentType.objects.filter(
+                            log__isnull=False,
+                        )
+                        .all()
+                        .values("pk", "app_label", "model")
+                        .distinct()
+                    ],
+                    key=lambda x: x[1].lower(),
+                ),
+            )
+            # tf["content_type__app_label"] = (
+            #     _("APP Label"),
+            #     lambda x: Q(content_type__app_label__icontains=x),
+            #     "input",
+            # )
+            # tf["content_type__model"] = (
+            #     _("APP Model"),
+            #     lambda x: Q(content_type__model__icontains=x),
+            #     "input",
+            # )
+            tf["show"] = (
+                _("Txt"),
+                lambda x: Q(change_txt__icontains=x),
                 "input",
             )
             # tf['users']=(
