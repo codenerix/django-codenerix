@@ -64,7 +64,7 @@ setup(
         "django-haystack>=2.6.1",
         "pytz",
         "elasticsearch>=2.0.0,<3.0.0",
-        "django-debug-toolbar==3.2.2",
+        "django-debug-toolbar>=4.4.2",
         "pyotp",
         "html5lib",
         "pyinstrument",
