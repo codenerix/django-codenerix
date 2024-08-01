@@ -180,8 +180,11 @@ class StaticSelectMulti(forms.widgets.SelectMultiple):
             # FORCE RELOAD DATAS
             elements = self.choices.queryset
             elements._result_cache = None
-            if self.dynamic and value and isinstance(value, list):
-                elements = elements.filter(pk__in=value)
+            if self.dynamic:
+                if value and isinstance(value, list):
+                    elements = elements.filter(pk__in=value)
+                else:
+                    elements = []
             for choice in elements:
                 init += '{{"id":"{0}","label":"{1}"}},'.format(
                     choice.pk,
