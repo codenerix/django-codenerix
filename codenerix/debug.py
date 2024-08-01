@@ -39,7 +39,7 @@ DEBUG_TOOLBAR_DEFAULT_PANELS = (
 DEBUG_TOOLBAR_DEFAULT_CONFIG = {
     "INTERCEPT_REDIRECTS": False,
     # Toolbar options
-    "RESULTS_CACHE_SIZE": 3,
+    "RESULTS_CACHE_SIZE": 100,
     "SHOW_COLLAPSED": True,
     # Panel options
     "SQL_WARNING_THRESHOLD": 100,  # milliseconds

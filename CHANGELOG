@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.5] - 2024-08-01
+### Bugfix
+- Updated "RESULTS_CACHE_SIZE" to 100 to improve Debug Toolbar cache
+
+
 ## [5.0.4] - 2024-06-24
 ### Feature
 - New version of django-debug-toolbar
