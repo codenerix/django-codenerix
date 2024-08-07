@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.7] - 2024-08-07
+### Feature
+- GenForeignKey now supports limit and limit_all attributes to provide a limited result when there is a search string or when the user request all results.
+
+
 ## [5.0.6] - 2024-08-01
 ### Bugfix
 - MultiDynamicSelect won't initialize the select box with all elements

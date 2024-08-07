@@ -5446,6 +5446,12 @@ class GenForeignKey(GenBase, View):
 
     label_cached = None
     action_permission = "list"
+    limit = getattr(settings, "LIMIT_FOREIGNKEY", 100)
+    limit_all = getattr(
+        settings,
+        "LIMIT_FOREIGNKEY_ALL",
+        None,
+    )
 
     def dispatch(self, request, **kwargs):
         # Set class internal variables
@@ -5533,15 +5539,17 @@ class GenForeignKey(GenBase, View):
         filters = json.loads(filterstxt)
         self.filters = filters
 
+        # Get limit
+        limit = self.limit
+
         # Empty search string if all where requested
         if search == "*":
             search = ""
+        if not search:
+            limit = self.limit_all
 
         # Get the queryset requested by the user
         qs = self.get_foreign(self.get_queryset(), search, filters)
-
-        # Limit answer
-        limit = getattr(settings, "LIMIT_FOREIGNKEY", 100)
 
         # Build answer
         answer = []
@@ -5551,14 +5559,26 @@ class GenForeignKey(GenBase, View):
             qstotal = len(qs)
         else:
             qstotal = qs.count()
-        for e in qs[0:limit]:
+
+        # Process limit and limit result itself
+        if limit is None:
+            qslimited = qs
+            tail = False
+        else:
+            qslimited = qs[0:limit]
+            tail = qstotal > limit
+
+        # Show elements
+        for e in qslimited:
             answer.append(
                 self.custom_choice(
                     e,
                     {"id": e.pk, "label": self.build_label(e)},
                 ),
             )
-        if qstotal > limit:
+
+        # Show tail if required
+        if tail:
             answer.append({"id": "", "label": "..."})
 
         # Convert the answer
