@@ -94,7 +94,6 @@ angular
                                 </button>
                             </div>`;
                     }
-
                 } else if (kind.substring(0, 4) == 'link') {
                     if ((input == null) || (input == undefined) ||
                         (input == '')) {
@@ -155,13 +154,13 @@ angular
                     } else {
                         var kind = kind.substring(16);
                         if (kind.length) {
-                            kingsp = kind.split(':');
-                            if (kingsp.length == 1) {
+                            kindsp = kind.split(':');
+                            if (kindsp.length == 1) {
                                 var title = 'Info';
-                                var body = kingsp[0];
+                                var body = kindsp[0];
                             } else {
-                                var title = kingsp[0];
-                                var body = kingsp[1];
+                                var title = kindsp[0];
+                                var body = kindsp[1];
                             }
                             var ngclick = `ng-click="modalinfo('` + title +
                                           `','` + body + `', 2000);"`;
@@ -181,6 +180,54 @@ angular
                                input + `
                             </div>
                            </a>`;
+                    }
+                } else if (kind.substring(0, 9) == 'shorttext') {
+                    if ((input == null) || (input == undefined) ||
+                        (input == '')) {
+                        return '-';
+                    } else {
+                        var kind = kind.substring(10);
+                        if (kind.length) {
+                            var kindsp = kind.split(':');
+                            if (kindsp.length == 1) {
+                                var length = kindsp[0];
+                                var mode = 'single';
+                            } else {
+                                var length = kindsp[0];
+                                var mode = kindsp[1];
+                            }
+
+                        } else {
+                            var length = 20;
+                            var mode = 'single';
+                        }
+                        // Choose parenting mode
+                        if (mode == 'page') {
+                            var parent = '$parent.$parent.$parent.$parent.';
+                        } else if (mode == 'row') {
+                            var parent = '$parent.$parent.';
+                        } else {
+                            mode = 'single';
+                            var parent = '';
+                        }
+                        return `
+                            <div
+                                ng-init="` +
+                               parent + `shorttext=true"
+                                ng-click="$event.stopPropagation(); ` +
+                               parent + `shorttext=!` + parent + `shorttext">
+                                    <div ng-show="` +
+                               parent + `shorttext">
+                                        ` +
+                               input.substring(0, length) + `...
+                                    </div>
+                                    <div ng-hide="` +
+                               parent + `shorttext">
+                                        ` +
+                               input + `
+                                    </div>
+                            </div>
+                            `;
                     }
                 } else if (kind.substring(0, 5) == 'image') {
                     if ((input == null) || (input == undefined) ||
@@ -206,7 +253,6 @@ angular
                         return Math.round(input * Math.pow(10, decimals)) /
                                Math.pow(10, decimals);
                     }
-
                 } else if (kind.substring(0, 5) == 'money') {
                     if ((input == null) || (input == undefined) ||
                         (input == '')) {

@@ -65,6 +65,7 @@ setup(
         "pytz",
         "elasticsearch>=2.0.0,<3.0.0",
         "django-debug-toolbar>=4.4.2",
+        "django-debug-toolbar-request-history",
         "pyotp",
         "html5lib",
         "pyinstrument",
