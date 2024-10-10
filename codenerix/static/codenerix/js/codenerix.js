@@ -1643,7 +1643,6 @@ function dynamic_fields(scope) {
         search,
         deepness,
         default_entry) {
-
         // Be default we want to get default entry (---)
         if ((default_entry != undefined) && (!default_entry)) {
             default_entry = 0;
@@ -4578,7 +4577,7 @@ function angularmaterialchip(scope, q) {
 
                     // Select them
                     if (query == '*') {
-                        var results = scope.amc_items[id].slice(0, 50);
+                        var results = scope.amc_items[id];
                     } else {
                         var results = query ? scope.amc_items[id].filter(
                                                   createFilterFor(query)) :
@@ -4594,7 +4593,7 @@ function angularmaterialchip(scope, q) {
 
         // By default filter results
         if (query == '*') {
-            var results = scope.amc_items[id].slice(0, 50);
+            var results = scope.amc_items[id];
         } else {
             var results =
                 query ? scope.amc_items[id].filter(createFilterFor(query)) : [];

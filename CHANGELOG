@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
-## [5.0.8] - 2024-09-08
+## [5.0.9] - 2024-10-10
+### Buffix
+- DynamicSelect corrected so '*' will show all the elements received.
+
+
+## [5.0.8] - 2024-10-08
 ### Feature
 - Added new filter named shorttext for GenList to shorten long texts in the list view and allow the user to click on the text to get the full text.
 
