@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.10] - 2024-10-10
+### Feature
+- The AngularJS 'codenerix-html-compile' directive now provides 'codenerix_inner_element' as a variable to the inner element so filters can bring the innert element back during the filtering process.
+
+
 ## [5.0.9] - 2024-10-10
 ### Buffix
 - DynamicSelect corrected so '*' will show all the elements received.

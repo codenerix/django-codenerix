@@ -25,7 +25,7 @@ angular
     .filter(
         'codenerix',
         function() {
-            return function(input, kind) {
+            return function(input, kind, codenerix_inner_element) {
                 if ((kind == null) || (kind == undefined)) {
                     // No kind defined
                     if ((input === null) || (input === undefined) ||
@@ -168,6 +168,13 @@ angular
                             var ngclick = '';
                         }
 
+                        // Replace content with the inner element if exists
+                        if (codenerix_inner_element == undefined) {
+                            var content = input;
+                        } else {
+                            var content = codenerix_inner_element;
+                        }
+
                         return `<a href="#" ng-click="$event.stopPropagation();">
                                 <div
                                     ` +
@@ -177,7 +184,7 @@ angular
                                     <i
                                         class='fa fa-clipboard'
                                         aria-hidden='true'></i> ` +
-                               input + `
+                               content + `
                             </div>
                            </a>`;
                     }

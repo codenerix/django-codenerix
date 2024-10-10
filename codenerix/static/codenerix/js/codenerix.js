@@ -1813,6 +1813,7 @@ var codenerix_directive_htmlcompile = [
         function($compile) {
             return {
                 restrict: 'A', link: function(scope, element, attrs) {
+                    scope.codenerix_inner_element = element.html();
                     scope.$watch(
                         attrs.codenerixHtmlCompile,
                         function(newValue, oldValue) {
