@@ -2676,6 +2676,11 @@ class GenList(GenBase, ListView):  # type: ignore
                 filter_column = value[4]
             else:
                 filter_column = None
+            # title
+            if len(value) > 5:
+                show_title = value[5]
+            else:
+                show_title = None
 
             # Process ordering
             ordering = []
@@ -2706,6 +2711,7 @@ class GenList(GenBase, ListView):  # type: ignore
             sort[order_key]["name"] = publicname
             sort[order_key]["align"] = align
             sort[order_key]["type"] = type_field
+            sort[order_key]["show_title"] = show_title
 
             if filter_column:
                 sort[order_key]["filter"] = filter_column
