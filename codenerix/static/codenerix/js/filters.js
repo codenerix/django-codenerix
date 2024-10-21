@@ -1,7 +1,7 @@
 /*
  *
- * django-codenerix
  *
+ * django-codenerix
  * Codenerix GNU
  *
  * Project URL : http://www.codenerix.com
@@ -279,6 +279,79 @@ angular
                                    '<span class=\'fa fa-btc\'></span>';
                         } else {
                             return input + '?';
+                        }
+                    }
+                } else if (kind.substring(0, 8) == 'humanize') {
+                    if ((input == null) || (input == undefined) ||
+                        (input == '')) {
+                        return '-';
+                    } else {
+                        kindsp = kind.substring(9).split(':');
+                        var style = null;
+                        var minimumFractionDigits = 0;
+                        var maximumFractionDigits = 1;
+                        if (kindsp.length >= 1) {
+                            var style = kindsp[0];
+                        }
+                        if (kindsp.length >= 2) {
+                            var minimumFractionDigits =
+                                parseInt(kindsp[1]) || 0;
+                        }
+                        if (kindsp.length >= 3) {
+                            var maximumFractionDigits =
+                                parseInt(kindsp[2]) || 1;
+                        }
+                        // Limit the number of decimal places
+                        var minimumFractionDigits =
+                            Math.max(0, minimumFractionDigits);
+                        var maximumFractionDigits = Math.max(
+                            minimumFractionDigits, maximumFractionDigits);
+
+                        // Determine the style of the number
+                        if (style == 'en') {
+                            // English (uk or us)
+                            var locale = 'en-GB';
+                            var units = ['K', 'M', 'B', 'T', 'Q', 'Qi'];
+                            var multiplier =
+                                [null, null, null, null, null, null];
+                        } else {
+                            // Spanish (european format)
+                            var locale = 'es-ES';
+                            var units = ['K', 'M', 'M', 'B', 'B', 'T'];
+                            var multiplier =
+                                [null, null, 1000, null, 1000, null];
+                        }
+
+                        // Convert the input to a number
+                        var number = parseFloat(input);
+                        if (number < 1000) {
+                            // Return the number as-is if it's below 1000
+                            return number.toLocaleString(locale, {
+                                minimumFractionDigits: minimumFractionDigits,
+                                maximumFractionDigits: maximumFractionDigits
+                            });
+                        } else {
+                            var unitIndex = -1;
+
+                            // Determine the appropriate unit and divide
+                            // accordingly
+                            while (number >= 1000 &&
+                                   unitIndex < units.length - 1) {
+                                number /= 1000;
+                                unitIndex++;
+                            }
+
+                            // Multiply the number by the multiplier
+                            if (multiplier[unitIndex] !== null) {
+                                number *= multiplier[unitIndex];
+                            }
+
+                            // Format the number with one decimal if needed and
+                            // append the unit
+                            return number.toLocaleString(locale, {
+                                minimumFrancionDigits: minimumFractionDigits,
+                                maximumFractionDigits: maximumFractionDigits
+                            }) + units[unitIndex];
                         }
                     }
                 } else {
