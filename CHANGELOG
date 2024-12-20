@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.13] - 2024-12-20
+### Feature
+- In GenList when filtering numbers next wildcards are supported:
+    >23 will filter all numbers greater than 23
+    <23 will filter all numbers lower than 23
+    >=23 will filter all numbers greater or equal to 23
+    <=23 will filter all numbers lower or equal to 23
+    23 will filter all numbers equal to 23
+    23..45 will filter all numbers between 23 and 45
+    23.. will filter all numbers greater or equal to 23
+    ..45 will filter all numbers lower or equal to 45
+    23,45 will filter all numbers equal to 23 or 45
+    23,45,67 will filter all numbers equal to 23, 45 or 67
+- New filter 'percent' for CODENERIX AngularJS Filtes that works as 'round' and adding the '%' symbol at the end
+
 ## [5.0.12] - 2024-10-21
 ### Feature
 - Allow columns to specify to show their content in the title attribute of the cell

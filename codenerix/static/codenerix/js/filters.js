@@ -260,6 +260,18 @@ angular
                         return Math.round(input * Math.pow(10, decimals)) /
                                Math.pow(10, decimals);
                     }
+                } else if (kind.substring(0, 7) == 'percent') {
+                    if ((input == null) || (input == undefined) ||
+                        (input == '')) {
+                        return '-';
+                    } else if (kind == 'percent') {
+                        return '' + Math.round(input) + '%';
+                    } else {
+                        var decimals = kind.substring(8);
+                        return Math.round(input * Math.pow(10, decimals)) /
+                                   Math.pow(10, decimals) +
+                               '%';
+                    }
                 } else if (kind.substring(0, 5) == 'money') {
                     if ((input == null) || (input == undefined) ||
                         (input == '')) {

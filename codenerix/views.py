@@ -229,6 +229,43 @@ def pages(paginator, current):
     return pages
 
 
+class SearchFilters:  # noqa: N801
+    @staticmethod
+    def number(fieldname):
+        def func(number):
+            if number:
+                if isinstance(number, str):
+                    if len(number) > 2 and number[0:2] == ">=":
+                        return Q(**{f"{fieldname}__gte": number[2:]})
+                    elif len(number) > 2 and number[0:2] == "<=":
+                        return Q(**{f"{fieldname}__lte": number[2:]})
+                    elif number[0] == ">":
+                        return Q(**{f"{fieldname}__gt": number[1:]})
+                    elif number[0] == "<":
+                        return Q(**{f"{fieldname}__lt": number[1:]})
+                    elif "," in number:
+                        numbers = number.split(",")
+                        return Q(**{f"{fieldname}__in": numbers})
+                    elif ".." in number:
+                        numbersp = number.split("..")
+                        before = numbersp[0]
+                        after = numbersp[1]
+                        qfilter = {}
+                        if before:
+                            qfilter[f"{fieldname}__gte"] = before
+                        if after:
+                            qfilter[f"{fieldname}__lte"] = after
+                        return Q(**qfilter)
+                    else:
+                        return Q(**{fieldname: number})
+                else:
+                    return Q(**{fieldname: number})
+            else:
+                return None
+
+        return func
+
+
 class MODELINFO:
     """
     This is a special class that hodls information to be given to the GenList special methods
@@ -1894,9 +1931,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 ]:
                     fields[field.name] = (
                         field.verbose_name,
-                        lambda x, fieldname=field.name: Q(
-                            **{"{}".format(fieldname): x},
-                        ),
+                        SearchFilters.number(field.name),
                         "input",
                     )
         return fields

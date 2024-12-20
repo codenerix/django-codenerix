@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-14 06:41+0200\n"
+"POT-Creation-Date: 2024-12-20 12:42+0100\n"
 "PO-Revision-Date: 2024-06-12 13:07+0200\n"
 "Last-Translator: abcdabcdabcdabcd  <yo@br0th3r.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -151,7 +151,7 @@ msgstr "Aplicar"
 #: codenerix/templates/codenerix/remote_log.html:29
 #: codenerix/templates/codenerix/remote_log.html:30
 #: codenerix/templates/codenerix/remote_log.html:40
-#: codenerix/templates/codenerix/remote_log.html:41 codenerix/views.py:651
+#: codenerix/templates/codenerix/remote_log.html:41 codenerix/views.py:685
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -302,11 +302,11 @@ msgstr "Actualizado"
 msgid "Cannot delete item, relationship with %(model_name)s"
 msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
 
-#: codenerix/models.py:302 codenerix/models.py:404 codenerix/views.py:650
+#: codenerix/models.py:302 codenerix/models.py:404 codenerix/views.py:684
 msgid "Add"
 msgstr "Añadir"
 
-#: codenerix/models.py:303 codenerix/models.py:406 codenerix/views.py:652
+#: codenerix/models.py:303 codenerix/models.py:406 codenerix/views.py:686
 msgid "Change"
 msgstr "Cambiar"
 
@@ -322,7 +322,7 @@ msgstr "Cambiar"
 #: codenerix/templates/codenerix/formmodal.html:62
 #: codenerix/templates/codenerix/formmodal.html:63
 #: codenerix/templates/codenerix/formmodal.html:65
-#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:656
+#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:690
 msgid "Delete"
 msgstr "Borrar"
 
@@ -330,7 +330,7 @@ msgstr "Borrar"
 msgid "Action"
 msgstr "Acción"
 
-#: codenerix/models.py:416 codenerix/models.py:471 codenerix/views.py:654
+#: codenerix/models.py:416 codenerix/models.py:471 codenerix/views.py:688
 msgid "Date"
 msgstr "Fecha"
 
@@ -419,12 +419,12 @@ msgid "Active"
 msgstr "Activo"
 
 #: codenerix/models_people.py:127
-#: codenerix/templatetags/codenerix_common.py:140 codenerix/views.py:1877
+#: codenerix/templatetags/codenerix_common.py:140 codenerix/views.py:1911
 msgid "Yes"
 msgstr "Si"
 
 #: codenerix/models_people.py:127
-#: codenerix/templatetags/codenerix_common.py:142 codenerix/views.py:1877
+#: codenerix/templatetags/codenerix_common.py:142 codenerix/views.py:1911
 msgid "No"
 msgstr "No"
 
@@ -444,14 +444,14 @@ msgstr "Añadir nuevo"
 #: codenerix/templates/codenerix/addmodal.html:41
 #: codenerix/templates/codenerix/addmodal.html:42
 #: codenerix/templates/codenerix/formmodal.html:70
-#: codenerix/templates/codenerix/formmodal.html:71 codenerix/views.py:673
+#: codenerix/templates/codenerix/formmodal.html:71 codenerix/views.py:707
 msgid "Save"
 msgstr "Guardar"
 
 #: codenerix/templates/codenerix/details.html:67
 #: codenerix/templates/codenerix/details.html:68
 #: codenerix/templates/codenerix/details.html:146
-#: codenerix/templates/codenerix/details.html:147 codenerix/views.py:659
+#: codenerix/templates/codenerix/details.html:147 codenerix/views.py:693
 msgid "Edit"
 msgstr "Editar"
 
@@ -466,7 +466,7 @@ msgstr "Volver"
 #: codenerix/templates/codenerix/detailsmodal_log.html:44
 #: codenerix/templates/codenerix/detailsmodal_log.html:99
 #: codenerix/templates/codenerix/detailsmodal_log.html:100
-#: codenerix/views.py:662
+#: codenerix/views.py:696
 msgid "Go back"
 msgstr "Volver"
 
@@ -488,7 +488,7 @@ msgstr "Editando"
 msgid "You will loose all your changes, are you sure?"
 msgstr "Perderá todos sus cambios, ¿está seguro?"
 
-#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3867
+#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3905
 msgid "List"
 msgstr "Lista"
 
@@ -505,124 +505,124 @@ msgstr "Verdad"
 msgid "False"
 msgstr "Falso"
 
-#: codenerix/views.py:653
+#: codenerix/views.py:687
 msgid "Clean filters"
 msgstr "Limpiar filtros"
 
-#: codenerix/views.py:655 codenerix/views.py:3317
+#: codenerix/views.py:689 codenerix/views.py:3355
 msgid "Day"
 msgstr "Día"
 
-#: codenerix/views.py:657
+#: codenerix/views.py:691
 msgid "Done"
 msgstr "Hecho"
 
-#: codenerix/views.py:658
+#: codenerix/views.py:692
 msgid "Download"
 msgstr "Descargar"
 
-#: codenerix/views.py:660
+#: codenerix/views.py:694
 msgid "Error"
 msgstr "Error"
 
-#: codenerix/views.py:661
+#: codenerix/views.py:695
 msgid "Filters"
 msgstr "Filtros"
 
-#: codenerix/views.py:663 codenerix/views.py:3319 codenerix/widgets.py:938
+#: codenerix/views.py:697 codenerix/views.py:3357 codenerix/widgets.py:938
 msgid "Hour"
 msgstr "Hora"
 
-#: codenerix/views.py:664 codenerix/views.py:3315
+#: codenerix/views.py:698 codenerix/views.py:3353
 msgid "Month"
 msgstr "Mes"
 
-#: codenerix/views.py:665 codenerix/views.py:3321
+#: codenerix/views.py:699 codenerix/views.py:3359
 msgid "Minute"
 msgstr "Minuto"
 
-#: codenerix/views.py:666
+#: codenerix/views.py:700
 msgid "Page number"
 msgstr "Número de página"
 
-#: codenerix/views.py:667
+#: codenerix/views.py:701
 msgid "Please wait"
 msgstr "Por favor espere"
 
-#: codenerix/views.py:668
+#: codenerix/views.py:702
 msgid "Print Excel"
 msgstr "Imprimir en Excel"
 
-#: codenerix/views.py:669
+#: codenerix/views.py:703
 msgid "Print CSV"
 msgstr "Imprimir en CSV"
 
-#: codenerix/views.py:670
+#: codenerix/views.py:704
 msgid "Print JSON"
 msgstr "Imprimir JSON"
 
-#: codenerix/views.py:671
+#: codenerix/views.py:705
 msgid "Print JSONL"
 msgstr "Imprimir JSONL"
 
-#: codenerix/views.py:672
+#: codenerix/views.py:706
 msgid "Print BSON"
 msgstr "Imprimir BSON"
 
-#: codenerix/views.py:674
+#: codenerix/views.py:708
 msgid "Save here"
 msgstr "Guardar aquí"
 
-#: codenerix/views.py:675
+#: codenerix/views.py:709
 msgid "Save & new"
 msgstr "Guardar y nuevo"
 
-#: codenerix/views.py:676
+#: codenerix/views.py:710
 msgid "Reload"
 msgstr "Recargar"
 
-#: codenerix/views.py:677
+#: codenerix/views.py:711
 msgid "Rows per page"
 msgstr "Filas por página"
 
-#: codenerix/views.py:678
+#: codenerix/views.py:712
 msgid "Search"
 msgstr "Buscar"
 
-#: codenerix/views.py:679 codenerix/views.py:3323
+#: codenerix/views.py:713 codenerix/views.py:3361
 msgid "Second"
 msgstr "Segundo"
 
-#: codenerix/views.py:680
+#: codenerix/views.py:714
 msgid "Time"
 msgstr "Hora"
 
-#: codenerix/views.py:681
+#: codenerix/views.py:715
 msgid "View"
 msgstr "Ver"
 
-#: codenerix/views.py:682
+#: codenerix/views.py:716
 msgid "Warning"
 msgstr "Atención"
 
-#: codenerix/views.py:683 codenerix/views.py:3313
+#: codenerix/views.py:717 codenerix/views.py:3351
 msgid "Year"
 msgstr "Año"
 
-#: codenerix/views.py:684
+#: codenerix/views.py:718
 msgid "registers"
 msgstr "registros"
 
-#: codenerix/views.py:744
+#: codenerix/views.py:778
 msgid "The view/model definition requires, that this user must be a superuser"
 msgstr ""
 "La definición de la vista/modelo, necesita que el usuario sea superuser"
 
-#: codenerix/views.py:757
+#: codenerix/views.py:791
 msgid "The view/model definition requires, that this user must be from staff"
 msgstr "La definición de la vista/modelo necesita que el usuario sea staff"
 
-#: codenerix/views.py:1256
+#: codenerix/views.py:1290
 msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
@@ -630,21 +630,21 @@ msgstr ""
 "Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
 "add_permission: detail, change y delete"
 
-#: codenerix/views.py:1821
+#: codenerix/views.py:1855
 msgid "Not allowed, this kind of requests has been prohibited for this view!"
 msgstr ""
 "No permitido, ¡este tipo de peticiones han sido prohibidas para esta vista!"
 
-#: codenerix/views.py:2352 codenerix/views.py:2365 codenerix/views.py:2971
-#: codenerix/views.py:3023
+#: codenerix/views.py:2384 codenerix/views.py:2397 codenerix/views.py:3009
+#: codenerix/views.py:3061
 msgid "All"
 msgstr "Todos"
 
-#: codenerix/views.py:3325
+#: codenerix/views.py:3363
 msgid "Unknown"
 msgstr "Desconocidos"
 
-#: codenerix/views.py:3839
+#: codenerix/views.py:3877
 msgid ""
 "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in "
 "Megabytes) of the config"
@@ -652,36 +652,36 @@ msgstr ""
 "Este fichero es demasiado grande ({}M). Cambie el parámetro "
 "FILE_DOWNLOAD_SIZE_MAX (en Megabytes) en la configuración"
 
-#: codenerix/views.py:3854
+#: codenerix/views.py:3892
 msgid "Could not generate file"
 msgstr "No se ha podido generar el fichero"
 
-#: codenerix/views.py:4711
+#: codenerix/views.py:4749
 msgid "This shouldn't happen, state is not $dirty or $pristine"
 msgstr "Esto no debería ocurrir, el estado no es ni $dirty ni $pristine"
 
-#: codenerix/views.py:4903
+#: codenerix/views.py:4941
 msgid "Method not allowed, use POST to delete or DELETE on the detail url"
 msgstr ""
 "Método no permitido, use POST para borrar o DELETE en la vista de detalles"
 
-#: codenerix/views.py:5617 codenerix/views.py:5660
+#: codenerix/views.py:5655 codenerix/views.py:5698
 msgid "Manager"
 msgstr "Gestor"
 
-#: codenerix/views.py:5617
+#: codenerix/views.py:5655
 msgid "Log"
 msgstr "Log"
 
-#: codenerix/views.py:5635
+#: codenerix/views.py:5673
 msgid "Identification"
 msgstr "Identificación"
 
-#: codenerix/views.py:5645
+#: codenerix/views.py:5683
 msgid "Changes"
 msgstr "Cambios"
 
-#: codenerix/views.py:5660
+#: codenerix/views.py:5698
 msgid "RemoteLog"
 msgstr "Log Remoto"
 
