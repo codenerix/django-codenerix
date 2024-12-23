@@ -19,7 +19,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.rst")) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name="django-codenerix",
+    name="django_codenerix",
     version=codenerix.__version__,
     packages=["codenerix"],
     include_package_data=True,

@@ -88,7 +88,7 @@ from openpyxl.cell.cell import TYPE_NUMERIC
 from openpyxl.styles import Border, Color, Font, PatternFill, Side
 
 from codenerix.helpers import (
-    daterange_filter,
+    DateRangeFilter,
     epochdate,
     get_class,
     get_profile,
@@ -1917,12 +1917,9 @@ class GenList(GenBase, ListView):  # type: ignore
                     models.DateField,
                     models.DateTimeField,
                 ]:
-                    fields[field.name] = (
+                    fields[field.name] = DateRangeFilter.factory(
+                        field.name,
                         field.verbose_name,
-                        lambda x, fieldname=field.name: Q(
-                            **daterange_filter(x, fieldname),
-                        ),
-                        "daterange",
                     )
                 elif type(field) in [
                     models.IntegerField,

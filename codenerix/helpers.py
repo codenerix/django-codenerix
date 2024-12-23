@@ -775,6 +775,22 @@ class SearchFAutoFilter:
         return filtercount
 
 
+class DateRangeFilter:
+    """
+    Class for helping buildin daterange filters
+    """
+
+    @classmethod
+    def factory(cls, field, label):
+        return (
+            label,
+            lambda x: Q(
+                **daterange_filter(x, field),
+            ),
+            "daterange",
+        )
+
+
 def otpauth(issuer, label, secret):
     if secret and pyotp:
         return pyotp.totp.TOTP(secret).provisioning_uri(
