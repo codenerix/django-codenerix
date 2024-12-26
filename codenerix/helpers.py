@@ -32,7 +32,7 @@ import os
 import random
 import time
 import zipfile
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 
 from dateutil.tz import tzutc
@@ -689,7 +689,7 @@ def form_answer(status, answer):
 
 
 def JSONEncoder_newdefault(  # noqa: N802
-    kind=["uuid", "datetime", "time", "decimal"],
+    kind=["uuid", "datetime", "date", "time", "decimal"],
 ):
     """
     JSON Encoder newdfeault is a wrapper capable of encoding several kinds
@@ -706,6 +706,8 @@ def JSONEncoder_newdefault(  # noqa: N802
         if ("uuid" in kind) and isinstance(o, UUID):
             return str(o)
         if ("datetime" in kind) and isinstance(o, datetime):
+            return str(o)
+        if ("date" in kind) and isinstance(o, date):
             return str(o)
         if ("time" in kind) and isinstance(o, time.struct_time):
             return datetime.fromtimestamp(time.mktime(o))

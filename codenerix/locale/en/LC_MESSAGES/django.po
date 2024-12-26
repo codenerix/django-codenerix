@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-20 12:42+0100\n"
+"POT-Creation-Date: 2024-12-24 12:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -145,7 +145,7 @@ msgstr ""
 #: codenerix/templates/codenerix/remote_log.html:29
 #: codenerix/templates/codenerix/remote_log.html:30
 #: codenerix/templates/codenerix/remote_log.html:40
-#: codenerix/templates/codenerix/remote_log.html:41 codenerix/views.py:685
+#: codenerix/templates/codenerix/remote_log.html:41 codenerix/views.py:688
 msgid "Cancel"
 msgstr ""
 
@@ -293,11 +293,11 @@ msgstr ""
 msgid "Cannot delete item, relationship with %(model_name)s"
 msgstr ""
 
-#: codenerix/models.py:302 codenerix/models.py:404 codenerix/views.py:684
+#: codenerix/models.py:302 codenerix/models.py:404 codenerix/views.py:687
 msgid "Add"
 msgstr ""
 
-#: codenerix/models.py:303 codenerix/models.py:406 codenerix/views.py:686
+#: codenerix/models.py:303 codenerix/models.py:406 codenerix/views.py:689
 msgid "Change"
 msgstr ""
 
@@ -313,7 +313,7 @@ msgstr ""
 #: codenerix/templates/codenerix/formmodal.html:62
 #: codenerix/templates/codenerix/formmodal.html:63
 #: codenerix/templates/codenerix/formmodal.html:65
-#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:690
+#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:693
 msgid "Delete"
 msgstr ""
 
@@ -321,7 +321,7 @@ msgstr ""
 msgid "Action"
 msgstr ""
 
-#: codenerix/models.py:416 codenerix/models.py:471 codenerix/views.py:688
+#: codenerix/models.py:416 codenerix/models.py:471 codenerix/views.py:691
 msgid "Date"
 msgstr ""
 
@@ -410,12 +410,12 @@ msgid "Active"
 msgstr ""
 
 #: codenerix/models_people.py:127
-#: codenerix/templatetags/codenerix_common.py:140 codenerix/views.py:1911
+#: codenerix/templatetags/codenerix_common.py:140 codenerix/views.py:1914
 msgid "Yes"
 msgstr ""
 
 #: codenerix/models_people.py:127
-#: codenerix/templatetags/codenerix_common.py:142 codenerix/views.py:1911
+#: codenerix/templatetags/codenerix_common.py:142 codenerix/views.py:1914
 msgid "No"
 msgstr ""
 
@@ -435,14 +435,14 @@ msgstr ""
 #: codenerix/templates/codenerix/addmodal.html:41
 #: codenerix/templates/codenerix/addmodal.html:42
 #: codenerix/templates/codenerix/formmodal.html:70
-#: codenerix/templates/codenerix/formmodal.html:71 codenerix/views.py:707
+#: codenerix/templates/codenerix/formmodal.html:71 codenerix/views.py:710
 msgid "Save"
 msgstr ""
 
 #: codenerix/templates/codenerix/details.html:67
 #: codenerix/templates/codenerix/details.html:68
 #: codenerix/templates/codenerix/details.html:146
-#: codenerix/templates/codenerix/details.html:147 codenerix/views.py:693
+#: codenerix/templates/codenerix/details.html:147 codenerix/views.py:696
 msgid "Edit"
 msgstr ""
 
@@ -457,7 +457,7 @@ msgstr ""
 #: codenerix/templates/codenerix/detailsmodal_log.html:44
 #: codenerix/templates/codenerix/detailsmodal_log.html:99
 #: codenerix/templates/codenerix/detailsmodal_log.html:100
-#: codenerix/views.py:696
+#: codenerix/views.py:699
 msgid "Go back"
 msgstr ""
 
@@ -496,129 +496,129 @@ msgstr ""
 msgid "False"
 msgstr ""
 
-#: codenerix/views.py:687
+#: codenerix/views.py:690
 msgid "Clean filters"
 msgstr ""
 
-#: codenerix/views.py:689 codenerix/views.py:3355
+#: codenerix/views.py:692 codenerix/views.py:3355
 msgid "Day"
 msgstr ""
 
-#: codenerix/views.py:691
+#: codenerix/views.py:694
 msgid "Done"
 msgstr ""
 
-#: codenerix/views.py:692
+#: codenerix/views.py:695
 msgid "Download"
 msgstr ""
 
-#: codenerix/views.py:694
+#: codenerix/views.py:697
 msgid "Error"
 msgstr ""
 
-#: codenerix/views.py:695
+#: codenerix/views.py:698
 msgid "Filters"
 msgstr ""
 
-#: codenerix/views.py:697 codenerix/views.py:3357 codenerix/widgets.py:938
+#: codenerix/views.py:700 codenerix/views.py:3357 codenerix/widgets.py:938
 msgid "Hour"
 msgstr ""
 
-#: codenerix/views.py:698 codenerix/views.py:3353
+#: codenerix/views.py:701 codenerix/views.py:3353
 msgid "Month"
 msgstr ""
 
-#: codenerix/views.py:699 codenerix/views.py:3359
+#: codenerix/views.py:702 codenerix/views.py:3359
 msgid "Minute"
 msgstr ""
 
-#: codenerix/views.py:700
+#: codenerix/views.py:703
 msgid "Page number"
 msgstr ""
 
-#: codenerix/views.py:701
+#: codenerix/views.py:704
 msgid "Please wait"
 msgstr ""
 
-#: codenerix/views.py:702
+#: codenerix/views.py:705
 msgid "Print Excel"
 msgstr ""
 
-#: codenerix/views.py:703
+#: codenerix/views.py:706
 msgid "Print CSV"
 msgstr ""
 
-#: codenerix/views.py:704
+#: codenerix/views.py:707
 msgid "Print JSON"
 msgstr ""
 
-#: codenerix/views.py:705
+#: codenerix/views.py:708
 msgid "Print JSONL"
 msgstr ""
 
-#: codenerix/views.py:706
+#: codenerix/views.py:709
 msgid "Print BSON"
 msgstr ""
 
-#: codenerix/views.py:708
+#: codenerix/views.py:711
 msgid "Save here"
 msgstr ""
 
-#: codenerix/views.py:709
+#: codenerix/views.py:712
 msgid "Save & new"
 msgstr ""
 
-#: codenerix/views.py:710
+#: codenerix/views.py:713
 msgid "Reload"
 msgstr ""
 
-#: codenerix/views.py:711
+#: codenerix/views.py:714
 msgid "Rows per page"
 msgstr ""
 
-#: codenerix/views.py:712
+#: codenerix/views.py:715
 msgid "Search"
 msgstr ""
 
-#: codenerix/views.py:713 codenerix/views.py:3361
+#: codenerix/views.py:716 codenerix/views.py:3361
 msgid "Second"
 msgstr ""
 
-#: codenerix/views.py:714
+#: codenerix/views.py:717
 msgid "Time"
 msgstr ""
 
-#: codenerix/views.py:715
+#: codenerix/views.py:718
 msgid "View"
 msgstr ""
 
-#: codenerix/views.py:716
+#: codenerix/views.py:719
 msgid "Warning"
 msgstr ""
 
-#: codenerix/views.py:717 codenerix/views.py:3351
+#: codenerix/views.py:720 codenerix/views.py:3351
 msgid "Year"
 msgstr ""
 
-#: codenerix/views.py:718
+#: codenerix/views.py:721
 msgid "registers"
 msgstr ""
 
-#: codenerix/views.py:778
+#: codenerix/views.py:781
 msgid "The view/model definition requires, that this user must be a superuser"
 msgstr ""
 
-#: codenerix/views.py:791
+#: codenerix/views.py:794
 msgid "The view/model definition requires, that this user must be from staff"
 msgstr ""
 
-#: codenerix/views.py:1290
+#: codenerix/views.py:1293
 msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
 msgstr ""
 
-#: codenerix/views.py:1855
+#: codenerix/views.py:1858
 msgid "Not allowed, this kind of requests has been prohibited for this view!"
 msgstr ""
 

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.15] - 2024-12-26
+### Feature
+- Helper to properly serialize date objects to JSON
+
+## [5.0.14] - 2024-12-23
+### Feature
+- DateRangeFilter is now available for __searchF__() to filter dates between two dates
+
 ## [5.0.14] - 2024-12-23
 ### Feature
 - DateRangeFilter is now available for __searchF__() to filter dates between two dates
