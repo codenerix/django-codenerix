@@ -5207,6 +5207,38 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                                 # for get_XXXX_display() mostly
                                 value = value()
 
+                    if isinstance(value, datetime.datetime):
+                        # Convert datetime to string
+                        value = (
+                            value.replace(tzinfo=pytz.utc)
+                            .astimezone(tz.tzlocal())
+                            .strftime(
+                                formats.get_format(
+                                    "DATETIME_INPUT_FORMATS",
+                                    lang=self.language,
+                                )[0],
+                            )
+                        )
+                    elif isinstance(value, datetime.date):
+                        # Convert datetime to string
+                        value = value.strftime(
+                            formats.get_format(
+                                "DATE_INPUT_FORMATS",
+                                lang=self.language,
+                            )[0],
+                        )
+                    elif isinstance(value, datetime.time):
+                        # Convert datetime to string
+                        value = value.strftime(
+                            formats.get_format(
+                                "TIME_INPUT_FORMATS",
+                                lang=self.language,
+                            )[0],
+                        )
+                    elif isinstance(value, Decimal):
+                        # Convert Decimal to float
+                        value = float(value)
+
                     # Show if cols
                     if cols is not None:
                         sublist.append(
