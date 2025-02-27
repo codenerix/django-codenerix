@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.17] - 2025-02-27
+### Feature
+- Support for "=0" in search's input's fields to filter by 0 values
+
 ## [5.0.16] - 2025-02-12
 ### Bug
 - Detailed views now show dates localized in the user's timezone

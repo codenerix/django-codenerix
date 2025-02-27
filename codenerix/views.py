@@ -233,7 +233,7 @@ class SearchFilters:  # noqa: N801
     @staticmethod
     def number(fieldname):
         def func(number):
-            if number:
+            if number is not None:
                 if isinstance(number, str):
                     if len(number) > 2 and number[0:2] == ">=":
                         return Q(**{f"{fieldname}__gte": number[2:]})
@@ -243,6 +243,8 @@ class SearchFilters:  # noqa: N801
                         return Q(**{f"{fieldname}__gt": number[1:]})
                     elif number[0] == "<":
                         return Q(**{f"{fieldname}__lt": number[1:]})
+                    elif number[0] == "=":
+                        return Q(**{f"{fieldname}": number[1:]})
                     elif "," in number:
                         numbers = number.split(",")
                         return Q(**{f"{fieldname}__in": numbers})
@@ -2295,14 +2297,16 @@ class GenList(GenBase, ListView):  # type: ignore
         for key in filters_by_struct:
             # Get the value of the original filter
             value = filters_by_struct[key]
+
             # If there is something to filter, filter is not being
             # changed and filter is known by the class
-            try:
-                value = int(value)
-            except ValueError:
-                pass
-            except TypeError:
-                pass
+            if value is not None:
+                try:
+                    value = int(value)
+                except ValueError:
+                    pass
+                except TypeError:
+                    pass
 
             # ORIG if (key in listfilters) and ((value>0) or
             # (isinstance(value, list)):
@@ -2310,7 +2314,7 @@ class GenList(GenBase, ListView):  # type: ignore
             # and ((value > 0) or (isinstance(value, list))):
             # V2 if (value and isinstance(value, int) and key in listfilters)
             # or ((value > 0) or (isinsance(value, list))):
-            if value and key in listfilters:
+            if value and (key in listfilters):
                 # Add the filter to the queryset
                 rule = listfilters[key]
                 # Get type
