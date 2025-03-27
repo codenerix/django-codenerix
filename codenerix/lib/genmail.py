@@ -34,11 +34,19 @@ class EmailMessage(mail.EmailMessage):
         elif "to" in kwargs and kwargs["to"] is None:
             kwargs["to"] = [x[1] for x in settings.ADMINS]
         else:
-            if settings.DEBUG and settings.CLIENTS:
+            if settings.DEBUG and hasattr(settings, "CLIENTS"):
+                # Warn this is deprecated in favor of FIXED_EMAIL_TARGETS
+                raise DeprecationWarning(
+                    "CLIENTS setting is deprecated "
+                    "use FIXED_EMAIL_TARGETS instead",
+                )
+            fixed_clients = getattr(settings, "FIXED_EMAIL_TARGETS", None)
+            if fixed_clients:
+                to = [x[1] for x in fixed_clients]
                 if len(args) >= 3:
-                    new_args[3] = [x[1] for x in settings.CLIENTS]
+                    new_args[3] = to
                 else:
-                    kwargs["to"] = [x[1] for x in settings.CLIENTS]
+                    kwargs["to"] = to
 
         super().__init__(*new_args, **kwargs)
 
