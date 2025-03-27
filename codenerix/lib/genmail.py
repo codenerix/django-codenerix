@@ -29,9 +29,11 @@ from django.core.mail.utils import DNS_NAME
 class EmailMessage(mail.EmailMessage):
     def __init__(self, *args, **kwargs):
         new_args = list(args)
-        if len(args) >= 3 and args[3] is None:
+        if len(args) >= 4 and args[3] is None:
+            print("WARNING: 'to' is None, using ADMINS as email target")
             new_args[3] = [x[1] for x in settings.ADMINS]
         elif "to" in kwargs and kwargs["to"] is None:
+            print("WARNING: 'to' is None, using ADMINS as email target")
             kwargs["to"] = [x[1] for x in settings.ADMINS]
         else:
             if settings.DEBUG and hasattr(settings, "CLIENTS"):
@@ -42,8 +44,9 @@ class EmailMessage(mail.EmailMessage):
                 )
             fixed_clients = getattr(settings, "FIXED_EMAIL_TARGETS", None)
             if fixed_clients:
+                print(f"WARNING: Using FIXED_EMAIL_TARGETS={fixed_clients}")
                 to = [x[1] for x in fixed_clients]
-                if len(args) >= 3:
+                if len(args) >= 4:
                     new_args[3] = to
                 else:
                     kwargs["to"] = to

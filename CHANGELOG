@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.19] - 2025-03-27
+### Bug
+- Corrected how EmailMessage behaves when "to" argument is None
+- Added some messages on the console to help debugging
+
 ## [5.0.18] - 2025-03-27
 ### Bug
 - We have discovered some users miss understanding CLIENTS inside settings, so we have replaced it by FIXED_EMAIL_TARGETS which is a more descriptive name and it is used to send emails to fixed email addresses. This should be used only for debugging purposes and it is not recommended to use it in production environments.
