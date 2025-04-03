@@ -26,8 +26,11 @@ import os
 import random
 import re
 from datetime import datetime
+from typing import Any, List
 
-from captcha.widgets import ReCaptcha  # type: ignore[import-not-found]
+from captcha.widgets import (  # type: ignore[import-not-found, import-untyped] # noqa: E501
+    ReCaptcha,
+)
 from django import forms
 from django.conf import settings
 from django.core.files.base import File
@@ -42,10 +45,12 @@ from django.utils.translation import gettext as _
 from codenerix.helpers import get_class
 
 try:
-    from django.utils.choices import BlankChoiceIterator
+    from django.utils.choices import (  # type: ignore[import] # noqa: E501
+        BlankChoiceIterator,
+    )
 except ModuleNotFoundError:
     # Django 4.x compatibility
-    BlankChoiceIterator = list
+    BlankChoiceIterator: List[Any] = list  # type: ignore[no-redef]
 
 
 class StaticSelectMulti(forms.widgets.SelectMultiple):
