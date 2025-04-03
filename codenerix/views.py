@@ -78,6 +78,7 @@ from django.utils.text import format_lazy
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.views.generic import ListView, View
+from django.views.generic.base import ContextMixin
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django_stubs_ext import StrOrPromise
@@ -674,7 +675,7 @@ def gen_auth_permission(
         return (auth, reason)
 
 
-class GenBase:
+class GenBase(ContextMixin):
     """
     public = False   # Will not perform permission controls
     """
