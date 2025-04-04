@@ -2,15 +2,15 @@
 
 import json
 from base64 import b64encode
-from collections import UserList
 from importlib import import_module
 
 import six
 from django.core.exceptions import ValidationError
 from django.forms import BoundField
+from django.forms.utils import ErrorList
 from django.http import QueryDict
 from django.utils.encoding import force_str
-from django.utils.html import escape, format_html, format_html_join
+from django.utils.html import format_html, format_html_join
 from django.utils.safestring import SafeData, SafeText, mark_safe
 
 
@@ -21,7 +21,8 @@ class SafeTuple(SafeData, tuple):
     """
 
 
-class TupleErrorList(UserList, list):
+class TupleErrorList(ErrorList):
+
     """
     A list of errors, which in contrast to Django's ErrorList, can contain
     a tuple for each item.
@@ -45,29 +46,6 @@ class TupleErrorList(UserList, list):
     li_format_bind = (
         '<li ng-show="{0}.{1}" class="{2}" ng-bind="{0}.{3}"></li>'
     )
-
-    def __init__(self, initlist=None, error_class=None, renderer=None):
-        super().__init__(initlist)
-
-        if error_class is None:
-            self.error_class = "errorlist"
-        else:
-            self.error_class = "errorlist {}".format(error_class)
-
-    def as_data(self):
-        return ValidationError(self.data).error_list
-
-    def get_json_data(self, escape_html=False):
-        errors = []
-        for error in self.as_data():
-            message = list(error)[0]
-            errors.append(
-                {
-                    "message": escape(message) if escape_html else message,
-                    "code": error.code or "",
-                },
-            )
-        return errors
 
     def as_json(self, escape_html=False):
         return json.dumps(self.get_json_data(escape_html))
@@ -138,16 +116,8 @@ class TupleErrorList(UserList, list):
     def __repr__(self):
         if self and isinstance(self[0], tuple):
             return repr([force_str(e[5]) for e in self])
-        return repr([force_str(e) for e in self])
-
-    def __contains__(self, item):
-        return item in list(self)
-
-    def __eq__(self, other):
-        return list(self) == other
-
-    def __ne__(self, other):
-        return list(self) != other
+        else:
+            return super().__repr__()
 
     def __getitem__(self, i):
         error = self.data[i]
@@ -155,9 +125,8 @@ class TupleErrorList(UserList, list):
             if isinstance(error[5], ValidationError):
                 error[5] = list(error[5])[0]
             return error
-        if isinstance(error, ValidationError):
-            return list(error)[0]
-        return force_str(error)
+        else:
+            return super().__getitem__(i)
 
 
 class NgBoundField(BoundField):

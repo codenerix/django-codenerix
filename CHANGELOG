@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.22] - 2025-04-04
+### Bug
+- Compatibility with Django 5.2
+
 ## [5.0.21] - 2025-04-03
 ### Bug
 - Types correction on GenBase
