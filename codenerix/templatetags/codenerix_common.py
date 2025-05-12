@@ -18,9 +18,11 @@
 # limitations under the License.
 
 import datetime
+import random
 
 from django import template
 from django.conf import settings
+from django.template import Node
 from django.utils import formats
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
@@ -378,3 +380,95 @@ def replace(value, fromto):
 def set_ngmodel(inp, name):
     inp.field.widget.field_name = name
     return inp
+
+
+# === PickOne tag ===
+#
+# This tag is used to randomly choose one of the options
+# defined inside the {% pick_one %}...{% endpick_one %} block.
+#
+# It is useful for generating random content in templates.
+# The options are defined using the {% option %}...{% endoption %}
+# block.
+#
+# The syntax is as follows:
+# {% pick_one %}
+#   {% option %}...{% endoption %}
+#   {% option %}...{% endoption %}
+#   {% option %}...{% endoption %}
+# {% endpick_one %}
+#
+# The {% option %} tag is used to define an individual option
+# within the {% pick_one %} block. It can contain any valid
+# Django template code, including variables, filters, and other
+# template tags.
+#
+# The chosen option will be rendered and returned as the output
+# of the {% pick_one %} tag.
+#
+# The options are chosen randomly, so each time the template is
+# rendered, a different option may be selected.
+#
+# Example:
+# {% pick_one %}
+#   {% option %}{% block "abc" %}default abc text{% endblock %}{% endoption %}
+#   {% option %}
+#     {% with def_text="def" %}{{ def_text }}{% endwith %}
+#   {% endoption %}
+#   {% option %}{{ ghi_var }}{% endoption %}
+# {% endpick_one %}
+
+
+class OptionNode(Node):
+    """
+    This node represents an option inside the {% pick_one %} block.
+    It can contain any valid Django template code, including
+    variables, filters, and other template tags.
+    """
+
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        # simply render whatever was inside this {% option %}…{% endoption %}
+        return self.nodelist.render(context)
+
+
+@register.tag("option")
+def do_option(parser, token):
+    """
+    Parse {% option %}...{% endoption %} into an OptionNode.
+    """
+    nodelist = parser.parse(("endoption",))
+    parser.delete_first_token()  # consume 'endoption'
+    return OptionNode(nodelist)
+
+
+class PickOneNode(Node):
+    """
+    This node represents the {% pick_one %} block. It collects
+    all the OptionNode children and randomly chooses one to render.
+    """
+
+    def __init__(self, options):
+        # options: a list of OptionNode instances
+        self.options = options
+
+    def render(self, context):
+        if not self.options:
+            return ""
+        chosen = random.choice(self.options)
+        return chosen.render(context)
+
+
+@register.tag("pick_one")
+def do_pick_one(parser, token):
+    """
+    Parse {% pick_one %}...{% endpick_one %}, collect all OptionNode children,
+    and render exactly one at random.
+    """
+    nodelist = parser.parse(("endpick_one",))
+    parser.delete_first_token()  # consume 'endpick_one'
+    # filter out only our OptionNode instances (ignore whitespace/text)
+    options = [node for node in nodelist if isinstance(node, OptionNode)]
+    return PickOneNode(options)

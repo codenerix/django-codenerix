@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-04 06:31+0200\n"
+"POT-Creation-Date: 2025-05-12 09:28+0200\n"
 "PO-Revision-Date: 2024-06-12 13:07+0200\n"
 "Last-Translator: abcdabcdabcdabcd  <yo@br0th3r.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -419,12 +419,12 @@ msgid "Active"
 msgstr "Activo"
 
 #: codenerix/models_people.py:127
-#: codenerix/templatetags/codenerix_common.py:140 codenerix/views.py:1917
+#: codenerix/templatetags/codenerix_common.py:142 codenerix/views.py:1917
 msgid "Yes"
 msgstr "Si"
 
 #: codenerix/models_people.py:127
-#: codenerix/templatetags/codenerix_common.py:142 codenerix/views.py:1917
+#: codenerix/templatetags/codenerix_common.py:144 codenerix/views.py:1917
 msgid "No"
 msgstr "No"
 
@@ -497,11 +497,11 @@ msgstr "Lista"
 msgid "Close"
 msgstr "Cerrar"
 
-#: codenerix/templatetags/codenerix_common.py:274
+#: codenerix/templatetags/codenerix_common.py:276
 msgid "True"
 msgstr "Verdad"
 
-#: codenerix/templatetags/codenerix_common.py:276
+#: codenerix/templatetags/codenerix_common.py:278
 msgid "False"
 msgstr "Falso"
 
