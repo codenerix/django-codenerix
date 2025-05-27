@@ -2938,8 +2938,9 @@ function multilist(
     };
 
     // Quick OK modal to show information
-    $scope.modalinfo = function(title, content, timeout, callback) {
+    $scope.modalinfo = function(title, content, timeout, callback, url) {
         var static_url = $scope.data.meta.url_static;
+        var modal_body = null;
         var template = `
             <div class="modal-header ng-scope">
                 <h3 class="modal-title text-center">` +
@@ -2947,8 +2948,13 @@ function multilist(
             </div>
             <div class="row clearfix ng-scope">
                 <div class="modal-body">
-                    <div class='modal-body text-center h1' codenerix-html-compile="'` +
-                       content + `'"></div>
+                    <div class='modal-body text-center h1' codenerix-html-compile="`;
+        if (url == undefined) {
+            template += `'` + content + `'`;
+        } else {
+            template += 'modal_body';
+        }
+        template += `"></div>
                 </div>
             </div>
             <div class="modal-footer ng-scope">
@@ -2978,16 +2984,40 @@ function multilist(
 
         var callback_internal = function(scope) {};
         var callback_cancel = function(scope) {};
-        openmodal(
-            $scope,
-            $timeout,
-            $uibModal,
-            'md',
-            functions,
-            callback_internal,
-            true,
-            callback_cancel,
-            template);
+
+        if (url == undefined) {
+            openmodal(
+                $scope,
+                $timeout,
+                $uibModal,
+                'md',
+                functions,
+                callback_internal,
+                true,
+                callback_cancel,
+                template);
+        } else {
+            // Bring url content
+            $http.get(url).then(
+                function(response) {
+                    // success callback
+                    $rootScope.modal_body = response.data;
+                    openmodal(
+                        $scope,
+                        $timeout,
+                        $uibModal,
+                        'md',
+                        functions,
+                        callback_internal,
+                        true,
+                        callback_cancel,
+                        template);
+                },
+                function(error) {
+                    // error callback
+                    console.error('Error occurred:', error);
+                });
+        }
     };
 
     $scope.addnew = function() {

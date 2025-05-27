@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.24] - 2025-05-27
+### Feature
+- Angular: modalinfo() supports opening an URL
+
 ## [5.0.23] - 2025-05-12
 ### Bug
 - New template block named "pick_one"
