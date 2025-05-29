@@ -6,10 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.28] - 2025-05-29
+### Feature
+- "obj_to_html" suports depth for the conversion operation to finish at certain level of the object
+
+## [5.0.27] - 2025-05-29
+### Feature
+- "obj_to_html" now supports also converting XML to HTML
+
 ## [5.0.26] - 2025-05-29
 ### Bugfix
 - "json_to_html" renamed to "obj_to_html"
-
 
 ## [5.0.25] - 2025-05-29
 ### Feature

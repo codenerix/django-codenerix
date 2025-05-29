@@ -36,6 +36,8 @@ import time
 import zipfile
 from datetime import date, datetime
 from uuid import UUID
+from xml.dom import minidom
+from xml.parsers.expat import ExpatError
 
 from dateutil.tz import tzutc
 from django.conf import settings
@@ -806,7 +808,7 @@ def otpauth(issuer, label, secret):
         return None
 
 
-def obj_to_html(obj, doc=None, tag=None, text=None):
+def obj_to_html(obj, depth=1, doc=None, tag=None, text=None, internal=False):
     """
     Function to convert JSON to HTML
     """
@@ -815,24 +817,91 @@ def obj_to_html(obj, doc=None, tag=None, text=None):
         doc, tag, text = Doc().tagtext()
         doc.asis("<html>")
         doc.asis("<body>")
+
+    # If the object is an string, try to convert it
+    if depth:
+        if isinstance(obj, str):
+            try:
+                pobj = json.loads(obj)
+                kind = "JSON"
+            except json.JSONDecodeError:
+                # Try to parse as XML
+                try:
+                    pobj = minidom.parseString(obj)
+                    kind = "XML"
+                except ExpatError:
+                    pobj = obj
+                    kind = "OBJ"
+        else:
+            # If the object is not a string, assume it's a Python object
+            pobj = obj
+            kind = "OBJ"
+    else:
+        # Negative depth, user doesn't want more prettyfier
+        pobj = obj
+        kind = "OBJ"
+
     if tag is None or text is None:
         tag, text = doc.tagtext()
 
-    if isinstance(obj, dict):
+    if isinstance(pobj, dict):
+        # If pobj is a dictionary, iterate through its items
         with tag("ul"):
-            for key, value in obj.items():
+            for key, value in pobj.items():
                 with tag("li"):
                     with tag("strong"):
                         text(f"{key}: ")
-                    obj_to_html(value, doc, tag, text)
-    elif isinstance(obj, list):
-        with tag("ul"):
-            for item in obj:
-                with tag("li"):
-                    obj_to_html(item, doc, tag, text)
-    elif obj is None:
-        text("None")
-    else:
-        text(obj)
+                    obj_to_html(
+                        value,
+                        depth and (depth - 1),
+                        doc,
+                        tag,
+                        text,
+                        internal=True,
+                    )
 
-    return SafeString(doc.getvalue())
+    elif isinstance(pobj, list):
+        # If pobj is a list, iterate through its items
+        with tag("ul"):
+            for item in pobj:
+                with tag("li"):
+                    obj_to_html(
+                        item,
+                        depth and (depth - 1),
+                        doc,
+                        tag,
+                        text,
+                        internal=True,
+                    )
+
+    elif pobj is None:
+        # If pobj is None, add a text node
+        text("None")
+
+    elif kind == "XML":
+        # If pobj has a toprettyxml method, assume it's an XML object
+        pretty_xml = pobj.toprettyxml(indent="\t")
+
+        # Remove empty lines from the pretty XML
+        xml_str = os.linesep.join(
+            [s for s in pretty_xml.splitlines() if s.strip()],
+        )
+
+        # Escape XML special characters
+        xml_str = (
+            xml_str.replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\n", "<br/>")
+            .replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+        )
+
+        # Return the pretty XML string
+        # return (kind, SafeString(xml_str))
+        doc.asis(xml_str)
+
+    else:
+        # If pobj is a string or any other type, add it as text
+        text(pobj)
+
+    if not internal:
+        return (kind, SafeString(doc.getvalue()))
