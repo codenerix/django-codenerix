@@ -806,7 +806,7 @@ def otpauth(issuer, label, secret):
         return None
 
 
-def json_to_html(data, doc=None, tag=None, text=None):
+def obj_to_html(obj, doc=None, tag=None, text=None):
     """
     Function to convert JSON to HTML
     """
@@ -818,21 +818,21 @@ def json_to_html(data, doc=None, tag=None, text=None):
     if tag is None or text is None:
         tag, text = doc.tagtext()
 
-    if isinstance(data, dict):
+    if isinstance(obj, dict):
         with tag("ul"):
-            for key, value in data.items():
+            for key, value in obj.items():
                 with tag("li"):
                     with tag("strong"):
                         text(f"{key}: ")
-                    json_to_html(value, doc, tag, text)
-    elif isinstance(data, list):
+                    obj_to_html(value, doc, tag, text)
+    elif isinstance(obj, list):
         with tag("ul"):
-            for item in data:
+            for item in obj:
                 with tag("li"):
-                    json_to_html(item, doc, tag, text)
-    elif data is None:
+                    obj_to_html(item, doc, tag, text)
+    elif obj is None:
         text("None")
     else:
-        text(data)
+        text(obj)
 
     return SafeString(doc.getvalue())
