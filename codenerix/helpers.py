@@ -22,6 +22,8 @@ import importlib
 import io
 import json
 
+from yattag import Doc
+
 try:
     import pyotp
 except ImportError:
@@ -50,6 +52,7 @@ from django.urls import reverse_lazy
 from django.utils import dateparse
 from django.utils.encoding import smart_str
 from django.utils.http import urlsafe_base64_encode
+from django.utils.safestring import SafeString
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import View
 from unidecode import unidecode
@@ -801,3 +804,35 @@ def otpauth(issuer, label, secret):
         )
     else:
         return None
+
+
+def json_to_html(data, doc=None, tag=None, text=None):
+    """
+    Function to convert JSON to HTML
+    """
+
+    if doc is None:
+        doc, tag, text = Doc().tagtext()
+        doc.asis("<html>")
+        doc.asis("<body>")
+    if tag is None or text is None:
+        tag, text = doc.tagtext()
+
+    if isinstance(data, dict):
+        with tag("ul"):
+            for key, value in data.items():
+                with tag("li"):
+                    with tag("strong"):
+                        text(f"{key}: ")
+                    json_to_html(value, doc, tag, text)
+    elif isinstance(data, list):
+        with tag("ul"):
+            for item in data:
+                with tag("li"):
+                    json_to_html(item, doc, tag, text)
+    elif data is None:
+        text("None")
+    else:
+        text(data)
+
+    return SafeString(doc.getvalue())

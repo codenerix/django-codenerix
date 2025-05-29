@@ -71,5 +71,6 @@ setup(
         "pyinstrument",
         "django-stubs",
         "django-stubs-ext",
+        "yattag",
     ],
 )

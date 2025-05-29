@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.25] - 2025-05-297
+### Feature
+- "json_to_html" added to helpers to convert JSON objects to HTML code as a SafeString
+
 ## [5.0.24] - 2025-05-27
 ### Feature
 - Angular: modalinfo() supports opening an URL
