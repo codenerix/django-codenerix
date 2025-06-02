@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.29] - 2025-06-02
+### Feature
+- Library reordeing in setup.py
+- Library pytz fully removed from the library
+
 ## [5.0.28] - 2025-05-29
 ### Feature
 - "obj_to_html" suports depth for the conversion operation to finish at certain level of the object

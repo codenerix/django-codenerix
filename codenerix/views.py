@@ -38,9 +38,9 @@ import time
 from decimal import Decimal
 from io import BytesIO, StringIO
 from typing import Any, Dict, List, Optional, Union
+from zoneinfo import ZoneInfo
 
 import bson
-import pytz
 from dateutil import tz
 from dateutil.parser import parse
 from django.conf import settings
@@ -3590,7 +3590,7 @@ class GenList(GenBase, ListView):  # type: ignore
                     if isinstance(value, datetime.datetime):
                         # Convert datetime to string
                         value = (
-                            value.replace(tzinfo=pytz.utc)
+                            value.replace(tzinfo=ZoneInfo("UTC"))
                             .astimezone(tz.tzlocal())
                             .strftime(
                                 formats.get_format(
@@ -3664,7 +3664,7 @@ class GenList(GenBase, ListView):  # type: ignore
                         elif isinstance(value, datetime.datetime):
                             # Convert datetime to string
                             value = (
-                                value.replace(tzinfo=pytz.utc)
+                                value.replace(tzinfo=ZoneInfo("UTC"))
                                 .astimezone(tz.tzlocal())
                                 .strftime(
                                     formats.get_format(
@@ -5215,7 +5215,7 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                     if isinstance(value, datetime.datetime):
                         # Convert datetime to string
                         value = (
-                            value.replace(tzinfo=pytz.utc)
+                            value.replace(tzinfo=ZoneInfo("UTC"))
                             .astimezone(tz.tzlocal())
                             .strftime(
                                 formats.get_format(
