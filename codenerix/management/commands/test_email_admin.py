@@ -1,33 +1,141 @@
 #!/usr/bin/env python
 
+import contextlib
+import importlib
 import logging
 
 from codenerix_lib.debugger import Debugger
-from django.core.management.base import BaseCommand
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
 from django.utils.log import AdminEmailHandler
+
+# Make sure this command is not executed inside django server
+if "runserver" in settings.INSTALLED_APPS:
+    raise CommandError(
+        "This command cannot be executed while the Django server is running. "
+        "Please stop the server and try again.",
+    )
+
+# Ensure the settings module is configured
+backend_string = getattr(settings, "EMAIL_BACKEND", None)
+if not backend_string:
+    raise CommandError("EMAIL_BACKEND setting is not configured.")
+
+# Attempt to import the specified email backend
+try:
+    backend_module, backend_class = backend_string.rsplit(".", 1)
+    smtp_backend = importlib.import_module(backend_module)
+except (ImportError, AttributeError) as e:
+    raise CommandError(f"Invalid EMAIL_BACKEND: {e!r}")
 
 
 class Command(BaseCommand, Debugger):
     # Show this when the user types help
     help = "Send a test email to admins"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--verbose",
+            action="store_true",
+            dest="verbose",
+            default=False,
+            help="Enable verbose output for debugging",
+        )
+
     def handle(self, *args, **options):
+        # Set verbosity level
+        self.VERBOSE = options.get("verbose")
+
         # Autoconfigure Debugger
         self.set_name("TEST ADMIN EMAIL")
         self.set_debug()
 
+        # Prepare handler
+        self.debug("Getting AdminEmailHandler", color="blue")
+        if self.VERBOSE:
+            handler = self.get_patched_handler()
+        else:
+            handler = AdminEmailHandler()
+
+        # Send the test email
+        self.send(handler)
+
+    def get_patched_handler(self):
+        # Patch the open method of the SMTP backend to set debuglevel
+        original_open = getattr(smtp_backend, backend_class).open
+
+        # Patch the open method to enable SMTP debug
+        def open_with_debug(self, *a, **kw):
+            result = original_open(self, *a, **kw)
+            try:
+                # After each open(), force SMTP debug
+                self.connection.set_debuglevel(1)
+                self.stderr.write("→ [PATCH] SMTP debuglevel=1 enabled")
+            except Exception:
+                pass
+            return result
+
+        # Replace the open method with our patched version
+        getattr(smtp_backend, backend_class).open = open_with_debug
+
+        # Logger from smtplib to DEBUG level and output to stderr
+        smtp_logger = logging.getLogger("smtplib")
+        smtp_logger.setLevel(logging.DEBUG)
+        smtp_ch = logging.StreamHandler(self.stderr)
+        smtp_ch.setLevel(logging.DEBUG)
+        smtp_logger.addHandler(smtp_ch)
+
+        # Prepare the AdminEmailHandler to send emails to admins
+        handler = AdminEmailHandler()
+        handler.fail_silently = False  # para no tragar excepciones
+
+        # Wrap the emit method to redirect stderr
+        orig_emit = handler.emit
+
+        # Define a new emit method that redirects stderr
+        def emit_with_debug(record):
+            with contextlib.redirect_stderr(self.stderr):
+                orig_emit(record)
+
+        # Patch the emit method to use our debug version
+        handler.emit = emit_with_debug
+
+        # Return the configured handler
+        return handler
+
+    def send(self, handler):
         # Check if the email backend is configured
         self.debug("Recording test email to admins", color="blue")
-        handler = AdminEmailHandler()
         record = logging.LogRecord(
             name="test",
             level=logging.ERROR,
             pathname=__file__,
             lineno=1,
-            msg="¡Prueba de email a admins!",
+            msg="¡Emailt TEST to admins!",
             args=(),
             exc_info=None,
         )
-        self.debug("Emitting test email record", color="yellow")
-        handler.emit(record)
-        self.debug("Test email done!", color="green")
+
+        # Emit the test email record
+        if self.VERBOSE:
+            self.debug(
+                "→ Emitting test email record with AdminEmailHandler:",
+                color="yellow",
+            )
+        else:
+            self.debug("Emitting test email record", color="yellow")
+        try:
+            handler.emit(record)
+        except Exception as e:
+            raise CommandError(f"Error sending test email: {e!r}")
+
+        if self.VERBOSE:
+            self.debug(
+                "→ Register sent, review above the SMTP conversion.",
+                color="green",
+            )
+        else:
+            self.debug(
+                "→ Email sent to admins, check your inbox.",
+                color="green",
+            )
