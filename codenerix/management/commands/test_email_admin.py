@@ -3,9 +3,11 @@
 import contextlib
 import importlib
 import logging
+import types
 
 from codenerix_lib.debugger import Debugger
 from django.conf import settings
+from django.core.mail import get_connection
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.log import AdminEmailHandler
 
@@ -87,18 +89,56 @@ class Command(BaseCommand, Debugger):
 
         # Prepare the AdminEmailHandler to send emails to admins
         handler = AdminEmailHandler()
-        handler.fail_silently = False  # para no tragar excepciones
+        handler.fail_silently = False
 
-        # Wrap the emit method to redirect stderr
+        # === Patch EMIT ===
+
+        # Get original method
         orig_emit = handler.emit
 
-        # Define a new emit method that redirects stderr
+        # Wrap the emit method to redirect stderr
         def emit_with_debug(record):
             with contextlib.redirect_stderr(self.stderr):
                 orig_emit(record)
 
         # Patch the emit method to use our debug version
         handler.emit = emit_with_debug
+
+        # === Patch SEND MAIL ===
+
+        # Emit is calling to send_mail with a hardcoded
+        # argument fail_silently=True which avoids producing
+        # errors while sending emails. We want to avoid this
+        # behavior because we want to DEBUG any error
+
+        # Get the original send_mail method from the handler
+        orig_send_mail = handler.send_mail
+
+        # Wrap the send_mail method to avoid fail_silently
+        def send_mail_no_fail_silently(self, *args, **kwargs):
+            kwargs["fail_silently"] = False
+            return orig_send_mail(*args, **kwargs)
+
+        # Patch the send_mail method of the handler
+        handler.send_mail = types.MethodType(
+            send_mail_no_fail_silently,
+            handler,
+        )
+
+        # === Patch connection method ===
+
+        # Wrap the connection method to avoid fail_silently
+        def connection_no_fail_silently(self, *args, **kwargs):
+            return get_connection(
+                backend=self.email_backend,
+                fail_silently=False,
+            )
+
+        # Patch the connection method of the handler
+        handler.connection = types.MethodType(
+            connection_no_fail_silently,
+            handler,
+        )
 
         # Return the configured handler
         return handler
@@ -124,10 +164,32 @@ class Command(BaseCommand, Debugger):
             )
         else:
             self.debug("Emitting test email record", color="yellow")
+
         try:
             handler.emit(record)
         except Exception as e:
-            raise CommandError(f"Error sending test email: {e!r}")
+            self.error(f"→ An error occurred while sending the email: {e!r}")
+            if self.VERBOSE:
+                self.error("→ Exception details:")
+                self.error(f"{e.__class__.__name__}: {e}")
+                self.debug("Analysing connection data:", color="white")
+                conn = get_connection(
+                    backend=handler.email_backend,
+                    fail_silently=False,
+                )
+                if conn:
+                    self.debug(f"{conn.host=}", color="white")
+                    self.debug(f"{conn.port=}", color="white")
+                    self.debug(f"{conn.username=}", color="white")
+                    self.debug(f"{conn.use_tls=}", color="white")
+                    self.debug(f"{conn.use_ssl=}", color="white")
+                    self.debug(f"{conn.timeout=}", color="white")
+                    self.debug(f"{conn.ssl_keyfile=}", color="white")
+                    self.debug(f"{conn.ssl_certfile=}", color="white")
+                else:
+                    self.error("No connection available!")
+                self.error("Re-raising exception")
+                raise
 
         if self.VERBOSE:
             self.debug(
@@ -138,4 +200,11 @@ class Command(BaseCommand, Debugger):
             self.debug(
                 "→ Email sent to admins, check your inbox.",
                 color="green",
+            )
+            self.debug(
+                "WARNING: fail_silently is enabled by default in Django "
+                "(at least until Django 5.2.2) and it may hide ERRORs. Please "
+                " consider trying executing this command with --verbose for "
+                "improved details, SMTP communication and debugging.",
+                color="blue",
             )
