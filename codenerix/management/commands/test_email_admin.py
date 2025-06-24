@@ -181,6 +181,7 @@ class Command(BaseCommand, Debugger):
                     self.debug(f"{conn.host=}", color="white")
                     self.debug(f"{conn.port=}", color="white")
                     self.debug(f"{conn.username=}", color="white")
+                    self.debug(f"{conn.password=}", color="white")
                     self.debug(f"{conn.use_tls=}", color="white")
                     self.debug(f"{conn.use_ssl=}", color="white")
                     self.debug(f"{conn.timeout=}", color="white")
