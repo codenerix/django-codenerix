@@ -629,12 +629,13 @@ def gen_auth_permission(
                                     break
 
                         if not auth:
+                            txtpermissions = ",".join(permission)
+                            txtpermissions_groups = ",".join(permission_group)
+
                             reason = (
-                                "Not authorized for: permissions: {} - "
-                                "permission group: {}".format(
-                                    ",".join(permission),
-                                    ",".join(permission_group),
-                                )
+                                f"User '{user}' is not authorized for: "
+                                f"permissions: {txtpermissions} - "
+                                f"permission group: {txtpermissions_groups}"
                             )
 
                 else:
@@ -658,9 +659,10 @@ def gen_auth_permission(
                                 break
 
                         if not auth:
-                            reason = "Not authorized for {} or {}".format(
-                                specific_permission,
-                                app_specific_permission,
+                            reason = (
+                                f"User '{user}' is not authorized"
+                                f" for {specific_permission}"
+                                f" or {app_specific_permission}"
                             )
 
                 # Set cache

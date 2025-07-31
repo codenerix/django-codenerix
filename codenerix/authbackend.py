@@ -20,12 +20,11 @@
 try:
     import pyotp  # type: ignore[import-not-found]
 except ImportError:
-    pyotp = None
+    pyotp = None  # type: ignore[assignment]
 import base64
 import datetime
 import hashlib
 import ssl
-import time
 
 import ldap3
 from codenerix_lib.debugger import Debugger
@@ -42,14 +41,12 @@ def hashed(string):
     """
     Hash a string with several algorithms and return all of them
     Allowed algorithms for authentication are:
-    - SHA1 <--- DEPRECATED and will be removed in future versions
     - SHA256
     - SHA512
     - SHA3_256 <--- RECOMMENDED
     - SHA3_512
     """
     algorightms = [
-        hashlib.sha1,  # DEPRECATED: Backward compatibility with old versions
         hashlib.sha256,
         hashlib.sha512,
         hashlib.sha3_256,
@@ -276,16 +273,7 @@ class LimitedAuthMiddleware(Debugger):
                 if last_seen is not None:
                     # Check if we have to logout this user for being
                     # innactive too long
-                    try:
-                        # python3
-                        nowts = now.timestamp()
-                    except AttributeError:
-                        # python2
-                        nowts = float(
-                            time.mktime(now.timetuple())
-                            + now.microsecond / 1000000.0,
-                        )
-
+                    nowts = now.timestamp()
                     diff = nowts - last_seen - expire_when_innactive
 
                     # Get caducity
@@ -294,16 +282,7 @@ class LimitedAuthMiddleware(Debugger):
                         logout(request)
 
                 # Refresh last_seen
-                last_seen = datetime.datetime.now()
-                try:
-                    # python3
-                    last_seen = last_seen.timestamp()
-                except AttributeError:
-                    # python2
-                    last_seen = float(
-                        time.mktime(last_seen.timetuple())
-                        + last_seen.microsecond / 1000000.0,
-                    )
+                last_seen = datetime.datetime.now().timestamp()
 
                 # Remember in session
                 request.session["user_last_seen"] = last_seen
@@ -324,20 +303,7 @@ class LimitedAuthMiddleware(Debugger):
                     now.day,
                     delta,
                 )
-                try:
-                    # python3
-                    kickout = kickout.timestamp() - now.timestamp()
-                except AttributeError:
-                    # python2
-                    ts = float(
-                        time.mktime(kickout.timetuple())
-                        + kickout.microsecond / 1000000.0,
-                    )
-                    tz = float(
-                        time.mktime(now.timetuple())
-                        + now.microsecond / 1000000.0,
-                    )
-                    kickout = ts - tz
+                kickout = kickout.timestamp() - now.timestamp()
 
                 # Get caducity
                 caducity = request.session.get("user_session_caducity", None)
@@ -627,7 +593,7 @@ class TokenAuth(ModelBackend, Debugger):
                 color="white",
             )
             self.debug(
-                "  > Username [authuser]: '{}'".format(username),
+                f"  > Username [authuser]: '{username}'",
                 color="cyan",
             )
             self.debug(
@@ -636,9 +602,7 @@ class TokenAuth(ModelBackend, Debugger):
                 color="cyan",
             )
             self.debug(
-                "  > String [json]: '{}' <- string to be used as salt".format(
-                    string,
-                ),
+                f"  > String [json]: '{string}' <- string to be used as salt",
                 color="cyan",
             )
 
@@ -695,6 +659,11 @@ class TokenAuth(ModelBackend, Debugger):
                     or config["master_unsigned"]
                     or config["master_signed"]
                 ):
+                    if self.__debugger:
+                        self.debug(
+                            "Getting master key",
+                            color="white",
+                        )
                     if config["key"] and (
                         config["master_unsigned"] or config["master_signed"]
                     ):
@@ -720,12 +689,30 @@ class TokenAuth(ModelBackend, Debugger):
                     or config["otp_unsigned"]
                     or config["otp_signed"]
                 ):
+                    if self.__debugger:
+                        self.debug(
+                            "Getting user/otp key",
+                            color="white",
+                        )
+
                     # Check if user first_name is filled
                     if user.first_name:
+                        if self.__debugger:
+                            self.debug(
+                                f"Getting USER key for User '{username}'",
+                                color="white",
+                            )
+
                         # Get user first_name as user_key
                         user_key = user.first_name
 
                         if config["otp_unsigned"] or config["otp_signed"]:
+                            if self.__debugger:
+                                self.debug(
+                                    "Getting OTP key",
+                                    color="white",
+                                )
+
                             if not pyotp:
                                 raise OSError(
                                     "PYOTP library not found, you can not "
@@ -751,10 +738,15 @@ class TokenAuth(ModelBackend, Debugger):
                             otp = None
 
                         # Remove user key if not in use
-                        if (not config["user_unsigned"]) or (
+                        if (not config["user_unsigned"]) and (
                             not config["user_signed"]
                         ):
                             user_key = None
+                            if self.__debugger:
+                                self.debug(
+                                    "User key not used, removing it!",
+                                    color="yellow",
+                                )
 
                     else:
                         if self.__debugger:
@@ -774,7 +766,7 @@ class TokenAuth(ModelBackend, Debugger):
                         "Clear text keys:",
                         color="white",
                     )
-                    if master:
+                    if master is not None:
                         info = []
                         if config.get("master_signed", False):
                             info.append("signed")
@@ -792,7 +784,7 @@ class TokenAuth(ModelBackend, Debugger):
                             "  > Master KEY NOT configured",
                             color="purple",
                         )
-                    if user_key:
+                    if user_key is not None:
                         info = []
                         if config.get("user_signed", False):
                             info.append("signed")
@@ -810,7 +802,7 @@ class TokenAuth(ModelBackend, Debugger):
                             "  > User KEY NOT configured",
                             color="purple",
                         )
-                    if otp:
+                    if otp is not None:
                         info = []
                         if config.get("otp_signed", False):
                             info.append("signed")
@@ -849,7 +841,7 @@ class TokenAuth(ModelBackend, Debugger):
                             user.username,
                             string,
                         ),
-                        color="white",
+                        color="yellow",
                     )
 
                 # Build the list of valid keys
@@ -861,30 +853,36 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
-                            if keys[-1] == token:
+                            if master == token:
                                 color = "cyan"
                             else:
                                 color = "blue"
                             self.debug(
-                                "  > Master Unsigned Key: {}".format(keys[-1]),
+                                "  > Master Unsigned Key: {}".format(master),
                                 color=color,
                             )
 
                     if config["master_signed"]:  # MASTER KEY SIGNED
                         # keys.append("master_signed")
-                        keys += hashed(tosign.encode() + master.encode())
+                        hashedkeys = hashed(tosign.encode() + master.encode())
+                        keys += hashedkeys
 
                         # Show debugger
                         if self.__debugger:
-                            if keys[-1] == token:
-                                color = "green"
-                            else:
-                                color = "blue"
                             self.debug(
-                                f"  > Master Signed Key: {keys[-1]} "
-                                f"<- HASHED( {tosign} + {master} )",
-                                color=color,
+                                "  > Master Signed Keys:"
+                                f" <- HASHED( '{tosign}' + '{master}' )",
+                                color="cyan",
                             )
+                            for key in hashedkeys:
+                                if token == key:
+                                    color = "green"
+                                else:
+                                    color = "blue"
+                                self.debug(
+                                    f"  > Master Signed Key: {key}",
+                                    color=color,
+                                )
 
                 if user_key:
                     if config["user_unsigned"]:  # USER KEY
@@ -893,30 +891,38 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
-                            if keys[-1] == token:
+                            if user_key == token:
                                 color = "green"
                             else:
                                 color = "blue"
                             self.debug(
-                                "  > User Unsigned Key: {}".format(keys[-1]),
+                                "  > User Unsigned Key: {}".format(user_key),
                                 color=color,
                             )
 
                     if config["user_signed"]:  # USER KEY SIGNED
                         # keys.append("user_signed")
-                        keys += hashed(tosign.encode() + user_key.encode())
+                        hashedkeys = hashed(
+                            tosign.encode() + user_key.encode(),
+                        )
+                        keys += hashedkeys
 
                         # Show debugger
                         if self.__debugger:
-                            if keys[-1] == token:
-                                color = "green"
-                            else:
-                                color = "blue"
                             self.debug(
-                                f"  > User Signed Key: {keys[-1]} "
-                                f"<- HASHED( {tosign} + {user_key} )",
-                                color=color,
+                                "  > User Signed Keys:"
+                                f" <- HASHED( '{tosign}' + '{user_key}' )",
+                                color="cyan",
                             )
+                            for key in hashedkeys:
+                                if token == key:
+                                    color = "green"
+                                else:
+                                    color = "blue"
+                                self.debug(
+                                    f"  > User Signed Key: {key}",
+                                    color=color,
+                                )
 
                 if otp:
                     if config["otp_unsigned"]:  # OTP KEY
@@ -925,30 +931,36 @@ class TokenAuth(ModelBackend, Debugger):
 
                         # Show debugger
                         if self.__debugger:
-                            if keys[-1] == token:
+                            if otp == token:
                                 color = "green"
                             else:
                                 color = "blue"
                             self.debug(
-                                "  > OTP Unsigned Key: {}".format(keys[-1]),
+                                "  > OTP Unsigned Key: {}".format(otp),
                                 color=color,
                             )
 
                     if config["otp_signed"]:  # OTP KEY SIGNED
                         # keys.append("otp_signed")
-                        keys += hashed(tosign.encode() + otp.encode())
+                        hashedkeys = hashed(tosign.encode() + otp.encode())
+                        keys += hashedkeys
 
                         # Show debugger
                         if self.__debugger:
-                            if keys[-1] == token:
-                                color = "green"
-                            else:
-                                color = "blue"
                             self.debug(
-                                f"  > OTP Signed Key: {keys[-1]} "
-                                f"<- HASHED( {tosign} + {otp} )",
-                                color=color,
+                                "  > OTP Signed Keys:"
+                                f" <- HASHED( '{tosign}' + '{otp}' )",
+                                color="cyan",
                             )
+                            for key in hashedkeys:
+                                if token == key:
+                                    color = "green"
+                                else:
+                                    color = "blue"
+                                self.debug(
+                                    f"  > OTP Signed Key: {key}",
+                                    color=color,
+                                )
 
                 # Key is valid
                 if token in keys:
@@ -972,6 +984,15 @@ class TokenAuth(ModelBackend, Debugger):
                             f"tokenkey '{token}'!",
                             color="red",
                         )
+                        self.debug(
+                            "  > Valid keys:",
+                            color="white",
+                        )
+                        for key in keys:
+                            self.debug(
+                                f"  > Key: '{key}'",
+                                color="white",
+                            )
 
             else:
                 # Username not found, not accepting the authentication request

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.35] - 2025-06-31
+### Deprecation
+- SHA1 removed from Authbackend
+
+## [5.0.34] - 2025-06-31
+### Bugfix
+- Corrected API authtoken authentication for user signed/unsigned requests
+
 ## [5.0.33] - 2025-06-24
 ### Feature
 - Improvement on debugging for test_email_admin command to show the password being used for the SMTP connection.
