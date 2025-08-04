@@ -41,6 +41,7 @@ from xml.parsers.expat import ExpatError
 
 from dateutil.tz import tzutc
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -694,7 +695,7 @@ def form_answer(status, answer):
 
 
 def JSONEncoder_newdefault(  # noqa: N802
-    kind=["uuid", "datetime", "date", "time", "decimal"],
+    kind=["uuid", "datetime", "date", "time", "decimal", "user"],
 ):
     """
     JSON Encoder newdfeault is a wrapper capable of encoding several kinds
@@ -718,6 +719,8 @@ def JSONEncoder_newdefault(  # noqa: N802
             return datetime.fromtimestamp(time.mktime(o))
         if ("decimal" in kind) and isinstance(o, decimal.Decimal):
             return str(o)
+        if ("user" in kind) and isinstance(o, User):
+            return o.username
         return JSONEncoder_olddefault(self, o)
 
     json.JSONEncoder.default = JSONEncoder_wrapped
