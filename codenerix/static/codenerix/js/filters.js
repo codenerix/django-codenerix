@@ -217,24 +217,29 @@ angular
                             mode = 'single';
                             var parent = '';
                         }
-                        return `
-                            <div
-                                ng-init="` +
-                               parent + `shorttext=true"
-                                ng-click="$event.stopPropagation(); ` +
-                               parent + `shorttext=!` + parent + `shorttext">
-                                    <div ng-show="` +
-                               parent + `shorttext">
-                                        ` +
-                               input.substring(0, length) + `...
-                                    </div>
-                                    <div ng-hide="` +
-                               parent + `shorttext">
-                                        ` +
-                               input + `
-                                    </div>
-                            </div>
-                            `;
+                        if (input.length <= length) {
+                            return input;
+                        } else {
+                            return `
+                                <div
+                                    ng-init="` +
+                                   parent + `shorttext=true"
+                                    ng-click="$event.stopPropagation(); ` +
+                                   parent + `shorttext=!` + parent +
+                                   `shorttext">
+                                        <div ng-show="` +
+                                   parent + `shorttext">
+                                            ` +
+                                   input.substring(0, length) + `...
+                                        </div>
+                                        <div ng-hide="` +
+                                   parent + `shorttext">
+                                            ` +
+                                   input + `
+                                        </div>
+                                </div>
+                                `;
+                        }
                     }
                 } else if (kind.substring(0, 5) == 'image') {
                     if ((input == null) || (input == undefined) ||

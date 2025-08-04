@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.36] - 2025-07-04
+### Bugfix
+- shottext filter is now applying its behaviour only on fiels that are longer than the specified length, so it won't apply on short texts
+
 ## [5.0.35] - 2025-06-31
 ### Deprecation
 - SHA1 removed from Authbackend
