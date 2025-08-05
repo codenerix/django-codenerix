@@ -22,7 +22,6 @@ class SafeTuple(SafeData, tuple):
 
 
 class TupleErrorList(ErrorList):
-
     """
     A list of errors, which in contrast to Django's ErrorList, can contain
     a tuple for each item.

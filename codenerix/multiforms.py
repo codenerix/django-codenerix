@@ -131,15 +131,15 @@ class MultiForm:
                 if "autofill" in dir(formelement.Meta):
                     formname = str(formelement).split(".")[-1].split("'")[0]
                     for key in formelement.Meta.autofill:
-                        form.Meta.autofill[
-                            "{}_{}".format(formname, key)
-                        ] = formelement.Meta.autofill[key]
+                        form.Meta.autofill["{}_{}".format(formname, key)] = (
+                            formelement.Meta.autofill[key]
+                        )
                 if "extend" in dir(formelement.Meta):
                     formname = str(formelement).split(".")[-1].split("'")[0]
                     for key in formelement.Meta.extend:
-                        form.Meta.extend[
-                            "{}_{}".format(formname, key)
-                        ] = formelement.Meta.extend[key]
+                        form.Meta.extend["{}_{}".format(formname, key)] = (
+                            formelement.Meta.extend[key]
+                        )
 
                 # Get prefix
                 if "field_prefix" in formelement.Meta.__dict__:

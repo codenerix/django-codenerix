@@ -1,1 +1,1 @@
-""" Simply turns this module in a django app """
+"""Simply turns this module in a django app"""

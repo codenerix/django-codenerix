@@ -2,6 +2,7 @@
 Mixin class methods to be added to django.forms.fields at runtime. These
 methods add additional error messages for AngularJS form validation.
 """
+
 import re
 
 from django.forms import widgets

@@ -123,7 +123,7 @@ def nicekilometers(value):
 @register.filter
 def niceeuronull(value):
     if value:
-        return f"{value}\u20AC"
+        return f"{value}\u20ac"
     else:
         return "-"
 

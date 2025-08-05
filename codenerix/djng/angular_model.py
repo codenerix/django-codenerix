@@ -125,9 +125,11 @@ class NgModelFormMixin(NgFormBaseMixin):
         ng = {
             "name": bound_field.name,
             "identifier": identifier,
-            "model": ("%s['%s']" % (self.scope_prefix, identifier))
-            if self.scope_prefix
-            else identifier,
+            "model": (
+                ("%s['%s']" % (self.scope_prefix, identifier))
+                if self.scope_prefix
+                else identifier
+            ),
         }
         if hasattr(self, "Meta") and bound_field.name in getattr(
             self.Meta,

@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
     -   id: check-added-large-files
     -   id: check-ast
@@ -14,20 +14,20 @@ repos:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 25.1.0
     hooks:
     -   id: black
         args:
           - --line-length=79
           - --include='\.pyi?$'
 -   repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+    rev: 6.0.1
     hooks:
     -   id: isort
         name: isort
         args: [--profile, black, --line-length, "79"]
 -   repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.1.0
+    rev: v3.2.0
     hooks:
     -   id: add-trailing-comma
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -40,7 +40,7 @@ repos:
         - "--ignore=E203,W503"
         # - "--max-complexity=18"
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.7.1'
+    rev: 'v1.17.1'
     hooks:
       - id: mypy
         additional_dependencies: [tokenize-rt==3.2.0, types-python-dateutil, types-PyYAML, types-requests, types-pytz, types-six, types-ldap3, pymongo-stubs, django-stubs, django-stubs-ext]
@@ -49,18 +49,18 @@ repos:
         # args: [--python-version 3.10, --ignore-missing-imports, --disallow-untyped-defs]
         # args: [--no-strict-optional, --ignore-missing-imports]
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
+    rev: v3.20.0
     hooks:
     -   id: pyupgrade
         args: [--keep-percent-format]
 -   repo: https://github.com/keewis/blackdoc
-    rev: v0.3.9
+    rev: v0.4.1
     hooks:
     -   id: blackdoc
         args: ["-l", "78"]
         exclude: ^doc/.*
 -   repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+    rev: 1.8.6
     hooks:
     -   id: bandit
         args: ["-r", "-lll"]
