@@ -6,15 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.39] - 2025-07-06
+### Feature
+- Shorttext filter on frontend now allows configuring the tail of the string
+
 ## [5.0.38] - 2025-07-05
 ### Bugfix
 - Renamed command from test_email_admin to email_admin_test to avoid pytest conflicts with Django's test_email_admin command.
 
-
 ## [5.0.37] - 2025-07-04
 ### Bugfix
 - User object is now serializable by JSONEncoder_newdefault inside helpers
-
 
 ## [5.0.36] - 2025-07-04
 ### Bugfix

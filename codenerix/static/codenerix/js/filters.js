@@ -196,17 +196,23 @@ angular
                         var kind = kind.substring(10);
                         if (kind.length) {
                             var kindsp = kind.split(':');
-                            if (kindsp.length == 1) {
-                                var length = kindsp[0];
+                            var head = kindsp[0];
+                            if (kindsp.length <= 1) {
                                 var mode = 'single';
                             } else {
-                                var length = kindsp[0];
                                 var mode = kindsp[1];
                             }
+                            if (kindsp.length <= 2) {
+                                var tail = 0;
+                            } else {
+                                var tail = kindsp[2];
+                            }
+
 
                         } else {
-                            var length = 20;
+                            var head = 20;
                             var mode = 'single';
+                            var tail = 0;
                         }
                         // Choose parenting mode
                         if (mode == 'page') {
@@ -217,9 +223,27 @@ angular
                             mode = 'single';
                             var parent = '';
                         }
-                        if (input.length <= length) {
+                        if (input.length <= head) {
                             return input;
                         } else {
+                            // Get head and tail
+                            head = Math.min(Math.max(head, 0), input.length);
+                            tail = Math.min(tail, input.length - head);
+                            // Get middle (true if there is a middle part)
+                            var mid = input.length - head - tail > 0;
+
+                            // Get strings
+                            var headtxt = input.substring(0, head);
+                            if (tail == 0) {
+                                var tailtxt = '';
+                            } else {
+                                var tailtxt = input.slice(-tail);
+                            }
+                            if (mid) {
+                                var midtxt = `...`;
+                            } else {
+                                var midtxt = '';
+                            }
                             return `
                                 <div
                                     ng-init="` +
@@ -230,7 +254,7 @@ angular
                                         <div ng-show="` +
                                    parent + `shorttext">
                                             ` +
-                                   input.substring(0, length) + `...
+                                   headtxt + midtxt + tailtxt + `
                                         </div>
                                         <div ng-hide="` +
                                    parent + `shorttext">
