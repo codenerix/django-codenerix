@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.40] - 2025-09-17
+### Feature
+- Added a VirtualRequest class into helpers to provide support for Django Management Commands that are using some part of Codenerix that requires to declare codenerix_request attributes
+
 ## [5.0.39] - 2025-07-06
 ### Feature
 - Shorttext filter on frontend now allows configuring the tail of the string

@@ -21,8 +21,10 @@ import decimal
 import importlib
 import io
 import json
+from dataclasses import dataclass, field
+from typing import Any, Dict, Optional
 
-from yattag import Doc
+from yattag import Doc  # type: ignore
 
 try:
     import pyotp
@@ -41,13 +43,14 @@ from xml.parsers.expat import ExpatError
 
 from dateutil.tz import tzutc
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser, User
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
 
 # Django
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, QueryDict
 from django.shortcuts import render
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template as django_get_template
@@ -654,8 +657,8 @@ def qobject_builder_string_search(valid_fields, text, conditions="icontains"):
             neg = False
 
         temp = None
-        for field in valid_fields:
-            qobject = Q(**{"{}__{}".format(field, conditions): word})
+        for tfield in valid_fields:
+            qobject = Q(**{"{}__{}".format(tfield, conditions): word})
             if temp:
                 temp |= qobject
             else:
@@ -908,3 +911,94 @@ def obj_to_html(obj, depth=1, doc=None, tag=None, text=None, internal=False):
 
     if not internal:
         return (kind, SafeString(doc.getvalue()))
+
+
+@dataclass
+class VirtualRequest:
+    """
+    Simulates a Django HttpRequest.
+
+    # --- Example usage ---
+
+    # Import libraries
+    from codenerix.helpers import VirtualRequest
+    from django.http import QueryDict
+
+    # Simulate a real user if needed
+    from django.contrib.auth.models import User
+    test_user = User(username="testuser")
+    test_user.is_authenticated = True
+
+    req = VirtualRequest(
+        method="POST",
+        scheme="https",
+        host="myapi.com",
+        path="/items/123/",
+        user=test_user,
+        GET=QueryDict("filter=new&tag=python&tag=django"),
+        POST=QueryDict("name=new_item&quantity=5"),
+        headers={"x-api-key": "secret123"},
+        body=b'{"raw": "data"}',
+    )
+
+    print(f"Absolute URL: {req.build_absolute_uri()}")
+    print(f"User: {req.user.username}")
+    print(f"X-Api-Key Header: {req.headers.get('x-api-key')}")
+    print(f"Tag values: {req.GET.getlist('tag')}")
+    print(f"POST Name: {req.POST.get('name')}")
+
+    # Set this virtual request into an object as a codenerix_request attribute
+    obj.codenerix_request = self
+
+    """
+
+    # Main attributes to build the URL
+    method: str = "GET"
+    scheme: str = "http"
+    host: str = "localhost:8000"
+    path: str = "/"
+
+    # Request data (using Django's real types)
+    GET: QueryDict = field(default_factory=QueryDict)
+    POST: QueryDict = field(default_factory=QueryDict)
+    FILES: Dict[str, SimpleUploadedFile] = field(default_factory=dict)
+
+    # Headers, cookies, and body
+    headers: Dict[str, str] = field(default_factory=dict)
+    COOKIES: Dict[str, str] = field(default_factory=dict)
+    body: bytes = b""
+
+    # User and session
+    user: Any = field(default_factory=AnonymousUser)
+    session: Dict[str, Any] = field(default_factory=dict)
+
+    # Default META dictionary for advanced cases
+    META: Dict[str, Any] = field(default_factory=dict)
+
+    def get_full_path(self) -> str:
+        """
+        Returns the path with the query string.
+        """
+        query_string = self.GET.urlencode()
+        return f"{self.path}{'?' if query_string else ''}{query_string}"
+
+    def build_absolute_uri(self, location: Optional[str] = None) -> str:
+        """
+        Builds an absolute URL using scheme and host.
+        """
+        if not location:
+            location = self.get_full_path()
+
+        # Si la location ya es absoluta, la devolvemos
+        if location.startswith("http://") or location.startswith("https://"):
+            return location
+
+        return f"{self.scheme}://{self.host}{location}"
+
+    def __post_init__(self):
+        """
+        Post-initialization adjustments.
+        """
+        self.method = self.method.upper()
+        self.META.setdefault("REQUEST_METHOD", self.method)
+        self.META.setdefault("HTTP_HOST", self.host)
