@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-04 07:06+0200\n"
+"POT-Creation-Date: 2025-09-26 06:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -177,39 +177,39 @@ msgstr ""
 msgid "Sa"
 msgstr ""
 
-#: codenerix/context.py:144 codenerix/helpers.py:137
+#: codenerix/context.py:144 codenerix/helpers.py:141
 msgid "January"
 msgstr ""
 
-#: codenerix/context.py:145 codenerix/helpers.py:139
+#: codenerix/context.py:145 codenerix/helpers.py:143
 msgid "February"
 msgstr ""
 
-#: codenerix/context.py:146 codenerix/helpers.py:141
+#: codenerix/context.py:146 codenerix/helpers.py:145
 msgid "March"
 msgstr ""
 
-#: codenerix/context.py:147 codenerix/helpers.py:143
+#: codenerix/context.py:147 codenerix/helpers.py:147
 msgid "April"
 msgstr ""
 
-#: codenerix/context.py:148 codenerix/helpers.py:145
+#: codenerix/context.py:148 codenerix/helpers.py:149
 msgid "May"
 msgstr ""
 
-#: codenerix/context.py:149 codenerix/helpers.py:147
+#: codenerix/context.py:149 codenerix/helpers.py:151
 msgid "June"
 msgstr ""
 
-#: codenerix/context.py:150 codenerix/helpers.py:149
+#: codenerix/context.py:150 codenerix/helpers.py:153
 msgid "July"
 msgstr ""
 
-#: codenerix/context.py:151 codenerix/helpers.py:151
+#: codenerix/context.py:151 codenerix/helpers.py:155
 msgid "August"
 msgstr ""
 
-#: codenerix/context.py:152 codenerix/helpers.py:153
+#: codenerix/context.py:152 codenerix/helpers.py:157
 msgid "September"
 msgstr ""
 
@@ -217,29 +217,29 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: codenerix/context.py:154 codenerix/helpers.py:157
+#: codenerix/context.py:154 codenerix/helpers.py:161
 msgid "November"
 msgstr ""
 
-#: codenerix/context.py:155 codenerix/helpers.py:159
+#: codenerix/context.py:155 codenerix/helpers.py:163
 msgid "December"
 msgstr ""
 
-#: codenerix/djng/field_mixins.py:35
+#: codenerix/djng/field_mixins.py:36
 #, python-format
 msgid "Ensure this value has at least %(limit_value)d character"
 msgid_plural "Ensure this value has at least %(limit_value)d characters"
 msgstr[0] ""
 msgstr[1] ""
 
-#: codenerix/djng/field_mixins.py:49
+#: codenerix/djng/field_mixins.py:50
 #, python-format
 msgid "Ensure this value has at most %(limit_value)d character"
 msgid_plural "Ensure this value has at most %(limit_value)d characters"
 msgstr[0] ""
 msgstr[1] ""
 
-#: codenerix/djng/field_mixins.py:116
+#: codenerix/djng/field_mixins.py:117
 msgid "This input self does not contain valid data."
 msgstr ""
 
@@ -271,11 +271,11 @@ msgstr ""
 msgid "Invalid color"
 msgstr ""
 
-#: codenerix/helpers.py:155
+#: codenerix/helpers.py:159
 msgid "Octuber"
 msgstr ""
 
-#: codenerix/helpers.py:463
+#: codenerix/helpers.py:467
 msgid "ERROR: dic has repeated elements"
 msgstr ""
 

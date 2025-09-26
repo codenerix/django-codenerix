@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-04 07:06+0200\n"
+"POT-Creation-Date: 2025-09-26 06:19+0200\n"
 "PO-Revision-Date: 2024-06-12 13:07+0200\n"
 "Last-Translator: abcdabcdabcdabcd  <yo@br0th3r.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -183,39 +183,39 @@ msgstr "Vi"
 msgid "Sa"
 msgstr "Sa"
 
-#: codenerix/context.py:144 codenerix/helpers.py:137
+#: codenerix/context.py:144 codenerix/helpers.py:141
 msgid "January"
 msgstr "Enero"
 
-#: codenerix/context.py:145 codenerix/helpers.py:139
+#: codenerix/context.py:145 codenerix/helpers.py:143
 msgid "February"
 msgstr "Febrero"
 
-#: codenerix/context.py:146 codenerix/helpers.py:141
+#: codenerix/context.py:146 codenerix/helpers.py:145
 msgid "March"
 msgstr "Marzo"
 
-#: codenerix/context.py:147 codenerix/helpers.py:143
+#: codenerix/context.py:147 codenerix/helpers.py:147
 msgid "April"
 msgstr "Abril"
 
-#: codenerix/context.py:148 codenerix/helpers.py:145
+#: codenerix/context.py:148 codenerix/helpers.py:149
 msgid "May"
 msgstr "Mayo"
 
-#: codenerix/context.py:149 codenerix/helpers.py:147
+#: codenerix/context.py:149 codenerix/helpers.py:151
 msgid "June"
 msgstr "Junio"
 
-#: codenerix/context.py:150 codenerix/helpers.py:149
+#: codenerix/context.py:150 codenerix/helpers.py:153
 msgid "July"
 msgstr "Julio"
 
-#: codenerix/context.py:151 codenerix/helpers.py:151
+#: codenerix/context.py:151 codenerix/helpers.py:155
 msgid "August"
 msgstr "Agosto"
 
-#: codenerix/context.py:152 codenerix/helpers.py:153
+#: codenerix/context.py:152 codenerix/helpers.py:157
 msgid "September"
 msgstr "Septiembre"
 
@@ -223,15 +223,15 @@ msgstr "Septiembre"
 msgid "October"
 msgstr "Octubre"
 
-#: codenerix/context.py:154 codenerix/helpers.py:157
+#: codenerix/context.py:154 codenerix/helpers.py:161
 msgid "November"
 msgstr "Noviembre"
 
-#: codenerix/context.py:155 codenerix/helpers.py:159
+#: codenerix/context.py:155 codenerix/helpers.py:163
 msgid "December"
 msgstr "Diciembre"
 
-#: codenerix/djng/field_mixins.py:35
+#: codenerix/djng/field_mixins.py:36
 #, python-format
 msgid "Ensure this value has at least %(limit_value)d character"
 msgid_plural "Ensure this value has at least %(limit_value)d characters"
@@ -239,7 +239,7 @@ msgstr[0] "Asegúrate de que este valor tiene al menos %(limit_value)d carácter
 msgstr[1] ""
 "Asegúrate de que este valor tiene al menos %(limit_value)d caracteres"
 
-#: codenerix/djng/field_mixins.py:49
+#: codenerix/djng/field_mixins.py:50
 #, python-format
 msgid "Ensure this value has at most %(limit_value)d character"
 msgid_plural "Ensure this value has at most %(limit_value)d characters"
@@ -248,7 +248,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Asegúrate de que este valor no tiene más de %(limit_value)d caracteres"
 
-#: codenerix/djng/field_mixins.py:116
+#: codenerix/djng/field_mixins.py:117
 msgid "This input self does not contain valid data."
 msgstr "Este input no tiene datos válidos."
 
@@ -280,11 +280,11 @@ msgstr "ID no válido detectado en SelectMultiple"
 msgid "Invalid color"
 msgstr "Color inválido"
 
-#: codenerix/helpers.py:155
+#: codenerix/helpers.py:159
 msgid "Octuber"
 msgstr "Octubre"
 
-#: codenerix/helpers.py:463
+#: codenerix/helpers.py:467
 msgid "ERROR: dic has repeated elements"
 msgstr "Error: El diccionario tiene elementos repetidos"
 

@@ -19,6 +19,8 @@
 
 import os
 
+from django.apps import apps
+
 try:
     from subprocess import getstatusoutput
 
@@ -130,16 +132,19 @@ class Command(BaseCommand, Debugger):
         if noauto:
             self.debug("Autoconfig mode is OFF", color="yellow")
 
-        # Get list of apps
-        apps = []
-        length = len(appname)
-        for app in settings.INSTALLED_APPS:
-            if app[0:length] == appname:
-                apps.append(app[length + 1 :])
+        # Get a list of all apps belonging to this project
+        installed_apps = []
+        for app_config in apps.get_app_configs():
+            # print(f"App Name: {app_config.name}")
+            # print(f"  - Verbose Name: {app_config.verbose_name}")
+            # print(f"  - Path: {app_config.path}")
+            # print("-" * 10)
+            if app_config.name.split(".")[0] == appname:
+                installed_apps.append(".".join(app_config.name.split(".")[1:]))
 
         # Check for locale folders
         error = False
-        for app in [""] + apps:
+        for app in [""] + installed_apps:
             testpath = os.path.abspath(
                 "{}/{}/locale".format(appdir, app).replace("//", "/"),
             )
@@ -217,7 +222,7 @@ class Command(BaseCommand, Debugger):
             # Remove all locale folders
             if key == "y":
                 self.debug("Removing locale folders...", color="red")
-                for app in [""] + apps:
+                for app in [""] + installed_apps:
                     testpath = os.path.abspath(
                         "{}/{}/locale".format(appdir, app).replace("//", "/"),
                     )
@@ -269,7 +274,7 @@ class Command(BaseCommand, Debugger):
                 user = "www-data"
             else:
                 raise CommandError("Wrong mode for sudo '{}'".format(mode))
-            for app in [""] + apps:
+            for app in [""] + installed_apps:
                 testpath = os.path.abspath(
                     "{}/{}/locale".format(appdir, app).replace("//", "/"),
                 )
