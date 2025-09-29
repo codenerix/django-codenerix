@@ -14,12 +14,19 @@ repos:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/psf/black
-    rev: 25.1.0
+    rev: 23.12.1
     hooks:
     -   id: black
         args:
           - --line-length=79
           - --include='\.pyi?$'
+-   repo: https://github.com/keewis/blackdoc
+    rev: v0.3.9
+    hooks:
+    -   id: blackdoc
+        additional_dependencies: ["black==23.10.1"]
+        args: ["-l", "78"]
+        exclude: ^doc/.*
 -   repo: https://github.com/PyCQA/isort
     rev: 6.0.1
     hooks:
@@ -53,12 +60,6 @@ repos:
     hooks:
     -   id: pyupgrade
         args: [--keep-percent-format]
--   repo: https://github.com/keewis/blackdoc
-    rev: v0.4.1
-    hooks:
-    -   id: blackdoc
-        args: ["-l", "78"]
-        exclude: ^doc/.*
 -   repo: https://github.com/PyCQA/bandit
     rev: 1.8.6
     hooks:

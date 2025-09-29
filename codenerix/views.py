@@ -3174,9 +3174,9 @@ class GenList(GenBase, ListView):  # type: ignore
         # Check ngincludes
         context["ngincludes"] = getattr(self, "ngincludes", {})
         if "table" not in context["ngincludes"].keys():
-            context["ngincludes"]["table"] = (
-                "{}codenerix/partials/table.html".format(settings.STATIC_URL)
-            )
+            context["ngincludes"][
+                "table"
+            ] = "{}codenerix/partials/table.html".format(settings.STATIC_URL)
 
         # Check readonly
         context["readonly"] = getattr(self, "readonly", False)
@@ -3871,11 +3871,11 @@ class GenList(GenBase, ListView):  # type: ignore
                     content_type=mimetype,
                     **response_kwargs,
                 )
-                response["Content-Disposition"] = (
-                    "attachment; filename={}.{}".format(
-                        answer["meta"]["export_name"],
-                        extension,
-                    )
+                response[
+                    "Content-Disposition"
+                ] = "attachment; filename={}.{}".format(
+                    answer["meta"]["export_name"],
+                    extension,
                 )
                 return response
             else:
@@ -4455,17 +4455,17 @@ class GenModify:
         # Set the pk in the success url
         try:
             # Try using decode first
-            self.success_url.__dict__[success_key]["kwargs"]["answer"] = (
-                urlsafe_base64_encode(
-                    str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
-                ).decode()
-            )
+            self.success_url.__dict__[success_key]["kwargs"][
+                "answer"
+            ] = urlsafe_base64_encode(
+                str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
+            ).decode()
         except AttributeError:
             # Try without decode
-            self.success_url.__dict__[success_key]["kwargs"]["answer"] = (
-                urlsafe_base64_encode(
-                    str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
-                )
+            self.success_url.__dict__[success_key]["kwargs"][
+                "answer"
+            ] = urlsafe_base64_encode(
+                str.encode(json.dumps(attr, cls=DjangoJSONEncoder)),
             )
 
         return super().get_success_url()
@@ -4717,12 +4717,12 @@ class GenModify:
                                 # Build a new field
                                 newfield = {}
                                 newfield["for"] = inp.id_for_label
-                                newfield["type"] = (
-                                    inp.field.__class__.__name__.replace(
-                                        "Field",
-                                        "",
-                                    ).lower()
-                                )
+                                newfield[
+                                    "type"
+                                ] = inp.field.__class__.__name__.replace(
+                                    "Field",
+                                    "",
+                                ).lower()
                                 newfield["html_name"] = inp.html_name
 
                                 if newfield["type"] == "genrecaptcha":
@@ -5155,11 +5155,11 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                             label_field = remove_getdisplay(field)
                             if self.model:
                                 try:
-                                    verbose_names[field] = (
-                                        self.model._meta.get_field(
-                                            label_field,
-                                        ).verbose_name
-                                    )
+                                    verbose_names[
+                                        field
+                                    ] = self.model._meta.get_field(
+                                        label_field,
+                                    ).verbose_name
                                 except FieldDoesNotExist:
                                     verbose_names[field] = _(label_field)
                             else:
@@ -5174,11 +5174,11 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                     for field_split in field.split("__"):
                         if value is None:
                             try:
-                                verbose_names[field] = (
-                                    self.object._meta.get_field(
-                                        field_split,
-                                    ).verbose_name
-                                )
+                                verbose_names[
+                                    field
+                                ] = self.object._meta.get_field(
+                                    field_split,
+                                ).verbose_name
                             except AttributeError:
                                 pass
                             except FieldDoesNotExist:
@@ -5310,10 +5310,10 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                     and self.object.internal_lock_delete(self.request)
                     is not None
                 ):
-                    context["cannot_delete"] = (
-                        self.object.internal_lock_delete(
-                            self.request,
-                        )
+                    context[
+                        "cannot_delete"
+                    ] = self.object.internal_lock_delete(
+                        self.request,
                     )
             except TypeError:
                 # Compatiblity mode for version 20160928 and lower
@@ -5321,9 +5321,9 @@ class GenDetail(GenBase, DetailView):  # type: ignore
                     "internal_lock_delete" in object_property
                     and self.object.internal_lock_delete() is not None
                 ):
-                    context["cannot_delete"] = (
-                        self.object.internal_lock_delete()
-                    )
+                    context[
+                        "cannot_delete"
+                    ] = self.object.internal_lock_delete()
 
             # Check lock update
             try:

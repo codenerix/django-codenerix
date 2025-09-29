@@ -6,8 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.43] - 2025-09-29
+### Bugfix
+- MANIFEST corrected
+
+## [5.0.42] - 2025-09-29
+### Feature
+- Added py.typed
+
 ## [5.0.41] - 2025-09-26
-### Buffix
+### Bugfix
 - Locales command corrected to use the right path for locale files when apps use AppConfig
 
 ## [5.0.40] - 2025-09-17

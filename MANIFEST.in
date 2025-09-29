@@ -5,13 +5,4 @@ include README.rst
 exclude *.pyc
 exclude __pycache__
 exclude .ropeproject
-recursive-include codenerix/contrib *
-recursive-include codenerix/lib *
-recursive-include codenerix/locale *
-recursive-include codenerix/management *
-recursive-include codenerix/migrations *
-recursive-include codenerix/static *
-recursive-include codenerix/templates *
-recursive-include codenerix/templatetags *
-recursive-include codenerix/djng *
-recursive-include codenerix/multi_email_field *
+recursive-include codenerix *
