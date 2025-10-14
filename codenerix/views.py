@@ -1929,6 +1929,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 elif type(field) in [
                     models.IntegerField,
                     models.SmallIntegerField,
+                    models.PositiveIntegerField,
                     models.FloatField,
                 ]:
                     fields[field.name] = (

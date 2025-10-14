@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-import codenerix
+from codenerix import __authors__, __authors_email__, __version__
 
 # from setuptools.command.install import install
 # class CustomInstallCommand(install):
@@ -20,7 +20,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name="django_codenerix",
-    version=codenerix.__version__,
+    version=__version__,
     packages=["codenerix"],
     include_package_data=True,
     zip_safe=False,
@@ -29,8 +29,8 @@ setup(
     "it makes easier development and building of ERPs.",
     long_description=README,
     url="https://github.com/codenerix/django-codenerix",
-    author=", ".join(codenerix.__authors__),
-    author_email=", ".join(codenerix.__authors_email__),
+    author=", ".join(__authors__),
+    author_email=", ".join(__authors_email__),
     keywords=["django", "codenerix", "management", "erp", "crm"],
     platforms=["OS Independent"],
     classifiers=[
