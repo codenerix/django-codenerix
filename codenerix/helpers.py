@@ -722,8 +722,11 @@ def JSONEncoder_newdefault(  # noqa: N802
             return datetime.fromtimestamp(time.mktime(o))
         if ("decimal" in kind) and isinstance(o, decimal.Decimal):
             return str(o)
-        if ("user" in kind) and isinstance(o, User):
-            return o.username
+        if "user" in kind:
+            if isinstance(o, User):
+                return o.username
+            elif isinstance(o, AnonymousUser):
+                return None
         return JSONEncoder_olddefault(self, o)
 
     json.JSONEncoder.default = JSONEncoder_wrapped
