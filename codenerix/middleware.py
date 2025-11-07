@@ -21,6 +21,7 @@ import re
 from threading import local
 
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import redirect
 
 
@@ -109,9 +110,10 @@ def get_current_user():
     Thought this function you can get the user loged in everywhere
     """
     if "value" in dir(_user):
-        return _user.value
-    else:
-        return None
+        user = _user.value
+        if user is not None:
+            return user
+    return AnonymousUser()
 
 
 _user = local()

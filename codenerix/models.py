@@ -535,12 +535,11 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
 
         def save(self, *args, **kwargs):
             user = get_current_user()
-            if user:
+            if user.is_authenticated:
                 user_id = user.pk
-                username = user.username
             else:
                 user_id = None
-                username = ""
+            username = user.username
 
             model = apps.get_model(
                 self._meta.app_label,
@@ -749,12 +748,11 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             GenLog,
         ):
             user = get_current_user()
-            if user:
+            if user.is_authenticated:
                 user_id = user.pk
-                username = user.username
             else:
                 user_id = None
-                username = "*Unknown*"
+            username = user.username
             action = DELETION
 
             attrs = {}

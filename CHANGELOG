@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.46] - 2025-11-07
+### Bugfix
+- get_current_user() claims to get the user logged in everywhere in your code, but for no user logged in it was returning None instead of AnonymouseUser
+
 ## [5.0.45] - 2025-11-04
 ### Feature
 - Added AnonymouseUser to DjangoJSONEncoder as None
