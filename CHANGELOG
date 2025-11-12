@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.48] - 2025-11-12
+### Bugfix
+- get_current_user(*, anonuser=False) I have recovered the original behaviour where None is again the default answer for backwards compatibility
+
+
+## [5.0.47] - 2025-11-12
+### Bugfix
+- get_current_user(anonuser=True) now supports to return AnonymouseUser (default) vs None
+
+#
 ## [5.0.46] - 2025-11-07
 ### Bugfix
 - get_current_user() claims to get the user logged in everywhere in your code, but for no user logged in it was returning None instead of AnonymouseUser

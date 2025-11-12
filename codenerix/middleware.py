@@ -105,7 +105,7 @@ class CurrentUserMiddleware:
         return response
 
 
-def get_current_user():
+def get_current_user(*, anonuser: bool = False):
     """
     Thought this function you can get the user loged in everywhere
     """
@@ -113,7 +113,9 @@ def get_current_user():
         user = _user.value
         if user is not None:
             return user
-    return AnonymousUser()
+    if anonuser:
+        return AnonymousUser()
+    return None
 
 
 _user = local()

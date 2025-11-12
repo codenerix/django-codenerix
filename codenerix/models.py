@@ -534,7 +534,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             pass
 
         def save(self, *args, **kwargs):
-            user = get_current_user()
+            user = get_current_user(anonuser=True)
             if user.is_authenticated:
                 user_id = user.pk
             else:
@@ -747,7 +747,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             sender,
             GenLog,
         ):
-            user = get_current_user()
+            user = get_current_user(anonuser=True)
             if user.is_authenticated:
                 user_id = user.pk
             else:
