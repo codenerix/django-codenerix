@@ -44,8 +44,16 @@ class EmailMessage(mail.EmailMessage):
                 )
             fixed_clients = getattr(settings, "FIXED_EMAIL_TARGETS", None)
             if fixed_clients:
-                print(f"WARNING: Using FIXED_EMAIL_TARGETS={fixed_clients}")
+                if len(args) >= 4:
+                    original_targets = args[3]
+                else:
+                    original_targets = kwargs.get("to", None)
                 to = [x[1] for x in fixed_clients]
+                print(
+                    "WARNING: Using FIXED_EMAIL_TARGETS "
+                    f"sending to {to} "
+                    f"instead: {original_targets}",
+                )
                 if len(args) >= 4:
                     new_args[3] = to
                 else:
