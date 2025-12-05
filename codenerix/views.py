@@ -70,7 +70,7 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import resolve, reverse, reverse_lazy
-from django.utils import formats
+from django.utils import formats, timezone
 from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -2572,7 +2572,7 @@ class GenList(GenBase, ListView):  # type: ignore
             for element in date_results:
                 # Save the data
                 context["datefilter"]["data"].append(
-                    element.timetuple()[deepness_index],
+                    timezone.localtime(element).timetuple()[deepness_index],
                 )
             context["datefilter"]["data"] = list(
                 set(context["datefilter"]["data"]),
