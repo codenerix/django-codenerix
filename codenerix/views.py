@@ -2502,7 +2502,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 f["hour"][0],
                 f["minute"][0],
                 f["second"][0],
-            )
+            ).replace(tzinfo=ZoneInfo(settings.TIME_ZONE))
             date_max = datetime.datetime(
                 f["year"][1],
                 f["month"][1],
@@ -2510,7 +2510,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 f["hour"][1],
                 f["minute"][1],
                 f["second"][1],
-            )
+            ).replace(tzinfo=ZoneInfo(settings.TIME_ZONE))
             qarg1 = {"{}__gte".format(datetimeQ): date_min}
             qarg2 = {"{}__lte".format(datetimeQ): date_max}
             qarg3 = {datetimeQ: None}
