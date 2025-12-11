@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.52] - 2025-12-11
+### Bugfix
+- ger_foreignkey() filter argument renamed to filters
+
 ## [5.0.51] - 2025-12-05
 ### Bugfix
 - Fixed localization when generating list of allowed filters for that datetime range used in datetime_filter

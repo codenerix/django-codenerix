@@ -5513,7 +5513,7 @@ class GenForeignKey(GenBase, View):
     - model = model to use for get_queryset()
     - label = string with "format" like: "{name}" or "{company__name}", the system will render it itself
     === METHOD ===
-    - get_foreign(self, queryset, search, filter) where:
+    - get_foreign(self, queryset, search, filters) where:
         queryset is the queryset ready to use result from model (you shouldn't use another queryset)
         search is the string the user is searching for ( when '*' is given you should return all possible results)
         filter is a dictionary that contains linked fields with their values:
@@ -5675,7 +5675,7 @@ class GenForeignKey(GenBase, View):
         # Send it
         return HttpResponse(json_answer, content_type="application/json")
 
-    def get_foreign(self, queryset, search, filter):
+    def get_foreign(self, queryset, search, filters):
         return queryset.all()
 
 
