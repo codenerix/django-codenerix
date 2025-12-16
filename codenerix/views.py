@@ -2326,7 +2326,10 @@ class GenList(GenBase, ListView):  # type: ignore
                 if isinstance(typekind, list):
                     # Compatibility: set typekind and fv in the old fassion
                     if isinstance(value, int):
-                        fv = typekind[value - 1][0]
+                        if len(typekind) >= value:
+                            fv = typekind[value - 1][0]
+                        else:
+                            fv = None
                         queryset = queryset.filter(rule[1](fv))
                         typekind = "select"
                 elif typekind == "datetime":

@@ -6,9 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.53] - 2025-12-16
+### Bugfix
+- __searchF__() improved to return an empty result when the Selector Filter is set to some element which has been removed from the database and is not selectable anymore as a filter.
+
 ## [5.0.52] - 2025-12-11
 ### Bugfix
-- ger_foreignkey() filter argument renamed to filters
+- get_foreignkey() filter argument renamed to filters
 
 ## [5.0.51] - 2025-12-05
 ### Bugfix
