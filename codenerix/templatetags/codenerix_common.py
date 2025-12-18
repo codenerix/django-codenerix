@@ -25,6 +25,7 @@ from django import template
 from django.conf import settings
 from django.template import Node
 from django.utils import formats
+from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 
@@ -39,7 +40,11 @@ register = template.Library()
 register.filter("digitos", zeropad)
 register.filter("monthname", monthname)
 register.filter("nameunify", nameunify)
-register.filter("json", json.dumps)
+
+
+@register.filter(name="json")
+def json_filter(value):
+    return mark_safe(json.dumps(value))
 
 
 @register.filter
