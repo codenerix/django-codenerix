@@ -18,6 +18,7 @@
 # limitations under the License.
 
 import datetime
+import json
 import random
 
 from django import template
@@ -27,12 +28,18 @@ from django.utils import formats
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 
-from codenerix.helpers import monthname, nameunify, zeropad
+from codenerix.helpers import (  # pylint: disable=unused-import # noqa: F401
+    JSONEncoder_newdefault,
+    monthname,
+    nameunify,
+    zeropad,
+)
 
 register = template.Library()
 register.filter("digitos", zeropad)
 register.filter("monthname", monthname)
 register.filter("nameunify", nameunify)
+register.filter("json", json.dumps)
 
 
 @register.filter

@@ -525,6 +525,14 @@ angular
         })
 
     .filter(
+        'json',
+        function() {
+            return function(obj) {
+                return JSON.stringify(obj);
+            }
+        })
+
+    .filter(
         'htmlToPlaintext',
         function() {
             return function(text) {
