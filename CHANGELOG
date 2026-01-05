@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.56] - 2026-01-05
+### Feature
+- Added command 'migrate_uuids' to assist during compatibility migrations between CHAR(32) and CHAR(36) when migrating to/from MySQL and MariaDB databases when using UUIDFields (it will convert all UUIDFields from CHAR(32) to CHAR(36) or viceversa depending on the database engine being used)
+
 ## [5.0.55] - 2025-12-18
 ### Bugfix
 - Mark "json" as safe string in Django templates to avoid escaping quotes
