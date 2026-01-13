@@ -1489,6 +1489,7 @@ class GenList(GenBase, ListView):  # type: ignore
         export_json = True                          # Show button 'Export to 'json' in the list
         export_jsonl = True                         # Show button 'Export to 'jsonl' in the list
         export_bson = True                          # Show button 'Export to 'bson' in the list
+        export_raw = False                         # With 'True' it will export all fields, else only the visible ones
         export = 'xlsx'                             # Force the download the list as file. Default None
         export_name = 'list'                        # Filename as a result of export
 
@@ -3173,6 +3174,7 @@ class GenList(GenBase, ListView):  # type: ignore
         context["export_json"] = getattr(self, "export_json", False)
         context["export_jsonl"] = getattr(self, "export_jsonl", False)
         context["export_bson"] = getattr(self, "export_bson", False)
+        context["export_raw"] = getattr(self, "export_raw", True)
         context["export_name"] = getattr(self, "export_name", "list")
 
         # Check ngincludes
@@ -3302,6 +3304,7 @@ class GenList(GenBase, ListView):  # type: ignore
         a["export_json"] = context["export_json"]
         a["export_jsonl"] = context["export_jsonl"]
         a["export_bson"] = context["export_bson"]
+        a["export_raw"] = context["export_raw"]
         a["export_name"] = context["export_name"]
         a["ngincludes"] = context["ngincludes"]
         a["linkedit"] = context["linkedit"]
@@ -3857,6 +3860,42 @@ class GenList(GenBase, ListView):  # type: ignore
         cell = "{}{}".format(string, row)
         return cell
 
+    def response_get_columns(self, answer):
+        known_columns = []
+        for col in answer["table"]["head"]["columns"]:
+            if col["id"] is not None:
+                known_columns.append(
+                    {
+                        "name": col["name"],
+                        "id": col["id"],
+                        "type": col["type"],
+                    },
+                )
+
+        if self.export_raw:
+            if len(answer["table"]["body"]) > 0:
+                columns = []
+                type_heuristics = {
+                    col["id"]: col["type"] for col in known_columns
+                }
+                for key, value in answer["table"]["body"][0].items():
+                    if key in type_heuristics:
+                        kind = type_heuristics[key]
+                    else:
+                        kind = "CharField"
+                    columns.append(
+                        {
+                            "name": key,
+                            "id": key,
+                            "type": kind,
+                        },
+                    )
+                return columns
+            else:
+                return known_columns
+        else:
+            return known_columns
+
     def response_export(
         self,
         answer,
@@ -3918,11 +3957,10 @@ class GenList(GenBase, ListView):  # type: ignore
         columns = []
         tmp = []
         types = []
-        for col in answer["table"]["head"]["columns"]:
-            if col["id"] is not None:
-                tmp.append(col["name"])
-                columns.append(col["id"])
-                types.append(col["type"])
+        for col in self.response_get_columns(answer):
+            tmp.append(col["name"])
+            columns.append(col["id"])
+            types.append(col["type"])
         ws1.append(tmp)
 
         for col in range(len(columns)):
@@ -4026,7 +4064,7 @@ class GenList(GenBase, ListView):  # type: ignore
             # Write header
             header = []
             columns = []
-            for col in answer["table"]["head"]["columns"]:
+            for col in self.response_get_columns(answer):
                 header.append(col["name"])
                 columns.append(col["id"])
             writer.writerow(header)
@@ -4092,7 +4130,7 @@ class GenList(GenBase, ListView):  # type: ignore
         # Write header
         header = []
         columns = []
-        for col in answer["table"]["head"]["columns"]:
+        for col in self.response_get_columns(answer):
             header.append(col["name"])
             columns.append(col["id"])
 
@@ -4162,7 +4200,7 @@ class GenList(GenBase, ListView):  # type: ignore
             # Write header
             header = []
             columns = []
-            for col in answer["table"]["head"]["columns"]:
+            for col in self.response_get_columns(answer):
                 header.append(col["name"])
                 columns.append(col["id"])
 
@@ -4230,7 +4268,7 @@ class GenList(GenBase, ListView):  # type: ignore
         # Write header
         header = []
         columns = []
-        for col in answer["table"]["head"]["columns"]:
+        for col in self.response_get_columns(answer):
             header.append(col["name"])
             columns.append(col["id"])
 

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.57] - 2026-01-13
+### Feature
+- Added support to export lists with all RAW data
+
 ## [5.0.56] - 2026-01-05
 ### Feature
 - Added command 'migrate_uuids' to assist during compatibility migrations between CHAR(32) and CHAR(36) when migrating to/from MySQL and MariaDB databases when using UUIDFields (it will convert all UUIDFields from CHAR(32) to CHAR(36) or viceversa depending on the database engine being used)
