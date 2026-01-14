@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.58] - 2026-01-14
+### Bugfix
+- Removed LimitedAuth authenticator
+- Improved TokenAuth and OTPAuth
+- TokenAuth wont raise errors in debug mode when no OTP is provided or no OTP is configured
+
 ## [5.0.57] - 2026-01-13
 ### Feature
 - Added support to export lists with all RAW data

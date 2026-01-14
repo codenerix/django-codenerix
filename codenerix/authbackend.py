@@ -182,34 +182,6 @@ def check_auth(user, debugger=None):
     return auth
 
 
-class LimitedAuth(ModelBackend, Debugger):
-    """
-    Authentication system based on default Django's authentication system
-    which extends the last one with check_auth() extra system limitations
-    """
-
-    def __init__(self, *args, **kwargs):
-        # Configure debugger
-        self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
-        if self.__debugger:
-            self.set_debug()
-
-        # Keep going with super
-        super().__init__(*args, **kwargs)
-
-    def authenticate(self, *args, **kwargs):
-        # Show debugger
-        if self.__debugger:
-            self.debug("Started authenticate(LimitedAuth)", color="blue")
-
-        # Launch default django authentication
-        user = super().authenticate(*args, **kwargs)
-
-        # Answer to the system
-        answer = check_auth(user, self.debug)
-        return answer
-
-
 class LimitedAuthMiddleware(Debugger):
     """
     Check every request if the user should or shouldn't be inside the system
@@ -349,13 +321,22 @@ class OTPAuth(ModelBackend, Debugger):
         # Keep going with super
         super().__init__(*args, **kwargs)
 
-    def authenticate(self, request, username, password, authtoken):
+    def authenticate(self, request, **kwargs):
         # Initialize answer
         answer = None
 
         # Show debugger
         if self.__debugger:
             self.debug("Started authenticate(OTPAuth)", color="blue")
+
+        # Get parameters
+        username = kwargs.get("username", None)
+        password = kwargs.get("password", None)
+        authtoken = kwargs.get("authtoken", None)
+
+        # Check we have all parameters
+        if not username or not password or not authtoken:
+            return answer
 
         # Check pyotp exists
         if pyotp:
@@ -417,8 +398,9 @@ class OTPAuth(ModelBackend, Debugger):
                             )
                         except TypeError:
                             if self.__debugger:
-                                raise OSError(
+                                self.debug(
                                     f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                    color="yellow",
                                 )
                             else:
                                 local_otp = None
@@ -454,9 +436,11 @@ class OTPAuth(ModelBackend, Debugger):
                                 )
 
                     else:
+                        # User is not signed to TOTP
                         if self.__debugger:
-                            raise OSError(
-                                "To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)",  # noqa: E501
+                            self.debug(
+                                "To use a OTP key you have to set the user key in the user's profile to some valid BASE32 string as your token (first_name field in the user's model)",  # noqa: E501
+                                color="yellow",
                             )
 
         else:
@@ -530,7 +514,7 @@ class OTPAuthMiddleware(Debugger):
 
             # Authenticate user
             user = authenticate(
-                request=request,
+                request,
                 username=username,
                 password=password,
                 authtoken=authtoken,
@@ -576,15 +560,15 @@ class TokenAuth(ModelBackend, Debugger):
         # Keep going with super
         super().__init__(*args, **kwargs)
 
-    def authenticate(self, *args, **kwargs):
+    def authenticate(self, request, **kwargs):
         # Show debugger
         if self.__debugger:
             self.debug("Started authenticate(TokenAuth)", color="blue")
 
-        # Get our arguments
-        username = kwargs.get("username", None)
-        token = kwargs.get("token", None)
-        string = kwargs.get("string", "")
+        # Get parameters
+        username = kwargs.get("authuser", None)
+        token = kwargs.get("authtoken", None)
+        string = kwargs.get("authjson", "")
 
         # Show debug
         if self.__debugger:
@@ -672,14 +656,14 @@ class TokenAuth(ModelBackend, Debugger):
 
                     else:
                         if self.__debugger:
-                            raise OSError(
+                            self.debug(
                                 "To use a master key you have to set "
                                 "master_signed or master_unsigned to "
                                 "True and set 'master' to some valid "
                                 "string as your token",
+                                color="yellow",
                             )
-                        else:
-                            master = None
+                        master = None
                 else:
                     master = None
 
@@ -729,11 +713,11 @@ class TokenAuth(ModelBackend, Debugger):
                                     )
                                 except TypeError:
                                     if self.__debugger:
-                                        raise OSError(
+                                        self.debug(
                                             f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                            color="yellow",
                                         )
-                                    else:
-                                        otp = None
+                                    otp = None
                         else:
                             otp = None
 
@@ -750,12 +734,12 @@ class TokenAuth(ModelBackend, Debugger):
 
                     else:
                         if self.__debugger:
-                            raise OSError(
+                            self.debug(
                                 "To use a user/otp key you have to set user_signed, user_unsigned, otp_signed or otp_unsigned to True and set the user key in the user's profile to some valid string as your token (first_name field in the user's model)",  # noqa: E501
+                                color="yellow",
                             )
-                        else:
-                            user_key = None
-                            otp = None
+                        user_key = None
+                        otp = None
                 else:
                     user_key = None
                     otp = None
@@ -1012,7 +996,7 @@ class TokenAuth(ModelBackend, Debugger):
             # Show debug
             if self.__debugger:
                 self.debug(
-                    "Missing data, can not authenticte with this information",
+                    "Missing data, can not authenticate with this information",
                     color="yellow",
                 )
 
@@ -1093,10 +1077,10 @@ class TokenAuthMiddleware(Debugger):
 
             # Authenticate user
             user = authenticate(
-                request=None,
-                username=username,
-                token=token,
-                string=json,
+                request,
+                authuser=username,
+                authtoken=token,
+                authjson=json,
             )
             if user:
                 # Show debug
@@ -1257,7 +1241,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         # Return the final result
         return answer
 
-    def authenticate(self, *args, **kwargs):
+    def authenticate(self, request, **kwargs):
         """
         Authenticate the user agains LDAP
         """
