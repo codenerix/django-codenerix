@@ -3904,11 +3904,14 @@ class GenList(GenBase, ListView):  # type: ignore
         extension,
         **response_kwargs,
     ):
+        # Check data_output
         if data_output:
             size_max = getattr(settings, "FILE_DOWNLOAD_SIZE_MAX", 1)
             data_output_len = len(data_output)
 
+            # Check size limit
             if data_output_len <= (size_max * 1000000):
+                # File is ok, prepare response
                 response = HttpResponse(
                     data_output,
                     content_type=mimetype,
@@ -3921,28 +3924,35 @@ class GenList(GenBase, ListView):  # type: ignore
                     extension,
                 )
                 return response
-            else:
-                result = {
-                    "message": _(
-                        "The file is very big ({}M). Change the parameter "
-                        "FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the "
-                        "config".format(data_output_len / 1000000.0),
-                    ),
-                    "file": "",
-                    "filename": "",
-                }
-                return JsonResponse(
-                    result,
-                    status=500,
-                    encoder=DjangoJSONEncoder,
-                )
-        else:
+
+            # File is too big
+            msg = _(
+                "The file is very big ({}M). Change the parameter "
+                "FILE_DOWNLOAD_SIZE_MAX (in Megabytes) of the "
+                "config".format(data_output_len / 1000000.0),
+            )
+            logger.error(f"Download failed (Size Limit): {msg}")
+
             result = {
-                "message": _("Could not generate file"),
+                "message": msg,
                 "file": "",
                 "filename": "",
             }
-            return JsonResponse(result, status=500, encoder=DjangoJSONEncoder)
+            return JsonResponse(
+                result,
+                status=413,
+                encoder=DjangoJSONEncoder,
+            )
+
+        # General error
+        msg = _("Could not generate file: data_output is empty or None")
+        logger.error(f"Download failed: {msg}")
+        result = {
+            "message": msg,
+            "file": "",
+            "filename": "",
+        }
+        return JsonResponse(result, status=500, encoder=DjangoJSONEncoder)
 
     def response_to_xls(self, answer, **response_kwargs):
         wb = Workbook()
