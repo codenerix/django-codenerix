@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.59] - 2026-01-15
+### Bugfix
+- When exporting a list as XLS, CSV, ... if there was an error in the server side the software was trying to answer properly to it but the response was producing an exception itself because a missing reverse url. Now it will answer with a proper error message using standard ERROR 500.
+
 ## [5.0.58] - 2026-01-14
 ### Bugfix
 - Removed LimitedAuth authenticator

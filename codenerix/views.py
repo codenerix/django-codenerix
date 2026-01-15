@@ -65,7 +65,7 @@ from django.http import (
     Http404,
     HttpResponse,
     HttpResponseForbidden,
-    HttpResponseRedirect,
+    JsonResponse,
     QueryDict,
 )
 from django.shortcuts import get_object_or_404, redirect, render
@@ -3931,11 +3931,10 @@ class GenList(GenBase, ListView):  # type: ignore
                     "file": "",
                     "filename": "",
                 }
-                args = "json={}".format(
-                    json.dumps(result, cls=DjangoJSONEncoder),
-                )
-                return HttpResponseRedirect(
-                    "{}?{}".format(reverse("show_error"), args),
+                return JsonResponse(
+                    result,
+                    status=500,
+                    encoder=DjangoJSONEncoder,
                 )
         else:
             result = {
@@ -3943,10 +3942,7 @@ class GenList(GenBase, ListView):  # type: ignore
                 "file": "",
                 "filename": "",
             }
-            args = "json={}".format(json.dumps(result, cls=DjangoJSONEncoder))
-            return HttpResponseRedirect(
-                "{}?{}".format(reverse("show_error"), args),
-            )
+            return JsonResponse(result, status=500, encoder=DjangoJSONEncoder)
 
     def response_to_xls(self, answer, **response_kwargs):
         wb = Workbook()
