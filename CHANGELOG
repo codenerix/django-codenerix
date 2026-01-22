@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.61] - 2026-01-22
+### Feature
+- Permission system and People manaemente improved to work with multiple Databases and improve permissions checking
+
 ## [5.0.60] - 2026-01-15
 ### Bugfix
 - Added logger to error handling for export failures to help debugging

@@ -78,16 +78,16 @@ class SecureRequiredMiddleware:
         return response
 
 
-class CurrentUserMiddleware:
+class CurrentRequestMiddleware:
     """
-    Let the system to have the username everywhere
+    Let the system to have the request everywhere
     """
 
     def __init__(self, get_response=None):
         self.get_response = get_response
 
     def process_request(self, request):
-        _user.value = request.user
+        _thread_locals_request.value = request
 
     def __call__(self, request):
         # Code to be executed for each request before the view (and
@@ -105,12 +105,28 @@ class CurrentUserMiddleware:
         return response
 
 
+class CurrentUserMiddleware(CurrentRequestMiddleware):
+    """
+    Backward compatibility
+    """
+
+    pass
+
+
+def get_current_request():
+    """
+    Thought this function you can get the request everywhere
+    """
+    return getattr(_thread_locals_request, "value", None)
+
+
 def get_current_user(*, anonuser: bool = False):
     """
     Thought this function you can get the user loged in everywhere
     """
-    if "value" in dir(_user):
-        user = _user.value
+    request = get_current_request()
+    if request:
+        user = request.user
         if user is not None:
             return user
     if anonuser:
@@ -118,4 +134,4 @@ def get_current_user(*, anonuser: bool = False):
     return None
 
 
-_user = local()
+_thread_locals_request = local()

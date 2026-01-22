@@ -28,6 +28,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 
@@ -145,9 +146,27 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         except Exception:
             return False
 
+    def lock_user(self):
+        if self.user:
+            # Lock the user out by setting is_active to False
+            self.user.is_active = False
+            # Disabled from now
+            self.user.disabled = timezone.now()
+            # Set unusable password
+            self.user.set_unusable_password()
+            # Save changes
+            self.user.save()
+
+    def unlock_user(self):
+        if self.user:
+            # Unlock the user by setting is_active to True
+            self.user.is_active = True
+            self.user.disabled = None
+            self.user.save()
+
     def profiles(self):
         """
-        return the rolls this people is related with
+        return the roles this people is related with
         """
         limit = []
 
@@ -158,17 +177,23 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         return limit
 
     def delete(self):
-        self.clean_memcache()
-        return super().delete()
+        # Lock user out
+        self.lock_user()
 
-    def lock_delete(self, request=None):
-        if request is not None:
-            if request.user == self.user:
-                return _("Cannot delete to yourself")
-            else:
-                return super().lock_delete()
-        else:
-            return super().lock_delete()
+        # Clean memcache
+        self.clean_memcache()
+
+        # Remove myself from creator field in other persons
+        Person = type(self)  # noqa: N806
+        Person.objects.filter(creator=self.user).update(creator=None)
+
+        # Delete person
+        return self.user.delete()
+
+    def lock_delete(self):
+        if get_current_user() == self.user:
+            return _("Cannot delete to yourself")
+        return super().lock_delete()
 
     def clean_memcache(self):
         if self.pk:
@@ -184,7 +209,17 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
     def get_grouppermit(self):
         return self.user.groups.all()
 
-    def presave(self, username, password, email, confirm, unusable=False):
+    def presave(
+        self,
+        username,
+        password,
+        email,
+        confirm,
+        *,
+        unusable=False,
+        is_staff=None,
+        is_superuser=None,
+    ):
         self.clean_memcache()
         # Check username
         # Rewrite username
@@ -262,15 +297,24 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
             # user creator of the user
             self.creator = get_current_user()
 
+        # Set staff and superuser flags
+        if is_staff is not None:
+            self.user.is_staff = is_staff
+        if is_superuser is not None:
+            self.user.is_superuser = is_superuser
+
         # Save changes
         self.user.save()
 
-    def refresh_permissions(self, quiet=False):
+    def refresh_permissions(self, quiet=False, using=None):
+        # Check which database we are using
+        if using is None:
+            using = self._state.db or "default"
         # Check we have a user to work with
         if self.user:
             # Clear groups and permisions for this user
-            self.user.groups.clear()
-            self.user.user_permissions.clear()
+            self.user.groups.db_manager(using).clear()
+            self.user.user_permissions.db_manager(using).clear()
 
             # Collect all groups and unique permissions for this
             # user relationships
@@ -302,13 +346,19 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
 
             # Add groups
             for groupname in set(groups):
-                group = Group.objects.filter(name=groupname).first()
+                group = (
+                    Group.objects.using(using).filter(name=groupname).first()
+                )
                 if group is None:
                     # Group not found, remake permissions for all groups with
                     # roles
-                    GenPerson.group_permissions(type(self))
+                    GenPerson.group_permissions(type(self), using=using)
                     # Check again
-                    group = Group.objects.filter(name=groupname).first()
+                    group = (
+                        Group.objects.using(using)
+                        .filter(name=groupname)
+                        .first()
+                    )
                     if group is None:
                         raise OSError(
                             f"Group '{groupname} not found in the system. I "
@@ -318,22 +368,25 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                         )
 
                 # Add the user to this group
-                self.user.groups.add(group)
+                self.user.groups.db_manager(using).add(group)
 
             # Add permissions
             for permissionname in set(permissions):
-                permission = Permission.objects.filter(
-                    codename=permissionname,
-                ).first()
+                permission = (
+                    Permission.objects.using(using)
+                    .filter(
+                        codename=permissionname,
+                    )
+                    .first()
+                )
                 if permission is None:
                     raise OSError(
-                        "Permission '{}' not found in the system".format(
-                            permissionname,
-                        ),
+                        f"Permission '{permissionname}' not "
+                        "found in the system",
                     )
 
                 # Add the permission to this user
-                self.user.user_permissions.add(permission)
+                self.user.user_permissions.db_manager(using).add(permission)
 
         else:
             if not quiet:
@@ -343,7 +396,7 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                 )
 
     @staticmethod
-    def group_permissions(clss):
+    def group_permissions(clss, using="default"):
         groupsresult = {}
         for x in clss._meta.get_fields():
             model = x.related_model
@@ -364,20 +417,17 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
                             perms = []
                             if groups_is_dict:
                                 for permname in groups[groupname]:
-                                    perm = Permission.objects.filter(
-                                        codename=permname,
-                                    ).first()
-                                    # Commented by Juan Soler on a project we
-                                    # both are working on. Since this code is
-                                    # preventing a proper execution, I will
-                                    # comment it as he has done in our project
-                                    # and I will wait for him to validate this
-                                    # lines
-                                    # if perm is None:
-                                    #    raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname)) # noqa: E501
-                                    # else:
+                                    perm = (
+                                        Permission.objects.using(using)
+                                        .filter(
+                                            codename=permname,
+                                        )
+                                        .first()
+                                    )
                                     if perm is not None:
                                         perms.append(perm)
+                                    # else:
+                                    #    raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname)) # noqa: E501
 
                             # Remember perms for this group
                             if groupname not in groupsresult:
@@ -387,51 +437,76 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         # Set permissions for all groups
         for groupname in groupsresult:
             # Get group
-            group = Group.objects.filter(name=groupname).first()
+            group = Group.objects.using(using).filter(name=groupname).first()
             if group is None:
                 # Add group if doesn't exists
                 group = Group(name=groupname)
-                group.save()
+                group.save(using=using)
             else:
                 # Remove all permissions for this group
-                group.permissions.clear()
+                group.permissions.db_manager(using).clear()
 
             # Add permissions to the group
             for perm in groupsresult[groupname]:
-                group.permissions.add(perm)
+                group.permissions.db_manager(using).add(perm)
 
     def save(self, *args, **kwargs):
         # Save this person
         answer = super().save(*args, **kwargs)
+
+        # Check if using was provided
+        using = kwargs.get("using", None)
+
         # Refresh permissions if possible
-        self.refresh_permissions(quiet=True)
+        self.refresh_permissions(quiet=True, using=using)
+
         # Return answer
         return answer
 
 
 class GenRole:
     def save(self, *args, **kwargs):
-        # only update permissions for new users
-        refresh_permissions = not self.pk
-        result = super().save(*args, **kwargs)
+        # Determine which database we are working with
+        using = (
+            kwargs.get("using")
+            or self._state.db  # pylint: disable=no-member
+            or "default"
+        )
+
+        # Only update permissions for new users
+        refresh_permissions = not self.pk  # pylint: disable=no-member
+        result = super().save(*args, **kwargs)  # pylint: disable=no-member
+
+        # Update permissions for related person
         if refresh_permissions:
             person = self.__CDNX_search_person_CDNX__()
             if person:
-                person.refresh_permissions(quiet=True)
+                person.refresh_permissions(quiet=True, using=using)
         return result
 
     def delete(self, using=None, keep_parents=False):
+        # Determine the database
+        using = (
+            using or self._state.db or "default"  # pylint: disable=no-member
+        )
+
+        # Get related person
         person = self.__CDNX_search_person_CDNX__()
-        result = super().delete(using=using, keep_parents=keep_parents)
+        result = super().delete(  # pylint: disable=no-member
+            using=using,
+            keep_parents=keep_parents,
+        )
         if person:
             # update permissions
-            person.refresh_permissions(quiet=True)
+            person.refresh_permissions(quiet=True, using=using)
         return result
 
-    def __CDNX_search_person_CDNX__(self):  # noqa: N802
-        # search relation with GenPerson
+    def __CDNX_search_person_CDNX__(  # pylint: disable=invalid-name # noqa: E501,N802
+        self,
+    ):
+        # Search relation with GenPerson
         person = None
-        for field in self._meta.get_fields():
+        for field in self._meta.get_fields():  # pylint: disable=no-member
             model = field.related_model
             if model and issubclass(model, GenPerson):
                 try:
@@ -441,7 +516,16 @@ class GenRole:
                 break
         return person
 
-    def CDNX_refresh_permissions_CDNX(self):  # noqa: N802
+    def CDNX_refresh_permissions_CDNX(  # pylint: disable=invalid-name # noqa: E501,N802
+        self,
+        using=None,
+    ):
+        # Allow manual refresh specifying DB
+        using = (
+            using or self._state.db or "default"  # pylint: disable=no-member
+        )
+
+        # Get related person
         person = self.__CDNX_search_person_CDNX__()
         if person:
-            person.refresh_permissions(quiet=True)
+            person.refresh_permissions(quiet=True, using=using)

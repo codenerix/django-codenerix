@@ -24,17 +24,30 @@ from django.contrib.auth.management import create_permissions
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.management import create_contenttypes
 from django.core.management.base import BaseCommand
+from providers.people.models import Person
 
 
 class Command(BaseCommand, Debugger):
     # Show this when the user types help
     help = "Refresh all permissions from a project"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--database",
+            type=str,
+            default="default",
+            help="Nominates a database to synchronize. "
+            "Defaults to the 'default' database.",
+        )
+
     def handle(self, *args, **options):
+        # Get database
+        db = options["database"]
+
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
-        self.debug("Settings permissions for:", color="blue")
+        self.debug(f"Settings permissions for '{db}':", color="blue")
 
         # Get list of apps
         self.debug("Getting list of APPs", color="blue")
@@ -49,7 +62,7 @@ class Command(BaseCommand, Debugger):
                 "    -> {}/{} {}".format(idx, apps_total, app_config.label),
                 color="cyan",
             )
-            create_permissions(app_config, apps=apps, verbosity=0)
+            create_permissions(app_config, apps=apps, verbosity=0, using=db)
             idx += 1
 
         # Update contenttypes
@@ -60,30 +73,31 @@ class Command(BaseCommand, Debugger):
                 "    -> {}/{} {}".format(idx, apps_total, app_config.label),
                 color="cyan",
             )
-            create_contenttypes(app_config)
+            create_contenttypes(app_config, using=db)
             idx += 1
 
         # Get all users from the system
+        self.debug("Refreshing users permissions", color="blue")
         person = None
-        for user in User.objects.all():
+        for user in User.objects.using(db).all():
             self.debug(
                 f"    > {user.username} ",
                 color="cyan",
-                tail=None,
+                tail=False,
             )
             if hasattr(user, "person") and user.person:
                 self.debug(
                     "OK",
                     color="green",
-                    header=None,
+                    head=False,
                 )
-                user.person.refresh_permissions()
+                user.person.refresh_permissions(using=db)
                 person = user.person
             else:
                 self.debug(
                     "NO PERSON",
                     color="red",
-                    header=None,
+                    head=False,
                 )
 
         # Remake groups permissions if we have at least one valid user
@@ -92,10 +106,10 @@ class Command(BaseCommand, Debugger):
                 "Refreshing group permissions "
                 "(it may takes over a minute)... ",
                 color="blue",
-                tail=None,
+                tail=False,
             )
-            person.__class__.group_permissions(person.__class__)
-            self.debug("DONE", color="green", header=None)
+            Person.group_permissions(Person, using=db)
+            self.debug("DONE", color="green", head=False)
         else:
             self.debug(
                 "Can not refresh group permissions because I didn't "

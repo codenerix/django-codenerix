@@ -231,7 +231,7 @@ class CodenerixModel(CodenerixModelBase):
                             break
         return answer
 
-    def lock_delete(self, request=None):
+    def lock_delete(self):
         return None
 
     # check lock update
@@ -534,6 +534,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             pass
 
         def save(self, *args, **kwargs):
+            # Determine which database we are writing to
+            using = kwargs.get("using") or self._state.db or "default"
+
+            # Get current user
             user = get_current_user(anonuser=True)
             if user.is_authenticated:
                 user_id = user.pk
@@ -547,7 +551,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             )
             isnew = True
             if self.pk is not None:
-                list_obj = model.objects.filter(pk=self.pk)
+                list_obj = model.objects.using(using).filter(pk=self.pk)
                 isnew = list_obj.count() == 0
                 # raise IOError,self.__dict__
             # only attributes changes
@@ -700,7 +704,9 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             log = Log()
             log.user_id = user_id
             log.username = username
-            log.content_type_id = ContentType.objects.get_for_model(self).pk
+            log.content_type_id = (
+                ContentType.objects.db_manager(using).get_for_model(self).pk
+            )
             log.object_id = pk
             log.object_repr = force_str(self, errors="replace")[:200]
             try:
@@ -730,7 +736,7 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             if pk is None:
                 # if new element, get pk
                 log.object_id = self.pk
-            log.save()
+            log.save(using=using)
 
             # custom post save from application
             self.post_save(log)
@@ -825,19 +831,26 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             except Exception:
                 representation = "*Unknown*"
 
+            # Get using from instance
+            using = getattr(instance._state, "db", "default")
+
             log = Log()
             log.user_id = user_id
             log.username = username
-            log.content_type_id = ContentType.objects.get_for_model(
-                instance,
-            ).pk
+            log.content_type_id = (
+                ContentType.objects.db_manager(using)
+                .get_for_model(
+                    instance,
+                )
+                .pk
+            )
             log.object_id = instance.pk
             log.object_repr = representation
             log.change_json = json.dumps(attrs, default=json_util.default)
             log.change_txt = json.dumps(attrs_txt, default=json_util.default)
             log.snapshot_txt = instance.__strlog_delete__()
             log.action_flag = action
-            log.save()
+            log.save(using=using)
 
     class RemoteLog(CodenerixModel):
         """
