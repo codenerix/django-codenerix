@@ -525,7 +525,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             # )
             return tf
 
-    class GenLog:
+    class GenLog(CodenerixModel):
+        class Meta(CodenerixModel.Meta):
+            abstract = True
+
         class CodenerixMeta(CodenerixModel.CodenerixMeta):
             log_full = False
 
@@ -744,7 +747,10 @@ if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):  # t
             return aux
 
     class GenLogFull(GenLog):
-        class CodenerixMeta(CodenerixModel.CodenerixMeta):
+        class Meta(GenLog.Meta):
+            abstract = True
+
+        class CodenerixMeta(GenLog.CodenerixMeta):
             log_full = True
 
     @receiver(post_delete)

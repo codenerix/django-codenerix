@@ -37,7 +37,7 @@ from codenerix.middleware import get_current_user
 from codenerix.models import CodenerixModel, GenLog
 
 
-class GenPerson(GenLog, models.Model):  # META: Abstract class
+class GenPerson(GenLog):  # META: Abstract class
     """
     Defines a person
     """
@@ -76,8 +76,11 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         default=None,
     )
 
-    class Meta(CodenerixModel.Meta):
+    class Meta(GenLog.Meta):
         abstract = True
+
+    class CodenerixMeta(GenLog.CodenerixMeta):
+        pass
 
     def __str__(self):
         if self.name and self.surname:
@@ -464,7 +467,13 @@ class GenPerson(GenLog, models.Model):  # META: Abstract class
         return answer
 
 
-class GenRole:
+class GenRole(CodenerixModel):  # META: Abstract class
+    class Meta(CodenerixModel.Meta):
+        abstract = True
+
+    class CodenerixMeta(CodenerixModel.CodenerixMeta):
+        pass
+
     def save(self, *args, **kwargs):
         # Determine which database we are working with
         using = (
