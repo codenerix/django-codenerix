@@ -3174,7 +3174,7 @@ class GenList(GenBase, ListView):  # type: ignore
         context["export_json"] = getattr(self, "export_json", False)
         context["export_jsonl"] = getattr(self, "export_jsonl", False)
         context["export_bson"] = getattr(self, "export_bson", False)
-        context["export_raw"] = getattr(self, "export_raw", True)
+        context["export_raw"] = getattr(self, "export_raw", False)
         context["export_name"] = getattr(self, "export_name", "list")
 
         # Check ngincludes
@@ -3872,7 +3872,7 @@ class GenList(GenBase, ListView):  # type: ignore
                     },
                 )
 
-        if self.export_raw:
+        if getattr(self, "export_raw", False):
             if len(answer["table"]["body"]) > 0:
                 columns = []
                 type_heuristics = {

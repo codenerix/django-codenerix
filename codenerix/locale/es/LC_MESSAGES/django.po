@@ -8,16 +8,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-16 11:19+0100\n"
-"PO-Revision-Date: 2024-06-12 13:07+0200\n"
-"Last-Translator: abcdabcdabcdabcd  <yo@br0th3r.com>\n"
+"POT-Creation-Date: 2026-02-02 10:08+0100\n"
+"PO-Revision-Date: 2026-02-02 10:11+0100\n"
+"Last-Translator: B7DNY3IT66KAJYWSRXJ64HAT47F3SKN5  <yo@br0th3r.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Translated-Using: django-rosetta 0.10.0\n"
+"X-Translated-Using: django-rosetta 0.10.3\n"
 
 #: codenerix/constants.py:24
 msgid "Kilogram"
@@ -112,8 +112,8 @@ msgid ""
 "WARNING: No version set to this code, add VERSION contant to your "
 "configuration"
 msgstr ""
-"ATENCIÓN: No hay un número de versión configurada para este código, añade la "
-"constante VERSION a tu configuración"
+"ATENCIÓN: No hay un número de versión configurada para este código, añade la"
+" constante VERSION a tu configuración"
 
 #: codenerix/context.py:102
 msgid "WARNING: CODENERIX_CSS is not set in your configuration!!!"
@@ -235,7 +235,8 @@ msgstr "Diciembre"
 #, python-format
 msgid "Ensure this value has at least %(limit_value)d character"
 msgid_plural "Ensure this value has at least %(limit_value)d characters"
-msgstr[0] "Asegúrate de que este valor tiene al menos %(limit_value)d carácter"
+msgstr[0] ""
+"Asegúrate de que este valor tiene al menos %(limit_value)d carácter"
 msgstr[1] ""
 "Asegúrate de que este valor tiene al menos %(limit_value)d caracteres"
 
@@ -288,8 +289,8 @@ msgstr "Octubre"
 msgid "ERROR: dic has repeated elements"
 msgstr "Error: El diccionario tiene elementos repetidos"
 
-#: codenerix/models.py:144 codenerix/models.py:870
-#: codenerix/models_people.py:101
+#: codenerix/models.py:144 codenerix/models.py:889
+#: codenerix/models_people.py:105
 msgid "Created"
 msgstr "Creado"
 
@@ -300,7 +301,8 @@ msgstr "Actualizado"
 #: codenerix/models.py:226
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
-msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
+msgstr ""
+"No se puede borrar el elemento, existe una relación con %(model_name)s"
 
 #: codenerix/models.py:302 codenerix/models.py:404 codenerix/views.py:692
 msgid "Add"
@@ -334,11 +336,11 @@ msgstr "Acción"
 msgid "Date"
 msgstr "Fecha"
 
-#: codenerix/models.py:417 codenerix/models.py:482 codenerix/models.py:871
+#: codenerix/models.py:417 codenerix/models.py:482 codenerix/models.py:890
 msgid "Actual user"
 msgstr "Usuario actual"
 
-#: codenerix/models.py:418 codenerix/models.py:487 codenerix/models.py:872
+#: codenerix/models.py:418 codenerix/models.py:487 codenerix/models.py:891
 msgid "Original user"
 msgstr "Usuario original"
 
@@ -346,7 +348,7 @@ msgstr "Usuario original"
 msgid "APP Name"
 msgstr "Nombre de la APP"
 
-#: codenerix/models.py:424 codenerix/models.py:480 codenerix/models.py:869
+#: codenerix/models.py:424 codenerix/models.py:480 codenerix/models.py:888
 msgid "ID"
 msgstr "ID"
 
@@ -386,7 +388,7 @@ msgstr "borrar"
 msgid "deleted"
 msgstr "borrado"
 
-#: codenerix/models_people.py:53 codenerix/models_people.py:98
+#: codenerix/models_people.py:54 codenerix/models_people.py:102
 #: codenerix_geodata/models.py:36 codenerix_geodata/models.py:46
 #: codenerix_geodata/models.py:115 codenerix_geodata/models.py:125
 #: codenerix_geodata/models.py:135 codenerix_geodata/views.py:106
@@ -398,41 +400,41 @@ msgstr "borrado"
 msgid "Name"
 msgstr "Nombre"
 
-#: codenerix/models_people.py:59 codenerix/models_people.py:99
+#: codenerix/models_people.py:60 codenerix/models_people.py:103
 msgid "Surname"
 msgstr "Apellidos"
 
-#: codenerix/models_people.py:65 codenerix/models_people.py:103
+#: codenerix/models_people.py:66 codenerix/models_people.py:107
 msgid "Disabled from"
 msgstr "Deshabilitado desde"
 
-#: codenerix/models_people.py:97
+#: codenerix/models_people.py:101
 msgid "User"
 msgstr "Usuario"
 
-#: codenerix/models_people.py:100
+#: codenerix/models_people.py:104
 msgid "Email"
 msgstr "Email"
 
-#: codenerix/models_people.py:102 codenerix/models_people.py:125
+#: codenerix/models_people.py:106 codenerix/models_people.py:129
 msgid "Active"
 msgstr "Activo"
 
-#: codenerix/models_people.py:127
+#: codenerix/models_people.py:131
 #: codenerix/templatetags/codenerix_common.py:154 codenerix/views.py:1920
 msgid "Yes"
 msgstr "Si"
 
-#: codenerix/models_people.py:127
+#: codenerix/models_people.py:131
 #: codenerix/templatetags/codenerix_common.py:156 codenerix/views.py:1920
 msgid "No"
 msgstr "No"
 
-#: codenerix/models_people.py:155
+#: codenerix/models_people.py:177
 msgid "Administrator"
 msgstr "Administrador"
 
-#: codenerix/models_people.py:167
+#: codenerix/models_people.py:198
 msgid "Cannot delete to yourself"
 msgstr "No puedes borrarte a ti mismo"
 
@@ -627,8 +629,8 @@ msgid ""
 "You have used get_object accidentally, this function has been designed only "
 "for action_permission: detail, change and delete"
 msgstr ""
-"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
-"add_permission: detail, change y delete"
+"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para"
+" add_permission: detail, change y delete"
 
 #: codenerix/views.py:1864
 msgid "Not allowed, this kind of requests has been prohibited for this view!"
@@ -653,10 +655,9 @@ msgstr ""
 "FILE_DOWNLOAD_SIZE_MAX (en Megabytes) en la configuración"
 
 #: codenerix/views.py:3948
-#, fuzzy
 #| msgid "Could not generate file"
 msgid "Could not generate file: data_output is empty or None"
-msgstr "No se ha podido generar el fichero"
+msgstr "No se ha podido generar el fichero: data_output estás vacío o es None"
 
 #: codenerix/views.py:4804
 msgid "This shouldn't happen, state is not $dirty or $pristine"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-16 11:19+0100\n"
+"POT-Creation-Date: 2026-02-02 10:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -279,8 +279,8 @@ msgstr ""
 msgid "ERROR: dic has repeated elements"
 msgstr ""
 
-#: codenerix/models.py:144 codenerix/models.py:870
-#: codenerix/models_people.py:101
+#: codenerix/models.py:144 codenerix/models.py:889
+#: codenerix/models_people.py:105
 msgid "Created"
 msgstr ""
 
@@ -325,11 +325,11 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: codenerix/models.py:417 codenerix/models.py:482 codenerix/models.py:871
+#: codenerix/models.py:417 codenerix/models.py:482 codenerix/models.py:890
 msgid "Actual user"
 msgstr ""
 
-#: codenerix/models.py:418 codenerix/models.py:487 codenerix/models.py:872
+#: codenerix/models.py:418 codenerix/models.py:487 codenerix/models.py:891
 msgid "Original user"
 msgstr ""
 
@@ -337,7 +337,7 @@ msgstr ""
 msgid "APP Name"
 msgstr ""
 
-#: codenerix/models.py:424 codenerix/models.py:480 codenerix/models.py:869
+#: codenerix/models.py:424 codenerix/models.py:480 codenerix/models.py:888
 msgid "ID"
 msgstr ""
 
@@ -377,7 +377,7 @@ msgstr ""
 msgid "deleted"
 msgstr ""
 
-#: codenerix/models_people.py:53 codenerix/models_people.py:98
+#: codenerix/models_people.py:54 codenerix/models_people.py:102
 #: codenerix_geodata/models.py:36 codenerix_geodata/models.py:46
 #: codenerix_geodata/models.py:115 codenerix_geodata/models.py:125
 #: codenerix_geodata/models.py:135 codenerix_geodata/views.py:106
@@ -389,41 +389,41 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: codenerix/models_people.py:59 codenerix/models_people.py:99
+#: codenerix/models_people.py:60 codenerix/models_people.py:103
 msgid "Surname"
 msgstr ""
 
-#: codenerix/models_people.py:65 codenerix/models_people.py:103
+#: codenerix/models_people.py:66 codenerix/models_people.py:107
 msgid "Disabled from"
 msgstr ""
 
-#: codenerix/models_people.py:97
+#: codenerix/models_people.py:101
 msgid "User"
 msgstr ""
 
-#: codenerix/models_people.py:100
+#: codenerix/models_people.py:104
 msgid "Email"
 msgstr ""
 
-#: codenerix/models_people.py:102 codenerix/models_people.py:125
+#: codenerix/models_people.py:106 codenerix/models_people.py:129
 msgid "Active"
 msgstr ""
 
-#: codenerix/models_people.py:127
+#: codenerix/models_people.py:131
 #: codenerix/templatetags/codenerix_common.py:154 codenerix/views.py:1920
 msgid "Yes"
 msgstr ""
 
-#: codenerix/models_people.py:127
+#: codenerix/models_people.py:131
 #: codenerix/templatetags/codenerix_common.py:156 codenerix/views.py:1920
 msgid "No"
 msgstr ""
 
-#: codenerix/models_people.py:155
+#: codenerix/models_people.py:177
 msgid "Administrator"
 msgstr ""
 
-#: codenerix/models_people.py:167
+#: codenerix/models_people.py:198
 msgid "Cannot delete to yourself"
 msgstr ""
 
