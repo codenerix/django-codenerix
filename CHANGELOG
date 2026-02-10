@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.64] - 2026-02-10
+### Feature
+- Mitigation Email Throttler for Django for mail-admin
+
 ## [5.0.63] - 2026-02-09
 ### Bugfix
 - Repaired problem with export when no export_raw is defined

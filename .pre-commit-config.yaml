@@ -86,6 +86,7 @@ repos:
           (?x)(
               CHANGELOG
             | codenerix/static/codenerix/lib/
+            | codenerix/lib/adminmail.py
           )
 
 # -   repo: https://github.com/pycqa/pylint
