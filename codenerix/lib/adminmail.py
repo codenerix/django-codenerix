@@ -167,8 +167,9 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
             cache.delete(test_key)
             return result == 1
         except Exception as e:
-            logger.warning(
-                f"Cache detection failed: {e}. Using fallback mode.",
+            logger.info(
+                f"ThrottledAdminEmailHandler: Cache detection failed: {e}. "
+                "Using fallback mode.",
             )
             return False
 
@@ -183,7 +184,7 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
                 "total (global across workers).",
             )
         else:
-            logger.warning(
+            logger.info(
                 f"ThrottledAdminEmailHandler: FALLBACK MODE active. "
                 f"Window: {self.FALLBACK_WINDOW_SECONDS}s. "
                 f"Limits: {self.FALLBACK_MAX_EMAILS_PER_ERROR} "
