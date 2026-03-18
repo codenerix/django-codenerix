@@ -71,6 +71,7 @@ setup(
         "pyotp",
         "python-dateutil",
         "pytz",
+        "standard-imghdr",
         "types-pytz",
         "yattag",
     ],

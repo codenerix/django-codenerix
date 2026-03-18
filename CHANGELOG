@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.66] - 2026-03-182
+### Bugfix
+- Added standard-imghdr to the dependencies
+
 ## [5.0.65] - 2026-03-12
 ### Feature
 - Removed verbosity on boot when no cache is found
