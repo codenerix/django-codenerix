@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Bugfix
 - Corrected error that make refresh_permissions to fail
 
-## [5.0.66] - 2026-03-27
-### Feature
-- Added support for database in fresh_permissions
+## [5.0.66] - 2026-03-182
+### Bugfix
+- Added standard-imghdr to the dependencies
 
 ## [5.0.65] - 2026-03-12
 ### Feature
