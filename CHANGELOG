@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.68] - 2026-03-27
+### Feature
+- New 'detail' permission
+- Some code cleanup
+
 ## [5.0.67] - 2026-03-27
 ### Bugfix
 - Corrected error that make refresh_permissions to fail

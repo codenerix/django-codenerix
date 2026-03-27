@@ -21,6 +21,7 @@ import base64
 import hashlib
 import operator
 from functools import reduce
+from logging import getLogger
 
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission, User
@@ -35,6 +36,8 @@ from django.utils.translation import gettext_lazy as _
 from codenerix.helpers import clean_memcache_item
 from codenerix.middleware import get_current_user
 from codenerix.models import CodenerixModel, GenLog
+
+logger = getLogger(__name__)
 
 
 class GenPerson(GenLog):  # META: Abstract class
@@ -355,7 +358,7 @@ class GenPerson(GenLog):  # META: Abstract class
                 if group is None:
                     # Group not found, remake permissions for all groups with
                     # roles
-                    GenPerson.group_permissions(type(self), using=using)
+                    self.group_permissions(using=using)
                     # Check again
                     group = (
                         Group.objects.using(using)
@@ -398,10 +401,10 @@ class GenPerson(GenLog):  # META: Abstract class
                     "doesn't have an associated user",
                 )
 
-    @staticmethod
-    def group_permissions(clss, using="default"):
+    @classmethod
+    def group_permissions(cls, using="default"):
         groupsresult = {}
-        for x in clss._meta.get_fields():
+        for x in cls._meta.get_fields():
             model = x.related_model
 
             # Check if it is a role
@@ -429,8 +432,11 @@ class GenPerson(GenLog):  # META: Abstract class
                                     )
                                     if perm is not None:
                                         perms.append(perm)
-                                    # else:
-                                    #    raise IOError("Permission '{}' not found for group '{}'!".format(permname, groupname)) # noqa: E501
+                                    else:
+                                        logger.warning(
+                                            f"Permission '{permname}' not "
+                                            f"found for group '{groupname}'!",
+                                        )  # noqa: E501
 
                             # Remember perms for this group
                             if groupname not in groupsresult:

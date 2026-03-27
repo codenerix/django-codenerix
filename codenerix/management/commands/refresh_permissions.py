@@ -107,7 +107,7 @@ class Command(BaseCommand, Debugger):
                 color="blue",
                 tail=False,
             )
-            person.__class__.group_permissions(person.__class__, using=db)
+            person.group_permissions(using=db)
             self.debug("DONE", color="green", head=False)
         else:
             self.debug(
