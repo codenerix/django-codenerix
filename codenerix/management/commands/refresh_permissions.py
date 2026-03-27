@@ -24,7 +24,6 @@ from django.contrib.auth.management import create_permissions
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.management import create_contenttypes
 from django.core.management.base import BaseCommand
-from providers.people.models import Person
 
 
 class Command(BaseCommand, Debugger):
@@ -108,7 +107,7 @@ class Command(BaseCommand, Debugger):
                 color="blue",
                 tail=False,
             )
-            Person.group_permissions(Person, using=db)
+            person.__class__.group_permissions(person.__class__, using=db)
             self.debug("DONE", color="green", head=False)
         else:
             self.debug(
