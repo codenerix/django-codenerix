@@ -825,8 +825,8 @@ def obj_to_html(
     tag=None,
     text=None,
     wrap=True,
-    internal=True,
-):
+    _internal=False,
+) -> tuple[str, SafeString] | None:
     """
     Function to convert JSON to HTML
     """
@@ -883,7 +883,7 @@ def obj_to_html(
                         tag=tag,
                         text=text,
                         wrap=wrap,
-                        internal=True,
+                        _internal=True,
                     )
 
     elif isinstance(pobj, list):
@@ -898,7 +898,7 @@ def obj_to_html(
                         tag=tag,
                         text=text,
                         wrap=wrap,
-                        internal=True,
+                        _internal=True,
                     )
 
     elif pobj is None:
@@ -930,10 +930,11 @@ def obj_to_html(
         # If pobj is a string or any other type, add it as text
         text(pobj)
 
-    if not internal:
+    if not _internal:
         if wrap:
             doc.asis("</div>")
         return (kind, SafeString(doc.getvalue()))
+    return None
 
 
 @dataclass

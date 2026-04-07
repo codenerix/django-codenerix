@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.71] - 2026-04-07
+### Bugfix
+- Bug that made the full obj_to_html function to behave wrong
+
 ## [5.0.70] - 2026-04-07
 ### Feature
 - obj_to_html helper now supports wrapping or unwrapping long text
