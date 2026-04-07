@@ -817,7 +817,16 @@ def otpauth(issuer, label, secret):
         return None
 
 
-def obj_to_html(obj, depth=1, doc=None, tag=None, text=None, internal=False):
+def obj_to_html(
+    obj,
+    *,
+    depth=1,
+    doc=None,
+    tag=None,
+    text=None,
+    wrap=True,
+    internal=True,
+):
     """
     Function to convert JSON to HTML
     """
@@ -826,6 +835,13 @@ def obj_to_html(obj, depth=1, doc=None, tag=None, text=None, internal=False):
         doc, tag, text = Doc().tagtext()
         doc.asis("<html>")
         doc.asis("<body>")
+        if wrap:
+            doc.asis(
+                '<div style="'
+                "word-break: break-all; "
+                "overflow-wrap: break-word;"
+                '">',
+            )
 
     # If the object is an string, try to convert it
     if depth:
@@ -862,10 +878,11 @@ def obj_to_html(obj, depth=1, doc=None, tag=None, text=None, internal=False):
                         text(f"{key}: ")
                     obj_to_html(
                         value,
-                        depth and (depth - 1),
-                        doc,
-                        tag,
-                        text,
+                        depth=depth and (depth - 1),
+                        doc=doc,
+                        tag=tag,
+                        text=text,
+                        wrap=wrap,
                         internal=True,
                     )
 
@@ -876,10 +893,11 @@ def obj_to_html(obj, depth=1, doc=None, tag=None, text=None, internal=False):
                 with tag("li"):
                     obj_to_html(
                         item,
-                        depth and (depth - 1),
-                        doc,
-                        tag,
-                        text,
+                        depth=depth and (depth - 1),
+                        doc=doc,
+                        tag=tag,
+                        text=text,
+                        wrap=wrap,
                         internal=True,
                     )
 
@@ -913,6 +931,8 @@ def obj_to_html(obj, depth=1, doc=None, tag=None, text=None, internal=False):
         text(pobj)
 
     if not internal:
+        if wrap:
+            doc.asis("</div>")
         return (kind, SafeString(doc.getvalue()))
 
 
