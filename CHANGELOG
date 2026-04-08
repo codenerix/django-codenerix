@@ -6,9 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
-## [5.0.72] - 2026-04-08
+## [5.0.73] - 2026-04-08
 ### Bugfix
 - Bug that made Authbackend to fail when an invalid token was found for OTP Authentication, now is bypassed as failed authentcation for that specific Authbackend
+
+## [5.0.72] - 2026-04-08
+### Bugfix
+- Incorrectly resolved bug that made Authbackend to fail when an invalid token was found for OTP Authentication, now is bypassed as failed authentcation for that specific Authbackend
 
 ## [5.0.71] - 2026-04-07
 ### Bugfix

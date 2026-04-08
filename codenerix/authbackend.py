@@ -391,6 +391,7 @@ class OTPAuth(ModelBackend, Debugger):
                         user_key = user.first_name
 
                         # Check if user_key is valid
+                        local_otp = None
                         if len(user_key) == 16:
                             # Calculate OTP token
                             try:
@@ -405,21 +406,24 @@ class OTPAuth(ModelBackend, Debugger):
                                         f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
                                         color="yellow",
                                     )
-                                else:
-                                    local_otp = None
                             except binascii.Error:
                                 if self.__debugger:
                                     self.debug(
                                         f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
                                         color="yellow",
                                     )
-                                else:
-                                    local_otp = None
 
                             if self.__debugger:
                                 self.debug(
                                     f"  > Local OTP Token: '{local_otp}'",
                                     color="cyan",
+                                )
+
+                        else:
+                            if self.__debugger:
+                                self.debug(
+                                    f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                    color="yellow",
                                 )
 
                         # Check if the OTP token is valid
