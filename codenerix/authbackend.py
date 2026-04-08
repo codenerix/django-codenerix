@@ -22,6 +22,7 @@ try:
 except ImportError:
     pyotp = None  # type: ignore[assignment]
 import base64
+import binascii
 import datetime
 import hashlib
 import ssl
@@ -389,27 +390,37 @@ class OTPAuth(ModelBackend, Debugger):
                         # Get user first_name as user_key
                         user_key = user.first_name
 
-                        # Calculate OTP token
-                        try:
-                            local_otp = str(
-                                pyotp.TOTP(
-                                    user_key,
-                                ).now(),
-                            )
-                        except TypeError:
+                        # Check if user_key is valid
+                        if len(user_key) == 16:
+                            # Calculate OTP token
+                            try:
+                                local_otp = str(
+                                    pyotp.TOTP(
+                                        user_key,
+                                    ).now(),
+                                )
+                            except TypeError:
+                                if self.__debugger:
+                                    self.debug(
+                                        f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                        color="yellow",
+                                    )
+                                else:
+                                    local_otp = None
+                            except binascii.Error:
+                                if self.__debugger:
+                                    self.debug(
+                                        f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                        color="yellow",
+                                    )
+                                else:
+                                    local_otp = None
+
                             if self.__debugger:
                                 self.debug(
-                                    f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
-                                    color="yellow",
+                                    f"  > Local OTP Token: '{local_otp}'",
+                                    color="cyan",
                                 )
-                            else:
-                                local_otp = None
-
-                        if self.__debugger:
-                            self.debug(
-                                f"  > Local OTP Token: '{local_otp}'",
-                                color="cyan",
-                            )
 
                         # Check if the OTP token is valid
                         if remote_otp == local_otp:
@@ -439,7 +450,7 @@ class OTPAuth(ModelBackend, Debugger):
                         # User is not signed to TOTP
                         if self.__debugger:
                             self.debug(
-                                "To use a OTP key you have to set the user key in the user's profile to some valid BASE32 string as your token (first_name field in the user's model)",  # noqa: E501
+                                "To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='",  # noqa: E501
                                 color="yellow",
                             )
 
