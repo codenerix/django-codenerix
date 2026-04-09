@@ -22,7 +22,7 @@ import importlib
 import io
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional, overload
 
 from yattag import Doc  # type: ignore
 
@@ -817,7 +817,35 @@ def otpauth(issuer, label, secret):
         return None
 
 
-def obj_to_html(
+@overload
+def obj_to_html(  # pylint: disable=too-many-arguments
+    obj: Any,
+    *,
+    depth: int = 1,
+    doc: Optional[Doc] = None,
+    tag: Optional[Any] = None,
+    text: Optional[Any] = None,
+    wrap: bool = True,
+    _internal: Literal[False] = False,
+) -> tuple[str, SafeString]:
+    ...
+
+
+@overload
+def obj_to_html(  # pylint: disable=too-many-arguments
+    obj: Any,
+    *,
+    depth: int = 1,
+    doc: Optional[Doc] = None,
+    tag: Optional[Any] = None,
+    text: Optional[Any] = None,
+    wrap: bool = True,
+    _internal: Literal[True] = True,
+) -> None:
+    ...
+
+
+def obj_to_html(  # pylint: disable=too-many-arguments
     obj,
     *,
     depth=1,

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.74] - 2026-04-09
+### Bugfix
+- Added type hints overloads to obj_to_html() function
+
 ## [5.0.73] - 2026-04-08
 ### Bugfix
 - Bug that made Authbackend to fail when an invalid token was found for OTP Authentication, now is bypassed as failed authentcation for that specific Authbackend
