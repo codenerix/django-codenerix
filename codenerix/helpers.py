@@ -300,12 +300,13 @@ def get_static(desired, user, lang, default, extension="html", relative=False):
         target = "%s%s.%s" % (basepath, addon, extension)
 
         # DEBUG
-        # debug_path = os.path.join(settings.STATIC_ROOT, target)
-        # exists = os.path.exists(debug_path)
-        # if exists:
-        #     print(f"{debug_path} ---> {exists}")
-        # else:
-        #     print(f".    {debug_path} ---> {exists}")
+        if getattr(settings, "DEBUG_STATICS", False):
+            debug_path = os.path.join(settings.STATIC_ROOT, target)
+            exists = os.path.exists(debug_path)
+            if exists:
+                print(f"{debug_path} ---> {exists}")
+            else:
+                print(f".    {debug_path} ---> {exists}")
 
         if (
             hasattr(settings, "STATIC_ROOT")
