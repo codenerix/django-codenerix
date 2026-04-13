@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.77] - 2026-04-13
+### Feature
+- Support for OTP Authentication Tokens by Email
+
+## [5.0.76] - 2026-04-13
+### Bugfix
+- Corrected check for OTP Auth Key length
+
 ## [5.0.75] - 2026-04-09
 ### Feature
 - DEBUG_STATICS added to allow discovering what static files are being searched while rendering and what static files are being found, this is intended to help debugging problems with static files not being found or rendered as expected.

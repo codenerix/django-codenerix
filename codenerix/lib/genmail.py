@@ -25,6 +25,21 @@ from django.core import mail
 from django.core.mail.backends.smtp import EmailBackend
 from django.core.mail.utils import DNS_NAME
 
+default_client_email_host = getattr(settings, "CLIENT_EMAIL_HOST", "localhost")
+default_client_email_port = getattr(settings, "CLIENT_EMAIL_PORT", 25)
+default_client_email_username = getattr(
+    settings,
+    "CLIENT_EMAIL_USERNAME",
+    None,
+)
+default_client_email_password = getattr(
+    settings,
+    "CLIENT_EMAIL_PASSWORD",
+    None,
+)
+default_client_email_use_tls = getattr(settings, "CLIENT_EMAIL_USE_TLS", False)
+default_client_email_use_ssl = getattr(settings, "CLIENT_EMAIL_USE_SSL", False)
+
 
 class EmailMessage(mail.EmailMessage):
     def __init__(self, *args, **kwargs):
@@ -104,12 +119,12 @@ class SSLEmailBackend(EmailBackend):
 
 
 def get_connection(
-    host=settings.CLIENT_EMAIL_HOST,
-    port=settings.CLIENT_EMAIL_PORT,
-    username=settings.CLIENT_EMAIL_USERNAME,
-    password=settings.CLIENT_EMAIL_PASSWORD,
-    use_tls=settings.CLIENT_EMAIL_USE_TLS,
-    use_ssl=settings.CLIENT_EMAIL_USE_SSL,
+    host=default_client_email_host,
+    port=default_client_email_port,
+    username=default_client_email_username,
+    password=default_client_email_password,
+    use_tls=default_client_email_use_tls,
+    use_ssl=default_client_email_use_ssl,
 ):
     if use_ssl:
         backend = "codenerix.lib.genmail.SSLEmailBackend"

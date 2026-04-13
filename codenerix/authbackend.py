@@ -17,6 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 try:
     import pyotp  # type: ignore[import-not-found]
 except ImportError:
@@ -25,6 +27,7 @@ import base64
 import binascii
 import datetime
 import hashlib
+import logging
 import ssl
 
 import ldap3
@@ -33,9 +36,12 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Group, User
+from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.utils import timezone
 from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
+
+logger = logging.getLogger(__name__)
 
 
 def hashed(string):
@@ -325,6 +331,7 @@ class OTPAuth(ModelBackend, Debugger):
     def authenticate(self, request, **kwargs):
         # Initialize answer
         answer = None
+        started = time.time()
 
         # Show debugger
         if self.__debugger:
@@ -334,6 +341,12 @@ class OTPAuth(ModelBackend, Debugger):
         username = kwargs.get("username", None)
         password = kwargs.get("password", None)
         authtoken = kwargs.get("authtoken", None)
+        bymail = getattr(settings, "OTP_BYMAIL", False)
+        byemail_interval = getattr(
+            settings,
+            "OTP_BYMAIL_INTERVAL",
+            300,
+        )  # 5 minutes
 
         # Check we have all parameters
         if not username or not password or not authtoken:
@@ -381,7 +394,7 @@ class OTPAuth(ModelBackend, Debugger):
                     # Show debug
                     if self.__debugger:
                         self.debug(
-                            "User '{}' found!".format(username),
+                            f"User '{username}' found!",
                             color="green",
                         )
 
@@ -392,42 +405,110 @@ class OTPAuth(ModelBackend, Debugger):
 
                         # Check if user_key is valid
                         local_otp = None
-                        if len(user_key) == 16:
+                        valid_window = {}
+                        if len(user_key) >= 32 or (
+                            bymail and remote_otp == "REQUEST_OTP"
+                        ):
+                            # Prepare interval for OTP token
+                            interval = {}
+                            if bymail:
+                                interval["interval"] = byemail_interval
+                                valid_window["valid_window"] = 1  # 5 minutes
                             # Calculate OTP token
                             try:
-                                local_otp = str(
-                                    pyotp.TOTP(
-                                        user_key,
-                                    ).now(),
+                                local_otp = pyotp.TOTP(
+                                    user_key,
+                                    **interval,
                                 )
-                            except TypeError:
+                            except TypeError as e:
                                 if self.__debugger:
                                     self.debug(
-                                        f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                        f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 32 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)}. ERROR: {e} ",  # noqa: E501
                                         color="yellow",
                                     )
                             except binascii.Error:
                                 if self.__debugger:
                                     self.debug(
-                                        f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                        f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 32 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)}. ERROR: binasccii.Error",  # noqa: E501
                                         color="yellow",
                                     )
 
                             if self.__debugger:
                                 self.debug(
-                                    f"  > Local OTP Token: '{local_otp}'",
+                                    "  > Local OTP Token: "
+                                    f"'{local_otp.now()}'",
                                     color="cyan",
                                 )
 
                         else:
                             if self.__debugger:
                                 self.debug(
-                                    f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                    f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 32 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. INFO: User {user_key} key length is {len(user_key)}!=32",  # noqa: E501
                                     color="yellow",
                                 )
 
                         # Check if the OTP token is valid
-                        if remote_otp == local_otp:
+                        if bymail and remote_otp == "REQUEST_OTP":
+                            # Show debug
+                            if self.__debugger:
+                                self.debug(
+                                    f"User '{username}' requested OTP token, "
+                                    "sending it by email!",
+                                    color="yellow",
+                                )
+                            # Send OTP token by email
+                            if user.email:
+                                # Send email with OTP token
+                                local_otp_code = local_otp.now()
+                                try:
+                                    send_mail(
+                                        "Your OTP token",
+                                        f"Your OTP token is: {local_otp_code}",
+                                        settings.DEFAULT_FROM_EMAIL,
+                                        [user.email],
+                                        fail_silently=False,
+                                    )
+                                except Exception as e:
+                                    if self.__debugger:
+                                        self.debug(
+                                            f"Error sending OTP token to "
+                                            f"'{user.email}': {e}",
+                                            color="red",
+                                        )
+                                    # Log error
+                                    logger.error(
+                                        "Error sending OTP token "
+                                        f"'{local_otp_code}' to "
+                                        f"'{user.email}': {e}",
+                                    )
+                                    logging.LogRecord(
+                                        name=__name__,
+                                        level=logging.ERROR,
+                                        pathname=__file__,
+                                        lineno=0,
+                                        msg=f"Error sending OTP token "
+                                        f"'{local_otp_code}' to "
+                                        f"'{user.email}': {e}",
+                                        args=(),
+                                        exc_info=None,
+                                    )
+
+                                if self.__debugger:
+                                    self.debug(
+                                        f"OTP token '{local_otp_code}' "
+                                        f"sent to '{user.email}'!",
+                                        color="green",
+                                    )
+                            else:
+                                if self.__debugger:
+                                    self.debug(
+                                        f"User '{username}' requested OTP token, but it has no email to send it!",  # noqa: E501
+                                        color="yellow",
+                                    )
+
+                            # User not authenticated on this request
+                            answer = None
+                        elif local_otp.verify(remote_otp, **valid_window):
                             user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"  # noqa: E501
                             answer = user
 
@@ -454,7 +535,7 @@ class OTPAuth(ModelBackend, Debugger):
                         # User is not signed to TOTP
                         if self.__debugger:
                             self.debug(
-                                "To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='",  # noqa: E501
+                                "To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 32 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. INFO: first_name is empty!",  # noqa: E501
                                 color="yellow",
                             )
 
@@ -462,6 +543,12 @@ class OTPAuth(ModelBackend, Debugger):
             raise OSError(
                 "PYOTP library not found, you can not use OTPAuth",
             )
+
+        # Wait whatever time is left to reach the minimum authentication time
+        min_auth_time = getattr(settings, "OTP_AUTH_MIN_TIME", 0)
+        elapsed = time.time() - started
+        if elapsed < min_auth_time:
+            time.sleep(min_auth_time - elapsed)
 
         # Return final answer
         return answer
