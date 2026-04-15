@@ -404,6 +404,7 @@ class OTPAuth(ModelBackend, Debugger):
                         user_key = user.first_name
 
                         # Check if user_key is valid
+                        direct_otp = None
                         local_otp = None
                         valid_window = {}
                         if len(user_key) >= 32 or (
@@ -416,6 +417,7 @@ class OTPAuth(ModelBackend, Debugger):
                                 valid_window["valid_window"] = 1  # 5 minutes
                             # Calculate OTP token
                             try:
+                                direct_otp = pyotp.TOTP(user_key)
                                 local_otp = pyotp.TOTP(
                                     user_key,
                                     **interval,
@@ -436,7 +438,9 @@ class OTPAuth(ModelBackend, Debugger):
                             if self.__debugger:
                                 self.debug(
                                     "  > Local OTP Token: "
-                                    f"'{local_otp.now()}'",
+                                    f"'{local_otp.now()}' "
+                                    " [ Direct OTP Token: "
+                                    f"'{direct_otp.now()}' ]",
                                     color="cyan",
                                 )
 
@@ -508,6 +512,17 @@ class OTPAuth(ModelBackend, Debugger):
 
                             # User not authenticated on this request
                             answer = None
+                        elif direct_otp.verify(remote_otp):
+                            user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"  # noqa: E501
+                            answer = user
+
+                            # Show debug
+                            if self.__debugger:
+                                self.debug(
+                                    f"User '{username}' authenticated "
+                                    "by Direct OTP!",
+                                    color="green",
+                                )
                         elif local_otp.verify(remote_otp, **valid_window):
                             user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"  # noqa: E501
                             answer = user
@@ -515,19 +530,15 @@ class OTPAuth(ModelBackend, Debugger):
                             # Show debug
                             if self.__debugger:
                                 self.debug(
-                                    "User '{}' authenticated!".format(
-                                        username,
-                                    ),
+                                    f"User '{username}' authenticated "
+                                    "by OTP!",
                                     color="green",
                                 )
                         else:
                             if self.__debugger:
                                 self.debug(
-                                    "User '{}' NOT authenticated with "
-                                    "otptoken '{}'!".format(
-                                        username,
-                                        remote_otp,
-                                    ),
+                                    f"User '{username}' NOT authenticated "
+                                    f"with otptoken '{remote_otp}'!",
                                     color="red",
                                 )
 
