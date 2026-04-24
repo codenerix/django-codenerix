@@ -196,7 +196,7 @@ limitations under the License.
                                                 {% else %}
                                                 {# IF INPUT: INI ============================================================================= {{{1 #}
                                                 {% with zi=forloop.revcounter|stringformat:"s" %}
-                                                {% with zindex="style=z-index:"|add:zi %}
+                                                {% with zindex="style=border-width:1px;z-index:"|add:zi %}
                                                 {% with autofocus=field|autofocus %}
                                                 {% with attrs=input|widgetize|addattr:autofocus|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:field.extra|lockattr:cannot_update %}
                                                 <div class="col-md-{{field.columns}}" ng-class="{{form.form_name|invalidator:input}}" {{field.extra_div|join_list:" "}}>
@@ -405,7 +405,7 @@ limitations under the License.
                                                                         {# INPUT PROCESSOR: INI {{{2 #}
                                                                         {% with zi=forloop.revcounter|stringformat:"s" %}
                                                                         {% with autofocus=subfield|autofocus %}
-                                                                        {% with zindex="style=z-index:"|add:zi %}
+                                                                        {% with zindex="style=border-width:1px;z-index:"|add:zi %}
 {% with attrs=input|widgetize|addattr:autofocus|addattr:zindex|addattr:"class=form-control"|inireadonly:input|addextra:subfield.extra|lockattr:cannot_update %}
                                                                         <div class="col-md-{{subfield.columns}}" ng-class="{{form.form_name|invalidator:input}}">
                                                                             {# FIELD: INI {{{3 #}

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- towncrier release notes start -->
 
+## [5.0.79] - 2026-04-24
+### Bugfix
+- Input fields now also get the red border when invalid and no focused
+
 ## [5.0.78] - 2026-04-15
 ### Feature
 - Direct OTP and Email OTP Token supported together
