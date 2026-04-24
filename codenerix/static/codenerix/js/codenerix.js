@@ -461,7 +461,8 @@ function openmodal(
                 }, },
         }
 
-        if (locked != undefined || locked == true) {
+        // If explicity locked, set backdrop and keyboard options
+        if (locked === true) {
             info['backdrop'] = 'static';
             info['keyboard'] = false;
         }
@@ -1677,7 +1678,7 @@ function dynamic_fields(scope) {
             }
             return null;
         } else {
-            console.log('???');
+            // console.log('???');
             return null;
         }
     };
