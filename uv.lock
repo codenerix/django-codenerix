@@ -257,22 +257,18 @@ wheels = [
 
 [[package]]
 name = "codenerix-lib"
-version = "1.0.30"
+version = "1.0.31"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "click" },
     { name = "colorama" },
-    { name = "joblib" },
     { name = "nltk" },
     { name = "pycryptodomex" },
-    { name = "regex" },
     { name = "textnorm" },
-    { name = "tqdm" },
     { name = "unidecode" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/34/5e/5b038f62d961923116eceba374973bb34856a9d905187e03e3a2483b1ee8/codenerix_lib-1.0.30.tar.gz", hash = "sha256:76bf28d8b3f11ae3d86cf4f61ab574fb963cefcd0b9c723b15111445f36f255b", size = 66736, upload-time = "2025-12-17T11:37:42.157Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/57/25744e613bb150da82e8da22c84237a0748ae17e46fad03d1928e5fdff37/codenerix_lib-1.0.31.tar.gz", hash = "sha256:e2da74692c9320b673afc276a5b1c9429d541f43bc5825cb5f5f314465e87464", size = 66746, upload-time = "2026-06-09T08:23:51.668Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ff/4c/a6266d11e4461b016a81ac326a7ecb250dd5762089efa77a19c3f034e8e7/codenerix_lib-1.0.30-py2.py3-none-any.whl", hash = "sha256:f5d8ecfbb5e25d27226244c81a9dbee136cb0a27937e00af1910f30047afa9c1", size = 20122, upload-time = "2025-12-17T11:37:44.506Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/65/9873c593eedb68a99e5a94ce0e97286a1ac41e740b7b9fc063f848d289ed/codenerix_lib-1.0.31-py2.py3-none-any.whl", hash = "sha256:a3fe9d39fa9bfbbb4c810a237a63783c52effd486badba48932895cf25def3c9", size = 20146, upload-time = "2026-06-09T08:23:53.852Z" },
 ]
 
 [[package]]
@@ -521,7 +517,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "codenerix-lib", specifier = ">=1.0.30" },
+    { name = "codenerix-lib", specifier = ">=1.0.31" },
     { name = "django", specifier = ">=5.2.14" },
     { name = "django-debug-toolbar", specifier = ">=4.4.2" },
     { name = "django-debug-toolbar-request-history" },

@@ -35,7 +35,7 @@ dependencies = [
     "Django>=5.2.14",
     "Pillow",
     "Unidecode",
-    "codenerix_lib>=1.0.30",
+    "codenerix_lib>=1.0.31",
     "elasticsearch>=7,<8",
     "django-debug-toolbar>=4.4.2",
     "django-debug-toolbar-request-history",
