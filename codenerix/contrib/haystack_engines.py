@@ -1,35 +1,30 @@
-# from django.conf import settings
-from haystack.backends.elasticsearch2_backend import (
-    Elasticsearch2SearchBackend,
-    Elasticsearch2SearchEngine,
+from haystack.backends.elasticsearch7_backend import (
+    Elasticsearch7SearchBackend,
+    Elasticsearch7SearchEngine,
 )
 
 
-class AsciifoldingElasticBackend(Elasticsearch2SearchBackend):
+class AsciifoldingElasticBackend(Elasticsearch7SearchBackend):
     """
-    Mounir Messelmeni - 13/December/2015
+    Asciifolding analyzer for Elasticsearch 7.x via django-haystack.
+    Adapted from Mounir Messelmeni (2015) for the ES7 backend:
     https://mounirmesselmeni.github.io/2015/12/13/enable-asciifolding-in-elasticsearchhaystack/
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        analyzer = {
-            "ascii_analyser": {
-                "tokenizer": "standard",
-                "filter": ["standard", "asciifolding", "lowercase"],
+        self.DEFAULT_SETTINGS["settings"]["analysis"]["analyzer"].update(
+            {
+                "ascii_analyser": {
+                    "tokenizer": "standard",
+                    "filter": ["lowercase", "asciifolding"],
+                },
             },
-            "ngram_analyzer": {
-                "type": "custom",
-                "tokenizer": "lowercase",
-                "filter": ["haystack_ngram", "asciifolding"],
-            },
-            "edgengram_analyzer": {
-                "type": "custom",
-                "tokenizer": "lowercase",
-                "filter": ["haystack_edgengram", "asciifolding"],
-            },
-        }
-        self.DEFAULT_SETTINGS["settings"]["analysis"]["analyzer"] = analyzer
+        )
+        for name in ("ngram_analyzer", "edgengram_analyzer"):
+            self.DEFAULT_SETTINGS["settings"]["analysis"]["analyzer"][name]["filter"].append(
+                "asciifolding"
+            )
 
     def build_schema(self, fields):
         content_field_name, mapping = super().build_schema(fields)
@@ -37,7 +32,7 @@ class AsciifoldingElasticBackend(Elasticsearch2SearchBackend):
         for _, field_class in fields.items():
             field_mapping = mapping[field_class.index_fieldname]
 
-            if field_mapping["type"] == "string" and field_class.indexed:
+            if field_mapping["type"] == "text" and field_class.indexed:
                 if not hasattr(
                     field_class,
                     "facet_for",
@@ -49,14 +44,13 @@ class AsciifoldingElasticBackend(Elasticsearch2SearchBackend):
 
     def extract_file_contents(self, *args, **kwargs):
         raise NotImplementedError(
-            "AsciifoldingElasticSearchEngine does not support file content extraction."
+            "AsciifoldingElasticSearchEngine does not support file content extraction.",
         )
 
 
-class AsciifoldingElasticSearchEngine(Elasticsearch2SearchEngine):
+class AsciifoldingElasticSearchEngine(Elasticsearch7SearchEngine):
     """
-    Mounir Messelmeni - 13/December/2015
-    https://mounirmesselmeni.github.io/2015/12/13/enable-asciifolding-in-elasticsearchhaystack/
+    Asciifolding search engine for Elasticsearch 7.x.
     """
 
     backend = AsciifoldingElasticBackend
