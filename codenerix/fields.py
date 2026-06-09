@@ -76,7 +76,7 @@ class Date2TimeField(models.DateTimeField):
             if args[0] and date_min.date() > args[0].date():
                 raise ValidationError(_("Date too old"))
             # return args[0]
-        return super().clean(*args, **kwargs)
+        return super().clean(*args, **kwargs)  # pylint: disable=no-member
 
 
 email_er = r"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*"  # noqa: E501 # pylint: disable=invalid-name

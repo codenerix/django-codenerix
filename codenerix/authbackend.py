@@ -214,7 +214,11 @@ class LimitedAuthMiddleware(Debugger):
                 self.debug("User already authenticated", color="cyan")
 
             # If the user doesn't pass the check_auth test
-            if not check_auth(request.user, self.debug):
+            if self.__debugger:
+                authdebug = self.debug
+            else:
+                authdebug = None
+            if not check_auth(request.user, debugger=authdebug):
                 # Show debugger
                 if self.__debugger:
                     self.debug("User didn'pass check_auth()", color="red")

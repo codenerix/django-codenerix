@@ -46,31 +46,31 @@ class GenPerson(GenLog):  # META: Abstract class
     """
 
     # Control fields
-    user = models.OneToOneField(  # type: ignore[var-annotated]
+    user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="person",
     )
-    name = models.CharField(  # type: ignore[var-annotated]
+    name = models.CharField(
         _("Name"),
         max_length=45,
         blank=False,
         null=False,
     )
-    surname = models.CharField(  # type: ignore[var-annotated]
+    surname = models.CharField(
         _("Surname"),
         max_length=90,
         blank=False,
         null=False,
     )
-    disabled = models.DateTimeField(  # type: ignore[var-annotated]
+    disabled = models.DateTimeField(
         _("Disabled from"),
         null=True,
         blank=True,
     )
-    creator = models.ForeignKey(  # type: ignore[var-annotated]
+    creator = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         blank=True,

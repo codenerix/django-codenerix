@@ -141,6 +141,8 @@ line-ending = "auto"
 # ----------------------------------------------------------------------------
 [tool.pytest.ini_options]
 addopts = "-ra -q --import-mode=importlib"
+DJANGO_SETTINGS_MODULE = "codenerix.tests.settings"
+python_files = ["test_*.py"]
 
 # ----------------------------------------------------------------------------
 # mypy. follow_imports/no_implicit_reexport per our channels conventions.
@@ -149,7 +151,7 @@ addopts = "-ra -q --import-mode=importlib"
 # ----------------------------------------------------------------------------
 [tool.mypy]
 python_version        = "3.10"
-# plugins             = ["mypy_django_plugin.main"]
+plugins             = ["mypy_django_plugin.main"]
 follow_imports        = "normal"
 warn_redundant_casts  = true
 warn_unused_ignores   = true
@@ -162,8 +164,8 @@ exclude = [
     '^codenerix/(.*/)?(migrations|tests)/',
 ]
 
-# [tool.django-stubs]
-# django_settings_module = "tests.settings"
+[tool.django-stubs]
+django_settings_module = "codenerix.tests.settings"
 
 # Third-party deps without type stubs (extend as mypy surfaces more).
 [[tool.mypy.overrides]]
@@ -208,7 +210,7 @@ exclude = [
 [tool.pylint.main]
 analyse-fallback-blocks   = false
 extension-pkg-allow-list  = ["PIL"]
-# django-settings-module  = "tests.settings"
+django-settings-module  = "codenerix.tests.settings"
 fail-under                = 10
 ignore                    = ["CVS"]
 # ignore-patterns matches base NAMES only (emacs lock files here).
@@ -222,8 +224,7 @@ ignore-paths              = [
 init-hook                 = 'import sys; sys.path.append(".")'
 jobs                      = 0
 limit-inference-results   = 100
-load-plugins              = ["pylint_pytest"]
-# load-plugins            = ["pylint_django", "pylint_pytest"]  # add pylint_django with settings
+load-plugins            = ["pylint_django", "pylint_pytest"]
 persistent                = true
 py-version                = "3.10"
 recursive                 = false
@@ -332,7 +333,10 @@ disable    = [
     "redefined-outer-name",          # W0621 (shadowing de nombres de módulo, ruidoso)
     "eval-used",                     # W0123 (intencionado en multiforms)
     "keyword-arg-before-vararg",     # W1113 (angular __init__)
-
+    "http-response-with-content-type-json",  # R5102 — HttpResponse(content_type=...) a propósito
+    "http-response-with-json-dumps",          # R5101 — idem
+    "imported-auth-user",                     # E5142 — GenPerson/GenRole usan el User por defecto por diseño
+    "model-has-unicode",                      # W5102 — Log mantiene un shim __unicode__ (py2 legacy)
 ]
 enable = ["c-extension-no-member"]
 
@@ -383,6 +387,7 @@ contextmanager-decorators    = ["contextlib.contextmanager"]
 generated-members = [
     "_meta",
     "objects",
+    "formfield",
     "DoesNotExist",
     "MultipleObjectsReturned",
     "WARNING",

@@ -484,7 +484,7 @@ def gen_auth_permission(
 ):
     # Check if the GENPERMISSIONS settings is shutting down the PERMISSION
     # system control from CODENERIX
-    if hasattr(settings, "GENPERMISSIONS") and not settings.GENPERMISSIONS:
+    if not getattr(settings, "GENPERMISSIONS", True):
         if not explained:
             return True
         else:
@@ -711,11 +711,11 @@ class GenBase(ContextMixin):
     # Constants
     BASE_URL = getattr(settings, "BASE_URL", "")
     DEFAULT_STATIC_PARTIAL_ROWS = os.path.join(
-        settings.STATIC_URL,
+        cast(str, settings.STATIC_URL),
         "codenerix/partials/rows.html",
     )
     DEFAULT_STATIC_PARTIAL_SUMMARY = os.path.join(
-        settings.STATIC_URL,
+        cast(str, settings.STATIC_URL),
         "codenerix/partials/summary.html",
     )
 
@@ -5595,7 +5595,7 @@ class GenForeignKey(GenBase, View):
 
 # === FORMS ===
 # We don't use log system when PQPRO_CASSANDRA == TRUE
-if not (hasattr(settings, "PQPRO_CASSANDRA") and settings.PQPRO_CASSANDRA):
+if not getattr(settings, "PQPRO_CASSANDRA", False):
     from codenerix.models import Log, RemoteLog
 
     class LogList(GenList):

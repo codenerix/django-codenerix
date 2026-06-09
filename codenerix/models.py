@@ -149,12 +149,12 @@ class CodenerixModel(CodenerixModelBase):
         __searchF__:
     """  # noqa: E501
 
-    created = models.DateTimeField(  # type: ignore[var-annotated]
+    created = models.DateTimeField(
         _("Created"),
         editable=False,
         auto_now_add=True,
     )
-    updated = models.DateTimeField(  # type: ignore[var-annotated]
+    updated = models.DateTimeField(
         _("Updated"),
         editable=False,
         auto_now=True,
@@ -310,55 +310,55 @@ class Log(models.Model):  # pylint: disable=too-many-instance-attributes
     Control the possible log
     """
 
-    action_time = models.DateTimeField(  # type: ignore[var-annotated]
+    action_time = models.DateTimeField(
         "Date",
         auto_now=True,
     )
-    user = models.ForeignKey(  # type: ignore[var-annotated]
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="log",
     )
-    username = models.CharField(  # type: ignore[var-annotated]
+    username = models.CharField(
         "Username",
         max_length=200,
         blank=True,
         null=False,
         default="",
     )
-    content_type = models.ForeignKey(  # type: ignore[var-annotated]
+    content_type = models.ForeignKey(
         ContentType,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="log",
     )
-    object_id = models.TextField(  # type: ignore[var-annotated]
+    object_id = models.TextField(
         "Object id",
         blank=True,
         null=True,
     )
-    object_repr = models.CharField(  # type: ignore[var-annotated]
+    object_repr = models.CharField(
         "Object repr",
         max_length=200,
     )
-    action_flag = models.PositiveSmallIntegerField(  # type: ignore[var-annotated] # noqa: E501
+    action_flag = models.PositiveSmallIntegerField(
         _("Action"),
         choices=TYPE_ACTION,
     )
-    change_json = models.TextField(  # type: ignore[var-annotated]
+    change_json = models.TextField(
         "Json",
         blank=True,
         null=False,
     )
-    change_txt = models.TextField(  # type: ignore[var-annotated]
+    change_txt = models.TextField(
         "Txt",
         blank=True,
         null=False,
     )
-    snapshot_txt = models.TextField(  # type: ignore[var-annotated]
+    snapshot_txt = models.TextField(
         "Snapshot Txt",
         blank=True,
         null=False,
@@ -836,21 +836,21 @@ class RemoteLog(CodenerixModel):
     RemoteLog system
     """
 
-    user = models.ForeignKey(  # type: ignore[var-annotated]
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="remotelog",
     )
-    username = models.CharField(  # type: ignore[var-annotated]
+    username = models.CharField(
         "Username",
         max_length=200,
         blank=True,
         null=False,
         default="",
     )
-    data = models.TextField(  # type: ignore[var-annotated]
+    data = models.TextField(
         "Data",
         blank=False,
         null=False,
