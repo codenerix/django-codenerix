@@ -54,8 +54,7 @@ class EmailMessage(mail.EmailMessage):
             if settings.DEBUG and hasattr(settings, "CLIENTS"):
                 # Warn this is deprecated in favor of FIXED_EMAIL_TARGETS
                 raise DeprecationWarning(
-                    "CLIENTS setting is deprecated "
-                    "use FIXED_EMAIL_TARGETS instead",
+                    "CLIENTS setting is deprecated use FIXED_EMAIL_TARGETS instead",
                 )
             fixed_clients = getattr(settings, "FIXED_EMAIL_TARGETS", None)
             if fixed_clients:
@@ -116,6 +115,8 @@ class SSLEmailBackend(EmailBackend):
             except smtplib.SMTPException:
                 if not self.fail_silently:
                     raise
+
+        return False
 
 
 def get_connection(

@@ -1,5 +1,5 @@
 # from django.conf import settings
-from haystack.backends.elasticsearch2_backend import (  # type: ignore[import-not-found] # noqa: E501
+from haystack.backends.elasticsearch2_backend import (
     Elasticsearch2SearchBackend,
     Elasticsearch2SearchEngine,
 )
@@ -34,7 +34,7 @@ class AsciifoldingElasticBackend(Elasticsearch2SearchBackend):
     def build_schema(self, fields):
         content_field_name, mapping = super().build_schema(fields)
 
-        for field_name, field_class in fields.items():
+        for _, field_class in fields.items():
             field_mapping = mapping[field_class.index_fieldname]
 
             if field_mapping["type"] == "string" and field_class.indexed:
@@ -46,6 +46,11 @@ class AsciifoldingElasticBackend(Elasticsearch2SearchBackend):
 
             mapping.update({field_class.index_fieldname: field_mapping})
         return (content_field_name, mapping)
+
+    def extract_file_contents(self, *args, **kwargs):
+        raise NotImplementedError(
+            "AsciifoldingElasticSearchEngine does not support file content extraction."
+        )
 
 
 class AsciifoldingElasticSearchEngine(Elasticsearch2SearchEngine):

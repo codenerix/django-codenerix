@@ -22,9 +22,7 @@ import importlib
 import io
 import json
 from dataclasses import dataclass, field
-from typing import Any, Dict, Literal, Optional, overload
-
-from yattag import Doc  # type: ignore
+from typing import Any, Literal, cast, overload
 
 try:
     import pyotp
@@ -59,9 +57,10 @@ from django.utils import dateparse
 from django.utils.encoding import smart_str
 from django.utils.http import urlsafe_base64_encode
 from django.utils.safestring import SafeString
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as __
 from django.views.generic.base import View
 from unidecode import unidecode
+from yattag import Doc
 
 
 def epochdate(timestamp):
@@ -74,26 +73,16 @@ def epochdate(timestamp):
     """
 
     dt = datetime.fromtimestamp(float(timestamp)).timetuple()
-    fecha = "{:d}-{:02d}-{:02d}".format(dt.tm_year, dt.tm_mon, dt.tm_mday)
-    hora = "{:02d}:{:02d}:{:02d}".format(dt.tm_hour, dt.tm_min, dt.tm_sec)
+    fecha = f"{dt.tm_year:d}-{dt.tm_mon:02d}-{dt.tm_mday:02d}"
+    hora = f"{dt.tm_hour:02d}:{dt.tm_min:02d}:{dt.tm_sec:02d}"
     return (fecha, hora)
 
 
 def date2string(dtime, formt, default):
-    try:
-        list_type = [
-            str,
-            unicode,
-        ]
-    except NameError:
-        list_type = [
-            str,
-        ]
-
     if dtime:
         if ("year" in dir(dtime)) and (dtime.year < 1900):
             return default
-        elif type(dtime) in list_type:
+        elif isinstance(dtime, str):
             return dtime
         else:
             return dtime.strftime(formt)
@@ -105,8 +94,8 @@ def daterange_filter(value, variable):
     start = dateparse.parse_datetime(value["startDate"])
     end = dateparse.parse_datetime(value["endDate"])
     result = {
-        "{}__gte".format(variable): start,
-        "{}__lte".format(variable): end,
+        f"{variable}__gte": start,
+        f"{variable}__lte": end,
     }
     return result
 
@@ -138,29 +127,29 @@ def zeropad(number, width):
 
 def monthname(value):
     if value == 1:
-        return _("January")
+        return __("January")
     elif value == 2:
-        return _("February")
+        return __("February")
     elif value == 3:
-        return _("March")
+        return __("March")
     elif value == 4:
-        return _("April")
+        return __("April")
     elif value == 5:
-        return _("May")
+        return __("May")
     elif value == 6:
-        return _("June")
+        return __("June")
     elif value == 7:
-        return _("July")
+        return __("July")
     elif value == 8:
-        return _("August")
+        return __("August")
     elif value == 9:
-        return _("September")
+        return __("September")
     elif value == 10:
-        return _("Octuber")
+        return __("Octuber")
     elif value == 11:
-        return _("November")
+        return __("November")
     elif value == 12:
-        return _("December")
+        return __("December")
     else:
         return None
 
@@ -216,19 +205,19 @@ def get_profiled_paths(path, user, lang, extension):
         profile = get_profile(user)
 
         # Define the base_path to use
-        paths.append("{}.{}".format(user.username, lang))
+        paths.append(f"{user.username}.{lang}")
         paths.append(user.username)
         if profile:
-            paths.append("{}.{}".format(profile, lang))
+            paths.append(f"{profile}.{lang}")
             paths.append(profile)
         if profile != "admin":
-            paths.append("user.{}".format(lang))
+            paths.append(f"user.{lang}")
             paths.append("user")
 
         # Add group paths
         if user.groups.count():
             for group in user.groups.all():
-                paths.append("{}.{}".format(group.name.lower(), lang))
+                paths.append(f"{group.name.lower()}.{lang}")
                 paths.append(group.name.lower())
 
     # Add an empty path
@@ -260,10 +249,10 @@ def get_template(template, user, lang, extension="html", raise_error=True):
     found = None
     for temp in templates:
         if len(temp):
-            addon = ".%s" % (temp)
+            addon = f".{temp}"
         else:
             addon = ""
-        target = "%s%s.%s" % (templatepath, addon, extension)
+        target = f"{templatepath}{addon}.{extension}"
         test.append(target)
         try:
             django_get_template(target)
@@ -278,9 +267,7 @@ def get_template(template, user, lang, extension="html", raise_error=True):
     else:
         if raise_error:
             raise OSError(
-                "I couldn't find a valid template, I have tried: {}".format(
-                    test,
-                ),
+                f"I couldn't find a valid template, I have tried: {test}",
             )
         else:
             return test
@@ -294,10 +281,10 @@ def get_static(desired, user, lang, default, extension="html", relative=False):
     found = None
     for temp in paths:
         if len(temp):
-            addon = ".%s" % (temp)
+            addon = f".{temp}"
         else:
             addon = ""
-        target = "%s%s.%s" % (basepath, addon, extension)
+        target = f"{basepath}{addon}.{extension}"
 
         # DEBUG
         if getattr(settings, "DEBUG_STATICS", False):
@@ -329,7 +316,7 @@ def get_static(desired, user, lang, default, extension="html", relative=False):
 
 
 def direct_to_template(request, template, lang):
-    template = get_template(template, request.user)
+    template = get_template(template, request.user, lang)
     return render(request, template, lang)
 
 
@@ -353,12 +340,7 @@ def model_inspect(obj):
         model = obj.__class__
 
     namesp = str(model)
-    namesp = (
-        namesp.replace("<class ", "")
-        .replace(">", "")
-        .replace("'", "")
-        .split(".")
-    )
+    namesp = namesp.replace("<class ", "").replace(">", "").replace("'", "").split(".")
 
     # Remember information
     info["appname"] = namesp[-3]
@@ -402,9 +384,9 @@ def upload_path(instance, filename):
     return string_path
 
 
-def get_class(func):
+def get_class(func) -> type[View] | None:
     if not getattr(func, "__closure__", None):
-        return
+        return None
 
     for closure in func.__closure__:
         contents = closure.cell_contents
@@ -418,6 +400,8 @@ def get_class(func):
         result = get_class(contents)
         if result:
             return result
+
+    return None
 
 
 def get_client_ip(request):
@@ -465,7 +449,7 @@ class CodenerixEncoder:
             if c not in nr:
                 nr += c
             else:
-                raise OSError(_("ERROR: dic has repeated elements"))
+                raise OSError(__("ERROR: dic has repeated elements"))
 
         # If no cfill
         if cfill is None:
@@ -604,7 +588,7 @@ class InMemoryZip:
 
     def writetofile(self, filename):
         """Writes the in-memory zip to a file."""
-        f = open(filename, "w")
+        f = open(filename, "wb")
         f.write(self.read())
         f.close()
 
@@ -615,15 +599,14 @@ def remove_getdisplay(field_name):
     """
     str_ini = "get_"
     str_end = "_display"
-    if (
-        str_ini == field_name[0 : len(str_ini)]
-        and str_end == field_name[(-1) * len(str_end) :]
-    ):
+    if str_ini == field_name[0 : len(str_ini)] and str_end == field_name[(-1) * len(str_end) :]:
         field_name = field_name[len(str_ini) : (-1) * len(str_end)]
     return field_name
 
 
-def trace_json_error(struct, path=[]):
+def trace_json_error(struct, path=None):
+    if path is None:
+        path = []
     found = None
     kind = type(struct)
     if kind is dict:
@@ -659,7 +642,7 @@ def qobject_builder_string_search(valid_fields, text, conditions="icontains"):
 
         temp = None
         for tfield in valid_fields:
-            qobject = Q(**{"{}__{}".format(tfield, conditions): word})
+            qobject = Q(**{f"{tfield}__{conditions}": word})
             if temp:
                 temp |= qobject
             else:
@@ -686,7 +669,7 @@ def form_answer(status, answer):
     # Encode answer
     answer_encoded = urlsafe_base64_encode(
         str.encode(json.dumps(answer, cls=DjangoJSONEncoder)),
-    ).decode()
+    )
 
     # Build success URL
     success_url = reverse_lazy(
@@ -699,7 +682,7 @@ def form_answer(status, answer):
 
 
 def JSONEncoder_newdefault(  # noqa: N802
-    kind=["uuid", "datetime", "date", "time", "decimal", "user"],
+    kind=None,
 ):
     """
     JSON Encoder newdfeault is a wrapper capable of encoding several kinds
@@ -707,6 +690,8 @@ def JSONEncoder_newdefault(  # noqa: N802
         from codenerix.helpers import JSONEncoder_newdefault
         JSONEncoder_newdefault()
     """
+    if kind is None:
+        kind = ["uuid", "datetime", "date", "time", "decimal", "user"]
     JSONEncoder_olddefault = json.JSONEncoder.default  # noqa: N806
 
     def JSONEncoder_wrapped(self, o):  # noqa: N802
@@ -769,16 +754,13 @@ class SearchFAutoFilter:
 
     @classmethod
     def get_options(cls):
-        return [
-            (f"{operation}{value}", label)
-            for (label, operation, value) in cls.options
-        ]
+        return [(f"{operation}{value}", label) for (label, operation, value) in cls.options]  # pyright: ignore[reportAttributeAccessIssue]
 
     @classmethod
     def get_lambda(cls, counterfield):
         def filtercount(filtering):
             filt = {counterfield: 0}
-            for label, operation, value in cls.options:
+            for _, operation, value in cls.options:  # pyright: ignore[reportAttributeAccessIssue]
                 key = f"{operation}{value}"
                 if filtering == key:
                     if operation is None:
@@ -823,13 +805,12 @@ def obj_to_html(  # pylint: disable=too-many-arguments
     obj: Any,
     *,
     depth: int = 1,
-    doc: Optional[Doc] = None,
-    tag: Optional[Any] = None,
-    text: Optional[Any] = None,
+    doc: Doc | None = None,
+    tag: Any | None = None,
+    text: Any | None = None,
     wrap: bool = True,
     _internal: Literal[False] = False,
-) -> tuple[str, SafeString]:
-    ...
+) -> tuple[str, SafeString]: ...
 
 
 @overload
@@ -837,13 +818,12 @@ def obj_to_html(  # pylint: disable=too-many-arguments
     obj: Any,
     *,
     depth: int = 1,
-    doc: Optional[Doc] = None,
-    tag: Optional[Any] = None,
-    text: Optional[Any] = None,
+    doc: Doc | None = None,
+    tag: Any | None = None,
+    text: Any | None = None,
     wrap: bool = True,
-    _internal: Literal[True] = True,
-) -> None:
-    ...
+    _internal: Literal[True],
+) -> None: ...
 
 
 def obj_to_html(  # pylint: disable=too-many-arguments
@@ -861,15 +841,12 @@ def obj_to_html(  # pylint: disable=too-many-arguments
     """
 
     if doc is None:
-        doc, tag, text = Doc().tagtext()
+        doc, tag, text = cast(Any, Doc().tagtext())
         doc.asis("<html>")
         doc.asis("<body>")
         if wrap:
             doc.asis(
-                '<div style="'
-                "word-break: break-all; "
-                "overflow-wrap: break-word;"
-                '">',
+                '<div style="word-break: break-all; overflow-wrap: break-word;">',
             )
 
     # If the object is an string, try to convert it
@@ -896,7 +873,7 @@ def obj_to_html(  # pylint: disable=too-many-arguments
         kind = "OBJ"
 
     if tag is None or text is None:
-        tag, text = doc.tagtext()
+        _, tag, text = doc.tagtext()
 
     if isinstance(pobj, dict):
         # If pobj is a dictionary, iterate through its items
@@ -936,7 +913,7 @@ def obj_to_html(  # pylint: disable=too-many-arguments
 
     elif kind == "XML":
         # If pobj has a toprettyxml method, assume it's an XML object
-        pretty_xml = pobj.toprettyxml(indent="\t")
+        pretty_xml = cast(Any, pobj).toprettyxml(indent="\t")
 
         # Remove empty lines from the pretty XML
         xml_str = os.linesep.join(
@@ -1014,19 +991,19 @@ class VirtualRequest:
     # Request data (using Django's real types)
     GET: QueryDict = field(default_factory=QueryDict)
     POST: QueryDict = field(default_factory=QueryDict)
-    FILES: Dict[str, SimpleUploadedFile] = field(default_factory=dict)
+    FILES: dict[str, SimpleUploadedFile] = field(default_factory=dict)
 
     # Headers, cookies, and body
-    headers: Dict[str, str] = field(default_factory=dict)
-    COOKIES: Dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
+    COOKIES: dict[str, str] = field(default_factory=dict)
     body: bytes = b""
 
     # User and session
     user: Any = field(default_factory=AnonymousUser)
-    session: Dict[str, Any] = field(default_factory=dict)
+    session: dict[str, Any] = field(default_factory=dict)
 
     # Default META dictionary for advanced cases
-    META: Dict[str, Any] = field(default_factory=dict)
+    META: dict[str, Any] = field(default_factory=dict)
 
     def get_full_path(self) -> str:
         """
@@ -1035,7 +1012,7 @@ class VirtualRequest:
         query_string = self.GET.urlencode()
         return f"{self.path}{'?' if query_string else ''}{query_string}"
 
-    def build_absolute_uri(self, location: Optional[str] = None) -> str:
+    def build_absolute_uri(self, location: str | None = None) -> str:
         """
         Builds an absolute URL using scheme and host.
         """

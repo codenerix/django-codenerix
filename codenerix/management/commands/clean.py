@@ -18,17 +18,8 @@
 # limitations under the License.
 
 import os
-
-try:
-    from subprocess import getstatusoutput
-
-    pythoncmd = "python3"
-except Exception:
-    from commands import (  # type: ignore[import-not-found,no-redef]
-        getstatusoutput,
-    )
-
-    pythoncmd = "python2"
+import shlex
+import subprocess
 
 from codenerix_lib.debugger import Debugger
 from django.conf import settings
@@ -47,11 +38,28 @@ class Command(BaseCommand, Debugger):
         # Get environment
         appname = settings.ROOT_URLCONF.split(".")[0]
         basedir = settings.BASE_DIR
-        appdir = os.path.abspath("{}/{}".format(basedir, appname))
-        cmd = (
-            f"find {appdir}/ -name '*.py[c|o]' -o "
-            "-name __pycache__ -exec rm -rf {} +"
+        appdir = os.path.abspath(f"{basedir}/{appname}")
+        cmd = [
+            "find",
+            f"{appdir}/",
+            "-name",
+            "*.py[c|o]",
+            "-o",
+            "-name",
+            "__pycache__",
+            "-exec",
+            "rm",
+            "-rf",
+            "{}",
+            "+",
+        ]
+        result = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
         )
-        status, output = getstatusoutput(cmd)
+        status, output = result.returncode, result.stdout.rstrip("\n")
         if status:
-            raise CommandError(f"{output}\nCommand was: {cmd}")
+            raise CommandError(f"{output}\nCommand was: {shlex.join(cmd)}")

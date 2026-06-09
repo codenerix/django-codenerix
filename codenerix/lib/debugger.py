@@ -24,7 +24,7 @@ import inspect
 import sys
 from os import getcwd
 
-from codenerix_lib.debugger import *  # noqa: F403,F401
+from codenerix_lib.debugger import *  # noqa: F403,F401 # pylint: disable=unused-import,wildcard-import,unused-wildcard-import  # pyright: ignore[reportWildcardImportFromLibrary]
 
 # Show a warning message with information about who is importing this library
 cf = inspect.currentframe()

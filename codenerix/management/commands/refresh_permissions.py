@@ -35,8 +35,7 @@ class Command(BaseCommand, Debugger):
             "--database",
             type=str,
             default="default",
-            help="Nominates a database to synchronize. "
-            "Defaults to the 'default' database.",
+            help="Nominates a database to synchronize. Defaults to the 'default' database.",
         )
 
     def handle(self, *args, **options):
@@ -50,7 +49,7 @@ class Command(BaseCommand, Debugger):
 
         # Get list of apps
         self.debug("Getting list of APPs", color="blue")
-        apps_config = apps.get_app_configs()
+        apps_config = list(apps.get_app_configs())
         apps_total = len(apps_config)
 
         # Create missins permissions
@@ -58,7 +57,7 @@ class Command(BaseCommand, Debugger):
         idx = 1
         for app_config in apps_config:
             self.debug(
-                "    -> {}/{} {}".format(idx, apps_total, app_config.label),
+                f"    -> {idx}/{apps_total} {app_config.label}",
                 color="cyan",
             )
             create_permissions(app_config, apps=apps, verbosity=0, using=db)
@@ -69,7 +68,7 @@ class Command(BaseCommand, Debugger):
         idx = 1
         for app_config in apps_config:
             self.debug(
-                "    -> {}/{} {}".format(idx, apps_total, app_config.label),
+                f"    -> {idx}/{apps_total} {app_config.label}",
                 color="cyan",
             )
             create_contenttypes(app_config, using=db)
@@ -84,14 +83,14 @@ class Command(BaseCommand, Debugger):
                 color="cyan",
                 tail=False,
             )
-            if hasattr(user, "person") and user.person:
+            if hasattr(user, "person") and user.person:  # pyright: ignore[reportAttributeAccessIssue]
                 self.debug(
                     "OK",
                     color="green",
                     head=False,
                 )
-                user.person.refresh_permissions(using=db)
-                person = user.person
+                user.person.refresh_permissions(using=db)  # pyright: ignore[reportAttributeAccessIssue]
+                person = user.person  # pyright: ignore[reportAttributeAccessIssue]
             else:
                 self.debug(
                     "NO PERSON",
@@ -102,8 +101,7 @@ class Command(BaseCommand, Debugger):
         # Remake groups permissions if we have at least one valid user
         if person:
             self.debug(
-                "Refreshing group permissions "
-                "(it may takes over a minute)... ",
+                "Refreshing group permissions (it may takes over a minute)... ",
                 color="blue",
                 tail=False,
             )
@@ -111,7 +109,6 @@ class Command(BaseCommand, Debugger):
             self.debug("DONE", color="green", head=False)
         else:
             self.debug(
-                "Can not refresh group permissions because I didn't "
-                "find a user with a Person",
+                "Can not refresh group permissions because I didn't find a user with a Person",
                 color="red",
             )

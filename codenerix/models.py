@@ -30,6 +30,7 @@ from django.db.models import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.dispatch.dispatcher import receiver
 from django.utils.encoding import force_str, smart_str
+from django.utils.functional import Promise
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django_stubs_ext.db.models import TypedModelMeta
@@ -103,7 +104,7 @@ class CodenerixModelBase(models.Model):
     # recolecta informacion de todas las clases que intervienen en la instancia
     # collects information from all classes that intervene in the instance
     def __init__(self, *args, **kwards):
-        self.CodenerixMeta = CodenerixMetaType()
+        self.CodenerixMeta = CodenerixMetaType()  # pylint: disable=invalid-name
 
         mro = self.__getmro__()
         for cl in reversed(mro):
@@ -129,7 +130,7 @@ class CodenerixModelBase(models.Model):
                                 elif isinstance(self.CodenerixMeta[key], list):
                                     self.CodenerixMeta[key] += list(value)
 
-        return super().__init__(*args, **kwards)
+        super().__init__(*args, **kwards)
 
 
 class CodenerixModel(CodenerixModelBase):
@@ -159,7 +160,7 @@ class CodenerixModel(CodenerixModelBase):
         auto_now=True,
     )
 
-    class Meta(TypedModelMeta):
+    class Meta(TypedModelMeta):  # pyright: ignore[reportIncompatibleVariableOverride]
         abstract = True
         default_permissions = (
             "add",
@@ -174,30 +175,35 @@ class CodenerixModel(CodenerixModelBase):
         abstract = None
 
     def __init__(self, *args, **kwards):
-        self.CodenerixMeta = CodenerixMetaType()
+        self.CodenerixMeta = CodenerixMetaType()  # pyright: ignore[reportAttributeAccessIssue]
         self.codenerix_uuid = None
         self.codenerix_request = None
-        return super().__init__(*args, **kwards)
+        super().__init__(*args, **kwards)
 
     def __strlog_add__(self):
         return ""
 
     def __strlog_update__(self, newobj):
+        del newobj  # Unused
         return ""
 
     def __strlog_delete__(self):
         return ""
 
-    def __limitQ__(self, info):  # noqa: N802
+    def __limitQ__(self, info):  # noqa: N802 # pylint: disable=invalid-name
+        del info  # Unused
         return {}
 
-    def __searchQ__(self, info, text):  # noqa: N802
+    def __searchQ__(self, info, text):  # noqa: N802 # pylint: disable=invalid-name
+        del info, text  # Unused
         return {}
 
-    def __searchF__(self, info):  # noqa: N802
+    def __searchF__(self, info):  # noqa: N802 # pylint: disable=invalid-name
+        del info  # Unused
         return {}
 
-    def lock_update(self, request=None):
+    def lock_update(self, request=None) -> Promise | None:  # pylint: disable=useless-return
+        del request  # Unused
         return None
 
     @property
@@ -220,17 +226,14 @@ class CodenerixModel(CodenerixModelBase):
 
     def internal_lock_delete(self):
         # if we have a specific lock delete from model
-        answer = self.lock_delete()
+        answer = self.lock_delete()  # pylint: disable=assignment-from-none
         if answer is None:
             # for each field
             for related in self._meta.get_fields():
                 # check if it is protected
-                if (
-                    "on_delete" in related.__dict__
-                    and related.on_delete == models.PROTECT
-                ):
+                if "on_delete" in related.__dict__ and related.on_delete == models.PROTECT:  # pyright: ignore[reportAttributeAccessIssue]
                     # if we have a name
-                    field = getattr(self, related.related_name, None)
+                    field = getattr(self, related.related_name, None)  # pyright: ignore[reportCallIssue, reportArgumentType, reportAttributeAccessIssue]
                     if field:
                         # try to get 'exists' function
                         f_exists = getattr(field, "exists", None)
@@ -238,24 +241,22 @@ class CodenerixModel(CodenerixModelBase):
                         if f_exists is None or f_exists():
                             # answer that the item is locked
                             answer = _(
-                                "Cannot delete item, relationship "
-                                "with %(model_name)s",
+                                "Cannot delete item, relationship with %(model_name)s",
                             ) % {
-                                "model_name": related.related_model._meta.verbose_name,  # noqa: E501
+                                "model_name": related.related_model._meta.verbose_name,  # noqa: E501  # pyright: ignore[reportOptionalMemberAccess]
                             }
                             break
         return answer
 
-    def lock_delete(self):
+    def lock_delete(self) -> Promise | None:
         return None
 
     # check lock update
     def clean(self):
-        locked = self.lock_update()
+        locked = self.lock_update()  # pylint: disable=assignment-from-none,assignment-from-no-return
         if locked is not None:
-            raise ValidationError(locked)
-        else:
-            return super().clean()
+            raise ValidationError(locked)  # pyright: ignore[reportArgumentType]
+        return super().clean()
 
 
 class GenInterface(CodenerixModelBase):
@@ -264,7 +265,7 @@ class GenInterface(CodenerixModelBase):
     the specified methods exists
     """
 
-    class Meta(TypedModelMeta):
+    class Meta(TypedModelMeta):  # pyright: ignore[reportIncompatibleVariableOverride]
         abstract = True
 
     class CodenerixMeta:
@@ -272,10 +273,8 @@ class GenInterface(CodenerixModelBase):
         force_methods = {'alias': ('method_name', 'Description'), }
         """
 
-        pass
-
     def __init__(self, *args, **kwards):
-        self.CodenerixMeta = CodenerixMetaType()
+        self.CodenerixMeta = CodenerixMetaType()  # pyright: ignore[reportAttributeAccessIssue]
         super().__init__(*args, **kwards)
 
         # revisamos que esten implementados los metodos indicados
@@ -288,17 +287,14 @@ class GenInterface(CodenerixModelBase):
                     getattr(self, method[0]),
                 ):
                     raise OSError(
-                        "Method {}() not found in class {}: {}".format(
-                            method[0],
-                            self._meta.object_name,
-                            method[1],
-                        ),
+                        f"Method {method[0]}() not found in class {self._meta.object_name}: {method[1]}",
                     )
-        return super().__init__(*args, **kwards)
+        super().__init__(*args, **kwards)
 
 
 @receiver(pre_delete)
 def codenerixmodel_delete_pre(sender, instance, **kwargs):
+    del sender, kwargs  # Unused
     if (
         not hasattr(instance, "name_models_list")
         and hasattr(instance, "internal_lock_delete")
@@ -309,7 +305,7 @@ def codenerixmodel_delete_pre(sender, instance, **kwargs):
             raise PermissionDenied(lock_delete)
 
 
-class Log(models.Model):
+class Log(models.Model):  # pylint: disable=too-many-instance-attributes
     """
     Control the possible log
     """
@@ -379,18 +375,17 @@ class Log(models.Model):
         if self.change_txt:
             cambios = json.loads(self.change_txt)
         else:
-            cambios = ""
+            cambios = {}
         for c in cambios:
             if isinstance(cambios[c], list):
-                text.append("{}: {}".format(cambios[c][0], cambios[c][1]))
+                text.append(f"{cambios[c][0]}: {cambios[c][1]}")
             else:
-                text.append("{}: {}".format(_(c), cambios[c]))
+                text.append(f"{_(c)}: {cambios[c]}")
 
         if view == "html":
+            li = "</li><li>".join(text)
             result = mark_safe(
-                "<ul><li>{}</li></ul>".format(
-                    "</li><li>".join(text),
-                ).replace(SEPARATOR, SEPARATOR_HTML),
+                f"<ul><li>{li}</li></ul>".replace(SEPARATOR, SEPARATOR_HTML),
             )
         else:
             result = "\n".join(text)
@@ -417,6 +412,7 @@ class Log(models.Model):
         return answer
 
     def __fields__(self, info):
+        del info  # Unused
         fields = []
         fields.append(("action_time", _("Date")))
         fields.append(("user__username", _("Actual user")))
@@ -431,7 +427,8 @@ class Log(models.Model):
         fields.append(("show", _("Txt")))
         return fields
 
-    def __searchQ__(self, info, text):  # noqa: N802
+    def __searchQ__(self, info, text):  # noqa: N802 # pylint: disable=invalid-name
+        del info  # Unused
         tf = {}
         tf["user"] = Q(user__username__icontains=text)
         tf["username"] = Q(username__icontains=text)
@@ -470,7 +467,8 @@ class Log(models.Model):
         tf["action_time"] = "datetime"
         return tf
 
-    def __searchF__(self, info):  # noqa: N802
+    def __searchF__(self, info):  # noqa: N802 # pylint: disable=invalid-name
+        del info  # Unused
         tf = {}
         tf["action_time"] = (
             _("Date"),
@@ -540,9 +538,9 @@ class GenLog(CodenerixModel):
 
     def post_save(self, log):
         # custom post save from application
-        pass
+        del log  # Unused
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         # Determine which database we are writing to
         using = kwargs.get("using") or self._state.db or "default"
 
@@ -552,16 +550,16 @@ class GenLog(CodenerixModel):
             user_id = user.pk
         else:
             user_id = None
-        username = user.username
+        username = user.username  # pyright: ignore[reportAttributeAccessIssue]
 
         model = apps.get_model(
             self._meta.app_label,
             self.__class__.__name__,
         )
-        isnew = True
         if self.pk is not None:
-            list_obj = model.objects.using(using).filter(pk=self.pk)
-            isnew = list_obj.count() == 0
+            isnew = not model.objects.using(using).filter(pk=self.pk).exists()
+        else:
+            isnew = True
             # raise IOError,self.__dict__
         # only attributes changes
         attrs = {}
@@ -571,12 +569,13 @@ class GenLog(CodenerixModel):
         if isnew:
             action = ADDITION
             pk = None
+            obj = None
         else:
             action = CHANGE
             pk = self.pk
             # Instance object
             # obj = model.objects.get(pk=self.pk)
-            obj = list_obj.get()
+            obj = model.objects.using(using).get(pk=self.pk)
             for key in obj._meta.get_fields():
                 key = key.name
                 # exclude manytomany
@@ -596,7 +595,6 @@ class GenLog(CodenerixModel):
 
         # comparison attributes
         # for key in self._meta.get_fields():
-        aux = None
         list_fields = [x.name for x in self._meta.get_fields()]
         for ffield in self._meta.get_fields():
             key = ffield.name
@@ -620,7 +618,6 @@ class GenLog(CodenerixModel):
                 # or (field != attrs_bd[key]):
                 if (key not in attrs_bd) or (field != attrs_bd[key]):
                     if field is not None or action == CHANGE:
-                        aux = ffield
                         field_txt = field
                         if field_txt is None:
                             field_txt = "---"
@@ -629,10 +626,7 @@ class GenLog(CodenerixModel):
 
                         try:
                             json.dumps(field, default=json_util.default)
-                            if (
-                                key not in attrs_bd
-                                or not self.CodenerixMeta.log_full
-                            ):
+                            if key not in attrs_bd or not self.CodenerixMeta.log_full:
                                 attrs[key] = field
                             else:
                                 if isinstance(
@@ -648,14 +642,11 @@ class GenLog(CodenerixModel):
                                         attrs_bd[key],
                                         field,
                                     )
-                        except Exception:
+                        except Exception:  # pylint: disable=broad-except
                             # If related, we don't do anything
                             if getattr(field, "all", None) is None:
                                 field = str(field)
-                                if (
-                                    key not in attrs_bd
-                                    or not self.CodenerixMeta.log_full
-                                ):
+                                if key not in attrs_bd or not self.CodenerixMeta.log_full:
                                     attrs[key] = field
                                 else:
                                     attrs[key] = (
@@ -664,29 +655,17 @@ class GenLog(CodenerixModel):
                                     )
 
                         if hasattr(ffield, "verbose_name"):
-                            try:
-                                is_string = isinstance(
-                                    ffield.verbose_name,
-                                    unicode,
-                                ) or isinstance(ffield.verbose_name, str)
-
-                            except NameError:
-                                is_string = isinstance(
-                                    ffield.verbose_name,
-                                    str,
-                                )
-
-                            if is_string:
-                                ffield_verbose_name = ffield.verbose_name
+                            if isinstance(
+                                ffield.verbose_name,  # pyright: ignore[reportAttributeAccessIssue]
+                                str,
+                            ):
+                                ffield_verbose_name = ffield.verbose_name  # pyright: ignore[reportAttributeAccessIssue]
                             else:
                                 ffield_verbose_name = str(
-                                    ffield.verbose_name,
+                                    ffield.verbose_name,  # pyright: ignore[reportAttributeAccessIssue]
                                 )
 
-                            if (
-                                key not in attrs_bd
-                                or not self.CodenerixMeta.log_full
-                            ):
+                            if key not in attrs_bd or not self.CodenerixMeta.log_full:
                                 attrs_txt[ffield_verbose_name] = force_str(
                                     field_txt,
                                     errors="replace",
@@ -694,27 +673,24 @@ class GenLog(CodenerixModel):
                             else:
                                 if attrs_bd[key] is None:
                                     attrs_bd[key] = "---"
+                                s1 = force_str(
+                                    attrs_bd[key],
+                                    errors="replace",
+                                )
+                                s2 = force_str(
+                                    field_txt,
+                                    errors="replace",
+                                )
+
                                 attrs_txt[key] = (
                                     ffield_verbose_name,
-                                    "{}{}{}".format(
-                                        force_str(
-                                            attrs_bd[key],
-                                            errors="replace",
-                                        ),
-                                        SEPARATOR,
-                                        force_str(
-                                            field_txt,
-                                            errors="replace",
-                                        ),
-                                    ),
+                                    f"{s1}{SEPARATOR}{s2}",
                                 )
 
         log = Log()
-        log.user_id = user_id
+        log.user_id = user_id  # pylint: disable=attribute-defined-outside-init  # pyright: ignore[reportAttributeAccessIssue]
         log.username = username
-        log.content_type_id = (
-            ContentType.objects.db_manager(using).get_for_model(self).pk
-        )
+        log.content_type_id = ContentType.objects.db_manager(using).get_for_model(self).pk  # pylint: disable=unused-variable,attribute-defined-outside-init  # pyright: ignore[reportAttributeAccessIssue]
         log.object_id = pk
         log.object_repr = force_str(self, errors="replace")[:200]
         try:
@@ -735,12 +711,12 @@ class GenLog(CodenerixModel):
                 default=json_util.default,
             )
         log.action_flag = action
-        if pk is None:
+        if obj is None:
             log.snapshot_txt = self.__strlog_add__()
         else:
             log.snapshot_txt = obj.__strlog_update__(self)
 
-        aux = super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
         if pk is None:
             # if new element, get pk
             log.object_id = self.pk
@@ -748,8 +724,6 @@ class GenLog(CodenerixModel):
 
         # custom post save from application
         self.post_save(log)
-
-        return aux
 
 
 class GenLogFull(GenLog):
@@ -762,6 +736,7 @@ class GenLogFull(GenLog):
 
 @receiver(post_delete)
 def codenerixmodel_delete_post(sender, instance, **kwargs):
+    del kwargs  # Unused
     if not hasattr(instance, "name_models_list") and issubclass(
         sender,
         GenLog,
@@ -771,7 +746,7 @@ def codenerixmodel_delete_post(sender, instance, **kwargs):
             user_id = user.pk
         else:
             user_id = None
-        username = user.username
+        username = user.username  # pyright: ignore[reportAttributeAccessIssue]
         action = DELETION
 
         attrs = {}
@@ -800,7 +775,7 @@ def codenerixmodel_delete_post(sender, instance, **kwargs):
             else:
                 try:
                     field = getattr(instance, key, None)
-                except Exception:
+                except Exception:  # pylint: disable=broad-except
                     field = None
 
             # If we have information to register
@@ -809,7 +784,7 @@ def codenerixmodel_delete_post(sender, instance, **kwargs):
                     attrs[key] = field.pk
                 else:
                     try:
-                        json.dump(field, default=json_util.default)
+                        json.dumps(field, default=json_util.default)
                         attrs[key] = field
                     except TypeError:
                         # If related, we don't do anything
@@ -819,16 +794,7 @@ def codenerixmodel_delete_post(sender, instance, **kwargs):
                             attrs[key] = field_str
 
                 if hasattr(ffield, "verbose_name"):
-                    try:
-                        is_string = isinstance(
-                            ffield.verbose_name,
-                            unicode,
-                        ) or isinstance(ffield.verbose_name, str)
-
-                    except NameError:
-                        is_string = isinstance(ffield.verbose_name, str)
-
-                    if is_string:
+                    if isinstance(ffield.verbose_name, str):
                         ffield_verbose_name = ffield.verbose_name
                     else:
                         ffield_verbose_name = str(ffield.verbose_name)
@@ -840,16 +806,16 @@ def codenerixmodel_delete_post(sender, instance, **kwargs):
 
         try:
             representation = force_str(instance)[:200]
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             representation = "*Unknown*"
 
         # Get using from instance
-        using = getattr(instance._state, "db", "default")
+        using = getattr(instance._state, "db", "default")  # pylint: disable=protected-access
 
         log = Log()
-        log.user_id = user_id
+        log.user_id = user_id  # pylint: disable=attribute-defined-outside-init  # pyright: ignore[reportAttributeAccessIssue]
         log.username = username
-        log.content_type_id = (
+        log.content_type_id = (  # pylint: disable=unused-variable,attribute-defined-outside-init  # pyright: ignore[reportAttributeAccessIssue]
             ContentType.objects.db_manager(using)
             .get_for_model(
                 instance,
@@ -891,6 +857,7 @@ class RemoteLog(CodenerixModel):
     )
 
     def __fields__(self, info):
+        del info  # Unused
         fields = []
         fields.append(("pk", _("ID")))
         fields.append(("created", _("Created")))
@@ -900,5 +867,5 @@ class RemoteLog(CodenerixModel):
 
     def save(self, *args, **kwargs):
         if self.user:
-            self.username = self.user.username
+            self.username = self.user.username  # pylint: disable=no-member
         super().__init__(*args, **kwargs)

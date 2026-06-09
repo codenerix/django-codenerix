@@ -18,17 +18,7 @@
 # limitations under the License.
 
 import os
-
-try:
-    from subprocess import getstatusoutput
-
-    pythoncmd = "python3"
-except Exception:
-    from commands import (  # type: ignore[import-not-found,no-redef]
-        getstatusoutput,
-    )
-
-    pythoncmd = "python2"
+import subprocess
 
 from codenerix_lib.colors import colors
 from codenerix_lib.debugger import Debugger
@@ -47,32 +37,32 @@ class Command(BaseCommand, Debugger):
 
         # Reorder colors
         keys = []
-        for key in colors.keys():
-            keys.append((colors[key][0], colors[key][1], key))
+        for key, color in colors.items():
+            keys.append((color[0], color[1], key))
         keys.sort()
 
         # Show up all colors
         for color in keys:
             # Get the color information
-            (simplebit, subcolor) = colors[color[2]]
+            simplebit, subcolor = colors[color[2]]
             # Show it
             print(
-                "{:1d}:{:02d} - \033[{:1d};{:02d}m{:<14s}\033[1;00m{:<s}".format(  # noqa: E501
-                    simplebit,
-                    subcolor,
-                    simplebit,
-                    subcolor,
-                    color[2],
-                    color[2],
-                ),
+                f"{simplebit:1d}:{subcolor:02d} - "
+                f"\033[{simplebit:1d};{subcolor:02d}m{color[2]:<14s}"
+                f"\033[1;00m{color[2]:<s}",
             )
 
             # Get environment
             appname = settings.ROOT_URLCONF.split(".")[0]
             basedir = settings.BASE_DIR
-            appdir = os.path.abspath("{}/{}".format(basedir, appname))
-            status, output = getstatusoutput(
-                "find {}/ -type f -name '*.pyc' -delete".format(appdir),
+            appdir = os.path.abspath(f"{basedir}/{appname}")
+            result = subprocess.run(
+                ["find", f"{appdir}/", "-type", "f", "-name", "*.pyc", "-delete"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
             )
+            status, output = result.returncode, result.stdout.rstrip("\n")
             if status:
                 raise CommandError(output)

@@ -1,19 +1,11 @@
-from django.apps import apps  # type: ignore # pylint: disable=import-error
-from django.core.management.base import (  # type: ignore # pylint: disable=import-error # noqa: E501
-    BaseCommand,
-)
-from django.db import connection  # type: ignore # pylint: disable=import-error
-from django.db.models import (  # type: ignore # pylint: disable=import-error # noqa: E501
-    ForeignKey,
-    UUIDField,
-)
+from django.apps import apps
+from django.core.management.base import BaseCommand
+from django.db import connection
+from django.db.models import ForeignKey, UUIDField
 
 
 class Command(BaseCommand):
-    help = (
-        "Migrate UUID columns between CHAR(32) (hex) and "
-        "CHAR(36) (dashed) formats."
-    )
+    help = "Migrate UUID columns between CHAR(32) (hex) and CHAR(36) (dashed) formats."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -60,8 +52,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    "MODE: EXECUTE (Destructive). Changes WILL be "
-                    "applied to the database.",
+                    "MODE: EXECUTE (Destructive). Changes WILL be applied to the database.",
                 ),
             )
 
@@ -91,9 +82,7 @@ class Command(BaseCommand):
                     model._meta.db_table  # pylint: disable=protected-access
                 )
 
-                for (
-                    field
-                ) in (
+                for field in (
                     model._meta.get_fields()  # pylint: disable=protected-access # noqa: E501
                 ):
                     # Identify UUID fields (PKs, direct fields or FKs to UUIDs)
@@ -119,7 +108,7 @@ class Command(BaseCommand):
                               AND TABLE_NAME = %s
                               AND COLUMN_NAME = %s
                         """,
-                            [table_name, field.column],
+                            [table_name, field.column],  # pyright: ignore[reportAttributeAccessIssue]
                         )
 
                         result = cursor.fetchone()
@@ -134,7 +123,7 @@ class Command(BaseCommand):
                                 {
                                     "model": model.__name__,
                                     "table": table_name,
-                                    "column": field.column,
+                                    "column": field.column,  # pyright: ignore[reportAttributeAccessIssue]
                                     "current": current_length,
                                     "target": target_length,
                                     "null": field.null,
@@ -144,8 +133,7 @@ class Command(BaseCommand):
         if not operations:
             self.stdout.write(
                 self.style.SUCCESS(
-                    "All UUID fields are already "
-                    f"compliant with CHAR({target_length}).",
+                    f"All UUID fields are already compliant with CHAR({target_length}).",
                 ),
             )
             return
@@ -169,14 +157,12 @@ class Command(BaseCommand):
 
             # Print the plan regardless of mode
             self.stdout.write(
-                f"Plan: {op['model']} -> {table}.{col} "
-                f"({op['current']} -> {op['target']})",
+                f"Plan: {op['model']} -> {table}.{col} ({op['current']} -> {op['target']})",
             )
 
             # A. Alter Table Structure
             sql_commands.append(
-                f"ALTER TABLE `{table}` MODIFY `{col}` "
-                f"CHAR({target_length}) {null_stmt};",
+                f"ALTER TABLE `{table}` MODIFY `{col}` CHAR({target_length}) {null_stmt};",
             )
 
             # B. Convert Data
@@ -236,15 +222,14 @@ class Command(BaseCommand):
                 self.stdout.write(
                     self.style.SUCCESS("Migration completed successfully."),
                 )
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 self.stdout.write(
                     self.style.ERROR(
                         f"CRITICAL ERROR executing migration: {e}",
                     ),
                 )
                 self.stdout.write(
-                    "Note: Some ALTER statements might have "
-                    "succeeded before the error.",
+                    "Note: Some ALTER statements might have succeeded before the error.",
                 )
                 # Note: Due to MySQL implicit commits on DDL, rollback might
                 # not be fully possible if it failed halfway through an ALTER

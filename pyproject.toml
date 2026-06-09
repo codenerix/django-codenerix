@@ -1,0 +1,447 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-codenerix"
+dynamic = ["version"]
+description = "Codenerix it is a framework that goes on top of Django so it makes easier development and building of ERPs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Juanmi Taboada", email = "juanmi@juanmitaboada.com" },
+]
+keywords = ["django", "codenerix", "management", "erp", "crm"]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+dependencies = [
+    "Django>=5.2.14",
+    "Pillow",
+    "Unidecode",
+    "codenerix_lib>=1.0.30",
+    "elasticsearch>=7,<8",
+    "django-debug-toolbar>=4.4.2",
+    "django-debug-toolbar-request-history",
+    "django-haystack>=2.6.1",
+    "django-recaptcha>=1.2.1,<1.3",
+    "django-rosetta>=0.9.8",
+    "html5lib",
+    "jsonfield",
+    "ldap3",
+    "openpyxl==3.1.2",
+    "pyinstrument",
+    "pymongo",
+    "pyotp",
+    "python-dateutil",
+    "pytz",
+    "standard-imghdr",
+    "yattag",
+    "typing_extensions>=4.1; python_version < '3.11'",
+]
+
+[project.urls]
+Homepage = "https://github.com/codenerix/django-codenerix"
+Documentation = "http://doc.codenerix.com"
+Source = "https://github.com/codenerix/django-codenerix"
+
+# ----------------------------------------------------------------------------
+# Dev dependencies (PEP 735). Installed by default with `uv sync`.
+# Criteria unified with the channels monorepo root.
+# ----------------------------------------------------------------------------
+[dependency-groups]
+dev = [
+    "pre-commit",
+    # virtualenv-pyenv: needed by pre-commit hooks that build their own
+    # virtualenv when pyenv shims are active (same as channels).
+    "virtualenv-pyenv",
+    # ruff pinned to match the ruff-pre-commit mirror rev (v0.14.5) so
+    # `uv run ruff` and the hook never diverge.
+    "ruff==0.14.5",
+    "mypy",
+    "pylint",
+    "pylint-pytest",
+    "pylint-django",
+    "basedpyright",
+    # tox matrix across Python/Django; uv backend for env creation
+    "tox",
+    "tox-uv",
+    # Pytest stack
+    "pytest",
+    "pytest-django",
+    "pytest-mock",
+    "coverage",
+    # Markdown lint
+    "pymarkdownlnt",
+    # Type stubs (used by mypy)
+    "types-python-dateutil",
+    "types-pytz",
+    "types-PyYAML",
+    "types-requests",
+    "types-ldap3",
+    "types-openpyxl",
+    "pymongo-stubs",
+    "django-stubs[compatible-mypy]",
+    "django-stubs-ext",
+]
+
+# ----------------------------------------------------------------------------
+# Ruff — linter and formatter (copied from channels root)
+# ----------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+# E, W: pycodestyle | F: pyflakes | B: bugbear | I: isort
+# UP: pyupgrade | COM: flake8-commas
+select = ["E", "F", "W", "B", "I", "UP", "COM"]
+ignore = [
+    # ruff-format handles trailing commas; disable the conflicting rule.
+    "COM812",
+    # ruff-format owns line length; E501 only fires on unsplittable lines
+    # (long URLs/<script> tags inside strings) - pure noise.
+    "E501",
+    # Note: E203 / W503 / E704 do NOT exist as ruff rules. Do not re-add.
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-single-line = false
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = false
+line-ending = "auto"
+
+# ----------------------------------------------------------------------------
+# Pytest (base config from channels; asyncio options dropped - codenerix is
+# not async). NOTE: running tests needs DJANGO_SETTINGS_MODULE pointing at a
+# test settings module, which this repo does not have yet.
+# ----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+addopts = "-ra -q --import-mode=importlib"
+
+# ----------------------------------------------------------------------------
+# mypy. follow_imports/no_implicit_reexport per our channels conventions.
+# Django integration requires a settings module: uncomment the plugin and
+# [tool.django-stubs] once a test settings module exists.
+# ----------------------------------------------------------------------------
+[tool.mypy]
+python_version        = "3.10"
+# plugins             = ["mypy_django_plugin.main"]
+follow_imports        = "normal"
+warn_redundant_casts  = true
+warn_unused_ignores   = true
+# warn_return_any       = true
+# strict_equality       = true
+# disallow_any_generics = true
+# check_untyped_defs    = true
+# no_implicit_reexport  = true
+exclude = [
+    '^codenerix/(.*/)?(migrations|tests)/',
+]
+
+# [tool.django-stubs]
+# django_settings_module = "tests.settings"
+
+# Third-party deps without type stubs (extend as mypy surfaces more).
+[[tool.mypy.overrides]]
+module = [
+    "captcha.*",
+    "haystack.*",
+    "rosetta.*",
+    "debug_toolbar.*",
+    "django_recaptcha.*",
+    "jsonfield.*",
+    "yattag.*",
+    "standard_imghdr.*",
+    "html5lib.*",
+]
+ignore_missing_imports = true
+
+[tool.pyright]
+venvPath         = "."
+venv             = ".venv"
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
+include          = ["codenerix"]
+exclude = [
+    "**/__pycache__",
+    "**/.mypy_cache",
+    "**/.pytest_cache",
+    "**/.ruff_cache",
+    "**/.cache",
+    "**/.tox",
+    "**/.venv",
+    "**/env",
+    "**/migrations",
+    "**/tests",
+]
+
+# ----------------------------------------------------------------------------
+# Pylint  (full config brought from the channels `ws` member).
+# Adaptations: extension-pkg-allow-list lxml -> PIL; django-settings-module +
+# pylint_django commented until a test settings module exists; dropped
+# pylint_pydantic (no pydantic) and the `enchant` known-third-party.
+# ----------------------------------------------------------------------------
+[tool.pylint.main]
+analyse-fallback-blocks   = false
+extension-pkg-allow-list  = ["PIL"]
+# django-settings-module  = "tests.settings"
+fail-under                = 10
+ignore                    = ["CVS"]
+# ignore-patterns matches base NAMES only (emacs lock files here).
+# Path-based excludes must go in ignore-paths below.
+ignore-patterns           = [
+    "^\\.#",
+]
+ignore-paths              = [
+    "^codenerix/(.*/)?(migrations|tests)/.*$",
+]
+init-hook                 = 'import sys; sys.path.append(".")'
+jobs                      = 0
+limit-inference-results   = 100
+load-plugins              = ["pylint_pytest"]
+# load-plugins            = ["pylint_django", "pylint_pytest"]  # add pylint_django with settings
+persistent                = true
+py-version                = "3.10"
+recursive                 = false
+unsafe-load-any-extension = false
+
+[tool.pylint.basic]
+argument-naming-style        = "snake_case"
+attr-naming-style            = "snake_case"
+bad-names                    = ["foo", "bar", "baz", "toto", "tutu", "tata"]
+class-attribute-naming-style = "any"
+class-const-naming-style     = "UPPER_CASE"
+class-naming-style           = "PascalCase"
+const-naming-style           = "UPPER_CASE"
+docstring-min-length         = -1
+function-naming-style        = "snake_case"
+good-names                   = ["i", "j", "k", "ex", "Run", "_"]
+include-naming-hint          = false
+inlinevar-naming-style       = "any"
+method-naming-style          = "snake_case"
+module-naming-style          = "snake_case"
+no-docstring-rgx             = "^_"
+property-classes             = ["abc.abstractproperty"]
+typevar-rgx                  = "^_{0,2}(?![0-9])([A-Z][a-zA-Z0-9]*)$"
+variable-naming-style        = "snake_case"
+
+[tool.pylint.classes]
+check-protected-access-in-special-methods = false
+defining-attr-methods                     = ["__init__", "__new__", "setUp", "__post_init__"]
+exclude-protected                         = ["_asdict", "_fields", "_replace", "_source", "_make", "_meta"]
+valid-classmethod-first-arg               = ["cls"]
+valid-metaclass-classmethod-first-arg     = ["cls"]
+
+[tool.pylint.design]
+max-positional-arguments = 10
+max-args                 = 10
+max-attributes           = 7
+max-bool-expr            = 5
+max-branches             = 40
+max-locals               = 40
+max-parents              = 7
+max-public-methods       = 20
+max-returns              = 6
+max-statements           = 55
+min-public-methods       = 0
+
+[tool.pylint.exceptions]
+overgeneral-exceptions = ["builtins.BaseException", "builtins.Exception"]
+
+[tool.pylint.format]
+ignore-long-lines      = "^\\s*(# )?<?https?://\\S+>?$"
+indent-after-paren     = 4
+indent-string          = "    "
+max-line-length        = 100
+max-module-lines       = 5000
+single-line-class-stmt = false
+single-line-if-stmt    = false
+
+[tool.pylint.imports]
+allow-wildcard-with-all = false
+
+[tool.pylint.logging]
+logging-format-style = "old"
+logging-modules      = ["logging"]
+
+[tool.pylint."messages control"]
+confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFINED"]
+disable    = [
+    "raw-checker-failed",
+    "bad-inline-option",
+    "locally-disabled",
+    "file-ignored",
+    "suppressed-message",
+    "useless-suppression",
+    "deprecated-pragma",
+    "use-symbolic-message-instead",
+    "line-too-long",
+    "logging-fstring-interpolation",
+    "missing-module-docstring",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "no-else-return",
+    "cannot-enumerate-pytest-fixtures",
+    "duplicate-code",
+    # ruff already migrates %/.format -> f-string (UP031/UP032); avoid double-flagging
+    "consider-using-f-string",
+    "invalid-name",
+    "import-outside-toplevel",
+    # Django CBVs: deep mixin chains and state set in dispatch()/setup(), not __init__
+    "too-many-ancestors",
+    "attribute-defined-outside-init",
+    "broad-exception-caught",      # W0718 — capturas defensivas a propósito (envío email OTP, parseo JSON, etc.)
+    "broad-exception-raised",      # W0719 — raise Exception() de framework; cambiar el tipo rompería except de llamantes
+    "too-many-return-statements",  # R0911 — funciones legacy grandes (get_queryset, helpers)
+    "too-many-locals",             # R0914 — get_queryset tiene 131 locals, refactor fuera de alcance
+    "too-many-lines",              # C0302 — views.py 5689 líneas, dividir el módulo es otro proyecto
+    "wrong-import-position",       # C0413 — FP del patrón import condicional (if sys.version_info / assert_never)
+    "no-else-raise",                 # R1720
+    "no-else-break",                 # R1723
+    "consider-using-get",            # R1715
+    "consider-using-dict-items",     # C0206
+    "consider-iterating-dictionary", # C0201
+    "consider-using-ternary",        # R1706
+    "superfluous-parens",            # C0325
+    "super-with-arguments",          # R1725 (necesario en el lambda)
+    "arguments-differ",              # W0221 (overrides de dispatch Django)
+    "redefined-outer-name",          # W0621 (shadowing de nombres de módulo, ruidoso)
+    "eval-used",                     # W0123 (intencionado en multiforms)
+    "keyword-arg-before-vararg",     # W1113 (angular __init__)
+
+]
+enable = ["c-extension-no-member"]
+
+[tool.pylint.method_args]
+timeout-methods = [
+    "requests.api.delete",
+    "requests.api.get",
+    "requests.api.head",
+    "requests.api.options",
+    "requests.api.patch",
+    "requests.api.post",
+    "requests.api.put",
+    "requests.api.request",
+]
+
+[tool.pylint.miscellaneous]
+notes = ["FIXME", "XXX", "TODO"]
+
+[tool.pylint.refactoring]
+max-nested-blocks         = 8
+never-returning-functions = ["sys.exit", "argparse.parse_error"]
+
+[tool.pylint.reports]
+evaluation = "max(0, 0 if fatal else 10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10))"
+reports    = false
+score      = true
+
+[tool.pylint.similarities]
+ignore-comments      = true
+ignore-docstrings    = true
+ignore-imports       = true
+ignore-signatures    = true
+min-similarity-lines = 4
+
+[tool.pylint.spelling]
+max-spelling-suggestions           = 4
+spelling-ignore-comment-directives = "fmt: on,fmt: off,noqa:,noqa,nosec,isort:skip,mypy:"
+spelling-store-unknown-words       = false
+
+[tool.pylint.string]
+check-quote-consistency          = false
+check-str-concat-over-line-jumps = false
+
+[tool.pylint.typecheck]
+contextmanager-decorators    = ["contextlib.contextmanager"]
+# Django adds `_meta` via its model metaclass; pylint can't see it without
+# pylint_django (commented out until a test settings module exists).
+generated-members = [
+    "_meta",
+    "objects",
+    "DoesNotExist",
+    "MultipleObjectsReturned",
+    "WARNING",
+    "ERROR",
+    "SUCCESS",
+    "MIGRATE_HEADING"
+]
+ignore-none                  = true
+ignore-on-opaque-inference   = true
+ignored-checks-for-mixins    = [
+    "no-member",
+    "not-async-context-manager",
+    "not-context-manager",
+    "attribute-defined-outside-init",
+]
+ignored-classes              = [
+    "optparse.Values",
+    "thread._local",
+    "_thread._local",
+    "argparse.Namespace",
+]
+missing-member-hint          = true
+missing-member-hint-distance = 1
+missing-member-max-choices   = 1
+mixin-class-rgx              = ".*[Mm]ixin|^(Gen[A-Z]\\w*|MultiForm|BaseForm|Static[A-Z]\\w*|Dynamic[A-Z]\\w*|SearchFAutoFilter)$"
+disable = [
+    "attribute-defined-outside-init",
+    "consider-using-f-string",
+    "invalid-name",
+    "import-outside-toplevel",
+    "unused-argument",
+    "too-many-ancestors",
+    "too-many-branches",
+    "too-many-statements",
+    "protected-access",
+    "too-many-instance-attributes",
+    "consider-using-with",
+    "too-many-positional-arguments",
+    "too-many-arguments",
+    "too-many-nested-blocks",
+]
+
+[tool.pylint.variables]
+allow-global-unused-variables = true
+callbacks                     = ["cb_", "_cb"]
+dummy-variables-rgx           = "_+$|(_[a-zA-Z0-9_]*[a-zA-Z0-9]+?$)|dummy|^ignored_|^unused_" # wokeignore:rule=dummy
+ignored-argument-names        = "_.*|^ignored_|^unused_"
+init-import                   = false
+redefining-builtins-modules   = ["six.moves", "past.builtins", "future.builtins", "builtins", "io"]
+
+[tool.pymarkdown]
+# MD013 (line-length) is noise for prose; everything else stays on.
+plugins.md013.enabled = false
+
+[tool.hatch.version]
+path = "codenerix/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["codenerix"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["codenerix", "README.md", "CHANGELOG", "LICENSE"]

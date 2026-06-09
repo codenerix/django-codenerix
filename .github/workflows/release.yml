@@ -1,0 +1,55 @@
+name: Release
+
+# Publishes to PyPI when a GitHub Release is published.
+# Uses Trusted Publishing (OIDC): no token or secret required.
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Build & publish to PyPI
+    runs-on: ubuntu-latest
+
+    # The environment must match the one configured in the PyPI
+    # Trusted Publisher (Settings -> Publishing).
+    environment:
+      name: pypi
+      url: https://pypi.org/project/django-codenerix/
+
+    permissions:
+      id-token: write   # required for trusted publishing via OIDC
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Guard 1: the release tag must match __version__ in the source.
+      # Aborts before building if they drift, so we never publish a
+      # version that disagrees with the code.
+      - name: Tag must match __version__
+        run: |
+          file_v=$(grep -oP '__version__ = "\K[^"]+' codenerix/__init__.py)
+          tag_v="${GITHUB_REF_NAME#v}"
+          echo "file=$file_v  tag=$tag_v"
+          test "$file_v" = "$tag_v" || { echo "::error::tag $tag_v != __version__ $file_v"; exit 1; }
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build sdist + wheel
+        run: uv build
+
+      # Guard 2: abort the release if the wheel ships without static
+      # assets (the _codenerix symlink bug). Better to fail here than
+      # to push a broken package to PyPI.
+      - name: Verify static assets are bundled
+        run: |
+          count=$(unzip -l dist/*.whl | grep -cE '\.(js|css|html)$' || true)
+          echo "Bundled assets: $count"
+          if [ "$count" -lt 1 ]; then
+            echo "::error::Wheel has no static assets; broken build, not publishing."
+            exit 1
+          fi
+
+      - name: Publish to PyPI
+        run: uv publish

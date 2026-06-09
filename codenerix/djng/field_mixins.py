@@ -3,6 +3,15 @@ Mixin class methods to be added to django.forms.fields at runtime. These
 methods add additional error messages for AngularJS form validation.
 """
 
+# These mixins are injected into django.forms.fields.Field subclasses at
+# runtime, so every attribute they use (required, widget, error_messages,
+# validators, min_length, max_length, min_value, max_value, max_digits,
+# regex, default_validators, ...) is supplied by the host Field, not by the
+# mixin itself. basedpyright cannot model that runtime composition, so the
+# whole module is exempted from attribute-access checking rather than tagging
+# each line individually.
+# pyright: reportAttributeAccessIssue=false
+
 import re
 
 from django.forms import widgets
@@ -33,10 +42,8 @@ class DefaultFieldMixin:
         for item in self.validators:
             if getattr(item, "code", None) == "min_length":
                 message = ngettext_lazy(
-                    "Ensure this value has "
-                    "at least %(limit_value)d character",
-                    "Ensure this value has "
-                    "at least %(limit_value)d characters",
+                    "Ensure this value has at least %(limit_value)d character",
+                    "Ensure this value has at least %(limit_value)d characters",
                     "limit_value",
                 )
                 errors.append(
@@ -74,10 +81,7 @@ class DefaultFieldMixin:
                 errors.append(("$error.max", msg))
                 errkeys.append(key)
         for item in self.validators:
-            if (
-                getattr(item, "code", None) == "min_value"
-                and "min_value" not in errkeys
-            ):
+            if getattr(item, "code", None) == "min_value" and "min_value" not in errkeys:
                 errors.append(
                     (
                         "$error.min",
@@ -85,10 +89,7 @@ class DefaultFieldMixin:
                     ),
                 )
                 errkeys.append("min_value")
-            if (
-                getattr(item, "code", None) == "max_value"
-                and "max_value" not in errkeys
-            ):
+            if getattr(item, "code", None) == "max_value" and "max_value" not in errkeys:
                 errors.append(
                     (
                         "$error.max",
@@ -103,13 +104,10 @@ class DefaultFieldMixin:
         errkeys = []
         for key, msg in self.error_messages.items():
             if key == "invalid":
-                errors.append(("$error.{}".format(ng_error_key), msg))
+                errors.append((f"$error.{ng_error_key}", msg))
                 errkeys.append(key)
         for item in self.validators:
-            if (
-                getattr(item, "code", None) == "invalid"
-                and "invalid" not in errkeys
-            ):
+            if getattr(item, "code", None) == "invalid" and "invalid" not in errkeys:
                 errmsg = getattr(
                     item,
                     "message",
@@ -117,7 +115,7 @@ class DefaultFieldMixin:
                         "This input self does not contain valid data.",
                     ),
                 )
-                errors.append(("$error.{}".format(ng_error_key), errmsg))
+                errors.append((f"$error.{ng_error_key}", errmsg))
                 errkeys.append("invalid")
         return errors
 
@@ -159,7 +157,7 @@ class EmailFieldMixin(DefaultFieldMixin):
         validator = self.default_validators[0]
         user_regex = validator.user_regex.pattern.replace(r"\Z", "@")
         domain_patterns = [validator.domain_regex.pattern.replace(r"\Z", "$")]
-        domain_regex = "({})".format("|".join(domain_patterns))
+        domain_regex = f"({'|'.join(domain_patterns)})"
         email_regex = user_regex + domain_regex
         return re.sub(r"\(\?\<[^()]*?\)", "", email_regex)  # Strip lookbehinds
 
@@ -197,7 +195,7 @@ class RegexFieldMixin(DefaultFieldMixin):
     # Presumably Python Regex can't be translated 1:1 into JS regex. Any
     # hints on how to convert these?
     def get_potential_errors(self):
-        self.widget.attrs["ng-pattern"] = "/{}/".format(self.regex.pattern)
+        self.widget.attrs["ng-pattern"] = f"/{self.regex.pattern}/"
         errors = self.get_input_required_errors()
         errors.extend(self.get_min_max_length_errors())
         errors.extend(self.get_invalid_value_errors("pattern"))

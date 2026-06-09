@@ -1,7 +1,6 @@
 from django.db import models
-from multi_email_field.forms import (
-    MultiEmailField as MultiEmailFormField,  # type: ignore[import-not-found]
-)
+
+from codenerix.multi_email_field.forms import MultiEmailField as MultiEmailFormField
 
 
 class MultiEmailField(models.Field):
@@ -11,14 +10,15 @@ class MultiEmailField(models.Field):
         kwargs.setdefault("default", [])
         super().__init__(*args, **kwargs)
 
-    def formfield(self, **kwargs):
+    def formfield(self, *args, **kwargs):
         # This is a fairly standard way to set up some defaults
         # while letting the caller override them.
         defaults = {"form_class": MultiEmailFormField}
         defaults.update(kwargs)
-        return super().formfield(**defaults)
+        return super().formfield(*args, **defaults)
 
     def from_db_value(self, value, expression, connection, context=None):
+        del expression, connection, context  # Unused parameters
         if value is None:
             return []
         return value.splitlines()
@@ -28,6 +28,8 @@ class MultiEmailField(models.Field):
             return value
         elif isinstance(value, list):
             return "\n".join(value)
+        else:
+            return ""
 
     def to_python(self, value):
         if not value:

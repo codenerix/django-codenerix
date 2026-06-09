@@ -28,7 +28,7 @@ try:
     backend_module, backend_class = backend_string.rsplit(".", 1)
     smtp_backend = importlib.import_module(backend_module)
 except (ImportError, AttributeError) as e:
-    raise CommandError(f"Invalid EMAIL_BACKEND: {e!r}")
+    raise CommandError(f"Invalid EMAIL_BACKEND: {e!r}") from e
 
 
 class Command(BaseCommand, Debugger):
@@ -46,7 +46,7 @@ class Command(BaseCommand, Debugger):
 
     def handle(self, *args, **options):
         # Set verbosity level
-        self.VERBOSE = options.get("verbose")
+        self.VERBOSE = options.get("verbose")  # pylint: disable=attribute-defined-outside-init,invalid-name
 
         # Autoconfigure Debugger
         self.set_name("TEST ADMIN EMAIL")
@@ -73,7 +73,7 @@ class Command(BaseCommand, Debugger):
                 # After each open(), force SMTP debug
                 self.connection.set_debuglevel(1)
                 self.stderr.write("→ [PATCH] SMTP debuglevel=1 enabled")
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 pass
             return result
 
@@ -89,7 +89,7 @@ class Command(BaseCommand, Debugger):
 
         # Prepare the AdminEmailHandler to send emails to admins
         handler = AdminEmailHandler()
-        handler.fail_silently = False
+        handler.fail_silently = False  # pyright: ignore[reportAttributeAccessIssue]
 
         # === Patch EMIT ===
 
@@ -98,7 +98,7 @@ class Command(BaseCommand, Debugger):
 
         # Wrap the emit method to redirect stderr
         def emit_with_debug(record):
-            with contextlib.redirect_stderr(self.stderr):
+            with contextlib.redirect_stderr(self.stderr):  # pyright: ignore[reportArgumentType]
                 orig_emit(record)
 
         # Patch the emit method to use our debug version
@@ -114,10 +114,10 @@ class Command(BaseCommand, Debugger):
         # Get the original send_mail method from the handler
         orig_send_mail = handler.send_mail
 
-        # Wrap the send_mail method to avoid fail_silently
-        def send_mail_no_fail_silently(self, *args, **kwargs):
+        # Wrap the send_mail method to avoid fail_silently (simulate self in the first argument)
+        def send_mail_no_fail_silently(_, *args, **kwargs):
             kwargs["fail_silently"] = False
-            return orig_send_mail(*args, **kwargs)
+            return orig_send_mail(*args, **kwargs)  # pylint: disable=not-callable
 
         # Patch the send_mail method of the handler
         handler.send_mail = types.MethodType(
@@ -129,6 +129,7 @@ class Command(BaseCommand, Debugger):
 
         # Wrap the connection method to avoid fail_silently
         def connection_no_fail_silently(self, *args, **kwargs):
+            del args, kwargs  # Unused
             return get_connection(
                 backend=self.email_backend,
                 fail_silently=False,
@@ -167,7 +168,7 @@ class Command(BaseCommand, Debugger):
 
         try:
             handler.emit(record)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             self.error(f"→ An error occurred while sending the email: {e!r}")
             if self.VERBOSE:
                 self.error("→ Exception details:")

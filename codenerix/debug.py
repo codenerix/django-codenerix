@@ -18,7 +18,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import debug_toolbar  # type: ignore[import-not-found]
+import debug_toolbar
 from django import VERSION
 
 DEBUG_TOOLBAR_DEFAULT_PANELS = (
@@ -66,10 +66,7 @@ def autoload(
         INSTALLED_APPS += ("django_spaghetti",)
     if DEBUG and ROSETTA:
         INSTALLED_APPS += ("rosetta",)
-    if (
-        "django.contrib.admin" not in INSTALLED_APPS
-        and not CODENERIX_DISABLE_LOG
-    ):
+    if "django.contrib.admin" not in INSTALLED_APPS and not CODENERIX_DISABLE_LOG:
         INSTALLED_APPS += ("django.contrib.admin",)
     if DEBUG and ADMINSITE and not CODENERIX_DISABLE_LOG:
         EXTRA_MIDDLEWARES.append(
@@ -116,6 +113,8 @@ def autourl(
     from django.conf.urls import include
     from django.urls import re_path
 
+    del DEBUG_PANEL  # Not used
+
     if ROSETTA:
         URLPATTERNS += [re_path(r"^rosetta/", include("rosetta.urls"))]
 
@@ -123,7 +122,7 @@ def autourl(
         from django.contrib import admin
 
         if VERSION[0] < 2 and ADMINSITE:
-            URLPATTERNS += [re_path(r"^admin/", include(admin.site.urls))]
+            URLPATTERNS += [re_path(r"^admin/", include(admin.site.urls))]  # pyright: ignore[reportArgumentType]
         else:
             from django.urls import path
 
@@ -144,7 +143,7 @@ def autourl(
 def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
     # Backward compatibility for older configurations (CODENERIXSOURCE is
     # deprecated from now!)
-    if type(STATIC_URL) is bool:
+    if isinstance(STATIC_URL, bool):
         DEBUG = STATIC_URL  # noqa: N806
         STATIC_URL = "/static/"  # noqa: N806
 
@@ -192,7 +191,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-TW.js"></script> '  # noqa: E501
 
-    CODENERIX_CSS_DEBUG = (  # noqa: N806
+    CODENERIX_CSS_DEBUG = (
         ' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
@@ -213,11 +212,11 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.css" rel="stylesheet"> \
-    '  # noqa: E501
+    '
         + ""
-    )
+    )  # noqa: N806  # noqa: E501
 
-    CODENERIX_CSS_MIN = (  # noqa: N806
+    CODENERIX_CSS_MIN = (
         ' \
     <link href="{STATIC_URL}codenerix/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"> \
     <link href="{STATIC_URL}djangular/css/styles.css" rel="stylesheet"> \
@@ -238,11 +237,11 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
     <link href="{STATIC_URL}codenerix/lib/angular-quill/quill.snow.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/angular-hotkeys/hotkeys.min.css" rel="stylesheet"> \
     <link href="{STATIC_URL}codenerix/lib/bootstrap-switch/bootstrap-switch.min.css" rel="stylesheet"> \
-    '  # noqa: E501
+    '
         + ""
-    )
+    )  # noqa: N806  # noqa: E501
 
-    CODENERIX_JS_DEBUG = (  # noqa: N806
+    CODENERIX_JS_DEBUG = (
         ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.js"></script> \
@@ -290,11 +289,11 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-bootstrap-switch/angular-bootstrap-switch.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-qr/qrcode.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-qr/angular-qr.js"></script> \
-    '  # noqa: E501
+    '
         + locales
-    )
+    )  # noqa: N806  # noqa: E501
 
-    CODENERIX_JS_MIN = (  # noqa: N806
+    CODENERIX_JS_MIN = (
         ' \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/jquery/jquery.min.js"></script> \
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/moment/moment.min.js"></script> \
@@ -343,7 +342,7 @@ def codenerix_statics(DEBUG, STATIC_URL="/static/"):  # noqa: N803
     <script type="text/javascript" src="{STATIC_URL}codenerix/lib/angular-qr/angular-qr.min.js"></script> \
     '  # noqa: E501
         + locales
-    )
+    )  # noqa: N806
 
     # Load CODENERIX CSS
     if DEBUG:

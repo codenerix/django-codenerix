@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-13 14:15+0200\n"
+"POT-Creation-Date: 2026-06-08 07:41+0200\n"
 "PO-Revision-Date: 2026-02-02 10:11+0100\n"
 "Last-Translator: B7DNY3IT66KAJYWSRXJ64HAT47F3SKN5  <yo@br0th3r.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -107,7 +107,7 @@ msgstr "Pie cúbico"
 msgid "Cubic yard"
 msgstr "Yarda cúbica"
 
-#: codenerix/context.py:39
+#: codenerix/context.py:40
 msgid ""
 "WARNING: No version set to this code, add VERSION contant to your "
 "configuration"
@@ -115,119 +115,109 @@ msgstr ""
 "ATENCIÓN: No hay un número de versión configurada para este código, añade la "
 "constante VERSION a tu configuración"
 
-#: codenerix/context.py:102
+#: codenerix/context.py:103
 msgid "WARNING: CODENERIX_CSS is not set in your configuration!!!"
 msgstr "ATENCIÓN: CODENERIX_CSS no está presente en tu configuración!!!"
 
-#: codenerix/context.py:107
+#: codenerix/context.py:108
 msgid "WARNING: CODENERIX_JS is not set in your configuration!!!"
 msgstr "ATENCIÓN: CODENERIX_JS no está presente en tu configuración!!!"
 
-#: codenerix/context.py:116
-msgid " WARNING: DATERANGEPICKER_OPTIONS is not set in your configuration!!! "
-msgstr ""
-"ATENCIÓN: DATERANGEPICKER_OPTIONS no está presente en tu configuración!!!"
-
-#: codenerix/context.py:123
-msgid " WARNING: DATETIME_RANGE_FORMAT is not set in your configuration!!! "
-msgstr ""
-"ATENCIÓN: DATETIME_RANGE_FORMAT no está presente en tu configuración!!!"
-
-#: codenerix/context.py:133
+#: codenerix/context.py:128
 msgid "From"
 msgstr "Desde"
 
-#: codenerix/context.py:134
+#: codenerix/context.py:129
 msgid "To"
 msgstr "Para"
 
-#: codenerix/context.py:135
+#: codenerix/context.py:130
 msgid "Apply"
 msgstr "Aplicar"
 
-#: codenerix/context.py:136 codenerix/templates/codenerix/addmodal.html:43
+#: codenerix/context.py:131 codenerix/templates/codenerix/addmodal.html:43
 #: codenerix/templates/codenerix/addmodal.html:44
 #: codenerix/templates/codenerix/formmodal.html:73
 #: codenerix/templates/codenerix/remote_log.html:29
 #: codenerix/templates/codenerix/remote_log.html:30
 #: codenerix/templates/codenerix/remote_log.html:40
-#: codenerix/templates/codenerix/remote_log.html:41 codenerix/views.py:693
+#: codenerix/templates/codenerix/remote_log.html:41
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: codenerix/context.py:137
+#: codenerix/context.py:132
 msgid "Su"
 msgstr "Do"
 
-#: codenerix/context.py:138
+#: codenerix/context.py:133
 msgid "Mo"
 msgstr "Lu"
 
-#: codenerix/context.py:139
+#: codenerix/context.py:134
 msgid "Tu"
 msgstr "Ma"
 
-#: codenerix/context.py:140
+#: codenerix/context.py:135
 msgid "We"
 msgstr "Mi"
 
-#: codenerix/context.py:141
+#: codenerix/context.py:136
 msgid "Th"
 msgstr "Ju"
 
-#: codenerix/context.py:142
+#: codenerix/context.py:137
 msgid "Fr"
 msgstr "Vi"
 
-#: codenerix/context.py:143
+#: codenerix/context.py:138
 msgid "Sa"
 msgstr "Sa"
 
-#: codenerix/context.py:144 codenerix/helpers.py:141
+#: codenerix/context.py:139
 msgid "January"
 msgstr "Enero"
 
-#: codenerix/context.py:145 codenerix/helpers.py:143
+#: codenerix/context.py:140
 msgid "February"
 msgstr "Febrero"
 
-#: codenerix/context.py:146 codenerix/helpers.py:145
+#: codenerix/context.py:141
 msgid "March"
 msgstr "Marzo"
 
-#: codenerix/context.py:147 codenerix/helpers.py:147
+#: codenerix/context.py:142
 msgid "April"
 msgstr "Abril"
 
-#: codenerix/context.py:148 codenerix/helpers.py:149
+#: codenerix/context.py:143
 msgid "May"
 msgstr "Mayo"
 
-#: codenerix/context.py:149 codenerix/helpers.py:151
+#: codenerix/context.py:144
 msgid "June"
 msgstr "Junio"
 
-#: codenerix/context.py:150 codenerix/helpers.py:153
+#: codenerix/context.py:145
 msgid "July"
 msgstr "Julio"
 
-#: codenerix/context.py:151 codenerix/helpers.py:155
+#: codenerix/context.py:146
 msgid "August"
 msgstr "Agosto"
 
-#: codenerix/context.py:152 codenerix/helpers.py:157
+#: codenerix/context.py:147
 msgid "September"
 msgstr "Septiembre"
 
-#: codenerix/context.py:153
+#: codenerix/context.py:148
 msgid "October"
 msgstr "Octubre"
 
-#: codenerix/context.py:154 codenerix/helpers.py:161
+#: codenerix/context.py:149
 msgid "November"
 msgstr "Noviembre"
 
-#: codenerix/context.py:155 codenerix/helpers.py:163
+#: codenerix/context.py:150
 msgid "December"
 msgstr "Diciembre"
 
@@ -239,7 +229,7 @@ msgstr[0] "Asegúrate de que este valor tiene al menos %(limit_value)d carácter
 msgstr[1] ""
 "Asegúrate de que este valor tiene al menos %(limit_value)d caracteres"
 
-#: codenerix/djng/field_mixins.py:50
+#: codenerix/djng/field_mixins.py:48
 #, python-format
 msgid "Ensure this value has at most %(limit_value)d character"
 msgid_plural "Ensure this value has at most %(limit_value)d characters"
@@ -248,7 +238,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Asegúrate de que este valor no tiene más de %(limit_value)d caracteres"
 
-#: codenerix/djng/field_mixins.py:117
+#: codenerix/djng/field_mixins.py:106
 msgid "This input self does not contain valid data."
 msgstr "Este input no tiene datos válidos."
 
@@ -272,31 +262,23 @@ msgstr "Incorrecto, por favor inténtelo de nuevo."
 msgid "Error verifying input, please try again."
 msgstr "Error verificando la entrada, por favor inténtelo de nuevo."
 
-#: codenerix/forms.py:82
+#: codenerix/forms.py:83
 msgid "Invalid ID detected in SelectMultiple"
 msgstr "ID no válido detectado en SelectMultiple"
 
-#: codenerix/forms.py:161
+#: codenerix/forms.py:158
 msgid "Invalid color"
 msgstr "Color inválido"
 
-#: codenerix/helpers.py:159
-msgid "Octuber"
-msgstr "Octubre"
-
-#: codenerix/helpers.py:468
-msgid "ERROR: dic has repeated elements"
-msgstr "Error: El diccionario tiene elementos repetidos"
-
-#: codenerix/models.py:41 codenerix/models.py:409 codenerix/views.py:692
+#: codenerix/models.py:42 codenerix/models.py:404
 msgid "Add"
 msgstr "Añadir"
 
-#: codenerix/models.py:42 codenerix/models.py:411 codenerix/views.py:694
+#: codenerix/models.py:43 codenerix/models.py:406
 msgid "Change"
 msgstr "Cambiar"
 
-#: codenerix/models.py:43 codenerix/models.py:413
+#: codenerix/models.py:44 codenerix/models.py:408
 #: codenerix/templates/codenerix/details.html:81
 #: codenerix/templates/codenerix/details.html:82
 #: codenerix/templates/codenerix/details.html:84
@@ -308,131 +290,123 @@ msgstr "Cambiar"
 #: codenerix/templates/codenerix/formmodal.html:62
 #: codenerix/templates/codenerix/formmodal.html:63
 #: codenerix/templates/codenerix/formmodal.html:65
-#: codenerix/templates/codenerix/formmodal.html:66 codenerix/views.py:698
+#: codenerix/templates/codenerix/formmodal.html:66
 msgid "Delete"
 msgstr "Borrar"
 
-#: codenerix/models.py:152 codenerix/models.py:896
-#: codenerix/models_people.py:108
+#: codenerix/models.py:153 codenerix/models.py:862
+#: codenerix/models_people.py:109
 msgid "Created"
 msgstr "Creado"
 
-#: codenerix/models.py:157
+#: codenerix/models.py:158
 msgid "Updated"
 msgstr "Actualizado"
 
-#: codenerix/models.py:241
+#: codenerix/models.py:244
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
 msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
 
-#: codenerix/models.py:352 codenerix/models.py:426 codenerix/models.py:481
+#: codenerix/models.py:348 codenerix/models.py:422 codenerix/models.py:479
 msgid "Action"
 msgstr "Acción"
 
-#: codenerix/models.py:421 codenerix/models.py:476 codenerix/views.py:696
+#: codenerix/models.py:417 codenerix/models.py:474
 msgid "Date"
 msgstr "Fecha"
 
-#: codenerix/models.py:422 codenerix/models.py:487 codenerix/models.py:897
+#: codenerix/models.py:418 codenerix/models.py:485 codenerix/models.py:863
 msgid "Actual user"
 msgstr "Usuario actual"
 
-#: codenerix/models.py:423 codenerix/models.py:492 codenerix/models.py:898
+#: codenerix/models.py:419 codenerix/models.py:490 codenerix/models.py:864
 msgid "Original user"
 msgstr "Usuario original"
 
-#: codenerix/models.py:425 codenerix/models.py:497
+#: codenerix/models.py:421 codenerix/models.py:495
 msgid "APP Name"
 msgstr "Nombre de la APP"
 
-#: codenerix/models.py:429 codenerix/models.py:485 codenerix/models.py:895
+#: codenerix/models.py:425 codenerix/models.py:483 codenerix/models.py:861
 msgid "ID"
 msgstr "ID"
 
-#: codenerix/models.py:431 codenerix/models.py:523
+#: codenerix/models.py:427 codenerix/models.py:521
 msgid "Txt"
 msgstr "Txt"
 
-#: codenerix/models.py:442
+#: codenerix/models.py:439
 msgid "add"
 msgstr "añadir"
 
-#: codenerix/models.py:443
+#: codenerix/models.py:440
 msgid "addition"
 msgstr "adición"
 
-#: codenerix/models.py:449
+#: codenerix/models.py:446
 msgid "change"
 msgstr "cambiar"
 
-#: codenerix/models.py:450
+#: codenerix/models.py:447
 msgid "changed"
 msgstr "cambiado"
 
-#: codenerix/models.py:456
+#: codenerix/models.py:453
 msgid "edit"
 msgstr "editar"
 
-#: codenerix/models.py:457
+#: codenerix/models.py:454
 msgid "edition"
 msgstr "edicción"
 
-#: codenerix/models.py:463
+#: codenerix/models.py:460
 msgid "delete"
 msgstr "borrar"
 
-#: codenerix/models.py:464
+#: codenerix/models.py:461
 msgid "deleted"
 msgstr "borrado"
 
-#: codenerix/models_people.py:57 codenerix/models_people.py:105
-#: codenerix_geodata/models.py:36 codenerix_geodata/models.py:46
-#: codenerix_geodata/models.py:115 codenerix_geodata/models.py:125
-#: codenerix_geodata/models.py:135 codenerix_geodata/views.py:106
-#: codenerix_geodata/views.py:125 codenerix_geodata/views.py:185
-#: codenerix_geodata/views.py:223 codenerix_geodata/views.py:313
-#: codenerix_geodata/views.py:378 codenerix_geodata/views.py:490
-#: codenerix_geodata/views.py:577 codenerix_geodata/views.py:747
-#: codenerix_geodata/views.py:833
+#: codenerix/models_people.py:57 codenerix/models_people.py:106
 msgid "Name"
 msgstr "Nombre"
 
-#: codenerix/models_people.py:63 codenerix/models_people.py:106
+#: codenerix/models_people.py:63 codenerix/models_people.py:107
 msgid "Surname"
 msgstr "Apellidos"
 
-#: codenerix/models_people.py:69 codenerix/models_people.py:110
+#: codenerix/models_people.py:69 codenerix/models_people.py:111
 msgid "Disabled from"
 msgstr "Deshabilitado desde"
 
-#: codenerix/models_people.py:104
+#: codenerix/models_people.py:105
 msgid "User"
 msgstr "Usuario"
 
-#: codenerix/models_people.py:107
+#: codenerix/models_people.py:108
 msgid "Email"
 msgstr "Email"
 
-#: codenerix/models_people.py:109 codenerix/models_people.py:132
+#: codenerix/models_people.py:110 codenerix/models_people.py:133
 msgid "Active"
 msgstr "Activo"
 
-#: codenerix/models_people.py:134
-#: codenerix/templatetags/codenerix_common.py:154 codenerix/views.py:1920
+#: codenerix/models_people.py:135
+#: codenerix/templatetags/codenerix_common.py:152
 msgid "Yes"
 msgstr "Si"
 
-#: codenerix/models_people.py:134
-#: codenerix/templatetags/codenerix_common.py:156 codenerix/views.py:1920
+#: codenerix/models_people.py:135
+#: codenerix/templatetags/codenerix_common.py:154
 msgid "No"
 msgstr "No"
 
-#: codenerix/models_people.py:180
+#: codenerix/models_people.py:186
 msgid "Administrator"
 msgstr "Administrador"
 
-#: codenerix/models_people.py:201
+#: codenerix/models_people.py:210
 msgid "Cannot delete to yourself"
 msgstr "No puedes borrarte a ti mismo"
 
@@ -444,14 +418,14 @@ msgstr "Añadir nuevo"
 #: codenerix/templates/codenerix/addmodal.html:41
 #: codenerix/templates/codenerix/addmodal.html:42
 #: codenerix/templates/codenerix/formmodal.html:70
-#: codenerix/templates/codenerix/formmodal.html:71 codenerix/views.py:715
+#: codenerix/templates/codenerix/formmodal.html:71
 msgid "Save"
 msgstr "Guardar"
 
 #: codenerix/templates/codenerix/details.html:67
 #: codenerix/templates/codenerix/details.html:68
 #: codenerix/templates/codenerix/details.html:146
-#: codenerix/templates/codenerix/details.html:147 codenerix/views.py:701
+#: codenerix/templates/codenerix/details.html:147
 msgid "Edit"
 msgstr "Editar"
 
@@ -466,7 +440,6 @@ msgstr "Volver"
 #: codenerix/templates/codenerix/detailsmodal_log.html:44
 #: codenerix/templates/codenerix/detailsmodal_log.html:99
 #: codenerix/templates/codenerix/detailsmodal_log.html:100
-#: codenerix/views.py:704
 msgid "Go back"
 msgstr "Volver"
 
@@ -488,7 +461,7 @@ msgstr "Editando"
 msgid "You will loose all your changes, are you sure?"
 msgstr "Perderá todos sus cambios, ¿está seguro?"
 
-#: codenerix/templates/codenerix/sublistmodal.html:27 codenerix/views.py:3961
+#: codenerix/templates/codenerix/sublistmodal.html:27
 msgid "List"
 msgstr "Lista"
 
@@ -497,357 +470,283 @@ msgstr "Lista"
 msgid "Close"
 msgstr "Cerrar"
 
-#: codenerix/templatetags/codenerix_common.py:288
+#: codenerix/templatetags/codenerix_common.py:284
 msgid "True"
 msgstr "Verdad"
 
-#: codenerix/templatetags/codenerix_common.py:290
+#: codenerix/templatetags/codenerix_common.py:286
 msgid "False"
 msgstr "Falso"
 
-#: codenerix/views.py:695
-msgid "Clean filters"
-msgstr "Limpiar filtros"
-
-#: codenerix/views.py:697 codenerix/views.py:3369
-msgid "Day"
-msgstr "Día"
-
-#: codenerix/views.py:699
-msgid "Done"
-msgstr "Hecho"
-
-#: codenerix/views.py:700
-msgid "Download"
-msgstr "Descargar"
-
-#: codenerix/views.py:702
-msgid "Error"
-msgstr "Error"
-
-#: codenerix/views.py:703
-msgid "Filters"
-msgstr "Filtros"
-
-#: codenerix/views.py:705 codenerix/views.py:3371 codenerix/widgets.py:943
-msgid "Hour"
-msgstr "Hora"
-
-#: codenerix/views.py:706 codenerix/views.py:3367
-msgid "Month"
-msgstr "Mes"
-
-#: codenerix/views.py:707 codenerix/views.py:3373
-msgid "Minute"
-msgstr "Minuto"
-
-#: codenerix/views.py:708
-msgid "Page number"
-msgstr "Número de página"
-
-#: codenerix/views.py:709
-msgid "Please wait"
-msgstr "Por favor espere"
-
-#: codenerix/views.py:710
-msgid "Print Excel"
-msgstr "Imprimir en Excel"
-
-#: codenerix/views.py:711
-msgid "Print CSV"
-msgstr "Imprimir en CSV"
-
-#: codenerix/views.py:712
-msgid "Print JSON"
-msgstr "Imprimir JSON"
-
-#: codenerix/views.py:713
-msgid "Print JSONL"
-msgstr "Imprimir JSONL"
-
-#: codenerix/views.py:714
-msgid "Print BSON"
-msgstr "Imprimir BSON"
-
-#: codenerix/views.py:716
-msgid "Save here"
-msgstr "Guardar aquí"
-
-#: codenerix/views.py:717
-msgid "Save & new"
-msgstr "Guardar y nuevo"
-
-#: codenerix/views.py:718
-msgid "Reload"
-msgstr "Recargar"
-
-#: codenerix/views.py:719
-msgid "Rows per page"
-msgstr "Filas por página"
-
-#: codenerix/views.py:720
-msgid "Search"
-msgstr "Buscar"
-
-#: codenerix/views.py:721 codenerix/views.py:3375
-msgid "Second"
-msgstr "Segundo"
-
-#: codenerix/views.py:722
-msgid "Time"
-msgstr "Hora"
-
-#: codenerix/views.py:723
-msgid "View"
-msgstr "Ver"
-
-#: codenerix/views.py:724
-msgid "Warning"
-msgstr "Atención"
-
-#: codenerix/views.py:725 codenerix/views.py:3365
-msgid "Year"
-msgstr "Año"
-
-#: codenerix/views.py:726
-msgid "registers"
-msgstr "registros"
-
-#: codenerix/views.py:786
-msgid "The view/model definition requires, that this user must be a superuser"
-msgstr ""
-"La definición de la vista/modelo, necesita que el usuario sea superuser"
-
-#: codenerix/views.py:799
-msgid "The view/model definition requires, that this user must be from staff"
-msgstr "La definición de la vista/modelo necesita que el usuario sea staff"
-
-#: codenerix/views.py:1298
-msgid ""
-"You have used get_object accidentally, this function has been designed only "
-"for action_permission: detail, change and delete"
-msgstr ""
-"Ha usado get_object accidentalmente, esta función ha sido diseñada sólo para "
-"add_permission: detail, change y delete"
-
-#: codenerix/views.py:1864
-msgid "Not allowed, this kind of requests has been prohibited for this view!"
-msgstr ""
-"No permitido, ¡este tipo de peticiones han sido prohibidas para esta vista!"
-
-#: codenerix/views.py:2396 codenerix/views.py:2409 codenerix/views.py:3021
-#: codenerix/views.py:3073
-msgid "All"
-msgstr "Todos"
-
-#: codenerix/views.py:3377
-msgid "Unknown"
-msgstr "Desconocidos"
-
-#: codenerix/views.py:3930
-msgid ""
-"The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX (in "
-"Megabytes) of the config"
-msgstr ""
-"Este fichero es demasiado grande ({}M). Cambie el parámetro "
-"FILE_DOWNLOAD_SIZE_MAX (en Megabytes) en la configuración"
-
-#: codenerix/views.py:3948
-msgid "Could not generate file: data_output is empty or None"
-msgstr "No se ha podido generar el fichero: data_output estás vacío o es None"
-
-#: codenerix/views.py:4804
-msgid "This shouldn't happen, state is not $dirty or $pristine"
-msgstr "Esto no debería ocurrir, el estado no es ni $dirty ni $pristine"
-
-#: codenerix/views.py:4996
-msgid "Method not allowed, use POST to delete or DELETE on the detail url"
-msgstr ""
-"Método no permitido, use POST para borrar o DELETE en la vista de detalles"
-
-#: codenerix/views.py:5742 codenerix/views.py:5785
-msgid "Manager"
-msgstr "Gestor"
-
-#: codenerix/views.py:5742
-msgid "Log"
-msgstr "Log"
-
-#: codenerix/views.py:5760
-msgid "Identification"
-msgstr "Identificación"
-
-#: codenerix/views.py:5770
-msgid "Changes"
-msgstr "Cambios"
-
-#: codenerix/views.py:5785
-msgid "RemoteLog"
-msgstr "Log Remoto"
-
-#: codenerix/widgets.py:103
+#: codenerix/widgets.py:89
 msgid "Press * and select an option"
 msgstr "Presione * y selección una opción"
 
-#: codenerix/widgets.py:289
+#: codenerix/widgets.py:249
 msgid "Select an option"
 msgstr "Seleccione una opción"
 
-#: codenerix/widgets.py:585 codenerix/widgets.py:589
+#: codenerix/widgets.py:502 codenerix/widgets.py:506
 msgid "Press * or start typing"
 msgstr "Presione * o comience a escribir"
 
-#: codenerix/widgets.py:1065
+#: codenerix/widgets.py:812
+msgid "Hour"
+msgstr "Hora"
+
+#: codenerix/widgets.py:932
 msgid "Text Angular"
 msgstr "Text Angular"
 
-#: codenerix/widgets.py:1066
+#: codenerix/widgets.py:933
 msgid "NG Quill"
 msgstr "NG Quill"
 
-#: codenerix/widgets.py:1067
+#: codenerix/widgets.py:934
 msgid "Source code"
 msgstr "Código fuente"
 
-#: codenerix/widgets.py:1068
+#: codenerix/widgets.py:935
 msgid "Preview"
 msgstr "Previsualización"
 
-#: codenerix/widgets.py:1229
+#: codenerix/widgets.py:1061
 msgid "Field deleted in the template"
 msgstr "Campo borrado en el template"
 
-#: codenerix/widgets.py:1303
+#: codenerix/widgets.py:1134
 msgid "We are working on this plugin, it will be ready for next version"
 msgstr ""
 "Estamos trabajando en este plugin, estará listo en la siguiente versión"
 
-#: codenerix_geodata/forms.py:46 codenerix_geodata/forms.py:62
-#: codenerix_geodata/forms.py:78 codenerix_geodata/forms.py:94
-#: codenerix_geodata/forms.py:110 codenerix_geodata/forms.py:125
-msgid "Details"
-msgstr "Detalles"
+#~ msgid ""
+#~ " WARNING: DATERANGEPICKER_OPTIONS is not set in your configuration!!! "
+#~ msgstr ""
+#~ "ATENCIÓN: DATERANGEPICKER_OPTIONS no está presente en tu configuración!!!"
 
-#: codenerix_geodata/management/commands/populate_geodata.py:235
-msgid "Populates Continent, Country and City models"
-msgstr "Inserta Continentes, Paises y modelos de Ciudades"
+#~ msgid " WARNING: DATETIME_RANGE_FORMAT is not set in your configuration!!! "
+#~ msgstr ""
+#~ "ATENCIÓN: DATETIME_RANGE_FORMAT no está presente en tu configuración!!!"
 
-#: codenerix_geodata/models.py:51 codenerix_geodata/models.py:67
-#: codenerix_geodata/models.py:77 codenerix_geodata/models.py:82
-#: codenerix_geodata/models.py:99 codenerix_geodata/models.py:110
-#: codenerix_geodata/models.py:141 codenerix_geodata/models.py:158
-#: codenerix_geodata/models.py:168 codenerix_geodata/models.py:174
-#: codenerix_geodata/models.py:191 codenerix_geodata/models.py:201
-#: codenerix_geodata/views.py:184 codenerix_geodata/views.py:312
-#: codenerix_geodata/views.py:489
-msgid "Code"
-msgstr "Código"
+#~ msgid "Octuber"
+#~ msgstr "Octubre"
 
-#: codenerix_geodata/models.py:83 codenerix_geodata/models.py:100
-msgid "Continent"
-msgstr "Continente"
+#~ msgid "ERROR: dic has repeated elements"
+#~ msgstr "Error: El diccionario tiene elementos repetidos"
 
-#: codenerix_geodata/models.py:140 codenerix_geodata/models.py:157
-#: codenerix_geodata/models.py:206 codenerix_geodata/models.py:225
-#: codenerix_geodata/models.py:234 codenerix_geodata/models.py:254
-#: codenerix_geodata/views.py:752
-msgid "Country"
-msgstr "País"
+#~ msgid "Clean filters"
+#~ msgstr "Limpiar filtros"
 
-#: codenerix_geodata/models.py:173 codenerix_geodata/models.py:190
-#: codenerix_geodata/models.py:207 codenerix_geodata/models.py:235
-#: codenerix_geodata/models.py:255
-msgid "Region"
-msgstr "Región"
+#~ msgid "Day"
+#~ msgstr "Día"
 
-#: codenerix_geodata/models.py:208 codenerix_geodata/models.py:236
-#: codenerix_geodata/models.py:256 codenerix_geodata/views.py:750
-msgid "Province"
-msgstr "Provincia"
+#~ msgid "Done"
+#~ msgstr "Hecho"
 
-#: codenerix_geodata/models.py:209
-msgid "Timezone"
-msgstr "Zona horaria"
+#~ msgid "Download"
+#~ msgstr "Descargar"
 
-#: codenerix_geodata/models.py:226
-msgid "Time zone"
-msgstr "Zona horaria"
+#~ msgid "Error"
+#~ msgstr "Error"
 
-#: codenerix_geodata/models.py:237 codenerix_geodata/models.py:258
-msgid "City"
-msgstr "Ciudad"
+#~ msgid "Filters"
+#~ msgstr "Filtros"
 
-#: codenerix_geodata/models.py:238 codenerix_geodata/models.py:257
-msgid "Town"
-msgstr "Ciudad"
+#~ msgid "Month"
+#~ msgstr "Mes"
 
-#: codenerix_geodata/models.py:239
-msgid "Zip code"
-msgstr "Código Postal"
+#~ msgid "Minute"
+#~ msgstr "Minuto"
 
-#: codenerix_geodata/models.py:240 codenerix_geodata/models.py:260
-msgid "Address"
-msgstr "Dirección"
+#~ msgid "Page number"
+#~ msgstr "Número de página"
 
-#: codenerix_geodata/models.py:241 codenerix_geodata/models.py:261
-msgid "Phone"
-msgstr "Teléfono"
+#~ msgid "Please wait"
+#~ msgstr "Por favor espere"
 
-#: codenerix_geodata/models.py:259
-msgid "Zipcode"
-msgstr "Código Postal"
+#~ msgid "Print Excel"
+#~ msgstr "Imprimir en Excel"
 
-#: codenerix_geodata/views.py:186 codenerix_geodata/views.py:225
-#: codenerix_geodata/views.py:316 codenerix_geodata/views.py:392
-#: codenerix_geodata/views.py:495 codenerix_geodata/views.py:602
-#: codenerix_geodata/views.py:753 codenerix_geodata/views.py:858
-msgid "Code continent"
-msgstr "Código del Continente"
+#~ msgid "Print CSV"
+#~ msgstr "Imprimir en CSV"
 
-#: codenerix_geodata/views.py:187 codenerix_geodata/views.py:319
-#: codenerix_geodata/views.py:397 codenerix_geodata/views.py:498
-#: codenerix_geodata/views.py:607 codenerix_geodata/views.py:756
-#: codenerix_geodata/views.py:863
-msgid "Name continent"
-msgstr "Nombre del Continente"
+#~ msgid "Print JSON"
+#~ msgstr "Imprimir JSON"
 
-#: codenerix_geodata/views.py:230
-msgid "Continent name"
-msgstr "Nombre del Continente"
+#~ msgid "Print JSONL"
+#~ msgstr "Imprimir JSONL"
 
-#: codenerix_geodata/views.py:314 codenerix_geodata/views.py:493
-#: codenerix_geodata/views.py:751
-msgid "Code country"
-msgstr "Código del País"
+#~ msgid "Print BSON"
+#~ msgstr "Imprimir BSON"
 
-#: codenerix_geodata/views.py:315 codenerix_geodata/views.py:386
-#: codenerix_geodata/views.py:494 codenerix_geodata/views.py:596
-#: codenerix_geodata/views.py:852
-msgid "Name country"
-msgstr "Nombre del País"
+#~ msgid "Save here"
+#~ msgstr "Guardar aquí"
 
-#: codenerix_geodata/views.py:381 codenerix_geodata/views.py:580
-#: codenerix_geodata/views.py:591 codenerix_geodata/views.py:836
-#: codenerix_geodata/views.py:847
-msgid "Code self"
-msgstr "Código propio"
+#~ msgid "Save & new"
+#~ msgstr "Guardar y nuevo"
 
-#: codenerix_geodata/views.py:491
-msgid "Code region"
-msgstr "Código de región"
+#~ msgid "Reload"
+#~ msgstr "Recargar"
 
-#: codenerix_geodata/views.py:492 codenerix_geodata/views.py:585
-#: codenerix_geodata/views.py:841
-msgid "Name region"
-msgstr "Nombre de la región"
+#~ msgid "Rows per page"
+#~ msgstr "Filas por página"
 
-#: codenerix_geodata/views.py:748
-msgid "Time Zone"
-msgstr "Zona horaria"
+#~ msgid "Search"
+#~ msgstr "Buscar"
 
-#: codenerix_geodata/views.py:749
-msgid "Code province"
-msgstr "Código de provincia"
+#~ msgid "Second"
+#~ msgstr "Segundo"
+
+#~ msgid "Time"
+#~ msgstr "Hora"
+
+#~ msgid "View"
+#~ msgstr "Ver"
+
+#~ msgid "Warning"
+#~ msgstr "Atención"
+
+#~ msgid "Year"
+#~ msgstr "Año"
+
+#~ msgid "registers"
+#~ msgstr "registros"
+
+#~ msgid ""
+#~ "The view/model definition requires, that this user must be a superuser"
+#~ msgstr ""
+#~ "La definición de la vista/modelo, necesita que el usuario sea superuser"
+
+#~ msgid ""
+#~ "The view/model definition requires, that this user must be from staff"
+#~ msgstr "La definición de la vista/modelo necesita que el usuario sea staff"
+
+#~ msgid ""
+#~ "You have used get_object accidentally, this function has been designed "
+#~ "only for action_permission: detail, change and delete"
+#~ msgstr ""
+#~ "Ha usado get_object accidentalmente, esta función ha sido diseñada sólo "
+#~ "para add_permission: detail, change y delete"
+
+#~ msgid ""
+#~ "Not allowed, this kind of requests has been prohibited for this view!"
+#~ msgstr ""
+#~ "No permitido, ¡este tipo de peticiones han sido prohibidas para esta "
+#~ "vista!"
+
+#~ msgid "All"
+#~ msgstr "Todos"
+
+#~ msgid "Unknown"
+#~ msgstr "Desconocidos"
+
+#~ msgid ""
+#~ "The file is very big ({}M). Change the parameter FILE_DOWNLOAD_SIZE_MAX "
+#~ "(in Megabytes) of the config"
+#~ msgstr ""
+#~ "Este fichero es demasiado grande ({}M). Cambie el parámetro "
+#~ "FILE_DOWNLOAD_SIZE_MAX (en Megabytes) en la configuración"
+
+#~ msgid "Could not generate file: data_output is empty or None"
+#~ msgstr ""
+#~ "No se ha podido generar el fichero: data_output estás vacío o es None"
+
+#~ msgid "This shouldn't happen, state is not $dirty or $pristine"
+#~ msgstr "Esto no debería ocurrir, el estado no es ni $dirty ni $pristine"
+
+#~ msgid "Method not allowed, use POST to delete or DELETE on the detail url"
+#~ msgstr ""
+#~ "Método no permitido, use POST para borrar o DELETE en la vista de detalles"
+
+#~ msgid "Manager"
+#~ msgstr "Gestor"
+
+#~ msgid "Log"
+#~ msgstr "Log"
+
+#~ msgid "Identification"
+#~ msgstr "Identificación"
+
+#~ msgid "Changes"
+#~ msgstr "Cambios"
+
+#~ msgid "RemoteLog"
+#~ msgstr "Log Remoto"
+
+#~ msgid "Details"
+#~ msgstr "Detalles"
+
+#~ msgid "Populates Continent, Country and City models"
+#~ msgstr "Inserta Continentes, Paises y modelos de Ciudades"
+
+#~ msgid "Code"
+#~ msgstr "Código"
+
+#~ msgid "Continent"
+#~ msgstr "Continente"
+
+#~ msgid "Country"
+#~ msgstr "País"
+
+#~ msgid "Region"
+#~ msgstr "Región"
+
+#~ msgid "Province"
+#~ msgstr "Provincia"
+
+#~ msgid "Timezone"
+#~ msgstr "Zona horaria"
+
+#~ msgid "Time zone"
+#~ msgstr "Zona horaria"
+
+#~ msgid "City"
+#~ msgstr "Ciudad"
+
+#~ msgid "Town"
+#~ msgstr "Ciudad"
+
+#~ msgid "Zip code"
+#~ msgstr "Código Postal"
+
+#~ msgid "Address"
+#~ msgstr "Dirección"
+
+#~ msgid "Phone"
+#~ msgstr "Teléfono"
+
+#~ msgid "Zipcode"
+#~ msgstr "Código Postal"
+
+#~ msgid "Code continent"
+#~ msgstr "Código del Continente"
+
+#~ msgid "Name continent"
+#~ msgstr "Nombre del Continente"
+
+#~ msgid "Continent name"
+#~ msgstr "Nombre del Continente"
+
+#~ msgid "Code country"
+#~ msgstr "Código del País"
+
+#~ msgid "Name country"
+#~ msgstr "Nombre del País"
+
+#~ msgid "Code self"
+#~ msgstr "Código propio"
+
+#~ msgid "Code region"
+#~ msgstr "Código de región"
+
+#~ msgid "Name region"
+#~ msgstr "Nombre de la región"
+
+#~ msgid "Time Zone"
+#~ msgstr "Zona horaria"
+
+#~ msgid "Code province"
+#~ msgstr "Código de provincia"
 
 #~ msgid "APP Label"
 #~ msgstr "Título de la APP"

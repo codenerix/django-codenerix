@@ -20,7 +20,7 @@
 import time
 
 try:
-    import pyotp  # type: ignore[import-not-found]
+    import pyotp
 except ImportError:
     pyotp = None  # type: ignore[assignment]
 import base64
@@ -59,10 +59,7 @@ def hashed(string):
         hashlib.sha3_256,
         hashlib.sha3_512,
     ]
-    return [
-        algorithm(string, usedforsecurity=True).hexdigest()
-        for algorithm in algorightms
-    ]
+    return [algorithm(string, usedforsecurity=True).hexdigest() for algorithm in algorightms]
 
 
 def check_auth(user, debugger=None):
@@ -82,7 +79,7 @@ def check_auth(user, debugger=None):
         # Show debugger
         if debugger:
             debugger(
-                "check_auth(): Username: '{}'".format(user),
+                f"check_auth(): Username: '{user}'",
                 color="white",
             )
 
@@ -94,7 +91,7 @@ def check_auth(user, debugger=None):
             # Show debugger
             if debugger:
                 debugger(
-                    "check_auth(): user '{}' is an Administrator".format(user),
+                    f"check_auth(): user '{user}' is an Administrator",
                     color="green",
                 )
 
@@ -102,7 +99,7 @@ def check_auth(user, debugger=None):
             # Show debugger
             if debugger:
                 debugger(
-                    "check_auth(): user '{}' is a Normal User".format(user),
+                    f"check_auth(): user '{user}' is a Normal User",
                     color="cyan",
                 )
 
@@ -112,8 +109,7 @@ def check_auth(user, debugger=None):
                 # Show debugger
                 if debugger:
                     debugger(
-                        "check_auth(): no associated person found for "
-                        f"user '{user}'",
+                        f"check_auth(): no associated person found for user '{user}'",
                         color="yellow",
                     )
 
@@ -123,8 +119,7 @@ def check_auth(user, debugger=None):
                     # Show debugger
                     if debugger:
                         debugger(
-                            "check_auth(): there are People associated for "
-                            f"user '{user}'",
+                            f"check_auth(): there are People associated for user '{user}'",
                             color="cyan",
                         )
 
@@ -151,18 +146,12 @@ def check_auth(user, debugger=None):
             # Show debugger
             if debugger and person:
                 debugger(
-                    "check_auth(): user={} - person={} - disabled={}'".format(
-                        user,
-                        person,
-                        person.disabled,
-                    ),
+                    f"check_auth(): user={user} - person={person} - disabled={person.disabled}'",
                     color="cyan",
                 )
 
             # Check if the person is already disabled
-            if person and (
-                (person.disabled is None) or (person.disabled > timezone.now())
-            ):
+            if person and ((person.disabled is None) or (person.disabled > timezone.now())):
                 # There is a person, no disabled found or the found one is
                 # fine to log in
                 auth = user
@@ -205,6 +194,7 @@ class LimitedAuthMiddleware(Debugger):
         self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
         if self.__debugger:
             self.set_debug()
+        super().__init__()
 
         # Get response
         self.get_response = get_response
@@ -274,6 +264,16 @@ class LimitedAuthMiddleware(Debugger):
                     if turno > now.hour:
                         delta = turno % 24
                         break
+                else:
+                    # Unreachable: the appended sentinel (shifts[0] + 24) is
+                    # always greater than now.hour (0-23), so the loop always
+                    # breaks with delta bound. This guard keeps delta provably
+                    # bound for static analysis and fails loudly if the
+                    # SESSION_SHIFTS invariant is ever broken.
+                    raise AssertionError(
+                        "SESSION_SHIFTS produced no shift after the current "
+                        "hour; check the SESSION_SHIFTS setting",
+                    )
 
                 # Calculate caducity
                 kickout = datetime.datetime(
@@ -304,7 +304,7 @@ class LimitedAuthMiddleware(Debugger):
         self.process_request(request)
 
         # Get response
-        response = self.get_response(request)
+        response = self.get_response(request)  # pyright: ignore[reportOptionalCall]
 
         # Code to be executed for each request/response after the view
         # is called
@@ -328,7 +328,7 @@ class OTPAuth(ModelBackend, Debugger):
         # Keep going with super
         super().__init__(*args, **kwargs)
 
-    def authenticate(self, request, **kwargs):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         # Initialize answer
         answer = None
         started = time.time()
@@ -338,8 +338,10 @@ class OTPAuth(ModelBackend, Debugger):
             self.debug("Started authenticate(OTPAuth)", color="blue")
 
         # Get parameters
-        username = kwargs.get("username", None)
-        password = kwargs.get("password", None)
+        if "username" in kwargs:
+            username = kwargs.get("username", None)
+        if "password" in kwargs:
+            password = kwargs.get("password", None)
         authtoken = kwargs.get("authtoken", None)
         bymail = getattr(settings, "OTP_BYMAIL", False)
         byemail_interval = getattr(
@@ -377,11 +379,7 @@ class OTPAuth(ModelBackend, Debugger):
                     color="cyan",
                 )
 
-            if (
-                username is not None
-                and password is not None
-                and remote_otp is not None
-            ):
+            if username is not None and password is not None and remote_otp is not None:
                 # Try to find the user
                 try:
                     # Get the requested username
@@ -407,9 +405,7 @@ class OTPAuth(ModelBackend, Debugger):
                         direct_otp = None
                         local_otp = None
                         valid_window = {}
-                        if len(user_key) >= 32 or (
-                            bymail and remote_otp == "REQUEST_OTP"
-                        ):
+                        if len(user_key) >= 32 or (bymail and remote_otp == "REQUEST_OTP"):
                             # Prepare interval for OTP token
                             interval = {}
                             if bymail:
@@ -435,7 +431,7 @@ class OTPAuth(ModelBackend, Debugger):
                                         color="yellow",
                                     )
 
-                            if self.__debugger:
+                            if self.__debugger and direct_otp is not None and local_otp is not None:
                                 self.debug(
                                     "  > Local OTP Token: "
                                     f"'{local_otp.now()}' "
@@ -456,12 +452,11 @@ class OTPAuth(ModelBackend, Debugger):
                             # Show debug
                             if self.__debugger:
                                 self.debug(
-                                    f"User '{username}' requested OTP token, "
-                                    "sending it by email!",
+                                    f"User '{username}' requested OTP token, sending it by email!",
                                     color="yellow",
                                 )
                             # Send OTP token by email
-                            if user.email:
+                            if user.email and local_otp is not None:
                                 # Send email with OTP token
                                 local_otp_code = local_otp.now()
                                 try:
@@ -475,8 +470,7 @@ class OTPAuth(ModelBackend, Debugger):
                                 except Exception as e:
                                     if self.__debugger:
                                         self.debug(
-                                            f"Error sending OTP token to "
-                                            f"'{user.email}': {e}",
+                                            f"Error sending OTP token to '{user.email}': {e}",
                                             color="red",
                                         )
                                     # Log error
@@ -499,8 +493,7 @@ class OTPAuth(ModelBackend, Debugger):
 
                                 if self.__debugger:
                                     self.debug(
-                                        f"OTP token '{local_otp_code}' "
-                                        f"sent to '{user.email}'!",
+                                        f"OTP token '{local_otp_code}' sent to '{user.email}'!",
                                         color="green",
                                     )
                             else:
@@ -512,26 +505,24 @@ class OTPAuth(ModelBackend, Debugger):
 
                             # User not authenticated on this request
                             answer = None
-                        elif direct_otp.verify(remote_otp):
+                        elif direct_otp is not None and direct_otp.verify(remote_otp):
                             user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"  # noqa: E501
                             answer = user
 
                             # Show debug
                             if self.__debugger:
                                 self.debug(
-                                    f"User '{username}' authenticated "
-                                    "by Direct OTP!",
+                                    f"User '{username}' authenticated by Direct OTP!",
                                     color="green",
                                 )
-                        elif local_otp.verify(remote_otp, **valid_window):
+                        elif local_otp is not None and local_otp.verify(remote_otp, **valid_window):
                             user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"  # noqa: E501
                             answer = user
 
                             # Show debug
                             if self.__debugger:
                                 self.debug(
-                                    f"User '{username}' authenticated "
-                                    "by OTP!",
+                                    f"User '{username}' authenticated by OTP!",
                                     color="green",
                                 )
                         else:
@@ -590,7 +581,7 @@ class OTPAuthMiddleware(Debugger):
         in the post() method inside our class-view. Probably this will work in the dispatch().
     """  # noqa: E501
 
-    def __init__(self, get_response=None):
+    def __init__(self, get_response=None):  # pylint: disable=super-init-not-called
         # Configure debugger
         self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
         if self.__debugger:
@@ -655,7 +646,7 @@ class OTPAuthMiddleware(Debugger):
             self.debug("No authtoken found in your request", color="yellow")
 
         # Return as usually
-        response = self.get_response(request)
+        response = self.get_response(request)  # pyright: ignore[reportOptionalCall]
         return response
 
 
@@ -673,13 +664,14 @@ class TokenAuth(ModelBackend, Debugger):
         # Keep going with super
         super().__init__(*args, **kwargs)
 
-    def authenticate(self, request, **kwargs):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         # Show debugger
         if self.__debugger:
             self.debug("Started authenticate(TokenAuth)", color="blue")
 
         # Get parameters
-        username = kwargs.get("authuser", None)
+        if "authuser" in kwargs:
+            username = kwargs.get("authuser", None)
         token = kwargs.get("authtoken", None)
         string = kwargs.get("authjson", "")
 
@@ -694,8 +686,7 @@ class TokenAuth(ModelBackend, Debugger):
                 color="cyan",
             )
             self.debug(
-                f"  > Token [authtoken]: '{token}' <- authentication "
-                "token (signed or unsigned)",
+                f"  > Token [authtoken]: '{token}' <- authentication token (signed or unsigned)",
                 color="cyan",
             )
             self.debug(
@@ -716,7 +707,7 @@ class TokenAuth(ModelBackend, Debugger):
                 # Show debug
                 if self.__debugger:
                     self.debug(
-                        "User '{}' found!".format(username),
+                        f"User '{username}' found!",
                         color="green",
                     )
 
@@ -746,24 +737,18 @@ class TokenAuth(ModelBackend, Debugger):
                         else:
                             color = "purple"
                         self.debug(
-                            "  > {}: {}".format(key, value),
+                            f"  > {key}: {value}",
                             color=color,
                         )
 
                 # Get keys
-                if (
-                    config["key"]
-                    or config["master_unsigned"]
-                    or config["master_signed"]
-                ):
+                if config["key"] or config["master_unsigned"] or config["master_signed"]:
                     if self.__debugger:
                         self.debug(
                             "Getting master key",
                             color="white",
                         )
-                    if config["key"] and (
-                        config["master_unsigned"] or config["master_signed"]
-                    ):
+                    if config["key"] and (config["master_unsigned"] or config["master_signed"]):
                         # Assign master key
                         master = config["key"]
 
@@ -815,29 +800,26 @@ class TokenAuth(ModelBackend, Debugger):
                                     "PYOTP library not found, you can not "
                                     "use OTP signed/unsigned configuration",
                                 )
-                            else:
-                                try:
-                                    otp = str(
-                                        pyotp.TOTP(
-                                            base64.b32encode(
-                                                user_key.encode(),
-                                            ),
-                                        ).now(),
+                            try:
+                                otp = str(
+                                    pyotp.TOTP(
+                                        base64.b32encode(
+                                            user_key.encode(),
+                                        ).decode(),
+                                    ).now(),
+                                )
+                            except TypeError:
+                                if self.__debugger:
+                                    self.debug(
+                                        f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
+                                        color="yellow",
                                     )
-                                except TypeError:
-                                    if self.__debugger:
-                                        self.debug(
-                                            f"To use a OTP key you have to set a valid BASE32 string in the user's profile as your token, the string must be 16 characters long (first_name field in the user's model) - BASE32 string can have only this characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567='. User {user_key} key length is {len(user_key)} ",  # noqa: E501
-                                            color="yellow",
-                                        )
-                                    otp = None
+                                otp = None
                         else:
                             otp = None
 
                         # Remove user key if not in use
-                        if (not config["user_unsigned"]) and (
-                            not config["user_signed"]
-                        ):
+                        if (not config["user_unsigned"]) and (not config["user_signed"]):
                             user_key = None
                             if self.__debugger:
                                 self.debug(
@@ -919,12 +901,10 @@ class TokenAuth(ModelBackend, Debugger):
                         )
 
                 # Unsigned string
-                if (
-                    config["master_signed"]
-                    or config["user_signed"]
-                    or config["otp_signed"]
-                ):
+                if config["master_signed"] or config["user_signed"] or config["otp_signed"]:
                     tosign = user.username + string
+                else:
+                    tosign = ""
 
                 # Show debugger
                 if self.__debugger:
@@ -933,11 +913,7 @@ class TokenAuth(ModelBackend, Debugger):
                         color="white",
                     )
                     self.debug(
-                        "  > tosign = '{}' = '{}' + '{}'".format(
-                            tosign,
-                            user.username,
-                            string,
-                        ),
+                        f"  > tosign = '{tosign}' = '{user.username}' + '{string}'",
                         color="yellow",
                     )
 
@@ -955,7 +931,7 @@ class TokenAuth(ModelBackend, Debugger):
                             else:
                                 color = "blue"
                             self.debug(
-                                "  > Master Unsigned Key: {}".format(master),
+                                f"  > Master Unsigned Key: {master}",
                                 color=color,
                             )
 
@@ -967,8 +943,7 @@ class TokenAuth(ModelBackend, Debugger):
                         # Show debugger
                         if self.__debugger:
                             self.debug(
-                                "  > Master Signed Keys:"
-                                f" <- HASHED( '{tosign}' + '{master}' )",
+                                f"  > Master Signed Keys: <- HASHED( '{tosign}' + '{master}' )",
                                 color="cyan",
                             )
                             for key in hashedkeys:
@@ -993,7 +968,7 @@ class TokenAuth(ModelBackend, Debugger):
                             else:
                                 color = "blue"
                             self.debug(
-                                "  > User Unsigned Key: {}".format(user_key),
+                                f"  > User Unsigned Key: {user_key}",
                                 color=color,
                             )
 
@@ -1007,8 +982,7 @@ class TokenAuth(ModelBackend, Debugger):
                         # Show debugger
                         if self.__debugger:
                             self.debug(
-                                "  > User Signed Keys:"
-                                f" <- HASHED( '{tosign}' + '{user_key}' )",
+                                f"  > User Signed Keys: <- HASHED( '{tosign}' + '{user_key}' )",
                                 color="cyan",
                             )
                             for key in hashedkeys:
@@ -1033,7 +1007,7 @@ class TokenAuth(ModelBackend, Debugger):
                             else:
                                 color = "blue"
                             self.debug(
-                                "  > OTP Unsigned Key: {}".format(otp),
+                                f"  > OTP Unsigned Key: {otp}",
                                 color=color,
                             )
 
@@ -1045,8 +1019,7 @@ class TokenAuth(ModelBackend, Debugger):
                         # Show debugger
                         if self.__debugger:
                             self.debug(
-                                "  > OTP Signed Keys:"
-                                f" <- HASHED( '{tosign}' + '{otp}' )",
+                                f"  > OTP Signed Keys: <- HASHED( '{tosign}' + '{otp}' )",
                                 color="cyan",
                             )
                             for key in hashedkeys:
@@ -1066,7 +1039,7 @@ class TokenAuth(ModelBackend, Debugger):
                     # Show debug
                     if self.__debugger:
                         self.debug(
-                            "User '{}' authenticated!".format(username),
+                            f"User '{username}' authenticated!",
                             color="green",
                         )
 
@@ -1077,8 +1050,7 @@ class TokenAuth(ModelBackend, Debugger):
                     # Show debug
                     if self.__debugger:
                         self.debug(
-                            f"User '{username}' NOT authenticated with "
-                            f"tokenkey '{token}'!",
+                            f"User '{username}' NOT authenticated with tokenkey '{token}'!",
                             color="red",
                         )
                         self.debug(
@@ -1098,7 +1070,7 @@ class TokenAuth(ModelBackend, Debugger):
                 # Show debug
                 if self.__debugger:
                     self.debug(
-                        "User '{}' NOT found!".format(username),
+                        f"User '{username}' NOT found!",
                         color="yellow",
                     )
 
@@ -1147,6 +1119,7 @@ class TokenAuthMiddleware(Debugger):
         self.__debugger = getattr(settings, "AUTHENTICATION_DEBUG", False)
         if self.__debugger:
             self.set_debug()
+        super().__init__()
 
         # Get response
         self.get_response = get_response
@@ -1171,7 +1144,7 @@ class TokenAuthMiddleware(Debugger):
         # If the user is authenticated and shouldn't be
         if token:
             if self.__debugger:
-                self.debug("AUTHTOKEN='{}'".format(token), color="cyan")
+                self.debug(f"AUTHTOKEN='{token}'", color="cyan")
 
             # Get username and json
             username = request.GET.get(
@@ -1184,7 +1157,7 @@ class TokenAuthMiddleware(Debugger):
             )
             if self.__debugger:
                 self.debug(
-                    "USERNAME={} - JSON={}".format(username, json),
+                    f"USERNAME={username} - JSON={json}",
                     color="cyan",
                 )
 
@@ -1205,12 +1178,12 @@ class TokenAuthMiddleware(Debugger):
                 # Log user in
                 login(request, user)
                 # Disable CSRF checks
-                setattr(request, "_dont_enforce_csrf_checks", True)
+                request._dont_enforce_csrf_checks = True
                 json_details = request.GET.get(
                     "authjson_details",
                     request.POST.get("authjson_details", False),
                 )
-                if json_details in ["true", "1", "t", True]:
+                if json_details in ["true", "1", "t", True]:  # pylint: disable=simplifiable-if-statement
                     json_details = True
                 else:
                     json_details = False
@@ -1228,7 +1201,7 @@ class TokenAuthMiddleware(Debugger):
         self.process_request(request)
 
         # Get response
-        response = self.get_response(request)
+        response = self.get_response(request)  # pyright: ignore[reportOptionalCall]
 
         # Code to be executed for each request/response after the view
         # is called
@@ -1271,15 +1244,15 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 debug_filename = getattr(settings, "AD_DEBUG_FILE", None)
                 if debug_filename:
                     # Open the debug file pointer
-                    self.__debug = open(settings.AD_DEBUG_FILE, "a")
+                    self.__debug = open(settings.AD_DEBUG_FILE, "a", encoding="utf-8")
                 else:
                     # Disable debuging forever
                     self.__debug = False
 
             if self.__debug:
                 # Debug the given message
-                self.__debug.write("{}\n".format(msg))
-                self.__debug.flush()
+                self.__debug.write(f"{msg}\n")  # pyright: ignore[reportAttributeAccessIssue]
+                self.__debug.flush()  # pyright: ignore[reportAttributeAccessIssue]
 
     def ldap_link(self, username, password, mode="LOGIN"):
         # If no password provided, we will not try to authenticate
@@ -1295,21 +1268,21 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 default_port = 389
                 proto = "ldap"
             port = getattr(settings, "AD_LDAP_PORT", default_port)
-            ldap_url = "{}://{}:{}".format(proto, dns_name, port)
-            self.debug("ldap.initialize :: url: {}".format(ldap_url))
+            ldap_url = f"{proto}://{dns_name}:{port}"
+            self.debug(f"ldap.initialize :: url: {ldap_url}")
 
             # Prepare library
             ser = {}
             ser["allowed_referral_hosts"] = [("*", True)]
             con = {}
-            con["user"] = r"{}\{}".format(nt4_domain, username)
+            con["user"] = rf"{nt4_domain}\{username}"
             con["password"] = password
             con["raise_exceptions"] = True
             con["authentication"] = ldap3.NTLM
             if use_ssl:
                 certfile = settings.AD_CERT_FILE
                 self.debug(
-                    "ldap.ssl :: Activated - Cert file: {}".format(certfile),
+                    f"ldap.ssl :: Activated - Cert file: {certfile}",
                 )
                 con["auto_bind"] = ldap3.AUTO_BIND_TLS_BEFORE_BIND
                 ser["use_ssl"] = True
@@ -1322,10 +1295,10 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             try:
                 # self.debug('ldap.server params :: {}'.format(ser))
                 server = ldap3.Server(ldap_url, **ser)
-                self.debug("ldap.server :: {}".format(server))
+                self.debug(f"ldap.server :: {server}")
                 # self.debug('ldap.connection params :: {}'.format(con))
                 answer = ldap3.Connection(server, **con)
-                self.debug("ldap.connection :: {}".format(answer))
+                self.debug(f"ldap.connection :: {answer}")
                 # answer.open()
                 # answer.bind()
                 self.debug("ldap.connected :: Authorized")
@@ -1333,22 +1306,20 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 # The access for this user has been denied, Debug it
                 # if required
                 self.debug(
-                    "LDAP connect failed 'SocketOpenError' "
-                    f"for url '{ldap_url}' with error '{e}'",
+                    f"LDAP connect failed 'SocketOpenError' for url '{ldap_url}' with error '{e}'",
                 )
                 answer = None
             except LDAPException as e:
                 # The access for this user has been denied, Debug it
                 # if required
                 self.debug(
-                    "LDAP connect failed 'LDAPException' "
-                    f"for user '{username}' with error '{e}'",
+                    f"LDAP connect failed 'LDAPException' for user '{username}' with error '{e}'",
                 )
                 answer = False
 
         else:
             # The access for this user has been denied, Debug it if required
-            self.debug("No password provided for user '{}'".format(username))
+            self.debug(f"No password provided for user '{username}'")
             answer = False
 
         # Return the final result
@@ -1396,7 +1367,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         return user
 
     def get_ad_info(self, username, password):
-        self.debug("get_ad_info for user '{}'".format(username))
+        self.debug(f"get_ad_info for user '{username}'")
 
         # Initialize the answer
         info = {}
@@ -1411,22 +1382,20 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             search_fields = ["sAMAccountName", "memberOf"] + list(
                 mapping.values(),
             )
-            search_dns = (
-                getattr(settings, "AD_NT4_DOMAIN", "").lower().split(".")
-            )
+            search_dns = getattr(settings, "AD_NT4_DOMAIN", "").lower().split(".")
             # Build the dn list
             search_dnlist = []
             for token in search_dns:
-                search_dnlist.append("dc={}".format(token))
+                search_dnlist.append(f"dc={token}")
             search_dn = ",".join(search_dnlist)
 
             # Search for the user
-            self.debug('Search "{}"'.format(search_dn))
+            self.debug(f'Search "{search_dn}"')
             # Search in LDAP
             link.search(
                 search_base=search_dn,
                 # search_filter='(&(objectclass=person)(uid=admin))',
-                search_filter="(sAMAccountName={})".format(username),
+                search_filter=f"(sAMAccountName={username})",
                 search_scope=ldap3.SUBTREE,
                 # attributes=ldap3.ALL_ATTRIBUTES,
                 attributes=search_fields,
@@ -1438,6 +1407,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
             results = link.entries
 
             # Make sure we found only one result
+            result = {}
             if len(results) == 1:
                 # Get answer
                 result = results[0].__dict__
@@ -1491,9 +1461,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 adfield = mapping[djfield]
                 if adfield in result:
                     info[djfield] = result[adfield]
-                    self.debug("{}={}".format(adfield, info[djfield]))
+                    self.debug(f"{adfield}={info[djfield]}")
                 else:
-                    self.debug("{}=-NONE-".format(adfield))
+                    self.debug(f"{adfield}=-NONE-")
 
         else:
             # No link gotten
@@ -1509,7 +1479,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
 
         # Get the groups for this user
         info = self.get_ad_info(username, password)
-        self.debug("INFO found: {}".format(info))
+        self.debug(f"INFO found: {info}")
 
         # Find the user
         try:

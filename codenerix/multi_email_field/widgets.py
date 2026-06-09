@@ -6,7 +6,7 @@ MULTI_EMAIL_FIELD_EMPTY_VALUES = validators.EMPTY_VALUES + ("[]",)
 
 
 class MultiEmailWidget(Textarea):
-    is_hidden = False
+    is_hidden = False  # pyright: ignore[reportIncompatibleMethodOverride, reportAssignmentType]
 
     def prep_value(self, value):
         """Prepare value before effectively render widget"""
@@ -18,6 +18,6 @@ class MultiEmailWidget(Textarea):
             return "\n".join(value)
         raise ValidationError("Invalid format.")
 
-    def render(self, name, value, **kwargs):
+    def render(self, name, value, *args, **kwargs):
         value = self.prep_value(value)
-        return super().render(name, value, **kwargs)
+        return super().render(name, value, *args, **kwargs)

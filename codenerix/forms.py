@@ -23,8 +23,9 @@ from django.forms import NullBooleanField
 from django.forms.widgets import CheckboxInput, Select, SelectMultiple
 from django.utils.translation import gettext as _
 
-from codenerix.djng import NgForm, NgFormValidationMixin, NgModelForm
+from codenerix.djng import NgForm, NgModelForm
 from codenerix.djng.angular_model import NgModelFormMixin
+from codenerix.djng.angular_validation import NgFormValidationMixin
 from codenerix.helpers import model_inspect
 from codenerix.widgets import (
     DynamicInput,
@@ -34,6 +35,15 @@ from codenerix.widgets import (
     StaticSelect,
 )
 
+# The codenerix form mixins below (BaseForm and friends) rely on attributes
+# supplied at runtime by the Django form they are combined with (fields,
+# cleaned_data, data, _errors, non_field_errors, clean, ...) plus codenerix
+# dynamic attributes (Meta, form_name, field_name, list_fields, list_errors)
+# and dynamic attributes assigned onto Django widgets. basedpyright cannot
+# model that composition, so attribute-access checking is disabled for the
+# whole module rather than tagging each line.
+# pyright: reportAttributeAccessIssue=false
+
 
 class BaseForm:
     def __init__(self, *args, **kwargs):
@@ -41,7 +51,7 @@ class BaseForm:
         self.attributes = {}
         self.__codenerix_uuid = None
         self.__codenerix_request = None
-        return super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def set_language(self, language):
         self.__language = language
@@ -82,15 +92,15 @@ class BaseForm:
                             msg = _("Invalid ID detected in SelectMultiple")
                             if settings.DEBUG:
                                 msg += f": {e}"
-                            raise ValidationError(msg)
+                            raise ValidationError(msg) from e
                     else:
                         pks = []
 
                     # Set the cleaned_data as a queryset with the
                     # selected values
-                    self.cleaned_data[field] = self.fields[
-                        field
-                    ].choices.queryset.filter(pk__in=pks)
+                    self.cleaned_data[field] = self.fields[field].choices.queryset.filter(
+                        pk__in=pks
+                    )
 
                     # If field was in errors, remove it
                     if field in self._errors:
@@ -153,11 +163,7 @@ class BaseForm:
                 if lt not in valores_validos:
                     r = False
                     break
-            if (
-                not r
-                or color[0] != "#"
-                or not (len(color) == 4 or len(color) == 7)
-            ):
+            if not r or color[0] != "#" or not (len(color) == 4 or len(color) == 7):
                 self._errors["color"] = [_("Invalid color")]
                 return color
             else:
@@ -186,7 +192,7 @@ class BaseForm:
         if userextend:
             extends = []
             for fieldextend in userextend:
-                extends.append("{}__{}".format(name, fieldextend))
+                extends.append(f"{name}__{fieldextend}")
         else:
             extends = None
         return extends
@@ -212,7 +218,7 @@ class BaseForm:
         self.__codenerix_request = request
         return request
 
-    def get_groups(self, gs=None, processed=[], initial=True):
+    def get_groups(self, gs=None, processed=None, initial=True):
         """
         <--------------------------------------- 12 columns ------------------------------------>
                     <--- 6 columns --->                           <--- 6 columns --->
@@ -306,6 +312,9 @@ class BaseForm:
         - widgets: widgets system (DJANGO)
         """  # noqa: E501
 
+        if processed is None:
+            processed = []
+
         # Check if language is set
         if not self.__language:
             raise OSError("ERROR: No language suplied!")
@@ -357,13 +366,9 @@ class BaseForm:
 
             if token["name"] in html_helper:
                 if "pre" in html_helper[token["name"]]:
-                    token["html_helper_pre"] = html_helper[token["name"]][
-                        "pre"
-                    ]
+                    token["html_helper_pre"] = html_helper[token["name"]]["pre"]
                 if "post" in html_helper[token["name"]]:
-                    token["html_helper_post"] = html_helper[token["name"]][
-                        "post"
-                    ]
+                    token["html_helper_post"] = html_helper[token["name"]]["post"]
 
             styles = g[1]
             if isinstance(styles, tuple):
@@ -393,15 +398,6 @@ class BaseForm:
                     # Recursive
                     fields += self.get_groups([list(f)], processed, False)
                 else:
-                    try:
-                        list_type = [
-                            str,
-                            unicode,
-                        ]
-                    except NameError:
-                        list_type = [
-                            str,
-                        ]
                     # Check if it is a list
                     if isinstance(f, list):
                         # This is a field with attributes, get the name
@@ -413,20 +409,14 @@ class BaseForm:
                             and "items" in html_helper[token["name"]]
                             and field in html_helper[token["name"]]["items"]
                         ):
-                            if (
-                                "pre"
-                                in html_helper[token["name"]]["items"][field]
-                            ):
-                                atr["html_helper_pre"] = html_helper[
-                                    token["name"]
-                                ]["items"][field]["pre"]
-                            if (
-                                "post"
-                                in html_helper[token["name"]]["items"][field]
-                            ):
-                                atr["html_helper_post"] = html_helper[
-                                    token["name"]
-                                ]["items"][field]["post"]
+                            if "pre" in html_helper[token["name"]]["items"][field]:
+                                atr["html_helper_pre"] = html_helper[token["name"]]["items"][field][
+                                    "pre"
+                                ]
+                            if "post" in html_helper[token["name"]]["items"][field]:
+                                atr["html_helper_post"] = html_helper[token["name"]]["items"][
+                                    field
+                                ]["post"]
 
                         # Process each attribute (if any)
                         dictionary = False
@@ -454,12 +444,11 @@ class BaseForm:
                                         "elements to it, you must keep going "
                                         "with dictionaries",
                                     )
-                    elif type(f) in list_type:
+                    elif isinstance(f, str):
                         field = f
                     else:
                         raise OSError(
-                            f"Uknown element type '{type(f)}' inside "
-                            f"group '{token['name']}'",
+                            f"Uknown element type '{type(f)}' inside group '{token['name']}'",
                         )
 
                     # Get the Django Field object
@@ -467,7 +456,8 @@ class BaseForm:
                     foundbool = False
                     userwidget = None
                     userextend = None
-                    for infield in list_fields:
+                    infield = None
+                    for infield in list_fields:  # pyright: ignore[reportGeneralTypeIssues]
                         if infield.__dict__[check_system] == field:
                             found = infield
                             foundbool = True
@@ -481,6 +471,8 @@ class BaseForm:
                             break
 
                     if foundbool:
+                        assert infield is not None
+                        assert found is not None
                         # Get attributes (required and original attributes)
                         wrequired = found.field.widget.is_required
                         wattrs = found.field.widget.attrs
@@ -530,9 +522,7 @@ class BaseForm:
                                             # If autofill is True for this
                                             # field set the DynamicSelect
                                             # widget
-                                            found.field.widget = (
-                                                MultiDynamicSelect(wattrs)
-                                            )
+                                            found.field.widget = MultiDynamicSelect(wattrs)
 
                                         elif autokind == "input":
                                             # If autofill is True for this
@@ -552,18 +542,10 @@ class BaseForm:
 
                                     # Configure widget
                                     found.field.widget.is_required = wrequired
-                                    found.field.widget.form_name = (
-                                        self.form_name
-                                    )
-                                    found.field.widget.field_name = (
-                                        infield.html_name
-                                    )
-                                    found.field.widget.autofill_deepness = (
-                                        autofill[1]
-                                    )
-                                    found.field.widget.autofill_url = autofill[
-                                        2
-                                    ]
+                                    found.field.widget.form_name = self.form_name
+                                    found.field.widget.field_name = infield.html_name
+                                    found.field.widget.autofill_deepness = autofill[1]
+                                    found.field.widget.autofill_url = autofill[2]
                                     found.field.widget.autofill = autofill[3:]
 
                                 else:
@@ -581,18 +563,10 @@ class BaseForm:
 
                                     # Configure widget
                                     found.field.widget.is_required = wrequired
-                                    found.field.widget.form_name = (
-                                        self.form_name
-                                    )
-                                    found.field.widget.field_name = (
-                                        infield.html_name
-                                    )
-                                    found.field.widget.autofill_deepness = (
-                                        autofill[0]
-                                    )
-                                    found.field.widget.autofill_url = autofill[
-                                        1
-                                    ]
+                                    found.field.widget.form_name = self.form_name
+                                    found.field.widget.field_name = infield.html_name
+                                    found.field.widget.autofill_deepness = autofill[0]
+                                    found.field.widget.autofill_url = autofill[1]
                                     found.field.widget.autofill = autofill[2:]
                         else:
                             # Set we don't have autofill for this field
@@ -637,16 +611,14 @@ class BaseForm:
                                 found.field.widget,
                                 "choices",
                             ) and hasattr(found.field, "choices"):
-                                found.field.widget.choices = (
-                                    found.field.choices
-                                )
+                                found.field.widget.choices = found.field.choices
                             found.field.widget.is_required = wrequired
                             found.field.widget.form_name = self.form_name
                             found.field.widget.field_name = infield.html_name
 
                         # Fill all attributes
                         for attribute, default in attributes:
-                            if attribute not in atr.keys():
+                            if attribute not in atr:
                                 atr[attribute] = default
 
                         # Check if we have to remove foreignkey buttons
@@ -676,8 +648,7 @@ class BaseForm:
                         processed.append(found.__dict__[check_system])
                     else:
                         raise OSError(
-                            f"Unknown field '{f}' specified in "
-                            f"group '{token['name']}'",
+                            f"Unknown field '{f}' specified in group '{token['name']}'",
                         )
 
             token["fields"] = fields
@@ -686,7 +657,7 @@ class BaseForm:
         # Add the rest of attributes we didn't use yet
         if initial:
             fields = []
-            for infield in list_fields:
+            for infield in list_fields:  # pyright: ignore[reportGeneralTypeIssues]
                 if infield.__dict__[check_system] not in processed:
                     # Check if the user specified a widget
                     if "widgets" in dir(self.Meta):
@@ -757,9 +728,7 @@ class BaseForm:
                                     elif autokind == "multiselect":
                                         # If autofill is True for this field
                                         # set the DynamicSelect widget
-                                        infield.field.widget = (
-                                            MultiDynamicSelect(wattrs)
-                                        )
+                                        infield.field.widget = MultiDynamicSelect(wattrs)
                                     elif autokind == "input":
                                         # If autofill is True for this field
                                         # set the DynamicSelect widget
@@ -777,12 +746,8 @@ class BaseForm:
                                 # Configure widget
                                 infield.field.widget.is_required = wrequired
                                 infield.field.widget.form_name = self.form_name
-                                infield.field.widget.field_name = (
-                                    infield.html_name
-                                )
-                                infield.field.widget.autofill_deepness = (
-                                    autofill[1]
-                                )
+                                infield.field.widget.field_name = infield.html_name
+                                infield.field.widget.autofill_deepness = autofill[1]
                                 infield.field.widget.autofill_url = autofill[2]
                                 infield.field.widget.autofill = autofill[3:]
                             else:
@@ -800,12 +765,8 @@ class BaseForm:
                                 # Configure widget
                                 infield.field.widget.is_required = wrequired
                                 infield.field.widget.form_name = self.form_name
-                                infield.field.widget.field_name = (
-                                    infield.html_name
-                                )
-                                infield.field.widget.autofill_deepness = (
-                                    autofill[0]
-                                )
+                                infield.field.widget.field_name = infield.html_name
+                                infield.field.widget.autofill_deepness = autofill[0]
                                 infield.field.widget.autofill_url = autofill[1]
                                 infield.field.widget.autofill = autofill[2:]
                     else:
@@ -843,16 +804,14 @@ class BaseForm:
                             infield.field.widget,
                             "choices",
                         ) and hasattr(infield.field, "choices"):
-                            infield.field.widget.choices = (
-                                infield.field.choices
-                            )
+                            infield.field.widget.choices = infield.field.choices
                         infield.field.widget.is_required = wrequired
                         infield.field.widget.form_name = self.form_name
                         infield.field.widget.field_name = infield.html_name
 
                     # Fill all attributes
                     for attribute, default in attributes:
-                        if attribute not in atr.keys():
+                        if attribute not in atr:
                             atr[attribute] = default
 
                     # Check if we have to remove foreignkey buttons
@@ -917,8 +876,6 @@ class GenModelForm(
         obj = super().save(*args, **kwargs)
         # Return the object
         return obj
-
-    pass
 
 
 class GenForm(BaseForm, NgFormValidationMixin, NgForm):

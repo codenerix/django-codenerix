@@ -36,13 +36,9 @@ import threading
 import time
 from typing import TypedDict
 
-from django.core.cache import (  # type:ignore # pylint: disable=import-error
-    cache,
-)
+from django.core.cache import cache
 from django.core.cache.backends.dummy import DummyCache
-from django.utils.log import (  # type: ignore # pylint: disable=import-error
-    AdminEmailHandler,
-)
+from django.utils.log import AdminEmailHandler
 
 
 class ThrottleEntry(TypedDict):
@@ -166,10 +162,9 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
             result = cache.get(test_key)
             cache.delete(test_key)
             return result == 1
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             logger.info(
-                f"ThrottledAdminEmailHandler: Cache detection failed: {e}. "
-                "Using fallback mode.",
+                f"ThrottledAdminEmailHandler: Cache detection failed: {e}. Using fallback mode.",
             )
             return False
 
@@ -213,11 +208,7 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
             return "global"
 
         # Build signature from error identity
-        exc_type = (
-            record.exc_info[0].__name__
-            if record.exc_info
-            else record.levelname
-        )
+        exc_type = record.exc_info[0].__name__ if record.exc_info else record.levelname
         signature = f"{exc_type}:{record.pathname}:{record.lineno}"
 
         # Hash with error handling for special characters
@@ -276,7 +267,7 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
 
             return error_allowed, total_allowed
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             # Cache failure - fail open (allow email)
             logger.error(f"Cache throttling error: {e}. Allowing email.")
             return True, True
@@ -310,7 +301,7 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
                     "count": 1,
                     "expires": now + self.FALLBACK_WINDOW_SECONDS,
                 }
-                self._memory_storage[error_key] = error_data
+                self._memory_storage[error_key] = error_data  # pyright: ignore[reportArgumentType]
             else:
                 # Increment existing counter
                 error_data["count"] += 1
@@ -323,18 +314,14 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
                     "count": 1,
                     "expires": now + self.FALLBACK_WINDOW_SECONDS,
                 }
-                self._memory_storage["__total__"] = total_data
+                self._memory_storage["__total__"] = total_data  # pyright: ignore[reportArgumentType]
             else:
                 # Increment total counter
                 total_data["count"] += 1
 
             # Check both limits
-            error_allowed = (
-                error_data["count"] <= self.FALLBACK_MAX_EMAILS_PER_ERROR
-            )
-            total_allowed = (
-                total_data["count"] <= self.FALLBACK_MAX_EMAILS_TOTAL
-            )
+            error_allowed = error_data["count"] <= self.FALLBACK_MAX_EMAILS_PER_ERROR
+            total_allowed = total_data["count"] <= self.FALLBACK_MAX_EMAILS_TOTAL
 
             return error_allowed, total_allowed
 
@@ -349,9 +336,7 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
             current_time: Current timestamp
         """
         expired_keys = [
-            key
-            for key, data in self._memory_storage.items()
-            if current_time > data["expires"]
+            key for key, data in self._memory_storage.items() if current_time > data["expires"]
         ]
 
         for key in expired_keys:
@@ -399,10 +384,9 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
             # Send email
             super().emit(record)
 
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             # Emergency fallback - never lose critical errors
             logger.exception(
-                f"Throttling logic failed: {e}. Sending email "
-                "without throttle.",
+                f"Throttling logic failed: {e}. Sending email without throttle.",
             )
             super().emit(record)

@@ -17,22 +17,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import glob
 import os
-
-from django.apps import apps
-
-try:
-    from subprocess import getstatusoutput
-
-    pythoncmd = "python3"
-except Exception:
-    from commands import (  # type: ignore[import-not-found,no-redef]
-        getstatusoutput,
-    )
-
-    pythoncmd = "python"
+import subprocess
 
 from codenerix_lib.debugger import Debugger
+from django.apps import apps
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
@@ -47,8 +37,7 @@ class Command(BaseCommand, Debugger):
             "--mode",
             dest="mode",
             default="suexec",
-            help="Mode used in the environment 'suexec', 'apache' "
-            "or 'wwwdata'",
+            help="Mode used in the environment 'suexec', 'apache' or 'wwwdata'",
         )
 
         # Named (optional) arguments
@@ -57,8 +46,7 @@ class Command(BaseCommand, Debugger):
             action="store_true",
             dest="noauto",
             default=False,
-            help="Tells the command not to find automatic solution "
-            "for problems",
+            help="Tells the command not to find automatic solution for problems",
         )
 
         # Named (optional) arguments
@@ -76,8 +64,7 @@ class Command(BaseCommand, Debugger):
             action="store_true",
             dest="clean",
             default=False,
-            help="Do a full clean by deleting everything before "
-            "building translations",
+            help="Do a full clean by deleting everything before building translations",
         )
 
         # Named (optional) arguments
@@ -107,19 +94,19 @@ class Command(BaseCommand, Debugger):
         # Get environment
         appname = settings.ROOT_URLCONF.split(".")[0]
         basedir = settings.BASE_DIR
-        appdir = os.path.abspath("{}/{}".format(basedir, appname))
+        appdir = os.path.abspath(f"{basedir}/{appname}")
         noauto = options["noauto"]
 
         # Check user selection
         if not options["noguess"]:
-            cmd = r"find {} -name 'locale' -exec ls -lR {{}} \; | grep www-data".format(  # noqa: E501
-                appdir,
+            result = subprocess.run(
+                ["find", appdir, "-name", "locale", "-exec", "ls", "-lR", "{}", ";"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
             )
-            status, output = getstatusoutput(cmd)
-            if status:
-                guess = "suexec"
-            else:
-                guess = "wwwdata"
+            guess = "wwwdata" if "www-data" in result.stdout else "suexec"
             if guess != mode:
                 self.print_help("", "")
                 raise CommandError(
@@ -128,7 +115,7 @@ class Command(BaseCommand, Debugger):
                 )
 
         # Show header
-        self.debug("Creating locales for {}".format(appname), color="blue")
+        self.debug(f"Creating locales for {appname}", color="blue")
         if noauto:
             self.debug("Autoconfig mode is OFF", color="yellow")
 
@@ -146,20 +133,18 @@ class Command(BaseCommand, Debugger):
         error = False
         for app in [""] + installed_apps:
             testpath = os.path.abspath(
-                "{}/{}/locale".format(appdir, app).replace("//", "/"),
+                f"{appdir}/{app}/locale".replace("//", "/"),
             )
             if not os.path.exists(testpath):
                 if noauto:
                     error = True
                     self.debug(
-                        "'locale' folder missing at {}/".format(testpath),
+                        f"'locale' folder missing at {testpath}/",
                         color="yellow",
                     )
                 else:
                     self.debug(
-                        "'locale' folder missing, creating {}/".format(
-                            testpath,
-                        ),
+                        f"'locale' folder missing, creating {testpath}/",
                         color="purple",
                     )
                     os.mkdir(testpath)
@@ -172,23 +157,37 @@ class Command(BaseCommand, Debugger):
 
         # Check execution mode
         sudo = ""
-        if mode == "apache" or mode == "wwwdata":
-            status, output = getstatusoutput("whoami")
+        if mode in ("apache", "wwwdata"):
+            result = subprocess.run(
+                ["whoami"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
+            )
+            status, output = result.returncode, result.stdout.rstrip("\n")
             if status:
                 # Error in command
                 self.error("Error while executing 'whoami' command")
                 raise CommandError(output)
-            elif output == "www-data":
+            if output == "www-data":
                 # Detected we are already www-data user, so keep going
                 self.debug("Detected we are 'www-data' user", color="purple")
             else:
                 # No permissions try to become root using sudo
-                status, output = getstatusoutput("sudo whoami")
+                result = subprocess.run(
+                    ["sudo", "whoami"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    check=False,
+                )
+                status, output = result.returncode, result.stdout.rstrip("\n")
                 if status:
                     # Error in command
                     self.error("Error while executing 'sudo whoami' command")
                     raise CommandError(output)
-                elif output == "root":
+                if output == "root":
                     # Detected sudo is working and we can become root
                     self.debug(
                         "Detected we can become 'root' user",
@@ -208,15 +207,11 @@ class Command(BaseCommand, Debugger):
             key = ""
             while key not in ["n", "y"]:
                 self.debug(
-                    "All 'locale' folders are going to be removed, "
-                    "are you sure? (y|n) ",
+                    "All 'locale' folders are going to be removed, are you sure? (y|n) ",
                     tail=False,
                     color="red",
                 )
-                try:
-                    key = raw_input().lower()
-                except NameError:
-                    key = input().lower()
+                key = input().lower()
                 self.debug("", header=False)
 
             # Remove all locale folders
@@ -224,17 +219,28 @@ class Command(BaseCommand, Debugger):
                 self.debug("Removing locale folders...", color="red")
                 for app in [""] + installed_apps:
                     testpath = os.path.abspath(
-                        "{}/{}/locale".format(appdir, app).replace("//", "/"),
+                        f"{appdir}/{app}/locale".replace("//", "/"),
                     )
                     if os.path.exists(testpath):
                         self.debug(
-                            "    > Removing {}".format(testpath),
+                            f"    > Removing {testpath}",
                             color="red",
                         )
-                        cmd = "{}rm -R {}/*".format(sudo, testpath)
-                        status, output = getstatusoutput(cmd)
-                        if status:
-                            raise CommandError(output)
+                        entries = glob.glob(f"{testpath}/*")
+                        if entries:
+                            result = subprocess.run(
+                                (["sudo"] if sudo else []) + ["rm", "-R", *entries],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                text=True,
+                                check=False,
+                            )
+                            status, output = (
+                                result.returncode,
+                                result.stdout.rstrip("\n"),
+                            )
+                            if status:
+                                raise CommandError(output)
             else:
                 raise CommandError(
                     "You requested to clean all 'locale' folders but "
@@ -246,22 +252,50 @@ class Command(BaseCommand, Debugger):
         if not options["compile"]:
             for code, name in settings.LANGUAGES:
                 self.debug(
-                    "Processing translations for {}...".format(name),
+                    f"Processing translations for {name}...",
                     color="cyan",
                 )
-                cmd = (
-                    f"{sudo}{basedir}/manage.py makemessages -v0 "
-                    f"--symlinks --ignore env -l {code}",
+                result = subprocess.run(
+                    (["sudo"] if sudo else [])
+                    + [
+                        f"{basedir}/manage.py",
+                        "makemessages",
+                        "-v0",
+                        "--symlinks",
+                        "--ignore",
+                        "env",
+                        "-l",
+                        code,
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    check=False,
                 )
-                status, output = getstatusoutput(cmd)
+                status, output = result.returncode, result.stdout.rstrip("\n")
                 if status:
                     raise CommandError(output)
 
-                cmd = (
-                    f"{sudo}{basedir}/manage.py makemessages -v0 "
-                    f"--symlinks --ignore env -d djangojs -l {code}"
+                result = subprocess.run(
+                    (["sudo"] if sudo else [])
+                    + [
+                        f"{basedir}/manage.py",
+                        "makemessages",
+                        "-v0",
+                        "--symlinks",
+                        "--ignore",
+                        "env",
+                        "-d",
+                        "djangojs",
+                        "-l",
+                        code,
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    check=False,
                 )
-                status, output = getstatusoutput(cmd)
+                status, output = result.returncode, result.stdout.rstrip("\n")
                 if status:
                     raise CommandError(output)
 
@@ -273,12 +307,18 @@ class Command(BaseCommand, Debugger):
             elif mode == "wwwdata":
                 user = "www-data"
             else:
-                raise CommandError("Wrong mode for sudo '{}'".format(mode))
+                raise CommandError(f"Wrong mode for sudo '{mode}'")
             for app in [""] + installed_apps:
                 testpath = os.path.abspath(
-                    "{}/{}/locale".format(appdir, app).replace("//", "/"),
+                    f"{appdir}/{app}/locale".replace("//", "/"),
                 )
-                cmd = "sudo chown {}.{} {}/ -R".format(user, user, testpath)
-                status, output = getstatusoutput(cmd)
+                result = subprocess.run(
+                    ["sudo", "chown", f"{user}.{user}", "-R", f"{testpath}/"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    check=False,
+                )
+                status, output = result.returncode, result.stdout.rstrip("\n")
                 if status:
                     raise CommandError(output)

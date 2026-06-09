@@ -34,11 +34,7 @@ register = Library()
 @register.filter
 def widgetize(i):
     # Initialize structure
-    attrs = (
-        i.__dict__.get("field", {})
-        .__dict__.get("widget", {})
-        .__dict__.get("attrs", {})
-    )
+    attrs = i.__dict__.get("field", {}).__dict__.get("widget", {}).__dict__.get("attrs", {})
 
     # Select
     # if 'choices' in i.field.widget.__dict__:
@@ -191,7 +187,7 @@ def datewidget(i, langcode, kindtype="datetime", kind=None):
         final["maxview"] = 4
         final["icon"] = "calendar"
 
-    elif (kind == "DATE_INPUT_FORMATS") or (kind == "date"):
+    elif kind in ["DATE_INPUT_FORMATS", "date"]:
         final["format"] = form.split(" ")[0]
         final["startview"] = 2
         final["minview"] = 2
@@ -226,11 +222,11 @@ def unlist(elements):
                 if newmsg:
                     newmsg += f" {error}"
                 else:
-                    newmsg = error
+                    newmsg = str(error)
             # Save new msg
             msg = newmsg
         # Save error with converted text
-        newtuple.append((f1, f2, f3, f4, f5, msg))
+        newtuple.append((f1, f2, f3, f4, f5, msg))  # pyright: ignore[reportArgumentType]
     # Return the newtuple
     return newtuple
 
@@ -241,10 +237,6 @@ def foreignkey(element, exceptions):
     function to determine if each select field needs a create button or not
     """
     label = element.field.__dict__["label"]
-    try:
-        label = unicode(label)
-    except NameError:
-        pass
     if (not label) or (label in exceptions):
         return False
     else:
@@ -295,6 +287,7 @@ class ColumnCounter:
 
 @register.filter
 def column_counter(nothing):
+    del nothing  # Unused
     return ColumnCounter()
 
 
@@ -304,15 +297,16 @@ def add_columns(obj, columns):
 
 
 @register.filter
-def linkedinfo(element, info_input={}):
-    info = model_inspect(element.field._get_queryset().model())
+def linkedinfo(element, info_input=None):
+    if info_input is None:
+        info_input = {}
+    info = model_inspect(element.field._get_queryset().model())  # pylint: disable=protected-access
     info.update(info_input)
 
-    ngmodel = element.html_name  # field.widget.attrs['ng-model']
+    ngm = element.html_name  # field.widget.attrs['ng-model']
     baseurl = getattr(settings, "BASE_URL", "")
     return mark_safe(
-        f"'{baseurl}','{ngmodel}','{info['appname']}', "
-        f"'{info['modelname'].lower()}s'",
+        f"'{baseurl}','{ngm}','{info['appname']}', '{info['modelname'].lower()}s'",
     )
 
 
@@ -350,8 +344,7 @@ def get_field_list(forms):
 @register.filter
 def invalidator(formname, inp):
     return mark_safe(
-        "{'codenerix_invalid':"
-        f"{smart_str(formname)}.{ngmodel(inp)}.$invalid}}",
+        f"{{'codenerix_invalid':{smart_str(formname)}.{ngmodel(inp)}.$invalid}}",
     )
 
 

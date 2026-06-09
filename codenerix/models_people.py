@@ -87,19 +87,20 @@ class GenPerson(GenLog):  # META: Abstract class
 
     def __str__(self):
         if self.name and self.surname:
-            output = "%s %s" % (smart_str(self.name), smart_str(self.surname))
+            output = "{smart_str(self.name)} {smart_str(self.surname)}"
         elif self.name:
             output = self.name
         elif self.surname:
             output = self.surname
         else:
-            output = "%s*" % (self.user)
+            output = f"{self.user}"
         return smart_str(output)
 
     def __unicode__(self):
         return self.__str__()
 
     def __fields__(self, info):
+        del info  # Unused
         fields = []
         fields.append(("user__username", _("User")))
         fields.append(("name", _("Name"), 100))
@@ -149,26 +150,31 @@ class GenPerson(GenLog):  # META: Abstract class
             return bool(
                 self.user.is_superuser or self.user.groups.get(name="Admins"),
             )
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             return False
 
-    def lock_user(self):
+    def lock_user(self, using=None):
         if self.user:
+            if using is None:
+                using = self._state.db or "default"
             # Lock the user out by setting is_active to False
             self.user.is_active = False
             # Disabled from now
-            self.user.disabled = timezone.now()
+            self.user.disabled = timezone.now()  # pyright: ignore[reportAttributeAccessIssue]
             # Set unusable password
             self.user.set_unusable_password()
             # Save changes
-            self.user.save()
+            self.user.save(using=using)
 
-    def unlock_user(self):
+    def unlock_user(self, using=None):
+        if using is None:
+            using = self._state.db or "default"
+
         if self.user:
             # Unlock the user by setting is_active to True
             self.user.is_active = True
-            self.user.disabled = None
-            self.user.save()
+            self.user.disabled = None  # pyright: ignore[reportAttributeAccessIssue]
+            self.user.save(using=using)
 
     def profiles(self):
         """
@@ -182,19 +188,22 @@ class GenPerson(GenLog):  # META: Abstract class
 
         return limit
 
-    def delete(self):
+    def delete(self, using=None, keep_parents=False):
+        if using is None:
+            using = self._state.db or "default"
+
         # Lock user out
-        self.lock_user()
+        self.lock_user(using=using)
 
         # Clean memcache
         self.clean_memcache()
 
         # Remove myself from creator field in other persons
         Person = type(self)  # noqa: N806
-        Person.objects.filter(creator=self.user).update(creator=None)
+        Person.objects.using(using).filter(creator=self.user).update(creator=None)  # pylint: disable=no-member
 
         # Delete person
-        return self.user.delete()
+        return self.user.delete(using=using)
 
     def lock_delete(self):
         if get_current_user() == self.user:
@@ -208,7 +217,7 @@ class GenPerson(GenLog):  # META: Abstract class
                 base64.b64encode(settings.SECRET_KEY.encode("utf-8")),
             )
             clean_memcache_item(
-                "person:{}".format(self.pk),
+                f"person:{self.pk}",
                 prefix.hexdigest(),
             )
 
@@ -244,9 +253,7 @@ class GenPerson(GenLog):  # META: Abstract class
                 raise ValidationError("Passwords do not match")
             if password and (len(password) < settings.PASSWORD_MIN_SIZE):
                 raise ValidationError(
-                    "Password can not be smaller than {} characters".format(
-                        settings.PASSWORD_MIN_SIZE,
-                    ),
+                    f"Password can not be smaller than {settings.PASSWORD_MIN_SIZE} characters",
                 )
 
         # Check email
@@ -254,8 +261,7 @@ class GenPerson(GenLog):  # META: Abstract class
             validate_email(email)
         else:
             raise ValidationError(
-                "Missing email when saving a new person without a "
-                "preassigned user",
+                "Missing email when saving a new person without a preassigned user",
             )
 
         # Create user and save it to the database
@@ -264,19 +270,14 @@ class GenPerson(GenLog):  # META: Abstract class
             if username != self.user.username:
                 # Check if the username already exists in the database and
                 # it is not me
-                already = (
-                    User.objects.filter(username=username)
-                    .exclude(pk=self.user.pk)
-                    .first()
-                )
+                already = User.objects.filter(username=username).exclude(pk=self.user.pk).first()
                 if already:
                     # Username already in use
                     raise ValidationError(
                         "Username already exists in the database",
                     )
-                else:
-                    # Set new username
-                    self.user.username = username
+                # Set new username
+                self.user.username = username
 
             # Update password if any
             if unusable:
@@ -338,8 +339,7 @@ class GenPerson(GenLog):  # META: Abstract class
                     if link and hasattr(link, "CodenerixMeta"):
                         # Get groups and permissions from that class
                         groups += list(
-                            getattr(link.CodenerixMeta, "rol_groups", None)
-                            or {},
+                            getattr(link.CodenerixMeta, "rol_groups", None) or {},
                         )
                         permissions += list(
                             getattr(
@@ -352,19 +352,13 @@ class GenPerson(GenLog):  # META: Abstract class
 
             # Add groups
             for groupname in set(groups):
-                group = (
-                    Group.objects.using(using).filter(name=groupname).first()
-                )
+                group = Group.objects.using(using).filter(name=groupname).first()
                 if group is None:
                     # Group not found, remake permissions for all groups with
                     # roles
                     self.group_permissions(using=using)
                     # Check again
-                    group = (
-                        Group.objects.using(using)
-                        .filter(name=groupname)
-                        .first()
-                    )
+                    group = Group.objects.using(using).filter(name=groupname).first()
                     if group is None:
                         raise OSError(
                             f"Group '{groupname} not found in the system. I "
@@ -387,8 +381,7 @@ class GenPerson(GenLog):  # META: Abstract class
                 )
                 if permission is None:
                     raise OSError(
-                        f"Permission '{permissionname}' not "
-                        "found in the system",
+                        f"Permission '{permissionname}' not found in the system",
                     )
 
                 # Add the permission to this user
@@ -416,7 +409,7 @@ class GenPerson(GenLog):  # META: Abstract class
 
                     # Add groups
                     if groups:
-                        groups_is_dict = type(groups) is dict
+                        groups_is_dict = isinstance(groups, dict)
                         groupslist = list(set(groups))
                         for groupname in groupslist:
                             # Check permissions just in case something is wrong
@@ -444,7 +437,7 @@ class GenPerson(GenLog):  # META: Abstract class
                             groupsresult[groupname] += perms
 
         # Set permissions for all groups
-        for groupname in groupsresult:
+        for groupname, grouppermssions in groupsresult.items():
             # Get group
             group = Group.objects.using(using).filter(name=groupname).first()
             if group is None:
@@ -456,21 +449,18 @@ class GenPerson(GenLog):  # META: Abstract class
                 group.permissions.db_manager(using).clear()
 
             # Add permissions to the group
-            for perm in groupsresult[groupname]:
+            for perm in grouppermssions:
                 group.permissions.db_manager(using).add(perm)
 
     def save(self, *args, **kwargs):
         # Save this person
-        answer = super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
         # Check if using was provided
         using = kwargs.get("using", None)
 
         # Refresh permissions if possible
         self.refresh_permissions(quiet=True, using=using)
-
-        # Return answer
-        return answer
 
 
 class GenRole(CodenerixModel):  # META: Abstract class
@@ -490,14 +480,13 @@ class GenRole(CodenerixModel):  # META: Abstract class
 
         # Only update permissions for new users
         refresh_permissions = not self.pk  # pylint: disable=no-member
-        result = super().save(*args, **kwargs)  # pylint: disable=no-member
+        super().save(*args, **kwargs)  # pylint: disable=no-member
 
         # Update permissions for related person
         if refresh_permissions:
             person = self.__CDNX_search_person_CDNX__()
             if person:
                 person.refresh_permissions(quiet=True, using=using)
-        return result
 
     def delete(self, using=None, keep_parents=False):
         # Determine the database

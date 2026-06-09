@@ -18,17 +18,8 @@
 # limitations under the License.
 
 import os
-
-try:
-    from subprocess import getstatusoutput
-
-    pythoncmd = "python3"
-except Exception:
-    from commands import (  # type: ignore[import-not-found,no-redef]
-        getstatusoutput,
-    )
-
-    pythoncmd = "python2"
+import subprocess
+from pathlib import Path
 
 from codenerix_lib.debugger import Debugger
 from django.conf import settings
@@ -66,24 +57,29 @@ class Command(BaseCommand, Debugger):
         # Get environment
         appname = settings.ROOT_URLCONF.split(".")[0]
         basedir = settings.BASE_DIR
-        appdir = os.path.abspath("{}/{}".format(basedir, appname))
+        appdir = os.path.abspath(f"{basedir}/{appname}")
 
         # While keep working
         keepworking = True
         while keepworking:
             # Collect
             self.debug("Collecting...", color="blue")
-            cmd = f"{appdir}/manage collectstatic --noinput"
-            status, output = getstatusoutput(cmd)
+            cmd = [f"{appdir}/manage", "collectstatic", "--noinput"]
+            result = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
+            )
+            status, output = result.returncode, result.stdout.rstrip("\n")
             if status:
-                raise CommandError(f"{output}\nCommand was: {cmd}")
+                raise CommandError(f"{output}\nCommand was: {' '.join(cmd)}")
             for line in output.split("\n"):
                 if line[0:7] == "Copying":
                     path = line.split("'")[1].replace(appdir, ".")
-                    self.debug("    > {}".format(path))
-                elif ("static file copied to" in line) or (
-                    "static files copied to" in line
-                ):
+                    self.debug(f"    > {path}")
+                elif ("static file copied to" in line) or ("static files copied to" in line):
                     done = line.split(" ")[0]
                     linesp = line.split(",")
                     if len(linesp) == 1:
@@ -108,14 +104,21 @@ class Command(BaseCommand, Debugger):
                 elif line == "":
                     pass
                 else:
-                    self.warning("Unknown string: #{}#".format(line))
+                    self.warning(f"Unknown string: #{line}#")
 
             # Clean
             self.debug("Cleaning...", color="blue")
-            cmd = f"{appdir}/manage clean"
-            status, output = getstatusoutput(cmd)
+            cmd = [f"{appdir}/manage", "clean"]
+            result = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
+            )
+            status, output = result.returncode, result.stdout.rstrip("\n")
             if status:
-                raise CommandError(f"{output}\nCommand was: {cmd}")
+                raise CommandError(f"{output}\nCommand was: {' '.join(cmd)}")
 
             # Touch
             self.debug("Touch...", color="blue", tail=False)
@@ -123,16 +126,11 @@ class Command(BaseCommand, Debugger):
             filenames.sort()
             for name in filenames:
                 if name[0:4] == "wsgi" or name[-4:] == "wsgi":
-                    cmd = f"/usr/bin/touch {appdir}/{name}"
-                    status, output = getstatusoutput(cmd)
-                    if status:
-                        raise CommandError(f"{output}\nCommand was: {cmd}")
-                    self.debug(
-                        " [{}]".format(name),
-                        color="cyan",
-                        header=False,
-                        tail=False,
-                    )
+                    try:
+                        Path(appdir, name).touch()
+                    except OSError as e:
+                        raise CommandError(f"{e}\nTouching: {appdir}/{name}") from e
+
             self.debug(" Done", color="green", header=False)
 
             if options["follow"] or options["f"]:
@@ -144,8 +142,6 @@ class Command(BaseCommand, Debugger):
                     color="purple",
                 )
                 try:
-                    key = raw_input().lower()
-                except NameError:
                     key = input().lower()
                 except KeyboardInterrupt:
                     self.debug(" ", header=False)

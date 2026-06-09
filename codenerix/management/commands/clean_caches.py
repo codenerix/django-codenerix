@@ -17,16 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-try:
-    from subprocess import getstatusoutput
-
-    pythoncmd = "python3"
-except Exception:
-    from commands import (  # type: ignore[import-not-found,no-redef]
-        getstatusoutput,
-    )
-
-    pythoncmd = "python2"
+import subprocess
 
 from codenerix_lib.debugger import Debugger
 from django.conf import settings
@@ -53,14 +44,20 @@ class Command(BaseCommand, Debugger):
                     host = locationsp[0]
                     port = locationsp[1]
                 self.debug(
-                    "Flushing all keys for "
-                    f"{name}@Memcache located at {host}:{port}",
+                    f"Flushing all keys for {name}@Memcache located at {host}:{port}",
                     color="blue",
                 )
-                # Get environment
-                status, output = getstatusoutput(
-                    f"echo 'flush_all' | nc -v -w 1 {host} {port}",
+                # Send 'flush_all' to memcached over the text protocol (no shell:
+                # the old `echo 'flush_all' | nc ...` pipe becomes stdin input).
+                result = subprocess.run(
+                    ["nc", "-v", "-w", "1", str(host), str(port)],
+                    input="flush_all\n",
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    check=False,
                 )
+                status, output = result.returncode, result.stdout.rstrip("\n")
                 if status:
                     self.debug(
                         f"ERROR at {name}@Memcache -> {output}",
@@ -68,7 +65,6 @@ class Command(BaseCommand, Debugger):
                     )
                 else:
                     self.debug(
-                        f"OK at {name}@Memcache located "
-                        f"at {host}:{port} -> {output}",
+                        f"OK at {name}@Memcache located at {host}:{port} -> {output}",
                         color="green",
                     )

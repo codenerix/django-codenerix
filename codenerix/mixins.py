@@ -17,6 +17,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# AjaxableResponseMixin is combined with a Django object-based FormView at
+# runtime; the attributes/methods it uses (request, object, form_invalid,
+# form_valid, ...) are supplied by that host view, which basedpyright cannot
+# model. Disable attribute-access checking module-wide.
+# pyright: reportAttributeAccessIssue=false
+
 import json
 
 from django.core.serializers.json import DjangoJSONEncoder

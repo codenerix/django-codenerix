@@ -26,11 +26,9 @@ from django.conf import settings
 from django.template import Node
 from django.utils import formats
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language
-from django.utils.translation import gettext as _
+from django.utils.translation import get_language, gettext as _
 
 from codenerix.helpers import (  # pylint: disable=unused-import # noqa: F401
-    JSONEncoder_newdefault,
     monthname,
     nameunify,
     zeropad,
@@ -64,7 +62,7 @@ def debugmedict(obj):
 
 @register.filter
 def addedit(value):
-    return (value == "add") or (value == "edit")
+    return value in ["add", "edit"]
 
 
 @register.filter
@@ -91,9 +89,9 @@ def ghtml(value):
                 oldlen = len(row)
                 row = row.replace("  ", "&nbsp;&nbsp;")
             if len(row) > 0 and row[0] == "#":
-                result += "<b>%s</b>" % (row[1:])
+                result += f"<b>{row[1:]}</b>"
             else:
-                result += "%s" % (row)
+                result += f"{row}"
             result += "<br>"
     else:
         result = value
@@ -143,7 +141,7 @@ def niceeuronull(value):
 @register.filter
 def nicepercentnull(value):
     if value:
-        return "%s%%" % (value)
+        return f"{value}%"
     else:
         return "-"
 
@@ -168,7 +166,7 @@ def ynbool(value):
 def toint(value):
     try:
         newvalue = int(value)
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         newvalue = None
     return newvalue
 
@@ -205,8 +203,8 @@ def pair(value):
 
 
 @register.filter(name="len")
-def lenlist(list):
-    return len(list)
+def lenlist(lst):
+    return len(lst)
 
 
 @register.filter
@@ -218,8 +216,7 @@ def nbsp(value):
 def mod(value, arg):
     if value % arg == 0:
         return 1
-    else:
-        return
+    return None
 
 
 @register.filter
@@ -260,29 +257,28 @@ def objectatrib(instance, atrib):
     the atrib param can contains underscores
     """
 
+    result = None
     if instance != "":
         atrib = atrib.replace("__", ".")
         atribs = []
         atribs = atrib.split(".")
 
         obj = instance
-        for atrib in atribs:
+        for atr in atribs:
             if isinstance(obj, dict):
-                result = obj[atrib]
+                result = obj[atr]
             else:
                 try:
-                    result = getattr(obj, atrib)()
-                except Exception:
-                    result = getattr(obj, atrib)
+                    result = getattr(obj, atr)()
+                except Exception:  # pylint: disable=broad-except
+                    result = getattr(obj, atr)
 
             obj = result
-    else:
-        result = None
     return result
 
 
 @register.filter
-def TrueFalse(value):  # noqa: N802
+def TrueFalse(value):  # noqa: N802 # pylint: disable=invalid-name
     if isinstance(value, bool):
         if value:
             return _("True")
@@ -295,43 +291,33 @@ def TrueFalse(value):  # noqa: N802
 def cdnx_beauty(value, kind=None):
     if kind:
         if kind == "skype":
-            return (
-                "<a ng-click='$event.stopPropagation();' "
-                f"href='tel:{value}'>{value}</a>"
-            )
-        elif kind == "image":
-            return (
-                "<img ng-click='$event.stopPropagation();' "
-                f"src='{settings.MEDIA_URL}{value}'>"
-            )
-        elif kind == "nofilter":
+            return f"<a ng-click='$event.stopPropagation();' href='tel:{value}'>{value}</a>"
+        if kind == "image":
+            return f"<img ng-click='$event.stopPropagation();' src='{settings.MEDIA_URL}{value}'>"
+        if kind == "nofilter":
             return value
-        else:
-            raise Exception(
-                "Django filter 'codenerix' got a wrong kind named '"
-                + kind
-                + "'",
-            )
-    else:
-        if value is None:
-            return nicenull(value)
-        elif isinstance(value, bool):
-            return TrueFalse(value)
-        elif isinstance(value, datetime.datetime):
-            fmt = formats.get_format(
-                "DATETIME_INPUT_FORMATS",
-                lang=get_language(),
-            )[0]
-            value = datetime.datetime.strftime(value, fmt)
-        elif isinstance(value, datetime.time):
-            fmt = formats.get_format(
-                "TIME_INPUT_FORMATS",
-                lang=get_language(),
-            )[0]
-            value = datetime.time.strftime(value, fmt)
-        elif isinstance(value, float):
-            if float(int(value)) == value:
-                value = int(value)
+        raise Exception(  # pylint: disable=broad-exception-raised
+            "Django filter 'codenerix' got a wrong kind named '" + kind + "'",
+        )
+    if value is None:
+        return nicenull(value)
+    if isinstance(value, bool):
+        return TrueFalse(value)
+    if isinstance(value, datetime.datetime):
+        fmt = formats.get_format(
+            "DATETIME_INPUT_FORMATS",
+            lang=get_language(),
+        )[0]
+        value = datetime.datetime.strftime(value, fmt)
+    elif isinstance(value, datetime.time):
+        fmt = formats.get_format(
+            "TIME_INPUT_FORMATS",
+            lang=get_language(),
+        )[0]
+        value = datetime.time.strftime(value, fmt)
+    elif isinstance(value, float):
+        if float(int(value)) == value:
+            value = int(value)
 
     return value
 
@@ -451,6 +437,7 @@ def do_option(parser, token):
     """
     Parse {% option %}...{% endoption %} into an OptionNode.
     """
+    del token  # Unused
     nodelist = parser.parse(("endoption",))
     parser.delete_first_token()  # consume 'endoption'
     return OptionNode(nodelist)
@@ -479,6 +466,7 @@ def do_pick_one(parser, token):
     Parse {% pick_one %}...{% endpick_one %}, collect all OptionNode children,
     and render exactly one at random.
     """
+    del token  # Unused
     nodelist = parser.parse(("endpick_one",))
     parser.delete_first_token()  # consume 'endpick_one'
     # filter out only our OptionNode instances (ignore whitespace/text)

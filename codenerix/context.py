@@ -30,14 +30,14 @@ def codenerix(request):
     """
     Codenerix CONTEXT
     """
+    del request  # Unused
     # Get values
-    DEBUG = getattr(settings, "DEBUG", False)  # noqa: N806
-    VERSION = getattr(  # noqa: N806
+    DEBUG = getattr(settings, "DEBUG", False)  # noqa: N806 # pylint: disable=invalid-name
+    VERSION = getattr(  # noqa: N806 # pylint: disable=invalid-name
         settings,
         "VERSION",
         _(
-            "WARNING: No version set to this code, "
-            "add VERSION contant to your configuration",
+            "WARNING: No version set to this code, add VERSION contant to your configuration",
         ),
     )
 
@@ -51,33 +51,34 @@ def codenerix(request):
 
 
 def codenerix_js(request):
+    del request  # Unused
     cnf = {}
 
     # Get values
-    CONNECTION_ERROR = getattr(  # noqa: N806
+    CONNECTION_ERROR = getattr(  # noqa: N806 # pylint: disable=invalid-name
         settings,
         "CONNECTION_ERROR",
         None,
     )
-    USER_BEHAVIOUR = getattr(settings, "USER_BEHAVIOUR", None)  # noqa: N806
-    ALARMS_LOOPTIME = getattr(settings, "ALARMS_LOOPTIME", None)  # noqa: N806
-    ALARMS_QUICKLOOP = getattr(  # noqa: N806
+    USER_BEHAVIOUR = getattr(settings, "USER_BEHAVIOUR", None)  # noqa: N806 # pylint: disable=invalid-name
+    ALARMS_LOOPTIME = getattr(settings, "ALARMS_LOOPTIME", None)  # noqa: N806 # pylint: disable=invalid-name
+    ALARMS_QUICKLOOP = getattr(  # noqa: N806 # pylint: disable=invalid-name
         settings,
         "ALARMS_QUICKLOOP",
         None,
     )
-    ALARMS_ERRORLOOP = getattr(  # noqa: N806
+    ALARMS_ERRORLOOP = getattr(  # noqa: N806 # pylint: disable=invalid-name
         settings,
         "ALARMS_ERRORLOOP",
         None,
     )
-    DEBUG = getattr(settings, "DEBUG", False)  # noqa: N806
-    DATERANGEPICKER_OPTIONS = getattr(  # noqa: N806
+    DEBUG = getattr(settings, "DEBUG", False)  # noqa: N806 # pylint: disable=invalid-name
+    DATERANGEPICKER_OPTIONS = getattr(  # noqa: N806 # pylint: disable=invalid-name
         settings,
         "DATERANGEPICKER_OPTIONS",
         None,
     )
-    DATETIME_RANGE_FORMAT = getattr(  # noqa: N806
+    DATETIME_RANGE_FORMAT = getattr(  # noqa: N806 # pylint: disable=invalid-name
         settings,
         "DATETIME_RANGE_FORMAT",
         None,
@@ -111,18 +112,12 @@ def codenerix_js(request):
     if (DATERANGEPICKER_OPTIONS is None) or (DATETIME_RANGE_FORMAT is None):
         daterangepicker = '"'
         if DATERANGEPICKER_OPTIONS is None:
-            daterangepicker += "{}".format(
-                _(
-                    " WARNING: DATERANGEPICKER_OPTIONS is not "
-                    "set in your configuration!!! ",
-                ),
+            daterangepicker += (
+                " WARNING: DATERANGEPICKER_OPTIONS is not set in your configuration!!! "
             )
         if DATETIME_RANGE_FORMAT is None:
-            daterangepicker += "{}".format(
-                _(
-                    " WARNING: DATETIME_RANGE_FORMAT is not "
-                    "set in your configuration!!! ",
-                ),
+            daterangepicker += (
+                " WARNING: DATETIME_RANGE_FORMAT is not set in your configuration!!! "
             )
         daterangepicker += '"'
         cnf["daterangepicker"] = mark_safe(daterangepicker)

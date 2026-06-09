@@ -21,7 +21,7 @@ import os
 import sys
 from datetime import datetime
 
-from captcha import client  # type: ignore[import-not-found]
+from captcha import client
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -71,21 +71,21 @@ class Date2TimeField(models.DateTimeField):
         date_min = datetime(2000, 1, 1, 0, 0, 0)
 
         if args[0]:
-            if type(args[0]) is not datetime:
+            if not isinstance(args[0], datetime):
                 raise ValidationError(_("Invalid date"))
-            elif args[0] and date_min.date() > args[0].date():
+            if args[0] and date_min.date() > args[0].date():
                 raise ValidationError(_("Date too old"))
             # return args[0]
         return super().clean(*args, **kwargs)
 
 
-email_er = r"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*"  # noqa: E501
+email_er = r"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*"  # noqa: E501 # pylint: disable=invalid-name
 
 
 class MultiEmailField(MultiEmailFormField):
     message = _("Enter valid email addresses.")  # type: ignore[assignment]
     widget = Textarea(  # type: ignore[assignment]
-        attrs={"ng-pattern": "/^({0})(\\n{0})*$/".format(email_er)},
+        attrs={"ng-pattern": f"/^({email_er})(\\n{email_er})*$/"},
     )
 
     def to_python(self, value):
@@ -135,8 +135,7 @@ class GenReCaptchaField(forms.CharField):
         public_key=None,
         private_key=None,
         use_ssl=None,
-        attrs={},
-        *args,
+        attrs=None,
         **kwargs,
     ):
         """
@@ -147,18 +146,12 @@ class GenReCaptchaField(forms.CharField):
         https://code.google.com/apis/recaptcha/docs/customization.html
 
         On compiled verstion of the library, don't forget to add before the codenerix.js scripts to add:
-        <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer></script>$
-        """  # noqa: E501
-        public_key = (
-            public_key if public_key else settings.RECAPTCHA_PUBLIC_KEY
-        )
-        self.private_key = (
-            private_key if private_key else settings.RECAPTCHA_PRIVATE_KEY
-        )
+        <script type="text/javascript" src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer></script>
+        """
+        public_key = public_key if public_key else settings.RECAPTCHA_PUBLIC_KEY
+        self.private_key = private_key if private_key else settings.RECAPTCHA_PRIVATE_KEY
         self.use_ssl = (
-            use_ssl
-            if use_ssl is not None
-            else getattr(settings, "RECAPTCHA_USE_SSL", False)
+            use_ssl if use_ssl is not None else getattr(settings, "RECAPTCHA_USE_SSL", False)
         )
 
         self.widget = GenReCaptchaInput(
@@ -168,10 +161,10 @@ class GenReCaptchaField(forms.CharField):
             attrs=attrs,
         )
         self.required = True
-        return super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
     def get_remote_ip(self):
-        f = sys._getframe()
+        f = sys._getframe()  # pylint: disable=protected-access
         while f:
             if "request" in f.f_locals:
                 request = f.f_locals["request"]
@@ -181,17 +174,18 @@ class GenReCaptchaField(forms.CharField):
                     ip = remote_ip if not forwarded_ip else forwarded_ip
                     return ip
             f = f.f_back
+        return ""
 
-    def clean(self, values):
-        super().clean(values[0])
-        recaptcha_challenge_value = smart_str(values[0])
-        recaptcha_response_value = smart_str(values[1])
+    def clean(self, value):
+        super().clean(value[0])
+        recaptcha_challenge_value = smart_str(value[0])
+        recaptcha_response_value = smart_str(value[1])
 
         if (
             os.environ.get("RECAPTCHA_TESTING", None) == "True"
             and recaptcha_response_value == "PASSED"
         ):
-            return values[0]
+            return value[0]
 
         try:
             check_captcha = client.submit(
@@ -202,11 +196,11 @@ class GenReCaptchaField(forms.CharField):
                 use_ssl=self.use_ssl,
             )
 
-        except OSError:  # Catch timeouts, etc
+        except OSError as e:  # Catch timeouts, etc
             # raise IOError,"ERROR: {}".format(
             #    self.error_messages['captcha_error']
             # )
-            raise ValidationError(self.error_messages["captcha_error"])
+            raise ValidationError(self.error_messages["captcha_error"]) from e
 
         if not check_captcha.is_valid:
             # raise IOError,"INVALID: {}".format(
@@ -214,4 +208,4 @@ class GenReCaptchaField(forms.CharField):
             # )
             raise ValidationError(self.error_messages["captcha_invalid"])
 
-        return values[0]
+        return value[0]

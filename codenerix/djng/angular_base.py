@@ -1,4 +1,11 @@
 # mypy: ignore-errors
+# Vendored/adapted django-angular base. The form mixins (NgFormBaseMixin and
+# friends) rely on attributes supplied at runtime by the Django form/field they
+# are combined with, and TupleErrorList intentionally stores tuples where
+# Django's ErrorList stores strings; basedpyright cannot model either. The
+# purely structural rules are disabled module-wide, but override checking is
+# left ON so future Django signature drifts still surface.
+# pyright: reportAttributeAccessIssue=false, reportOptionalMemberAccess=false, reportIndexIssue=false, reportCallIssue=false, reportArgumentType=false
 
 import json
 from base64 import b64encode
@@ -42,9 +49,7 @@ class TupleErrorList(ErrorList):
 
     ul_format = '<ul class="{1}" ng-show="{0}.{2}" ng-cloak>{3}</ul>'
     li_format = '<li ng-show="{0}.{1}" class="{2}">{3}</li>'
-    li_format_bind = (
-        '<li ng-show="{0}.{1}" class="{2}" ng-bind="{0}.{3}"></li>'
-    )
+    li_format_bind = '<li ng-show="{0}.{1}" class="{2}" ng-bind="{0}.{3}"></li>'
 
     def as_json(self, escape_html=False):
         return json.dumps(self.get_json_data(escape_html))
@@ -59,11 +64,7 @@ class TupleErrorList(ErrorList):
                 "$dirty": [],
             }
             for e in self:
-                li_format = (
-                    e[5] == "$message"
-                    and self.li_format_bind
-                    or self.li_format
-                )
+                li_format = e[5] == "$message" and self.li_format_bind or self.li_format
                 err_tuple = (e[0], e[3], e[4], force_str(e[5]))
                 error_lists[e[2]].append(format_html(li_format, *err_tuple))
             for key in error_lists.keys():
@@ -100,14 +101,14 @@ class TupleErrorList(ErrorList):
             ),
         )
 
-    def as_text(self):
+    def as_text(self):  # pyright: ignore[reportIncompatibleMethodOverride]
         if not self:
             return ""
         if isinstance(self[0], tuple):
             return "\n".join(
-                ["* %s" % force_str(e[5]) for e in self if bool(e[5])],
+                [f"* {force_str(e[5])}" for e in self if bool(e[5])],
             )
-        return "\n".join(["* %s" % force_str(e) for e in self])
+        return "\n".join([f"* {force_str(e)}" for e in self])
 
     def __str__(self):
         return self.as_ul()
@@ -118,11 +119,16 @@ class TupleErrorList(ErrorList):
         else:
             return super().__repr__()
 
-    def __getitem__(self, i):
+    def __getitem__(self, i):  # pyright: ignore[reportIncompatibleMethodOverride]
         error = self.data[i]
         if isinstance(error, tuple):
             if isinstance(error[5], ValidationError):
-                error[5] = list(error[5])[0]
+                # SafeTuple/tuple is immutable: rebuild it with the first
+                # message extracted from the ValidationError instead of
+                # assigning to error[5] (which raises TypeError at runtime).
+                error = error.__class__(
+                    (*error[:5], list(error[5])[0]),
+                )
             return error
         else:
             return super().__getitem__(i)
@@ -191,7 +197,7 @@ class NgBoundField(BoundField):
                 attrs.update({"class": widget_classes})
         return super().as_widget(widget, attrs, only_initial)
 
-    def label_tag(self, contents=None, attrs=None, label_suffix=None):
+    def label_tag(self, contents=None, attrs=None, label_suffix=None, tag=None):
         attrs = attrs or {}
         css_classes = getattr(self.field, "label_css_classes", None)
         if hasattr(css_classes, "split"):
@@ -218,6 +224,7 @@ class NgBoundField(BoundField):
             contents,
             attrs,
             label_suffix="",
+            tag=tag,
         )
 
 
@@ -275,9 +282,7 @@ class NgFormBaseMixin:
         except AttributeError:
             # if form_name is unset, then generate a pseudo unique name, based
             # upon the class name
-            form_name = (
-                b64encode(six.b(self.__class__.__name__)).rstrip(b"=").decode()
-            )
+            form_name = b64encode(six.b(self.__class__.__name__)).rstrip(b"=").decode()
         self.form_name = kwargs.pop("form_name", form_name)
         error_class = kwargs.pop("error_class", TupleErrorList)
         kwargs.setdefault("error_class", error_class)
@@ -286,14 +291,14 @@ class NgFormBaseMixin:
             data = self.rectify_multipart_form_data(data.copy())
         elif isinstance(data, dict):
             data = self.rectify_ajax_form_data(data.copy())
-        super().__init__(data=data, *args, **kwargs)
+        super().__init__(data, *args, **kwargs)
 
     def __getitem__(self, name):
         "Returns a NgBoundField with the given name."
         try:
             field = self.fields[name]
-        except KeyError:
-            raise KeyError("Key %r not found in Form" % name)
+        except KeyError as e:
+            raise KeyError(f"Key {name!r} not found in Form") from e
         return NgBoundField(self, field, name)
 
     def add_prefix(self, field_name):
@@ -301,11 +306,7 @@ class NgFormBaseMixin:
         Rewrite the model keys to use dots instead of dashes, since thats the
         syntax used in Angular models.
         """
-        return (
-            ("%s.%s" % (self.prefix, field_name))
-            if self.prefix
-            else field_name
-        )
+        return f"{self.prefix}.{field_name}" if self.prefix else field_name
 
     def get_field_errors(self, field):
         """

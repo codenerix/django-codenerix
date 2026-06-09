@@ -26,5 +26,5 @@ class MultiEmailField(forms.Field):
         try:
             for email in value:
                 validate_email(email)
-        except ValidationError:
-            raise ValidationError(self.message, code=self.code)
+        except ValidationError as e:
+            raise ValidationError(self.message, code=self.code) from e

@@ -19,8 +19,10 @@
 
 import re
 from threading import local
+from typing import Literal, overload
 
 from django.conf import settings
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import redirect
 
@@ -41,8 +43,7 @@ class SecureRequiredMiddleware:
             for path in self.paths:
                 full_path = request.get_full_path()
                 if path[0] == "-" and (
-                    full_path.startswith(path[1:])
-                    or re.compile(path[1:]).match(full_path)
+                    full_path.startswith(path[1:]) or re.compile(path[1:]).match(full_path)
                 ):
                     return None
 
@@ -68,7 +69,7 @@ class SecureRequiredMiddleware:
 
         # Get response
         if response is None:
-            response = self.get_response(request)
+            response = self.get_response(request)  # pyright: ignore[reportOptionalCall]
 
         # Code to be executed for each request/response after the
         # view is called
@@ -95,7 +96,7 @@ class CurrentRequestMiddleware:
         self.process_request(request)
 
         # Get response
-        response = self.get_response(request)
+        response = self.get_response(request)  # pyright: ignore[reportOptionalCall]
 
         # Code to be executed for each request/response after the
         # view is called
@@ -110,8 +111,6 @@ class CurrentUserMiddleware(CurrentRequestMiddleware):
     Backward compatibility
     """
 
-    pass
-
 
 def get_current_request():
     """
@@ -120,6 +119,12 @@ def get_current_request():
     return getattr(_thread_locals_request, "value", None)
 
 
+@overload
+def get_current_user(*, anonuser: Literal[True]) -> AbstractBaseUser | AnonymousUser: ...
+@overload
+def get_current_user(
+    *, anonuser: Literal[False] = ...
+) -> AbstractBaseUser | AnonymousUser | None: ...
 def get_current_user(*, anonuser: bool = False):
     """
     Thought this function you can get the user loged in everywhere

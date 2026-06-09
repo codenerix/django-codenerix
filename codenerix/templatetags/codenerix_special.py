@@ -20,7 +20,6 @@
 import base64
 import hashlib
 import os
-from os import path
 
 from django import template
 from django.conf import settings
@@ -34,14 +33,12 @@ register = Library()
 @register.filter
 def txt2img(
     text,
-    FontSize=14,  # noqa: N803
+    FontSize=14,  # noqa: N803 # pylint: disable=invalid-name
     bg="#ffffff",
     fg="#000000",
     font="FreeMono.ttf",
 ):
-    font_dir = (
-        settings.MEDIA_ROOT + "/txt2img/"
-    )  # Set the directory to store the images
+    font_dir = settings.MEDIA_ROOT + "/txt2img/"  # Set the directory to store the images
     img_name_temp = (
         text + "-" + bg.strip("#") + "-" + fg.strip("#") + "-" + str(FontSize)
     )  # Remove hashes
@@ -59,28 +56,21 @@ def txt2img(
             usedforsecurity=False,
         ).hexdigest()
 
-    img_name = "%s.jpg" % (img_name_encode)
+    img_name = f"{img_name_encode}.jpg"
 
-    if path.exists(font_dir + img_name):  # Make sure img doesn't exist already
+    if os.path.exists(font_dir + img_name):  # Make sure img doesn't exist already
         pass
     else:
         font_size = FontSize
         fnt = ImageFont.truetype(font_dir + font, font_size)
-        w, h = fnt.getsize(text)
+        left, top, right, bottom = fnt.getbbox(text)
+        w, h = int(right - left), int(bottom - top)
         img = Image.new("RGBA", (w, h), bg)
         draw = ImageDraw.Draw(img)
         draw.fontmode = "0"
         draw.text((0, 0), text, font=fnt, fill=fg)
         img.save(font_dir + img_name, "JPEG", quality=100)
-    imgtag = (
-        '<img src="'
-        + settings.MEDIA_URL
-        + "txt2img/"
-        + img_name
-        + '" alt="'
-        + text
-        + '" />'
-    )
+    imgtag = '<img src="' + settings.MEDIA_URL + "txt2img/" + img_name + '" alt="' + text + '" />'
     return imgtag
 
 
@@ -135,10 +125,10 @@ def ifusergroup(parser, token):
         tokensp = token.split_contents()
         groups = []
         groups += tokensp[1:]
-    except ValueError:
+    except ValueError as e:
         raise template.TemplateSyntaxError(
             "Tag 'ifusergroup' requires at least 1 argument.",
-        )
+        ) from e
 
     nodelist_true = parser.parse(("else", "endifusergroup"))
     token = parser.next_token()
@@ -174,7 +164,7 @@ class GroupCheckNode(template.Node):
         for checkgroup in self.groups:
             try:
                 group = Group.objects.get(name=checkgroup)
-            except Group.DoesNotExist:
+            except Group.DoesNotExist:  # pylint: disable=no-member
                 break
 
             if group in user.groups.all():

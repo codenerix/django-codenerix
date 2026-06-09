@@ -16,13 +16,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# pyright: reportAttributeAccessIssue=false
 
-from typing import List, Optional, Tuple
 
 from django.db import transaction
 
 # Warning: Q objects are used inside an eval() that you can find somewhere down
-from django.db.models import Q  # noqa: F401
 from django.http import HttpRequest, HttpResponseRedirect
 
 
@@ -57,6 +56,7 @@ class MultiForm:
         its inline formsets.
         """
 
+        del request  # Unused
         # Prepare base
         if "pk" in kwargs:
             self.object = self.get_object()  # type: ignore[attr-defined]
@@ -76,24 +76,21 @@ class MultiForm:
         # Build form
         form = self.get_form(form_class)  # type: ignore[attr-defined]
 
+        # Initialize list of fields
+        fields = []
+
         # Find groups
         if "groups" in dir(self):
             # Save groups
             groups = self.groups  # type: ignore[attr-defined]
             # Redefine groups inside the form
             form.__groups__ = lambda: groups
-            # Initialize list of fields
-            fields = []
         else:
             groups = None
 
         # Add special prefix support to properly support form independency
-        form.add_prefix = (
-            lambda fields_name, field_prefix=field_prefix: "%s_%s"
-            % (
-                field_prefix,
-                fields_name,
-            )
+        form.add_prefix = lambda fields_name, field_prefix=field_prefix: (
+            "{field_prefix}_{fields_name}"
         )
         if "autofill" not in dir(form.Meta):
             form.Meta.autofill = {}
@@ -101,9 +98,7 @@ class MultiForm:
             form.Meta.extend = {}
 
         # For every extra form
-        forms: List[
-            Tuple[Optional[HttpRequest], Optional[str], Optional[str]]
-        ] = []
+        forms: list[tuple[HttpRequest | None, str | None, str | None]] = []
         position_form_default = 0
         for formelement, linkerfield, modelfilter in self.forms:  # type: ignore[attr-defined] # noqa: E501
             if formelement is None:
@@ -117,9 +112,7 @@ class MultiForm:
                     ).related_query_name()
                     queryset = getattr(self.object, related_name)
                     if modelfilter:
-                        queryset = queryset.filter(
-                            eval("Q(%s)" % (modelfilter)),
-                        )
+                        queryset = queryset.filter(eval(f"Q({modelfilter})"))
                     get_method = getattr(queryset, "get", None)
                     if get_method:
                         instance = queryset.get()
@@ -129,17 +122,13 @@ class MultiForm:
                     instance = None
 
                 if "autofill" in dir(formelement.Meta):
-                    formname = str(formelement).split(".")[-1].split("'")[0]
+                    formname = str(formelement).rsplit(".", maxsplit=1)[-1].split("'")[0]
                     for key in formelement.Meta.autofill:
-                        form.Meta.autofill[
-                            "{}_{}".format(formname, key)
-                        ] = formelement.Meta.autofill[key]
+                        form.Meta.autofill[f"{formname}_{key}"] = formelement.Meta.autofill[key]
                 if "extend" in dir(formelement.Meta):
-                    formname = str(formelement).split(".")[-1].split("'")[0]
+                    formname = str(formelement).rsplit(".", maxsplit=1)[-1].split("'")[0]
                     for key in formelement.Meta.extend:
-                        form.Meta.extend[
-                            "{}_{}".format(formname, key)
-                        ] = formelement.Meta.extend[key]
+                        form.Meta.extend[f"{formname}_{key}"] = formelement.Meta.extend[key]
 
                 # Get prefix
                 if "field_prefix" in formelement.Meta.__dict__:
@@ -147,9 +136,7 @@ class MultiForm:
                     field_prefix = formelement.Meta.field_prefix
                 else:
                     # Get name from the class
-                    field_prefix = (
-                        str(formelement).split("'")[1].split(".")[-1]
-                    )
+                    field_prefix = str(formelement).split("'")[1].split(".")[-1]
                 self.field_prefix = field_prefix
 
                 # Prepare form
@@ -166,9 +153,8 @@ class MultiForm:
 
                 # Add special prefix support to properly support
                 # form independency
-                formobj.add_prefix = (
-                    lambda fields_name, field_prefix=field_prefix: "%s_%s"
-                    % (field_prefix, fields_name)
+                formobj.add_prefix = lambda fields_name, field_prefix=field_prefix: (
+                    f"{field_prefix}_{fields_name}"
                 )
                 formobj.scope_prefix = field_prefix
 
@@ -205,6 +191,8 @@ class MultiForm:
         for validity.
         """
 
+        del request, args  # Unused
+
         # Prepare base
         if "pk" in kwargs:
             self.object = self.get_object()
@@ -225,32 +213,26 @@ class MultiForm:
         # Build the form
         form = self.get_form(form_class)
 
+        # Initialize list of fields
+        fields = []
         # Find groups
         if "groups" in dir(self):
             # Save groups
             groups = self.groups
             # Redefine groups inside the form
             form.__groups__ = lambda: groups
-            # Initialize list of fields
-            fields = []
         else:
             groups = None
 
         # Add special prefix support to properly support form independency
-        form.add_prefix = (
-            lambda fields_name, field_prefix=field_prefix: "%s_%s"
-            % (
-                field_prefix,
-                fields_name,
-            )
+        form.add_prefix = lambda fields_name, field_prefix=field_prefix: (
+            f"{field_prefix}_{fields_name}"
         )
 
         # Check validation
         valid = form.is_valid()
         if (not valid) and ("non_field_errors" in dir(self)):
-            errors = [
-                element[5] for element in list(self.non_field_errors())[:-1]
-            ]
+            errors = [element[5] for element in list(self.non_field_errors())[:-1]]
         elif form.errors.as_data():
             errors = []
             for element in form.errors.as_data():
@@ -274,9 +256,7 @@ class MultiForm:
                     ).related_query_name()
                     queryset = getattr(self.object, related_name)
                     if modelfilter:
-                        queryset = queryset.filter(
-                            eval("Q(%s)" % (modelfilter)),
-                        )
+                        queryset = queryset.filter(eval(f"Q({modelfilter})"))
                     get_method = getattr(queryset, "get", None)
                     if get_method:
                         instance = queryset.get()
@@ -291,9 +271,7 @@ class MultiForm:
                     field_prefix = formelement.Meta.field_prefix
                 else:
                     # Get name from the class
-                    field_prefix = (
-                        str(formelement).split("'")[1].split(".")[-1]
-                    )
+                    field_prefix = str(formelement).split("'")[1].split(".")[-1]
                 self.field_prefix = field_prefix
 
                 # Prepare form
@@ -312,22 +290,16 @@ class MultiForm:
                     del formobj.fields[linkerfield]
 
                 # Link it to the main model
-                formobj.add_prefix = (
-                    lambda fields_name, field_prefix=field_prefix: "%s_%s"
-                    % (field_prefix, fields_name)
+                formobj.add_prefix = lambda fields_name, field_prefix=field_prefix: (
+                    f"{field_prefix}_{fields_name}"
                 )
 
                 # Validate
                 valid *= formobj.is_valid()
 
                 # append error
-                if not formobj.is_valid() and (
-                    "non_field_errors" in dir(formobj)
-                ):
-                    errors += [
-                        element[5]
-                        for element in list(formobj.non_field_errors())[:-1]
-                    ]
+                if not formobj.is_valid() and ("non_field_errors" in dir(formobj)):
+                    errors += [element[5] for element in list(formobj.non_field_errors())[:-1]]
 
             # Save fields to the list
             if groups:
@@ -388,7 +360,7 @@ class MultiForm:
         """
         if self.object:
             form.save()
-            for formobj, linkerfield in forms:
+            for formobj, _ in forms:
                 if form != formobj:
                     formobj.save()
         else:

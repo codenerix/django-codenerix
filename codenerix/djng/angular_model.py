@@ -1,11 +1,12 @@
-try:
-    from django.forms.utils import ErrorDict
-except ImportError:
-    from django.forms.util import ErrorDict  # type: ignore[no-redef, import-untyped] # noqa: E501
-
+# NgModelFormMixin is combined with a Django (model) form at runtime; the
+# attributes it uses (Meta, fields, initial, _post_clean, ...) are supplied by
+# that host form, which basedpyright cannot model. Disable attribute-access
+# checking module-wide.
+# pyright: reportAttributeAccessIssue=false
+from django.forms.utils import ErrorDict
 from django.utils.html import format_html
 
-from .angular_base import NgFormBaseMixin, SafeTuple
+from codenerix.djng.angular_base import NgFormBaseMixin, SafeTuple
 
 
 class NgModelFormMixin(NgFormBaseMixin):
@@ -20,7 +21,7 @@ class NgModelFormMixin(NgFormBaseMixin):
 
     add_djng_error = False
 
-    def __init__(self, data=None, *args, **kwargs):
+    def __init__(self, data=None, files=None, **kwargs):
         self.scope_prefix = kwargs.pop(
             "scope_prefix",
             getattr(self, "scope_prefix", None),
@@ -31,7 +32,7 @@ class NgModelFormMixin(NgFormBaseMixin):
                 fmtstr = kwargs.pop(key)
                 self.ng_directives[key.replace("_", "-")] = fmtstr
         if hasattr(self, "Meta") and hasattr(self.Meta, "ng_models"):
-            if not isinstance(getattr(self.Meta, "ng_models"), list):
+            if not isinstance(self.Meta.ng_models, list):
                 raise TypeError("Meta.ng_model is not of type list")
         elif "ng-model" not in self.ng_directives:
             self.ng_directives["ng-model"] = "%(model)s"
@@ -39,8 +40,7 @@ class NgModelFormMixin(NgFormBaseMixin):
         if self.prefix and data:
             if data.get(self.prefix):
                 data = {
-                    self.add_prefix(name): value
-                    for (name, value) in data.get(self.prefix).items()
+                    self.add_prefix(name): value for (name, value) in data.get(self.prefix).items()
                 }
             else:
                 data = {
@@ -48,7 +48,7 @@ class NgModelFormMixin(NgFormBaseMixin):
                     for (name, value) in data.items()
                     if name.startswith(self.prefix + ".")
                 }
-        super().__init__(data, *args, **kwargs)
+        super().__init__(data, files, **kwargs)
         if self.scope_prefix == self.form_name:
             raise ValueError(
                 "The form's name may not be identical with its scope_prefix",
@@ -62,8 +62,7 @@ class NgModelFormMixin(NgFormBaseMixin):
         super()._post_clean()
         if self._errors and self.prefix:
             self._errors = ErrorDict(
-                (self.add_prefix(name), value)
-                for name, value in self._errors.items()
+                (self.add_prefix(name), value) for name, value in self._errors.items()
             )
 
     def get_initial_data(self):
@@ -74,14 +73,10 @@ class NgModelFormMixin(NgFormBaseMixin):
         ``ng-init={{ thisform.get_initial_data|js|safe }}``.
         """
         data = {}
-        ng_models = (
-            hasattr(self, "Meta") and getattr(self.Meta, "ng_models", []) or []
-        )
+        ng_models = hasattr(self, "Meta") and getattr(self.Meta, "ng_models", []) or []
         for name, field in self.fields.items():
             if "ng-model" in self.ng_directives or name in ng_models:
-                data[name] = (
-                    self.initial.get(name) if self.initial else field.initial
-                )
+                data[name] = self.initial.get(name) if self.initial else field.initial
         return data
 
     def get_field_errors(self, field):
@@ -125,11 +120,7 @@ class NgModelFormMixin(NgFormBaseMixin):
         ng = {
             "name": bound_field.name,
             "identifier": identifier,
-            "model": (
-                ("%s['%s']" % (self.scope_prefix, identifier))
-                if self.scope_prefix
-                else identifier
-            ),
+            "model": (f"{self.scope_prefix}['{identifier}']" if self.scope_prefix else identifier),
         }
         if hasattr(self, "Meta") and bound_field.name in getattr(
             self.Meta,

@@ -1,8 +1,12 @@
+# NgFormValidationMixin is combined with a Django form at runtime; the
+# attributes it uses (fields, ...) are supplied by that host form, which
+# basedpyright cannot model. Disable attribute-access checking module-wide.
+# pyright: reportAttributeAccessIssue=false
 from django.forms import widgets
 from django.utils.encoding import force_str
 from django.utils.html import format_html
 
-from .angular_base import NgFormBaseMixin, SafeTuple
+from codenerix.djng.angular_base import NgFormBaseMixin, SafeTuple
 
 
 class NgFormValidationMixin(NgFormBaseMixin):
@@ -20,13 +24,14 @@ class NgFormValidationMixin(NgFormBaseMixin):
             ng_model = self.add_prefix(name)
             field.widget.attrs.setdefault("ng-model", ng_model)
 
-    def get_field_errors(self, bound_field):
+    def get_field_errors(self, field):
         """
         Determine the kind of input field and create a list of potential
         errors which may occur during validation of that field. This list
         is returned to be displayed in '$dirty' state if the field does
         not validate for that criteria.
         """
+        bound_field = field
         errors = super().get_field_errors(
             bound_field,
         )

@@ -1,3 +1,7 @@
+# These renderer mixins are combined with a Django ChoiceFieldRenderer at
+# runtime, so super().__init__(name, value, attrs, choices) resolves correctly
+# there; basedpyright sees only object.__init__. Disable call checking here.
+# pyright: reportCallIssue=false
 import json
 
 # from django.forms import widgets
@@ -77,9 +81,7 @@ class CheckboxFieldRendererMixin:
         attrs.pop("djng-error", None)
         self.field_attrs = [format_html('ng-form="{0}"', name)]
         if attrs.pop("multiple_checkbox_required", False):
-            field_names = [
-                format_html("{0}.{1}", name, choice) for choice, _ in choices
-            ]
+            field_names = [format_html("{0}.{1}", name, choice) for choice, _ in choices]
             self.field_attrs.append(
                 format_html(
                     'validate-multiple-fields="{0}"',
