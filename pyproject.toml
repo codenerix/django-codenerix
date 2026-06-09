@@ -7,7 +7,7 @@ name = "django-codenerix"
 dynamic = ["version"]
 description = "Codenerix it is a framework that goes on top of Django so it makes easier development and building of ERPs."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.15"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
@@ -54,6 +54,7 @@ dependencies = [
     "standard-imghdr",
     "yattag",
     "typing_extensions>=4.1; python_version < '3.11'",
+    "django-stubs-ext",
 ]
 
 [project.urls]
@@ -96,9 +97,7 @@ dev = [
     "types-requests",
     "types-ldap3",
     "types-openpyxl",
-    "pymongo-stubs",
     "django-stubs[compatible-mypy]",
-    "django-stubs-ext",
 ]
 
 # ----------------------------------------------------------------------------
@@ -170,6 +169,8 @@ django_settings_module = "codenerix.tests.settings"
 # Third-party deps without type stubs (extend as mypy surfaces more).
 [[tool.mypy.overrides]]
 module = [
+    "bson.*",
+    "pymongo.*",
     "captcha.*",
     "haystack.*",
     "rosetta.*",

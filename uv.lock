@@ -1,9 +1,8 @@
 version = 1
 revision = 3
-requires-python = ">=3.10"
+requires-python = ">=3.10, <3.15"
 resolution-markers = [
-    "python_full_version >= '3.15'",
-    "python_full_version >= '3.12' and python_full_version < '3.15'",
+    "python_full_version >= '3.12'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
 ]
@@ -452,8 +451,7 @@ name = "django"
 version = "6.0.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.15'",
-    "python_full_version >= '3.12' and python_full_version < '3.15'",
+    "python_full_version >= '3.12'",
 ]
 dependencies = [
     { name = "asgiref", marker = "python_full_version >= '3.12'" },
@@ -477,6 +475,7 @@ dependencies = [
     { name = "django-haystack" },
     { name = "django-recaptcha" },
     { name = "django-rosetta" },
+    { name = "django-stubs-ext" },
     { name = "elasticsearch" },
     { name = "html5lib" },
     { name = "jsonfield" },
@@ -499,14 +498,12 @@ dev = [
     { name = "basedpyright" },
     { name = "coverage" },
     { name = "django-stubs", extra = ["compatible-mypy"] },
-    { name = "django-stubs-ext" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pylint" },
     { name = "pylint-django" },
     { name = "pylint-pytest" },
     { name = "pymarkdownlnt" },
-    { name = "pymongo-stubs" },
     { name = "pytest" },
     { name = "pytest-django" },
     { name = "pytest-mock" },
@@ -531,6 +528,7 @@ requires-dist = [
     { name = "django-haystack", specifier = ">=2.6.1" },
     { name = "django-recaptcha", specifier = ">=1.2.1,<1.3" },
     { name = "django-rosetta", specifier = ">=0.9.8" },
+    { name = "django-stubs-ext" },
     { name = "elasticsearch", specifier = ">=7,<8" },
     { name = "html5lib" },
     { name = "jsonfield" },
@@ -553,14 +551,12 @@ dev = [
     { name = "basedpyright" },
     { name = "coverage" },
     { name = "django-stubs", extras = ["compatible-mypy"] },
-    { name = "django-stubs-ext" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pylint" },
     { name = "pylint-django" },
     { name = "pylint-pytest" },
     { name = "pymarkdownlnt" },
-    { name = "pymongo-stubs" },
     { name = "pytest" },
     { name = "pytest-django" },
     { name = "pytest-mock" },
@@ -1544,18 +1540,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/19/13/1e5ceb828c5b5f9bae253ba2712e1e66a26e0bdd9de9f94f04badeb0b99c/pymongo-3.13.0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:4d9ed67c987bf9ac2ac684590ba3d2599cdfb0f331ee3db607f9684469b3b59d", size = 509422, upload-time = "2022-11-01T19:03:22.671Z" },
     { url = "https://files.pythonhosted.org/packages/cf/e1/968dd3a62a0a8fd49f5edb0395a09c8b65b89a3c1d7353a6d8bb67e6d893/pymongo-3.13.0-cp311-cp311-win32.whl", hash = "sha256:e8f6979664ff477cd61b06bf8aba206df7b2334209815ab3b1019931dab643d6", size = 391275, upload-time = "2022-11-01T19:03:24.751Z" },
     { url = "https://files.pythonhosted.org/packages/22/64/fe59e4175aa00d98241f007783268e87610d0a218c8ea3311956f3806986/pymongo-3.13.0-cp311-cp311-win_amd64.whl", hash = "sha256:174fd1000e896d0dfbc7f6d7e6a1992a4868796c7dec31679e38218c78d6a942", size = 394541, upload-time = "2022-11-01T19:03:26.97Z" },
-]
-
-[[package]]
-name = "pymongo-stubs"
-version = "0.2.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pymongo" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/2d/46/82d53c1096768eaf2adf90d8b1f17c88f51b17efe67791b9546af7617503/pymongo-stubs-0.2.0.tar.gz", hash = "sha256:f53d497c8f9d64d9187b8e969184027112234fcef1b99dbc3190bb133d19ee19", size = 27197, upload-time = "2022-01-11T21:21:57.444Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b1/74/5f1f8d3ddd28155e15b0f034b370c245191abbeea1cf88c2e2f79612a571/pymongo_stubs-0.2.0-py3-none-any.whl", hash = "sha256:4f634211cc15257a9f5e6e69fea69f9322c8a1fb2b81ac0f1dbc88dc6df12066", size = 39512, upload-time = "2022-01-11T21:21:55.807Z" },
 ]
 
 [[package]]
