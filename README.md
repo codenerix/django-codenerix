@@ -1,5 +1,12 @@
 # django-codenerix
 
+[![PyPI](https://img.shields.io/pypi/v/django-codenerix?color=blue)](https://pypi.org/project/django-codenerix/)
+[![CI](https://github.com/codenerix/django-codenerix/actions/workflows/ci.yml/badge.svg)](https://github.com/codenerix/django-codenerix/actions/workflows/ci.yml)
+[![Python versions](https://img.shields.io/pypi/pyversions/django-codenerix)](https://pypi.org/project/django-codenerix/)
+[![Django](https://img.shields.io/badge/Django-5.2%20%7C%206.0-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-yellow)](https://opensource.org/license/apache-2.0)
+[![Changelog](https://img.shields.io/badge/changelog-CHANGELOG-orange.svg)](CHANGELOG)
+
 Open source enterprise business management system built on top of Django + AngularJS + Bootstrap. Ready for fast development of any CMS, ERP, Business Management Software, you can discover more in [CODENERIX.com](https://www.codenerix.com).
 
 [![Try our demo with Codenerix Cloud](https://github.com/codenerix/django-codenerix/raw/master/codenerix/static/codenerix/img/codenerix.png)](https://www.codenerix.com)
