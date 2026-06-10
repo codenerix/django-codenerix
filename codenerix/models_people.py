@@ -87,7 +87,7 @@ class GenPerson(GenLog):  # META: Abstract class
 
     def __str__(self):
         if self.name and self.surname:
-            output = "{smart_str(self.name)} {smart_str(self.surname)}"
+            output = f"{smart_str(self.name)} {smart_str(self.surname)}"
         elif self.name:
             output = self.name
         elif self.surname:
