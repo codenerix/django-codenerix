@@ -19,7 +19,6 @@
 
 import base64
 import hashlib
-import imghdr  # pylint: disable=deprecated-module  # provided by standard-imghdr on 3.13+
 import io
 import json
 import os
@@ -41,8 +40,19 @@ from django.utils.encoding import smart_str
 from django.utils.html import escapejs
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext as _
+from PIL import Image, UnidentifiedImageError
 
 from codenerix.helpers import get_class
+
+
+def _is_image_file(path):
+    """Return True if *path* points to a readable image (replaces removed imghdr)."""
+    try:
+        with Image.open(path) as image:
+            image.verify()
+    except (UnidentifiedImageError, OSError):
+        return False
+    return True
 
 
 class _ChoiceFieldLike(Protocol):
@@ -694,7 +704,7 @@ class FileAngularInput(forms.widgets.FileInput):
                     value,
                     attrs=attrs,
                 )
-                if imghdr.what(path_image) is not None:
+                if _is_image_file(path_image):
                     image = (
                         f'<img src="{settings.MEDIA_URL}{value}" style="max-height:75px; '
                         'max-width:150px;" />'
