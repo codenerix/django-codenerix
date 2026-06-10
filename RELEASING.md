@@ -67,13 +67,35 @@ Example: releasing `5.0.81`.
    git push origin master --tags
    ```
 
-5. **Create the GitHub Release.** On GitHub, go to *Releases → Draft a new
+5. **Create the GitHub Release.** This is the step that actually triggers
+   the pipeline — pushing the tag alone does **not** publish. The release
+   workflow listens for the *release published* event, so the tag just
+   sits there until a Release is published from it.
+
+   **Option A — CLI (recommended).** With the [GitHub CLI](https://cli.github.com/):
+
+   ```bash
+   gh release create v5.0.81 --title "5.0.81" --generate-notes
+   ```
+
+   - `--generate-notes` auto-builds the notes from commits/PRs since the
+     previous release; use `--notes "..."` (or both) for custom text.
+   - It publishes immediately (no `--draft`), which fires the workflow. If
+     you pass `--draft`, nothing runs until you publish the draft later.
+
+   **Option B — Web UI.** On GitHub, go to *Releases → Draft a new
    release*, pick the `v5.0.81` tag, write the notes, and click *Publish
    release*.
 
 6. **Watch the Actions tab.** The `Release` workflow runs the guards,
    builds, and publishes. A green check means it is live on PyPI:
    <https://pypi.org/project/django-codenerix/>
+
+   From the CLI you can follow the run directly:
+
+   ```bash
+   gh run watch
+   ```
 
 ## Versioning convention
 
@@ -106,6 +128,11 @@ print a number greater than 0.
 
 ## Troubleshooting
 
+- **I pushed the tag but nothing ran / nothing was published.** The tag
+  push does not trigger anything on its own. The workflow runs on the
+  *release published* event, so you must create **and publish** a GitHub
+  Release from the tag (step 5: `gh release create vX.Y.Z --generate-notes`,
+  or the web UI). A *draft* release also does nothing until published.
 - **Workflow fails on "Tag must match `__version__`".** You tagged a
   version that does not match `codenerix/__init__.py`. Fix the version
   string (or the tag) so they agree, then re-tag.
