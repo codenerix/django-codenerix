@@ -786,7 +786,7 @@ def codenerixmodel_delete_post(sender, instance, **kwargs):
                     try:
                         json.dumps(field, default=json_util.default)
                         attrs[key] = field
-                    except TypeError:
+                    except (TypeError, ValueError, OverflowError):
                         # If related, we don't do anything
                         if getattr(field, "all", None) is None:
                             # field_str = str(field)

@@ -16,7 +16,7 @@ class MultiEmailFormTest(SimpleTestCase):
         output = form.as_p()
         self.assertEqual(1, len(pq("textarea", output)))
         # The template-based widget add a line-return
-        value = pq("textarea", output).text()
+        value = str(pq("textarea", output).text())
         self.assertEqual(value.lstrip(), "foo@foo.fr\nbar@bar.fr")
 
 
@@ -39,7 +39,7 @@ class MultiEmailModelFormTest(TestCase):
         output = form.as_p()
         self.assertEqual(2, len(pq("textarea", output)))
         # The template-based widget add a line-return
-        value = pq("textarea:first", output).text()
+        value = str(pq("textarea:first", output).text())
         self.assertEqual(
             value.lstrip(),
             "foo@foo.fr\nbar@bar.fr",
@@ -163,5 +163,5 @@ class MultiEmailWidgetTest(SimpleTestCase):
         output = w.render("test", ["foo@foo.fr", "bar@bar.fr"])
         self.assertEqual(1, len(pq("textarea", output)))
         # The template-based widget add a line-return
-        value = pq("textarea", output).text()
+        value = str(pq("textarea", output).text())
         self.assertEqual(value.lstrip(), "foo@foo.fr\nbar@bar.fr")

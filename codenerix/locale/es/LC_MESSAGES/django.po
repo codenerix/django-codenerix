@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-08 07:41+0200\n"
+"POT-Creation-Date: 2026-06-10 12:38+0200\n"
 "PO-Revision-Date: 2026-02-02 10:11+0100\n"
 "Last-Translator: B7DNY3IT66KAJYWSRXJ64HAT47F3SKN5  <yo@br0th3r.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -221,7 +221,7 @@ msgstr "Noviembre"
 msgid "December"
 msgstr "Diciembre"
 
-#: codenerix/djng/field_mixins.py:36
+#: codenerix/djng/field_mixins.py:45
 #, python-format
 msgid "Ensure this value has at least %(limit_value)d character"
 msgid_plural "Ensure this value has at least %(limit_value)d characters"
@@ -229,7 +229,7 @@ msgstr[0] "Asegúrate de que este valor tiene al menos %(limit_value)d carácter
 msgstr[1] ""
 "Asegúrate de que este valor tiene al menos %(limit_value)d caracteres"
 
-#: codenerix/djng/field_mixins.py:48
+#: codenerix/djng/field_mixins.py:57
 #, python-format
 msgid "Ensure this value has at most %(limit_value)d character"
 msgid_plural "Ensure this value has at most %(limit_value)d characters"
@@ -238,7 +238,7 @@ msgstr[0] ""
 msgstr[1] ""
 "Asegúrate de que este valor no tiene más de %(limit_value)d caracteres"
 
-#: codenerix/djng/field_mixins.py:106
+#: codenerix/djng/field_mixins.py:115
 msgid "This input self does not contain valid data."
 msgstr "Este input no tiene datos válidos."
 
@@ -262,11 +262,11 @@ msgstr "Incorrecto, por favor inténtelo de nuevo."
 msgid "Error verifying input, please try again."
 msgstr "Error verificando la entrada, por favor inténtelo de nuevo."
 
-#: codenerix/forms.py:83
+#: codenerix/forms.py:92
 msgid "Invalid ID detected in SelectMultiple"
 msgstr "ID no válido detectado en SelectMultiple"
 
-#: codenerix/forms.py:158
+#: codenerix/forms.py:167
 msgid "Invalid color"
 msgstr "Color inválido"
 
@@ -294,7 +294,7 @@ msgstr "Cambiar"
 msgid "Delete"
 msgstr "Borrar"
 
-#: codenerix/models.py:153 codenerix/models.py:862
+#: codenerix/models.py:153 codenerix/models.py:863
 #: codenerix/models_people.py:109
 msgid "Created"
 msgstr "Creado"
@@ -316,11 +316,11 @@ msgstr "Acción"
 msgid "Date"
 msgstr "Fecha"
 
-#: codenerix/models.py:418 codenerix/models.py:485 codenerix/models.py:863
+#: codenerix/models.py:418 codenerix/models.py:485 codenerix/models.py:864
 msgid "Actual user"
 msgstr "Usuario actual"
 
-#: codenerix/models.py:419 codenerix/models.py:490 codenerix/models.py:864
+#: codenerix/models.py:419 codenerix/models.py:490 codenerix/models.py:865
 msgid "Original user"
 msgstr "Usuario original"
 
@@ -328,7 +328,7 @@ msgstr "Usuario original"
 msgid "APP Name"
 msgstr "Nombre de la APP"
 
-#: codenerix/models.py:425 codenerix/models.py:483 codenerix/models.py:861
+#: codenerix/models.py:425 codenerix/models.py:483 codenerix/models.py:862
 msgid "ID"
 msgstr "ID"
 
@@ -369,6 +369,14 @@ msgid "deleted"
 msgstr "borrado"
 
 #: codenerix/models_people.py:57 codenerix/models_people.py:106
+#: codenerix_geodata/models.py:36 codenerix_geodata/models.py:46
+#: codenerix_geodata/models.py:115 codenerix_geodata/models.py:125
+#: codenerix_geodata/models.py:135 codenerix_geodata/views.py:106
+#: codenerix_geodata/views.py:125 codenerix_geodata/views.py:185
+#: codenerix_geodata/views.py:223 codenerix_geodata/views.py:313
+#: codenerix_geodata/views.py:378 codenerix_geodata/views.py:490
+#: codenerix_geodata/views.py:577 codenerix_geodata/views.py:747
+#: codenerix_geodata/views.py:833
 msgid "Name"
 msgstr "Nombre"
 
@@ -478,46 +486,173 @@ msgstr "Verdad"
 msgid "False"
 msgstr "Falso"
 
-#: codenerix/widgets.py:89
+#: codenerix/widgets.py:113
 msgid "Press * and select an option"
 msgstr "Presione * y selección una opción"
 
-#: codenerix/widgets.py:249
+#: codenerix/widgets.py:276
 msgid "Select an option"
 msgstr "Seleccione una opción"
 
-#: codenerix/widgets.py:502 codenerix/widgets.py:506
+#: codenerix/widgets.py:536 codenerix/widgets.py:540
 msgid "Press * or start typing"
 msgstr "Presione * o comience a escribir"
 
-#: codenerix/widgets.py:812
+#: codenerix/widgets.py:846
 msgid "Hour"
 msgstr "Hora"
 
-#: codenerix/widgets.py:932
+#: codenerix/widgets.py:970
 msgid "Text Angular"
 msgstr "Text Angular"
 
-#: codenerix/widgets.py:933
+#: codenerix/widgets.py:971
 msgid "NG Quill"
 msgstr "NG Quill"
 
-#: codenerix/widgets.py:934
+#: codenerix/widgets.py:972
 msgid "Source code"
 msgstr "Código fuente"
 
-#: codenerix/widgets.py:935
+#: codenerix/widgets.py:973
 msgid "Preview"
 msgstr "Previsualización"
 
-#: codenerix/widgets.py:1061
+#: codenerix/widgets.py:1112
 msgid "Field deleted in the template"
 msgstr "Campo borrado en el template"
 
-#: codenerix/widgets.py:1134
+#: codenerix/widgets.py:1190
 msgid "We are working on this plugin, it will be ready for next version"
 msgstr ""
 "Estamos trabajando en este plugin, estará listo en la siguiente versión"
+
+#: codenerix_geodata/forms.py:46 codenerix_geodata/forms.py:62
+#: codenerix_geodata/forms.py:78 codenerix_geodata/forms.py:94
+#: codenerix_geodata/forms.py:110 codenerix_geodata/forms.py:125
+msgid "Details"
+msgstr "Detalles"
+
+#: codenerix_geodata/management/commands/populate_geodata.py:235
+msgid "Populates Continent, Country and City models"
+msgstr "Inserta Continentes, Paises y modelos de Ciudades"
+
+#: codenerix_geodata/models.py:51 codenerix_geodata/models.py:67
+#: codenerix_geodata/models.py:77 codenerix_geodata/models.py:82
+#: codenerix_geodata/models.py:99 codenerix_geodata/models.py:110
+#: codenerix_geodata/models.py:141 codenerix_geodata/models.py:158
+#: codenerix_geodata/models.py:168 codenerix_geodata/models.py:174
+#: codenerix_geodata/models.py:191 codenerix_geodata/models.py:201
+#: codenerix_geodata/views.py:184 codenerix_geodata/views.py:312
+#: codenerix_geodata/views.py:489
+msgid "Code"
+msgstr "Código"
+
+#: codenerix_geodata/models.py:83 codenerix_geodata/models.py:100
+msgid "Continent"
+msgstr "Continente"
+
+#: codenerix_geodata/models.py:140 codenerix_geodata/models.py:157
+#: codenerix_geodata/models.py:206 codenerix_geodata/models.py:225
+#: codenerix_geodata/models.py:234 codenerix_geodata/models.py:254
+#: codenerix_geodata/views.py:752
+msgid "Country"
+msgstr "País"
+
+#: codenerix_geodata/models.py:173 codenerix_geodata/models.py:190
+#: codenerix_geodata/models.py:207 codenerix_geodata/models.py:235
+#: codenerix_geodata/models.py:255
+msgid "Region"
+msgstr "Región"
+
+#: codenerix_geodata/models.py:208 codenerix_geodata/models.py:236
+#: codenerix_geodata/models.py:256 codenerix_geodata/views.py:750
+msgid "Province"
+msgstr "Provincia"
+
+#: codenerix_geodata/models.py:209
+msgid "Timezone"
+msgstr "Zona horaria"
+
+#: codenerix_geodata/models.py:226
+msgid "Time zone"
+msgstr "Zona horaria"
+
+#: codenerix_geodata/models.py:237 codenerix_geodata/models.py:258
+msgid "City"
+msgstr "Ciudad"
+
+#: codenerix_geodata/models.py:238 codenerix_geodata/models.py:257
+msgid "Town"
+msgstr "Ciudad"
+
+#: codenerix_geodata/models.py:239
+msgid "Zip code"
+msgstr "Código Postal"
+
+#: codenerix_geodata/models.py:240 codenerix_geodata/models.py:260
+msgid "Address"
+msgstr "Dirección"
+
+#: codenerix_geodata/models.py:241 codenerix_geodata/models.py:261
+msgid "Phone"
+msgstr "Teléfono"
+
+#: codenerix_geodata/models.py:259
+msgid "Zipcode"
+msgstr "Código Postal"
+
+#: codenerix_geodata/views.py:186 codenerix_geodata/views.py:225
+#: codenerix_geodata/views.py:316 codenerix_geodata/views.py:392
+#: codenerix_geodata/views.py:495 codenerix_geodata/views.py:602
+#: codenerix_geodata/views.py:753 codenerix_geodata/views.py:858
+msgid "Code continent"
+msgstr "Código del Continente"
+
+#: codenerix_geodata/views.py:187 codenerix_geodata/views.py:319
+#: codenerix_geodata/views.py:397 codenerix_geodata/views.py:498
+#: codenerix_geodata/views.py:607 codenerix_geodata/views.py:756
+#: codenerix_geodata/views.py:863
+msgid "Name continent"
+msgstr "Nombre del Continente"
+
+#: codenerix_geodata/views.py:230
+msgid "Continent name"
+msgstr "Nombre del Continente"
+
+#: codenerix_geodata/views.py:314 codenerix_geodata/views.py:493
+#: codenerix_geodata/views.py:751
+msgid "Code country"
+msgstr "Código del País"
+
+#: codenerix_geodata/views.py:315 codenerix_geodata/views.py:386
+#: codenerix_geodata/views.py:494 codenerix_geodata/views.py:596
+#: codenerix_geodata/views.py:852
+msgid "Name country"
+msgstr "Nombre del País"
+
+#: codenerix_geodata/views.py:381 codenerix_geodata/views.py:580
+#: codenerix_geodata/views.py:591 codenerix_geodata/views.py:836
+#: codenerix_geodata/views.py:847
+msgid "Code self"
+msgstr "Código propio"
+
+#: codenerix_geodata/views.py:491
+msgid "Code region"
+msgstr "Código de región"
+
+#: codenerix_geodata/views.py:492 codenerix_geodata/views.py:585
+#: codenerix_geodata/views.py:841
+msgid "Name region"
+msgstr "Nombre de la región"
+
+#: codenerix_geodata/views.py:748
+msgid "Time Zone"
+msgstr "Zona horaria"
+
+#: codenerix_geodata/views.py:749
+msgid "Code province"
+msgstr "Código de provincia"
 
 #~ msgid ""
 #~ " WARNING: DATERANGEPICKER_OPTIONS is not set in your configuration!!! "
@@ -672,81 +807,6 @@ msgstr ""
 
 #~ msgid "RemoteLog"
 #~ msgstr "Log Remoto"
-
-#~ msgid "Details"
-#~ msgstr "Detalles"
-
-#~ msgid "Populates Continent, Country and City models"
-#~ msgstr "Inserta Continentes, Paises y modelos de Ciudades"
-
-#~ msgid "Code"
-#~ msgstr "Código"
-
-#~ msgid "Continent"
-#~ msgstr "Continente"
-
-#~ msgid "Country"
-#~ msgstr "País"
-
-#~ msgid "Region"
-#~ msgstr "Región"
-
-#~ msgid "Province"
-#~ msgstr "Provincia"
-
-#~ msgid "Timezone"
-#~ msgstr "Zona horaria"
-
-#~ msgid "Time zone"
-#~ msgstr "Zona horaria"
-
-#~ msgid "City"
-#~ msgstr "Ciudad"
-
-#~ msgid "Town"
-#~ msgstr "Ciudad"
-
-#~ msgid "Zip code"
-#~ msgstr "Código Postal"
-
-#~ msgid "Address"
-#~ msgstr "Dirección"
-
-#~ msgid "Phone"
-#~ msgstr "Teléfono"
-
-#~ msgid "Zipcode"
-#~ msgstr "Código Postal"
-
-#~ msgid "Code continent"
-#~ msgstr "Código del Continente"
-
-#~ msgid "Name continent"
-#~ msgstr "Nombre del Continente"
-
-#~ msgid "Continent name"
-#~ msgstr "Nombre del Continente"
-
-#~ msgid "Code country"
-#~ msgstr "Código del País"
-
-#~ msgid "Name country"
-#~ msgstr "Nombre del País"
-
-#~ msgid "Code self"
-#~ msgstr "Código propio"
-
-#~ msgid "Code region"
-#~ msgstr "Código de región"
-
-#~ msgid "Name region"
-#~ msgstr "Nombre de la región"
-
-#~ msgid "Time Zone"
-#~ msgstr "Zona horaria"
-
-#~ msgid "Code province"
-#~ msgstr "Código de provincia"
 
 #~ msgid "APP Label"
 #~ msgstr "Título de la APP"
