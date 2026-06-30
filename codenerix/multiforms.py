@@ -90,7 +90,7 @@ class MultiForm:
 
         # Add special prefix support to properly support form independency
         form.add_prefix = lambda fields_name, field_prefix=field_prefix: (
-            "{field_prefix}_{fields_name}"
+            f"{field_prefix}_{fields_name}"
         )
         if "autofill" not in dir(form.Meta):
             form.Meta.autofill = {}

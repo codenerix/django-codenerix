@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.86] - 2026-06-30
+### Bugfix
+- Fixed bug that prevented proper render of multiforms
+
 ## [5.0.85] - 2026-06-30
 ### Bugfix
 - Fixed crash on model delete logging when a field is a native uuid.UUID: bson's json_util.default raises ValueError (not TypeError), so the delete post-processing now also catches ValueError and OverflowError and falls back to smart_str()
