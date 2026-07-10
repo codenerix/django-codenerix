@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.87] - 2026-07-10
+### Maintenance
+- Squashed migrations 0001–0024 into 0001_squashed_0024_alter_remotelog_options (originals kept for transition, non-breaking via `replaces`)
+
 ## [5.0.86] - 2026-06-30
 ### Bugfix
 - Fixed bug that prevented proper render of multiforms
