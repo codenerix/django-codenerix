@@ -20,6 +20,7 @@
 import os
 import sys
 from datetime import datetime
+from typing import Any
 
 from captcha import client
 from django import forms
@@ -30,6 +31,7 @@ from django.forms.widgets import Textarea
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext as _
 
+from codenerix.helpers import get_client_ip
 from codenerix.multi_email_field.forms import (
     MultiEmailField as MultiEmailFormField,
 )
@@ -47,7 +49,7 @@ class FileAngularField(models.FileField):
     description = "File manage throught the Angular service system"
 
     def formfield(self, **kwargs):
-        defaults = {"widget": FileAngularInput}
+        defaults: dict[str, Any] = {"widget": FileAngularInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
@@ -56,14 +58,14 @@ class ImageAngularField(models.ImageField):
     description = "Image field for Angular JS"
 
     def formfield(self, **kwargs):
-        defaults = {"widget": FileAngularInput}
+        defaults: dict[str, Any] = {"widget": FileAngularInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
 
 class Date2TimeField(models.DateTimeField):
     def formfield(self, **kwargs):
-        defaults = {"widget": Date2TimeInput}
+        defaults: dict[str, Any] = {"widget": Date2TimeInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
@@ -99,7 +101,7 @@ class WysiwygAngularField(models.TextField):
     description = "A hand of cards (bridge style)"
 
     def formfield(self, **kwargs):
-        defaults = {"widget": WysiwygAngularInput}
+        defaults: dict[str, Any] = {"widget": WysiwygAngularInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
@@ -108,7 +110,7 @@ class MultiBlockWysiwygField(models.TextField):
     description = "Multi block WYSIWYG"
 
     def formfield(self, **kwargs):
-        defaults = {"widget": MultiBlockWysiwygInput}
+        defaults: dict[str, Any] = {"widget": MultiBlockWysiwygInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
@@ -117,7 +119,7 @@ class BootstrapWysiwygField(models.TextField):
     description = "Bootstrap WYSIWYG"
 
     def formfield(self, **kwargs):
-        defaults = {"widget": BootstrapWysiwygInput}
+        defaults: dict[str, Any] = {"widget": BootstrapWysiwygInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
@@ -169,10 +171,7 @@ class GenReCaptchaField(forms.CharField):
             if "request" in f.f_locals:
                 request = f.f_locals["request"]
                 if request:
-                    remote_ip = request.META.get("REMOTE_ADDR", "")
-                    forwarded_ip = request.META.get("HTTP_X_FORWARDED_FOR", "")
-                    ip = remote_ip if not forwarded_ip else forwarded_ip
-                    return ip
+                    return get_client_ip(request) or ""
             f = f.f_back
         return ""
 
