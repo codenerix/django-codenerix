@@ -48,7 +48,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 # Django
 from django.db.models import Q
-from django.http import HttpResponseRedirect, QueryDict
+from django.http import HttpRequest, HttpResponseRedirect, QueryDict
 from django.shortcuts import render
 from django.template import TemplateDoesNotExist
 from django.template.loader import get_template as django_get_template
@@ -404,13 +404,44 @@ def get_class(func) -> type[View] | None:
     return None
 
 
-def get_client_ip(request):
-    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0]
-    else:
-        ip = request.META.get("REMOTE_ADDR")
-    return ip
+def get_client_ip(
+    request: HttpRequest,
+    trusted_proxies: int | None = None,
+) -> str | None:
+    """Client IP address, tolerant of reverse proxies.
+
+    ``trusted_proxies`` is the number of trusted hops sitting in front of the
+    application: 1 for a single nginx, 2 for CDN + nginx, and 0 or less to
+    distrust proxy headers entirely.  It defaults to the
+    ``CODENERIX_TRUSTED_PROXIES`` setting, or 1 when that is not set.
+
+    ``X-Forwarded-For`` is read from the RIGHT.  Nginx's
+    ``$proxy_add_x_forwarded_for`` APPENDS the peer address to whatever the
+    client sent, so the leftmost entry is attacker controlled while the
+    rightmost was always written by the proxy itself.
+    """
+    hops: int = (
+        getattr(settings, "CODENERIX_TRUSTED_PROXIES", 1)
+        if trusted_proxies is None
+        else trusted_proxies
+    )
+
+    # No trusted proxies means no proxy header is to be believed.
+    if hops < 1:
+        return request.META.get("REMOTE_ADDR")
+
+    xff = request.META.get("HTTP_X_FORWARDED_FOR")
+    if xff:
+        parts = [part.strip() for part in xff.split(",") if part.strip()]
+        if parts:
+            return parts[max(0, len(parts) - hops)]
+
+    # No XFF: X-Real-IP is overwritten by the proxy and is not appendable.
+    real = request.META.get("HTTP_X_REAL_IP")
+    if real:
+        return real.strip()
+
+    return request.META.get("REMOTE_ADDR")
 
 
 def clean_memcache_item(key, item):
