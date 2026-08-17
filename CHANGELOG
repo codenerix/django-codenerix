@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2026-08-17
+### Security
+- `get_client_ip()` no longer trusts the leftmost `X-Forwarded-For` entry. Nginx's `$proxy_add_x_forwarded_for` appends the peer address to whatever the client sent, so the leftmost entry is attacker controlled: any visitor could impersonate an arbitrary IP address. The header is now read from the right, counting the number of trusted hops.
+- `GenReCaptchaField.get_remote_ip()` now routes through `get_client_ip()` instead of reimplementing the lookup. It previously handed reCAPTCHA the entire raw `X-Forwarded-For` string, commas included, whenever the header carried more than one entry.
+
+### Feature
+- New `CODENERIX_TRUSTED_PROXIES` setting (default `1`) declaring how many trusted reverse proxies sit in front of the application: `1` for a single nginx, `2` for CDN + nginx, `0` or less to distrust proxy headers entirely and use `REMOTE_ADDR` only. `get_client_ip()` also accepts it as a `trusted_proxies` keyword argument, which takes precedence over the setting.
+- `get_client_ip()` falls back to `X-Real-IP` when no `X-Forwarded-For` is present. Unlike `X-Forwarded-For`, the proxy overwrites `X-Real-IP` on every request, so it cannot be appended to by the client.
+- First test module of the suite: `codenerix/tests/test_helpers.py`, covering the ten header scenarios plus the setting resolution.
+
+### Changed
+- **Deployments behind a CDN must set `CODENERIX_TRUSTED_PROXIES`.** With the default of one trusted hop, an application behind CDN + nginx now resolves to the CDN edge address instead of the visitor address. Setting the value to the real number of hops (`2` for CDN + nginx) restores the visitor address. Deployments with a single reverse proxy, or with no proxy headers at all, are unaffected and return exactly the same value as before.
+
+### Maintenance
+- Annotated the `defaults` dicts in `fields.py` as `dict[str, Any]`, silencing 66 basedpyright `reportArgumentType` errors caused by the dict being inferred as `dict[str, type[Widget]]` and checked against every keyword parameter of `formfield()`. No behaviour change.
+
 ## [5.0.87] - 2026-07-10
 ### Maintenance
 - Squashed migrations 0001–0024 into 0001_squashed_0024_alter_remotelog_options (originals kept for transition, non-breaking via `replaces`)
