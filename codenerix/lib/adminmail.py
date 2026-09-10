@@ -82,7 +82,7 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
 
     # === FALLBACK STATE ===
     # Structure: {error_key: {'count': int, 'expires': float}}
-    _memory_storage: dict[str, ThrottleEntry]
+    _memory_storage: dict[str, ThrottleEntry] = {}
     _memory_lock = threading.Lock()
     _last_cleanup = time.time()
     _cache_available = None

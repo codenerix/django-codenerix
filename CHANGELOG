@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.1] - 2026-09-10
+### Bugfix
+- `ThrottledAdminEmailHandler._memory_storage` was only annotated, never assigned, so the attribute did not exist. When the cache backend was unavailable and the handler fell back to in-memory throttling, accessing `self._memory_storage` raised `AttributeError`. It is now assigned as a class-level dict, matching the class-level `_memory_lock`, so the process-wide fallback store actually exists.
+
 ## [5.1.0] - 2026-08-17
 ### Security
 - `get_client_ip()` no longer trusts the leftmost `X-Forwarded-For` entry. Nginx's `$proxy_add_x_forwarded_for` appends the peer address to whatever the client sent, so the leftmost entry is attacker controlled: any visitor could impersonate an arbitrary IP address. The header is now read from the right, counting the number of trusted hops.
