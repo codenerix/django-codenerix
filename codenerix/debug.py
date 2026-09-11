@@ -91,10 +91,12 @@ def autoload(
         EXTRA_MIDDLEWARES.append("pyinstrument.middleware.ProfilerMiddleware")
 
     # Attach new middlewares
+    existing = set(MIDDLEWARE)
+    extra = [middleware for middleware in EXTRA_MIDDLEWARES if middleware not in existing]
     if isinstance(MIDDLEWARE, tuple):
-        MIDDLEWARE += tuple(EXTRA_MIDDLEWARES)
+        MIDDLEWARE += tuple(extra)
     else:
-        MIDDLEWARE += list(EXTRA_MIDDLEWARES)
+        MIDDLEWARE += extra
 
     # Return final results
     return (INSTALLED_APPS, MIDDLEWARE)
