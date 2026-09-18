@@ -70,6 +70,13 @@ class CodenerixMetaType(dict):
                 self[k] = kwargs[k]
 
     def __getattr__(self, attr):
+        # Dunders must keep raising AttributeError. Returning None for them
+        # breaks every protocol that probes for an optional special method
+        # with getattr(): pickle asks for __setstate__, gets None instead of
+        # AttributeError, and then calls it, so pickling any model carrying a
+        # CodenerixMeta failed with "'NoneType' object is not callable".
+        if attr.startswith("__") and attr.endswith("__"):
+            raise AttributeError(attr)
         return self.get(attr)
 
     def __setattr__(self, key, value):
