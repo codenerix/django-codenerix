@@ -55,14 +55,24 @@ repos:
   # ==========================================================================
   - repo: local
     hooks:
+      # Checks the whole package, like the basedpyright hook below and like CI.
+      # Per-file mypy is unsound: type inference crosses files, so a change in
+      # one file can break another that is not in the commit. No `exclude:`
+      # here either -- that would stop the hook from firing on changes under
+      # tests/, and codenerix/tests/settings.py is the module django-stubs
+      # resolves, so editing it changes types all over the package. What mypy
+      # analyses is still governed by `exclude` in [tool.mypy].
+      # Cost measured on this repo: 0.4s warm vs 0.3s for a single file.
       - id: mypy
         name: mypy
-        entry: uv run mypy
+        entry: uv run mypy codenerix
         language: system
         files: ^codenerix/.*\.py$
-        exclude: ^codenerix/(.*/)?(migrations|tests)/
-        pass_filenames: true
+        pass_filenames: false
 
+      # Deliberately per-file, unlike mypy above: pylint over the whole package
+      # takes 81s here versus 1.7s for a single file, and CI has no pylint job,
+      # so it is not a release gate.
       - id: pylint
         name: pylint
         entry: uv run pylint -j1

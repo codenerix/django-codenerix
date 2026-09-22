@@ -20,11 +20,17 @@ from codenerix.debug import (
 )
 
 # Importing the panel modules pulls debug_toolbar.models.HistoryEntry, which
-# needs the app registered. Scoped to this test so the rest of the suite keeps
-# running without the toolbar installed. STATIC_URL cannot be overridden here:
-# override_settings repopulates the app registry before applying the overrides,
-# so the staticfiles panel's ready() would read it as None. It lives in the
-# test settings module instead.
+# needs the app registered, and the staticfiles panel reads STATIC_URL in its
+# ready(). Both are scoped to this test so the rest of the suite keeps running
+# without the toolbar installed.
+#
+# The two overrides must be NESTED, not merged into one call: override_settings
+# repopulates the app registry before applying its own overrides, so a single
+# call would run the toolbar's ready() while STATIC_URL is still None. And
+# STATIC_URL must not be declared in codenerix.tests.settings either -- that is
+# the module django-stubs resolves, and defining it there narrows
+# settings.STATIC_URL from `str | None` to `str`, which makes the deliberate
+# cast(str, ...) calls in views.py redundant and fails mypy.
 _TOOLBAR_APPS = [
     *settings.INSTALLED_APPS,
     "django.contrib.staticfiles",
@@ -43,11 +49,12 @@ def test_default_panels_match_upstream() -> None:
     )
 
 
-@override_settings(INSTALLED_APPS=_TOOLBAR_APPS)
 def test_default_panels_are_importable() -> None:
     """Every dotted path must resolve against the installed toolbar."""
-    for panel in DEBUG_TOOLBAR_DEFAULT_PANELS:
-        import_string(panel)
+    with override_settings(STATIC_URL="/static/"):
+        with override_settings(INSTALLED_APPS=_TOOLBAR_APPS):
+            for panel in DEBUG_TOOLBAR_DEFAULT_PANELS:
+                import_string(panel)
 
 
 def test_default_config_keys_are_known() -> None:
