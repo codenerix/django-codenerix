@@ -48,7 +48,7 @@ from codenerix.widgets import (
 class FileAngularField(models.FileField):
     description = "File manage throught the Angular service system"
 
-    def formfield(self, **kwargs):
+    def formfield(self, **kwargs) -> forms.Field | None:
         defaults: dict[str, Any] = {"widget": FileAngularInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -57,14 +57,14 @@ class FileAngularField(models.FileField):
 class ImageAngularField(models.ImageField):
     description = "Image field for Angular JS"
 
-    def formfield(self, **kwargs):
+    def formfield(self, **kwargs) -> forms.Field | None:
         defaults: dict[str, Any] = {"widget": FileAngularInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
 
 class Date2TimeField(models.DateTimeField):
-    def formfield(self, **kwargs):
+    def formfield(self, **kwargs) -> forms.Field | None:
         defaults: dict[str, Any] = {"widget": Date2TimeInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -100,7 +100,7 @@ class MultiEmailField(MultiEmailFormField):
 class WysiwygAngularField(models.TextField):
     description = "A hand of cards (bridge style)"
 
-    def formfield(self, **kwargs):
+    def formfield(self, **kwargs) -> forms.Field | None:
         defaults: dict[str, Any] = {"widget": WysiwygAngularInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -109,7 +109,7 @@ class WysiwygAngularField(models.TextField):
 class MultiBlockWysiwygField(models.TextField):
     description = "Multi block WYSIWYG"
 
-    def formfield(self, **kwargs):
+    def formfield(self, **kwargs) -> forms.Field | None:
         defaults: dict[str, Any] = {"widget": MultiBlockWysiwygInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
@@ -118,7 +118,7 @@ class MultiBlockWysiwygField(models.TextField):
 class BootstrapWysiwygField(models.TextField):
     description = "Bootstrap WYSIWYG"
 
-    def formfield(self, **kwargs):
+    def formfield(self, **kwargs) -> forms.Field | None:
         defaults: dict[str, Any] = {"widget": BootstrapWysiwygInput}
         defaults.update(kwargs)
         return super().formfield(**defaults)
