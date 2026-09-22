@@ -62,11 +62,14 @@ publish: release-guards lint test build-check
 	-# Wait for CI on the pushed commit BEFORE publishing anything...
 	@# The local gate only covers one Python; CI runs the whole matrix. A red
 	@# CI must stop the release, not be discovered after it is public.
+	@# `// empty` matters: without it jq prints the literal string "null" when
+	@# no run exists yet, the -n test passes and the loop breaks on the very
+	@# race it is here to absorb.
 	@sha=$$(git rev-parse HEAD); \
 	 echo "Waiting for a CI run on $$sha..."; \
 	 for i in $$(seq 1 30); do \
 		id=$$(gh run list --commit "$$sha" --workflow CI --limit 1 \
-			--json databaseId --jq '.[0].databaseId' 2>/dev/null); \
+			--json databaseId --jq '.[0].databaseId // empty' 2>/dev/null); \
 		[ -n "$$id" ] && break; \
 		sleep 5; \
 	 done; \
@@ -74,4 +77,20 @@ publish: release-guards lint test build-check
 	 gh run watch "$$id" --exit-status
 	-# CI is green, publish the release (this triggers the PyPI workflow)...
 	gh release create "v$(VERSION)" --title "$(VERSION)" --notes-from-tag
-	gh run watch
+	-# Wait for the PyPI publish run, matched to this commit...
+	@# Bare `gh run watch` looks at whatever is in progress right now, so just
+	@# after creating the release it finds nothing, prints "found no in progress
+	@# runs to watch" and exits 0 -- success that was never checked. Poll for
+	@# the Release run whose head commit is ours instead.
+	@sha=$$(git rev-parse HEAD); \
+	 echo "Waiting for the Release run on $$sha..."; \
+	 for i in $$(seq 1 30); do \
+		id=$$(gh run list --workflow Release --event release --limit 10 \
+			--json databaseId,headSha \
+			--jq "[.[] | select(.headSha==\"$$sha\")] | .[0].databaseId // empty" \
+			2>/dev/null); \
+		[ -n "$$id" ] && break; \
+		sleep 5; \
+	 done; \
+	 test -n "$$id" || { echo "ERROR: no Release run found for $$sha after 150s"; exit 1; }; \
+	 gh run watch "$$id" --exit-status
