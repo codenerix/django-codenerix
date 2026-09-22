@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0] - 2026-09-22
+### Added
+- `codenerix/tests/test_debug_toolbar.py`: guards against upstream drift. The panel tuple must match django-debug-toolbar's `PANELS_DEFAULTS` verbatim (order included), every dotted path must import against the installed toolbar, and every `DEBUG_TOOLBAR_DEFAULT_CONFIG` key must still be recognised by it.
+
+### Changed
+- `DEBUG_TOOLBAR_DEFAULT_PANELS` now mirrors the full upstream default panel set, adding `AlertsPanel` (upstream 4.4.3), `CommunityPanel` (6.1) and `TasksPanel` (7.1). The hardcoded list had silently fallen behind upstream.
+- Minimum `django-debug-toolbar` raised from `>=4.4.2` to `>=7.1.0`. Panels are imported by dotted path, so older releases raise `ImportError` on the panels they do not ship.
+
+### Removed
+- `INTERCEPT_REDIRECTS` dropped from `DEBUG_TOOLBAR_DEFAULT_CONFIG`. Upstream removed the setting in django-debug-toolbar 2.0 and it had been silently ignored ever since; `DISABLE_PANELS` supersedes it.
+
 ## [5.1.3] - 2026-09-18
 ### Bugfix
 - `CodenerixMetaType.__getattr__` now re-raises `AttributeError` for dunder names instead of returning `None`. Returning `None` broke every protocol that probes for an optional special method via `getattr()`: pickle asked for `__setstate__`, got `None` instead of `AttributeError`, then called it, so pickling any model carrying a `CodenerixMeta` failed with `'NoneType' object is not callable`. Non-dunder attributes still fall back to `self.get(attr)`.

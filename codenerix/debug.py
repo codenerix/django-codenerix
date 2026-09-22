@@ -21,6 +21,9 @@
 import debug_toolbar
 from django import VERSION
 
+# Full set of built-in panels, in upstream order. Requires
+# django-debug-toolbar >= 7.1 (TasksPanel landed there); older releases raise
+# ImportError on the panels they do not ship.
 DEBUG_TOOLBAR_DEFAULT_PANELS = (
     "debug_toolbar.panels.history.HistoryPanel",
     "debug_toolbar.panels.versions.VersionsPanel",
@@ -31,13 +34,20 @@ DEBUG_TOOLBAR_DEFAULT_PANELS = (
     "debug_toolbar.panels.sql.SQLPanel",
     "debug_toolbar.panels.staticfiles.StaticFilesPanel",
     "debug_toolbar.panels.templates.TemplatesPanel",
+    "debug_toolbar.panels.alerts.AlertsPanel",
     "debug_toolbar.panels.cache.CachePanel",
     "debug_toolbar.panels.signals.SignalsPanel",
+    "debug_toolbar.panels.tasks.TasksPanel",
+    "debug_toolbar.panels.community.CommunityPanel",
+    # Deprecated since 6.2 in favour of HistoryPanel, but still part of the
+    # upstream default set. Sits in DISABLE_PANELS, so it is never instantiated
+    # and emits no warning unless a project enables it. Drop it when upstream does.
     "debug_toolbar.panels.redirects.RedirectsPanel",
+    # Not deprecated, only disabled by default via DISABLE_PANELS: profiling
+    # every request is expensive.
     "debug_toolbar.panels.profiling.ProfilingPanel",
 )
 DEBUG_TOOLBAR_DEFAULT_CONFIG = {
-    "INTERCEPT_REDIRECTS": False,
     # Toolbar options
     "RESULTS_CACHE_SIZE": 100,
     "SHOW_COLLAPSED": True,

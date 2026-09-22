@@ -9,6 +9,11 @@ SECRET_KEY = "codenerix-test-secret-key"  # noqa: S105 - test-only, not a secret
 
 USE_TZ = True
 
+# Needed by tests that pull django.contrib.staticfiles in through
+# override_settings: that helper repopulates the app registry BEFORE installing
+# the setting overrides, so STATIC_URL has to be resolvable from here.
+STATIC_URL = "/static/"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
