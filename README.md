@@ -48,7 +48,7 @@ Open source enterprise business management system built on top of Django + Angul
 
 - hotkeys support
 
-- [Haystack](http://haystacksearch.org) support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
+- [Haystack](https://github.com/django-haystack/django-haystack) support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
 
 - nice packages with plenty of icons ready to use (Glyphicon, Font Awesome & Font Awesome Animation)
 

@@ -49,14 +49,25 @@ class Command(BaseCommand, Debugger):
                 )
                 # Send 'flush_all' to memcached over the text protocol (no shell:
                 # the old `echo 'flush_all' | nc ...` pipe becomes stdin input).
-                result = subprocess.run(
-                    ["nc", "-v", "-w", "1", str(host), str(port)],
-                    input="flush_all\n",
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    check=False,
-                )
+                try:
+                    result = subprocess.run(
+                        ["nc", "-v", "-w", "1", str(host), str(port)],
+                        input="flush_all\n",
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        text=True,
+                        check=False,
+                    )
+                except FileNotFoundError:
+                    # nc is not installed everywhere. Without this the command
+                    # dies with a traceback about a missing binary, which says
+                    # nothing about the cache still being full afterwards.
+                    self.debug(
+                        f"ERROR at {name}@Memcache -> 'nc' not found, install "
+                        "netcat to flush memcached",
+                        color="red",
+                    )
+                    continue
                 status, output = result.returncode, result.stdout.rstrip("\n")
                 if status:
                     self.debug(
