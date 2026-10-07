@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.0] - 2026-10-07
+### Added
+- `codenerix.debug.show_toolbar`, now the `SHOW_TOOLBAR_CALLBACK` in `DEBUG_TOOLBAR_DEFAULT_CONFIG`. Visibility is driven by the new optional settings `DEBUG_TOOLBAR_ALLOWED_IPS` (list of client IPs; `"0.0.0.0"` means any) and `DEBUG_TOOLBAR_REQUIRE_SUPERUSER` (defaults to `not DEBUG`). Both are read per request, so they may be defined anywhere in the settings module. When `DEBUG_TOOLBAR_ALLOWED_IPS` is not defined, upstream's default (`DEBUG` and `INTERNAL_IPS`) applies unchanged. The project must assign `DEBUG_TOOLBAR_CONFIG = DEBUG_TOOLBAR_DEFAULT_CONFIG` (or set `SHOW_TOOLBAR_CALLBACK` to `"codenerix.debug.show_toolbar"` itself), and do it under the same condition `autoload()` uses to install the toolbar; otherwise upstream's callback stays in charge and none of this applies.
+- `autoload(..., DEBUG_TOOLBAR_PRODUCTION=False)`: opt-in to install the toolbar with `DEBUG=False`. Without it, the toolbar is still only installed when `DEBUG` is true.
+- System check `codenerix.E001`: rejects a `DEBUG_TOOLBAR_ALLOWED_IPS` that is not a list/tuple/set (a bare string would degrade into a substring match) and the combination `"0.0.0.0"` + `DEBUG=False` + `DEBUG_TOOLBAR_REQUIRE_SUPERUSER=False`, which would make the toolbar public. `show_toolbar` fails closed on both, since system checks do not run under uWSGI/WSGI.
+
+### Changed
+- `autourl()` mounts `__debug__/` when `DEBUG_TOOLBAR` is set and `debug_toolbar` is in `INSTALLED_APPS`, instead of requiring `DEBUG`. It now follows what `autoload()` actually installed.
+
 ## [5.2.0] - 2026-09-22
 ### Added
 - `codenerix/tests/test_debug_toolbar.py`: guards against upstream drift. The panel tuple must match django-debug-toolbar's `PANELS_DEFAULTS` verbatim (order included), every dotted path must import against the installed toolbar, and every `DEBUG_TOOLBAR_DEFAULT_CONFIG` key must still be recognised by it.

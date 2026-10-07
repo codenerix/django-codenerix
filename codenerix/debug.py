@@ -18,8 +18,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
+from collections.abc import Collection
+from typing import TYPE_CHECKING
+
 import debug_toolbar
 from django import VERSION
+from django.conf import settings
+
+if TYPE_CHECKING:
+    # Type-only: keep settings-time imports of this module minimal
+    from django.http import HttpRequest
+
+# Sentinel in DEBUG_TOOLBAR_ALLOWED_IPS meaning "any client address". It can
+# never be a real REMOTE_ADDR, so it cannot collide with a listed client.
+DEBUG_TOOLBAR_ANY_IP = "0.0.0.0"
+
+
+def debug_toolbar_access_errors() -> list[str]:
+    """Return the problems found in the toolbar access settings, if any.
+
+    Shared by show_toolbar() (which fails closed on any of them) and the
+    codenerix system check (which reports them at startup).
+    """
+    allowed = getattr(settings, "DEBUG_TOOLBAR_ALLOWED_IPS", None)
+    if allowed is None:
+        return []
+    # A bare string would turn the membership test into a substring match
+    if isinstance(allowed, str) or not isinstance(allowed, Collection):
+        return ["DEBUG_TOOLBAR_ALLOWED_IPS must be a list, tuple or set of IP strings."]
+    if DEBUG_TOOLBAR_ANY_IP in allowed and not settings.DEBUG and not _require_superuser():
+        return [
+            f"DEBUG_TOOLBAR_ALLOWED_IPS contains {DEBUG_TOOLBAR_ANY_IP!r} with DEBUG=False "
+            "and DEBUG_TOOLBAR_REQUIRE_SUPERUSER=False: the toolbar would be public.",
+        ]
+    return []
+
+
+def _require_superuser() -> bool:
+    # Login required by default only outside development
+    return bool(getattr(settings, "DEBUG_TOOLBAR_REQUIRE_SUPERUSER", not settings.DEBUG))
+
+
+def show_toolbar(request: HttpRequest) -> bool:
+    """SHOW_TOOLBAR_CALLBACK driven by DEBUG_TOOLBAR_ALLOWED_IPS.
+
+    Without DEBUG_TOOLBAR_ALLOWED_IPS the upstream default applies unchanged
+    (DEBUG and REMOTE_ADDR in INTERNAL_IPS). Settings are read per request, so
+    projects may define them anywhere in their settings module.
+    """
+
+    allowed = getattr(settings, "DEBUG_TOOLBAR_ALLOWED_IPS", None)
+    if allowed is None:
+        # Imported lazily: debug.py is loaded from settings.py, before apps are ready
+        from debug_toolbar.middleware import show_toolbar as upstream_show_toolbar
+
+        return upstream_show_toolbar(request)
+    if debug_toolbar_access_errors():
+        # Fail closed; the system check reports the misconfiguration
+        return False
+    if DEBUG_TOOLBAR_ANY_IP not in allowed and request.META.get("REMOTE_ADDR") not in allowed:
+        return False
+    if _require_superuser():
+        user = getattr(request, "user", None)
+        return bool(user is not None and user.is_authenticated and user.is_superuser)
+    return True
+
 
 # Full set of built-in panels, in upstream order. Requires
 # django-debug-toolbar >= 7.1 (TasksPanel landed there); older releases raise
@@ -53,6 +118,8 @@ DEBUG_TOOLBAR_DEFAULT_CONFIG = {
     "SHOW_COLLAPSED": True,
     # Panel options
     "SQL_WARNING_THRESHOLD": 100,  # milliseconds
+    # Visibility rules (DEBUG_TOOLBAR_ALLOWED_IPS); upstream default when unset
+    "SHOW_TOOLBAR_CALLBACK": "codenerix.debug.show_toolbar",
 }
 
 
@@ -70,6 +137,7 @@ def autoload(
     GRAPH_MODELS=False,
     CODENERIX_DISABLE_LOG=False,
     DEBUG_PYINSTRUMENT=False,
+    DEBUG_TOOLBAR_PRODUCTION: bool = False,
 ):
     EXTRA_MIDDLEWARES = []  # noqa: N806
     if DEBUG and SPAGHETTI:
@@ -82,7 +150,8 @@ def autoload(
         EXTRA_MIDDLEWARES.append(
             "django.contrib.messages.middleware.MessageMiddleware",
         )
-    if DEBUG and DEBUG_TOOLBAR:
+    # Production use is opt-in; per-request visibility is then up to show_toolbar
+    if DEBUG_TOOLBAR and (DEBUG or DEBUG_TOOLBAR_PRODUCTION):
         INSTALLED_APPS += ("debug_toolbar",)
         if DEBUG_PANEL:
             INSTALLED_APPS += ("debug_panel",)
@@ -146,7 +215,8 @@ def autourl(
             ]
     if DEBUG and SPAGHETTI:
         URLPATTERNS += [re_path(r"^plate/", include("django_spaghetti.urls"))]
-    if DEBUG and DEBUG_TOOLBAR:
+    # Follow what autoload() installed instead of re-deriving it from DEBUG
+    if DEBUG_TOOLBAR and "debug_toolbar" in settings.INSTALLED_APPS:
         URLPATTERNS += [re_path(r"^__debug__/", include(debug_toolbar.urls))]
     return URLPATTERNS
 
