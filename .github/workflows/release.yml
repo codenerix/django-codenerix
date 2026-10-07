@@ -21,7 +21,7 @@ jobs:
       id-token: write   # required for trusted publishing via OIDC
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Guard 1: the release tag must match __version__ in the source.
       # Aborts before building if they drift, so we never publish a
@@ -34,7 +34,7 @@ jobs:
           test "$file_v" = "$tag_v" || { echo "::error::tag $tag_v != __version__ $file_v"; exit 1; }
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
 
       - name: Build sdist + wheel
         run: uv build
