@@ -40,6 +40,7 @@ from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
 
 logger = logging.getLogger(__name__)
@@ -663,9 +664,14 @@ class OTPAuthMiddleware(Debugger):
                 # Log user in
                 login(request=request, user=user)
 
-                # Redirect to next or LOGIN_REDIRECT_URL if not set
+                # Redirect to next or LOGIN_REDIRECT_URL if not set. `next` is
+                # client input: only follow it to this host, never offsite
                 next_url = request.GET.get("next", None)
-                if next_url:
+                if next_url and url_has_allowed_host_and_scheme(
+                    next_url,
+                    allowed_hosts={request.get_host()},
+                    require_https=request.is_secure(),
+                ):
                     return redirect(next_url)
                 else:
                     return redirect(settings.LOGIN_REDIRECT_URL)
@@ -1317,10 +1323,9 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 )
                 con["auto_bind"] = ldap3.AUTO_BIND_TLS_BEFORE_BIND
                 ser["use_ssl"] = True
-                ser["tls"] = ldap3.Tls(
-                    validate=ssl.CERT_REQUIRED,
-                    version=ssl.PROTOCOL_TLSv1,
-                )
+                # No explicit version: ldap3 then uses ssl.create_default_context(),
+                # which negotiates the best protocol (TLS 1.2+) instead of TLS 1.0
+                ser["tls"] = ldap3.Tls(validate=ssl.CERT_REQUIRED)
             else:
                 con["auto_bind"] = ldap3.AUTO_BIND_NO_TLS
             try:

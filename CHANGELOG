@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.2] - 2026-10-07
+### Security
+- `OTPAuthMiddleware` only follows the post-login `next` parameter when it points to the current host (`url_has_allowed_host_and_scheme`); anything else redirects to `LOGIN_REDIRECT_URL`.
+- `GenList` bounds the client-supplied `pages_to_bring` to the number of existing pages (new helper `codenerix.views.bounded_pages_to_bring`); non-numeric values fall back to 1.
+- The LDAP backend no longer forces TLS 1.0 when `AD_SSL` is enabled; ldap3 now negotiates the protocol with Python's default SSL context (TLS 1.2 or later). Directory servers that only speak TLS 1.0 will no longer connect.
+
+### Changed
+- `ThrottledAdminEmailHandler` no longer reads the clock at import time to initialise its cleanup timer.
+
 ## [5.3.1] - 2026-10-07
 ### Added
 - `OTPAuth` logs every failed attempt (unknown user, wrong password or wrong OTP code) to the new `codenerix.auth.otp` logger as `OTPAuth failure ip=<address>`, with the client address from `REMOTE_ADDR` and nothing else, so it can be watched by fail2ban. Successful logins, OTP-by-email requests with valid credentials and calls without an `authtoken` are not logged. The README documents the `LOGGING` setup and a fail2ban filter and jail.

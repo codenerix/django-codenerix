@@ -148,6 +148,19 @@ def grv(struct, position):
     return rightnow
 
 
+def bounded_pages_to_bring(value: object, total_pages: int) -> int:
+    """Coerce the client-supplied `pages_to_bring` into 1..total_pages.
+
+    It drives the pagination loops in GenList, so an unbounded value from the
+    request would make them run arbitrarily long.
+    """
+    try:
+        requested = int(value)  # type: ignore[call-overload]
+    except (TypeError, ValueError):
+        requested = 1
+    return max(1, min(requested, max(total_pages, 1)))
+
+
 def pages(paginator, current):
     # Get the range of pages
     p = paginator.page_range
@@ -2988,6 +3001,8 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
                         page_number = 1
                     page_number = max(page_number, 1)
                     page_number = min(page_number, total_pages)
+
+            pages_to_bring = bounded_pages_to_bring(pages_to_bring, total_pages)
 
             # Build the list of page counters allowed
             choice = {}

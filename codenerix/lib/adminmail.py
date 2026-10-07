@@ -84,7 +84,8 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
     # Structure: {error_key: {'count': int, 'expires': float}}
     _memory_storage: dict[str, ThrottleEntry] = {}
     _memory_lock = threading.Lock()
-    _last_cleanup = time.time()
+    # 0.0, not time.time(): no clock read at import; the first call just cleans up
+    _last_cleanup = 0.0
     _cache_available = None
 
     def __init__(  # pylint: disable=too-many-arguments
