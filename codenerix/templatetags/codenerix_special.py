@@ -44,16 +44,14 @@ def txt2img(
     )  # Remove hashes
     try:
         # python 2.7
-        img_name_encode = hashlib.md5(
+        img_name_encode = hashlib.sha256(
             img_name_temp,
-            usedforsecurity=False,
         ).hexdigest()
     except TypeError:
         # python 3.x
         img_name_temp = bytes(img_name_temp, encoding="utf-8")
-        img_name_encode = hashlib.md5(
+        img_name_encode = hashlib.sha256(
             img_name_temp,
-            usedforsecurity=False,
         ).hexdigest()
 
     img_name = f"{img_name_encode}.jpg"
@@ -81,7 +79,10 @@ def file64(path, basepath):
     """
 
     # Attach Base 64 string
-    finalpath = basepath + "/" + path
+    basepath_real = os.path.realpath(basepath)
+    finalpath = os.path.realpath(os.path.join(basepath_real, path))
+    if not (finalpath == basepath_real or finalpath.startswith(basepath_real + os.sep)):
+        raise ValueError(f"Invalid path '{path}'")
     if os.path.exists(finalpath):
         with open(finalpath, "rb") as binary:
             img = base64.b64encode(binary.read()).decode()
