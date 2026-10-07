@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.1] - 2026-10-07
+### Added
+- `OTPAuth` logs every failed attempt (unknown user, wrong password or wrong OTP code) to the new `codenerix.auth.otp` logger as `OTPAuth failure ip=<address>`, with the client address from `REMOTE_ADDR` and nothing else, so it can be watched by fail2ban. Successful logins, OTP-by-email requests with valid credentials and calls without an `authtoken` are not logged. The README documents the `LOGGING` setup and a fail2ban filter and jail.
+
+### Changed
+- `file64`, `static64` and `media64` template tags reject paths that resolve outside their base directory (`STATIC_ROOT`, `MEDIA_ROOT` or the given `basepath`) with `SuspiciousFileOperation`. The check is lexical: symlinks inside the base directory keep working, and a leading `/` is still relative to the base, as before.
+
 ## [5.3.0] - 2026-10-07
 ### Added
 - `codenerix.debug.show_toolbar`, now the `SHOW_TOOLBAR_CALLBACK` in `DEBUG_TOOLBAR_DEFAULT_CONFIG`. Visibility is driven by the new optional settings `DEBUG_TOOLBAR_ALLOWED_IPS` (list of client IPs; `"0.0.0.0"` means any) and `DEBUG_TOOLBAR_REQUIRE_SUPERUSER` (defaults to `not DEBUG`). Both are read per request, so they may be defined anywhere in the settings module. When `DEBUG_TOOLBAR_ALLOWED_IPS` is not defined, upstream's default (`DEBUG` and `INTERNAL_IPS`) applies unchanged. The project must assign `DEBUG_TOOLBAR_CONFIG = DEBUG_TOOLBAR_DEFAULT_CONFIG` (or set `SHOW_TOOLBAR_CALLBACK` to `"codenerix.debug.show_toolbar"` itself), and do it under the same condition `autoload()` uses to install the toolbar; otherwise upstream's callback stays in charge and none of this applies.

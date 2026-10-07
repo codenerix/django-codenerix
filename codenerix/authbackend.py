@@ -27,6 +27,7 @@ import base64
 import binascii
 import datetime
 import hashlib
+import ipaddress
 import logging
 import ssl
 
@@ -42,6 +43,25 @@ from django.utils import timezone
 from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
 
 logger = logging.getLogger(__name__)
+
+# Dedicated logger for failed OTPAuth attempts, meant to be routed to its own
+# file and watched by fail2ban. Its line format is a contract: do not change it.
+otp_failure_logger = logging.getLogger("codenerix.auth.otp")
+
+
+def log_otp_failure(request) -> None:
+    """Log a failed OTPAuth attempt as `OTPAuth failure ip=<address>`.
+
+    Only the client address is logged: free-form input (e.g. the username) on
+    the same line could forge extra lines and get arbitrary hosts banned.
+    """
+    remote_addr = request.META.get("REMOTE_ADDR", "") if request is not None else ""
+    try:
+        # Normalised and validated, so nothing but an address can reach the log
+        address = ipaddress.ip_address(remote_addr)
+    except ValueError:
+        return
+    otp_failure_logger.warning("OTPAuth failure ip=%s", address)
 
 
 def hashed(string):
@@ -358,6 +378,9 @@ class OTPAuth(ModelBackend, Debugger):
         if not username or not password or not authtoken:
             return answer
 
+        # A valid-credentials OTP request is not a failed attempt
+        otp_requested = False
+
         # Check pyotp exists
         if pyotp:
             # Remake the name of the variable
@@ -509,6 +532,7 @@ class OTPAuth(ModelBackend, Debugger):
 
                             # User not authenticated on this request
                             answer = None
+                            otp_requested = True
                         elif direct_otp is not None and direct_otp.verify(remote_otp):
                             user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"  # noqa: E501
                             answer = user
@@ -549,6 +573,9 @@ class OTPAuth(ModelBackend, Debugger):
             raise OSError(
                 "PYOTP library not found, you can not use OTPAuth",
             )
+
+        if answer is None and not otp_requested:
+            log_otp_failure(request)
 
         # Wait whatever time is left to reach the minimum authentication time
         min_auth_time = getattr(settings, "OTP_AUTH_MIN_TIME", 0)

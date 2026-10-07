@@ -154,6 +154,62 @@ You can get in touch with us [here](https://codenerix.com/contact/).
       compilation terminated.
       error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
 
+## Banning failed OTP logins with fail2ban
+
+`codenerix.authbackend.OTPAuth` does not throttle attempts by itself. Instead, every failed attempt (unknown user, wrong password or wrong OTP code) is logged to the `codenerix.auth.otp` logger as a single line carrying only the client address:
+
+    OTPAuth failure ip=203.0.113.7
+
+Successful logins, OTP-by-email requests with valid credentials and calls without an `authtoken` are not logged. The address is taken from `REMOTE_ADDR`, so it must be the real client address: with nginx and `uwsgi_pass` it already is; behind an HTTP reverse proxy, configure nginx's `real_ip` module first, or every line will carry the proxy address.
+
+Route that logger to its own file in your project settings:
+
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "fail2ban": {"format": "%(asctime)s %(message)s"},
+        },
+        "handlers": {
+            "otp_failures": {
+                # WatchedFileHandler reopens the file after logrotate moves it
+                "class": "logging.handlers.WatchedFileHandler",
+                "filename": "/var/log/myproject/otp-failures.log",
+                "formatter": "fail2ban",
+            },
+        },
+        "loggers": {
+            "codenerix.auth.otp": {
+                "handlers": ["otp_failures"],
+                "level": "WARNING",
+                "propagate": False,
+            },
+        },
+    }
+
+Create the filter `/etc/fail2ban/filter.d/codenerix-otp.conf`:
+
+    [Definition]
+    failregex = ^\s*OTPAuth failure ip=<ADDR>$
+    ignoreregex =
+
+And the jail `/etc/fail2ban/jail.d/codenerix-otp.conf` (adjust the thresholds to your needs):
+
+    [codenerix-otp]
+    enabled  = true
+    port     = http,https
+    filter   = codenerix-otp
+    logpath  = /var/log/myproject/otp-failures.log
+    maxretry = 10
+    findtime = 15m
+    bantime  = 1h
+
+Check the filter against your log and reload fail2ban:
+
+    fail2ban-regex /var/log/myproject/otp-failures.log /etc/fail2ban/filter.d/codenerix-otp.conf
+    fail2ban-client reload
+    fail2ban-client status codenerix-otp
+
 ## Credits
 
 We are thankful to:

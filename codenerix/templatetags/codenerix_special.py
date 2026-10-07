@@ -24,6 +24,7 @@ import os
 from django import template
 from django.conf import settings
 from django.contrib.auth.models import Group
+from django.core.exceptions import SuspiciousFileOperation
 from django.template import Library, NodeList, Variable
 from PIL import Image, ImageDraw, ImageFont
 
@@ -80,8 +81,16 @@ def file64(path, basepath):
     Returns the given path as a Base 64 IMAGE tag
     """
 
+    # Lexical containment check: symlinks inside basepath are trusted and may
+    # point elsewhere, so the path is normalised, never resolved
+    base = os.path.normpath(basepath)
+    # A leading "/" was always relative to basepath; keep it that way
+    finalpath = os.path.normpath(os.path.join(base, path.lstrip("/")))
+    # Component-wise (so "/srv/media2" is not inside "/srv/media"), and works for "/"
+    if os.path.commonpath([base, finalpath]) != base:
+        raise SuspiciousFileOperation(f"Path '{path}' is outside of '{basepath}'")
+
     # Attach Base 64 string
-    finalpath = basepath + "/" + path
     if os.path.exists(finalpath):
         with open(finalpath, "rb") as binary:
             img = base64.b64encode(binary.read()).decode()
