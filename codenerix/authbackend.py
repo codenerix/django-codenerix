@@ -35,6 +35,7 @@ from codenerix_lib.debugger import Debugger
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
+from django.core.cache import cache
 from django.contrib.auth.models import Group, User
 from django.core.mail import send_mail
 from django.shortcuts import redirect
@@ -348,6 +349,15 @@ class OTPAuth(ModelBackend, Debugger):
             password = kwargs.get("password", None)
         authtoken = kwargs.get("authtoken", None)
         bymail = getattr(settings, "OTP_BYMAIL", False)
+
+        # Throttle authentication attempts to avoid unlimited retries (CWE-770)
+        max_attempts = getattr(settings, "OTP_AUTH_MAX_ATTEMPTS", 10)
+        lockout_time = getattr(settings, "OTP_AUTH_LOCKOUT_TIME", 300)
+        throttle_key = f"otpauth_attempts_{username}"
+        attempts = cache.get(throttle_key, 0)
+        if attempts >= max_attempts:
+            return answer
+        cache.set(throttle_key, attempts + 1, lockout_time)
         byemail_interval = getattr(
             settings,
             "OTP_BYMAIL_INTERVAL",
