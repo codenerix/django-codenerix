@@ -213,9 +213,8 @@ class ThrottledAdminEmailHandler(  # pylint: disable=too-many-instance-attribute
         signature = f"{exc_type}:{record.pathname}:{record.lineno}"
 
         # Hash with error handling for special characters
-        return hashlib.md5(
+        return hashlib.sha256(
             signature.encode("utf-8", errors="replace"),
-            usedforsecurity=False,
         ).hexdigest()[:16]
 
     def _check_cache_throttle(self, error_key: str) -> tuple[bool, bool]:
