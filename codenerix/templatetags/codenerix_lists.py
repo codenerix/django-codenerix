@@ -305,7 +305,8 @@ def linkedinfo(element, info_input=None):
 
     ngm = element.html_name  # field.widget.attrs['ng-model']
     baseurl = getattr(settings, "BASE_URL", "")
-    return mark_safe(
+    # Settings, field and model names rendered as JS args; escaping would break them
+    return mark_safe(  # pylint: disable=mark-safe-interpolation
         f"'{baseurl}','{ngm}','{info['appname']}', '{info['modelname'].lower()}s'",
     )
 
@@ -343,7 +344,8 @@ def get_field_list(forms):
 
 @register.filter
 def invalidator(formname, inp):
-    return mark_safe(
+    # Form and field names rendered as an Angular expression; escaping would break it
+    return mark_safe(  # pylint: disable=mark-safe-interpolation
         f"{{'codenerix_invalid':{smart_str(formname)}.{ngmodel(inp)}.$invalid}}",
     )
 

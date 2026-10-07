@@ -122,7 +122,8 @@ def codenerix_js(request):
         daterangepicker += '"'
         cnf["daterangepicker"] = mark_safe(daterangepicker)
     else:
-        cnf["daterangepicker"] = mark_safe(
+        # Developer-set settings rendered as JS; HTML-escaping would break it
+        cnf["daterangepicker"] = mark_safe(  # pylint: disable=mark-safe-interpolation
             settings.DATERANGEPICKER_OPTIONS.format(
                 Format=settings.DATETIME_RANGE_FORMAT[1],
                 From=_("From"),
