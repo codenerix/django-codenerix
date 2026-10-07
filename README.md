@@ -2,8 +2,9 @@
 
 [![PyPI](https://img.shields.io/pypi/v/django-codenerix?color=blue)](https://pypi.org/project/django-codenerix/)
 [![CI](https://github.com/codenerix/django-codenerix/actions/workflows/ci.yml/badge.svg)](https://github.com/codenerix/django-codenerix/actions/workflows/ci.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=codenerix_django-codenerix&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=codenerix_django-codenerix)
 [![Python versions](https://img.shields.io/pypi/pyversions/django-codenerix)](https://pypi.org/project/django-codenerix/)
-[![Django](https://img.shields.io/badge/Django-5.2%20%7C%206.0-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Django](https://img.shields.io/badge/Django-5.2%20%7C%206.0%20%7C%206.1-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-yellow)](https://opensource.org/license/apache-2.0)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG-orange.svg)](CHANGELOG)
 
