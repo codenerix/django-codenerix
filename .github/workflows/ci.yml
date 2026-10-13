@@ -14,6 +14,9 @@ concurrency:
 env:
   UV_LOCKED: "1"
 
+# Each job builds and installs once, in its "Sync (dev)" step; the "uv run" steps
+# after it use --no-sync --no-build so they never re-sync or run build scripts.
+
 jobs:
   lint:
     name: Lint (ruff)
@@ -29,9 +32,9 @@ jobs:
       - name: Sync (dev)
         run: uv sync --locked
       - name: ruff check
-        run: uv run --locked ruff check .
+        run: uv run --locked --no-sync --no-build ruff check .
       - name: ruff format --check
-        run: uv run --locked ruff format --check .
+        run: uv run --locked --no-sync --no-build ruff format --check .
 
   types:
     name: Type check (mypy + basedpyright)
@@ -45,9 +48,9 @@ jobs:
       - name: Sync (dev)
         run: uv sync --locked
       - name: mypy
-        run: uv run --locked mypy codenerix
+        run: uv run --locked --no-sync --no-build mypy codenerix
       - name: basedpyright
-        run: uv run --locked basedpyright codenerix
+        run: uv run --locked --no-sync --no-build basedpyright codenerix
 
   test:
     name: Tests (py${{ matrix.python-version }})
@@ -67,4 +70,4 @@ jobs:
       - name: pytest
         # Necesita DJANGO_SETTINGS_MODULE; lo fijamos en
         # [tool.pytest.ini_options] del pyproject (igual que en channels).
-        run: uv run --locked pytest
+        run: uv run --locked --no-sync --no-build pytest
