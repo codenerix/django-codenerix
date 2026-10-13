@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.3.3] - 2026-10-13
+### Security
+- `autoload()` inserts the debug toolbar middleware (`DebugToolbarMiddleware`, or `DebugPanelMiddleware` with `DEBUG_PANEL`) at the start of `MIDDLEWARE`, or right after `GZipMiddleware` when present, instead of appending it. Appended, it sat behind Django's page cache (`UpdateCacheMiddleware` ... `FetchFromCacheMiddleware`): responses without cookies were cached with the toolbar output (`djdt-request-id`, `Server-Timing` with SQL timings, or the full toolbar HTML) and served to every client, and cache hits bypassed the toolbar. A toolbar middleware already present in `MIDDLEWARE` keeps its position. Other extra middlewares are still appended.
+- `show_toolbar` fails closed, and system check `codenerix.E001` reports it, when a toolbar middleware comes after a page cache middleware in `MIDDLEWARE`, with or without `DEBUG_TOOLBAR_ALLOWED_IPS`. This covers settings that add the page cache after calling `autoload()`, and Django's recommended `UpdateCacheMiddleware` before `GZipMiddleware` order, where the toolbar cannot sit both after GZip and before the cache.
+
 ## [5.3.2] - 2026-10-07
 ### Security
 - `OTPAuthMiddleware` only follows the post-login `next` parameter when it points to the current host (`url_has_allowed_host_and_scheme`); anything else redirects to `LOGIN_REDIRECT_URL`.

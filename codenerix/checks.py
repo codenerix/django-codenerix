@@ -30,7 +30,8 @@ def check_debug_toolbar_access(
     app_configs: Sequence[AppConfig] | None,
     **kwargs: Any,
 ) -> list[CheckMessage]:
-    """Report unsafe or malformed DEBUG_TOOLBAR_ALLOWED_IPS settings.
+    """Report unsafe or malformed DEBUG_TOOLBAR_ALLOWED_IPS settings, and a
+    toolbar middleware placed behind the page cache middlewares.
 
     show_toolbar() already fails closed on these; this makes the cause visible
     on runserver and on any management command (e.g. `manage.py check --deploy`).

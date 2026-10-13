@@ -35,6 +35,18 @@ if TYPE_CHECKING:
 # never be a real REMOTE_ADDR, so it cannot collide with a listed client.
 DEBUG_TOOLBAR_ANY_IP = "0.0.0.0"
 
+# Matched by dotted path: settings-time code cannot import project middlewares
+_TOOLBAR_MIDDLEWARES = (
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "debug_panel.middleware.DebugPanelMiddleware",
+)
+_PAGE_CACHE_MIDDLEWARES = (
+    "django.middleware.cache.UpdateCacheMiddleware",
+    "django.middleware.cache.CacheMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
+)
+_CONTENT_ENCODING_MIDDLEWARES = ("django.middleware.gzip.GZipMiddleware",)
+
 
 def debug_toolbar_access_errors() -> list[str]:
     """Return the problems found in the toolbar access settings, if any.
@@ -42,18 +54,46 @@ def debug_toolbar_access_errors() -> list[str]:
     Shared by show_toolbar() (which fails closed on any of them) and the
     codenerix system check (which reports them at startup).
     """
+    errors = _middleware_order_errors()
     allowed = getattr(settings, "DEBUG_TOOLBAR_ALLOWED_IPS", None)
     if allowed is None:
-        return []
+        return errors
     # A bare string would turn the membership test into a substring match
     if isinstance(allowed, str) or not isinstance(allowed, Collection):
-        return ["DEBUG_TOOLBAR_ALLOWED_IPS must be a list, tuple or set of IP strings."]
-    if DEBUG_TOOLBAR_ANY_IP in allowed and not settings.DEBUG and not _require_superuser():
-        return [
+        errors.append("DEBUG_TOOLBAR_ALLOWED_IPS must be a list, tuple or set of IP strings.")
+    elif DEBUG_TOOLBAR_ANY_IP in allowed and not settings.DEBUG and not _require_superuser():
+        errors.append(
             f"DEBUG_TOOLBAR_ALLOWED_IPS contains {DEBUG_TOOLBAR_ANY_IP!r} with DEBUG=False "
             "and DEBUG_TOOLBAR_REQUIRE_SUPERUSER=False: the toolbar would be public.",
-        ]
-    return []
+        )
+    return errors
+
+
+def _middleware_order_errors() -> list[str]:
+    middleware = list(getattr(settings, "MIDDLEWARE", None) or ())
+    toolbar = [i for i, path in enumerate(middleware) if path in _TOOLBAR_MIDDLEWARES]
+    cache = [i for i, path in enumerate(middleware) if path in _PAGE_CACHE_MIDDLEWARES]
+    if not toolbar or not cache or max(toolbar) < min(cache):
+        return []
+    return [
+        f"{middleware[max(toolbar)]} comes after {middleware[min(cache)]} in MIDDLEWARE: "
+        "the page cache would store toolbar output and serve it to every client. "
+        "Move the toolbar middleware before the page cache middlewares.",
+    ]
+
+
+def _insert_toolbar_middleware(
+    middleware: list[str] | tuple[str, ...],
+    toolbar: str,
+) -> list[str] | tuple[str, ...]:
+    # As early as possible, but after anything that encodes the response body
+    # (django-debug-toolbar installation docs); early also keeps it outside the page cache
+    encoders = [i for i, path in enumerate(middleware) if path in _CONTENT_ENCODING_MIDDLEWARES]
+    position = encoders[-1] + 1 if encoders else 0
+    if isinstance(middleware, tuple):
+        return (*middleware[:position], toolbar, *middleware[position:])
+    middleware.insert(position, toolbar)
+    return middleware
 
 
 def _require_superuser() -> bool:
@@ -69,15 +109,15 @@ def show_toolbar(request: HttpRequest) -> bool:
     projects may define them anywhere in their settings module.
     """
 
+    if debug_toolbar_access_errors():
+        # Fail closed; the system check reports the misconfiguration
+        return False
     allowed = getattr(settings, "DEBUG_TOOLBAR_ALLOWED_IPS", None)
     if allowed is None:
         # Imported lazily: debug.py is loaded from settings.py, before apps are ready
         from debug_toolbar.middleware import show_toolbar as upstream_show_toolbar
 
         return upstream_show_toolbar(request)
-    if debug_toolbar_access_errors():
-        # Fail closed; the system check reports the misconfiguration
-        return False
     if DEBUG_TOOLBAR_ANY_IP not in allowed and request.META.get("REMOTE_ADDR") not in allowed:
         return False
     if _require_superuser():
@@ -140,6 +180,7 @@ def autoload(
     DEBUG_TOOLBAR_PRODUCTION: bool = False,
 ):
     EXTRA_MIDDLEWARES = []  # noqa: N806
+    toolbar_middleware: str | None = None
     if DEBUG and SPAGHETTI:
         INSTALLED_APPS += ("django_spaghetti",)
     if DEBUG and ROSETTA:
@@ -155,13 +196,9 @@ def autoload(
         INSTALLED_APPS += ("debug_toolbar",)
         if DEBUG_PANEL:
             INSTALLED_APPS += ("debug_panel",)
-            EXTRA_MIDDLEWARES.append(
-                "debug_panel.middleware.DebugPanelMiddleware",
-            )
+            toolbar_middleware = "debug_panel.middleware.DebugPanelMiddleware"
         else:
-            EXTRA_MIDDLEWARES.append(
-                "debug_toolbar.middleware.DebugToolbarMiddleware",
-            )
+            toolbar_middleware = "debug_toolbar.middleware.DebugToolbarMiddleware"
     if DEBUG and SNIPPET_SCREAM:
         EXTRA_MIDDLEWARES.append("snippetscream.ProfileMiddleware")
     if DEBUG and GRAPH_MODELS:
@@ -176,6 +213,9 @@ def autoload(
         MIDDLEWARE += tuple(extra)
     else:
         MIDDLEWARE += extra
+    # Not appended: behind the page cache its output would be cached for everyone
+    if toolbar_middleware is not None and toolbar_middleware not in existing:
+        MIDDLEWARE = _insert_toolbar_middleware(MIDDLEWARE, toolbar_middleware)  # noqa: N806
 
     # Return final results
     return (INSTALLED_APPS, MIDDLEWARE)
