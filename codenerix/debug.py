@@ -117,12 +117,21 @@ def _middleware_errors(family: tuple[str, ...]) -> list[str]:
         )
     stock = [path for path in middleware if path in _PAGE_CACHE_REPLACEMENTS]
     if stock:
-        errors.append(
-            f"{stock[0]} in MIDDLEWARE together with debug tools: debug requests would be "
-            "served from and stored in the page cache. Add the page cache middlewares "
-            "before calling autoload(), or use "
-            f"{_PAGE_CACHE_REPLACEMENTS[stock[0]]}.",
-        )
+        replacement = _PAGE_CACHE_REPLACEMENTS[stock[0]]
+        if replacement in middleware:
+            # Typical cause: an "if <stock path> not in MIDDLEWARE" guard run after autoload()
+            errors.append(
+                f"{stock[0]} and {replacement} are both in MIDDLEWARE: {stock[0]} was added "
+                "again after autoload() replaced it, so the page cache runs twice and debug "
+                "requests would be served from and stored in it. Code that checks MIDDLEWARE "
+                f"for {stock[0]} after calling autoload() must also accept {replacement}.",
+            )
+        else:
+            errors.append(
+                f"{stock[0]} in MIDDLEWARE together with debug tools: debug requests would be "
+                "served from and stored in the page cache. Add the page cache middlewares "
+                f"before calling autoload(), or use {replacement}.",
+            )
     return errors
 
 

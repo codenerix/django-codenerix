@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.1] - 2026-10-14
+### Changed
+- System check `codenerix.E001` names the real cause when a stock page cache middleware (`django.middleware.cache.UpdateCacheMiddleware`, `FetchFromCacheMiddleware` or `CacheMiddleware`) is in `MIDDLEWARE` together with the `codenerix.debug_middleware` subclass that `autoload()` put in its place. That happens when settings code runs after `autoload()` and adds the middleware again because it tests `MIDDLEWARE` for the stock path only (`if "django.middleware.cache.UpdateCacheMiddleware" not in MIDDLEWARE: ...`), so the page cache runs twice. The message used to suggest adding the page cache before calling `autoload()`, which those projects already do; it now says the middleware was added again after `autoload()` replaced it and that such checks must also accept the `codenerix.debug_middleware` path. Only the message changes: the debug tools still fail closed in that configuration.
+
 ## [6.0.0] - 2026-10-14
 ### Security
 - pyinstrument is gated like the debug toolbar. With `DEBUG_PYINSTRUMENT`, `autoload()` installs `codenerix.debug_middleware.ProfilerMiddleware`, a subclass of pyinstrument's middleware that only profiles requests accepted by the new `codenerix.debug.show_pyinstrument` (a project `PYINSTRUMENT_SHOW_CALLBACK`, if set, still applies on top). Before, `pyinstrument.middleware.ProfilerMiddleware` was appended to `MIDDLEWARE`, behind the page cache: any client could get a profile with `?profile`, and the profile page was cached and served to everyone asking for that URL, even with a restrictive `PYINSTRUMENT_SHOW_CALLBACK`. The profile page is sent with `Cache-Control: no-store`. Projects that list pyinstrument's own middleware in `MIDDLEWARE` keep it where it is; the gate then applies only if they set `PYINSTRUMENT_SHOW_CALLBACK = "codenerix.debug.show_pyinstrument"`.

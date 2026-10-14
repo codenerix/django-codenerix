@@ -123,6 +123,32 @@ def test_profiler_behind_page_cache_fails_closed_and_is_reported(
         assert any(f"{profiler} comes after" in e.msg for e in messages)
 
 
+def _stock_cache_messages(middleware: list[str]) -> list[str]:
+    with override_settings(
+        DEBUG=True,
+        DEBUG_ALLOWED_IPS=[MY_IP],
+        DEBUG_REQUIRE_SUPERUSER=False,
+        MIDDLEWARE=middleware,
+    ):
+        assert show_pyinstrument(_request(MY_IP)) is False
+        # Placement messages start with the tool path; these start with the cache path
+        return [e.msg for e in check_debug_access(None) if e.msg.startswith(UPDATE_CACHE_MW)]
+
+
+def test_page_cache_added_after_autoload_is_reported() -> None:
+    (message,) = _stock_cache_messages([PROFILER_MW, *PAGE_CACHE])
+    assert "before calling autoload()" in message
+
+
+def test_page_cache_added_again_after_autoload_is_reported() -> None:
+    # Settings that run "if <stock path> not in MIDDLEWARE: insert" after autoload()
+    middleware = autoload((), list(PAGE_CACHE), DEBUG=True, DEBUG_PYINSTRUMENT=True)[1]
+    middleware = [UPDATE_CACHE_MW, *middleware, FETCH_CACHE_MW]
+    (message,) = _stock_cache_messages(middleware)
+    assert f"{UPDATE_CACHE_MW} and {CDNX_UPDATE_CACHE_MW} are both in MIDDLEWARE" in message
+    assert "added again after autoload()" in message
+
+
 @override_settings(
     DEBUG=True,
     DEBUG_ALLOWED_IPS=[MY_IP],
