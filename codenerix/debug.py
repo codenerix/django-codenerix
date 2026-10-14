@@ -20,7 +20,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Collection
+import functools
+from collections.abc import Callable, Collection
 from importlib import import_module
 from typing import TYPE_CHECKING, Any
 
@@ -30,7 +31,7 @@ from django.conf import settings
 
 if TYPE_CHECKING:
     # Type-only: keep settings-time imports of this module minimal
-    from django.http import HttpRequest
+    from django.http import HttpRequest, HttpResponseBase
 
 # Sentinel in DEBUG_ALLOWED_IPS meaning "any client address". It can never be
 # a real REMOTE_ADDR, so it cannot collide with a listed client.
@@ -44,10 +45,7 @@ _REMOVED_SETTINGS = {
 }
 
 # Matched by dotted path: settings-time code cannot import project middlewares
-_TOOLBAR_MIDDLEWARES = (
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
-    "debug_panel.middleware.DebugPanelMiddleware",
-)
+_TOOLBAR_MIDDLEWARES = ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 _PROFILER_MIDDLEWARE = "codenerix.debug_middleware.ProfilerMiddleware"
 _PROFILER_MIDDLEWARES = (
     "pyinstrument.middleware.ProfilerMiddleware",
@@ -64,23 +62,34 @@ _PAGE_CACHE_REPLACEMENTS = {
         "codenerix.debug_middleware.FetchFromCacheMiddleware"
     ),
 }
-_PAGE_CACHE_MIDDLEWARES = (*_PAGE_CACHE_REPLACEMENTS, *_PAGE_CACHE_REPLACEMENTS.values())
 _CONTENT_ENCODING_MIDDLEWARES = ("django.middleware.gzip.GZipMiddleware",)
 _DEBUG_REQUEST_ATTR = "_codenerix_debug_request"
 
+# System check ids, one per kind of problem, so each can be silenced on its own
+E_ACCESS = "codenerix.E001"  # removed, malformed or public access settings
+E_ORDER = "codenerix.E002"  # debug tool behind the page cache
+E_CACHE = "codenerix.E003"  # page cache that debug requests would not bypass
+E_CALLBACK = "codenerix.E004"  # toolbar callback that ignores DEBUG_ALLOWED_IPS
+E_DUPLICATE = "codenerix.E005"  # more than one middleware of a debug tool
 
-def debug_access_errors() -> list[str]:
-    """Return every problem found in the debug access settings, if any.
+
+def debug_access_checks() -> list[tuple[str, str]]:
+    """Return every problem found in the debug access settings, as (check id, message).
 
     Reported at startup by the codenerix system check. The gates fail closed on
     them: is_debug_request() on the access settings, and each tool on the
     placement of its own middleware.
     """
-    errors = _access_errors()
+    checks = [(E_ACCESS, error) for error in _access_errors()]
     for family in (_TOOLBAR_MIDDLEWARES, _PROFILER_MIDDLEWARES):
-        errors += [error for error in _middleware_errors(family) if error not in errors]
-    errors += _toolbar_callback_errors()
-    return errors
+        checks += [check for check in _middleware_errors(family) if check not in checks]
+    checks += [(E_CALLBACK, error) for error in _toolbar_callback_errors()]
+    return checks
+
+
+def debug_access_errors() -> list[str]:
+    """The messages of debug_access_checks(), without their check ids."""
+    return [message for _, message in debug_access_checks()]
 
 
 def _access_errors() -> list[str]:
@@ -102,33 +111,113 @@ def _access_errors() -> list[str]:
     return errors
 
 
-def _middleware_errors(family: tuple[str, ...]) -> list[str]:
-    middleware = list(getattr(settings, "MIDDLEWARE", None) or ())
+@functools.cache
+def _page_cache_kind(path: str) -> tuple[bool, str] | None:
+    """Classify a MIDDLEWARE entry as a page cache middleware.
+
+    Returns None for anything else, or (bypassed, codenerix path): whether
+    debug requests skip it, and the codenerix.debug_middleware class it is or
+    should derive from. Imports project middlewares, so it is only called at
+    check and request time, never while settings load.
+    """
+    if path in _PAGE_CACHE_REPLACEMENTS:
+        return False, _PAGE_CACHE_REPLACEMENTS[path]
+    if path in _PAGE_CACHE_REPLACEMENTS.values():
+        return True, path
+    if path in (*_TOOLBAR_MIDDLEWARES, *_PROFILER_MIDDLEWARES, *_CONTENT_ENCODING_MIDDLEWARES):
+        return None
+    from django.middleware import cache
+    from django.utils.module_loading import import_string
+
+    try:
+        middleware = import_string(path)
+    except Exception:  # noqa: BLE001
+        # Not ours to report: Django fails on it when it loads MIDDLEWARE
+        return None
+    if not isinstance(middleware, type):
+        return None
+    update = issubclass(middleware, cache.UpdateCacheMiddleware)
+    fetch = issubclass(middleware, cache.FetchFromCacheMiddleware)
+    if update and fetch:
+        stock = "django.middleware.cache.CacheMiddleware"
+    elif update:
+        stock = "django.middleware.cache.UpdateCacheMiddleware"
+    elif fetch:
+        stock = "django.middleware.cache.FetchFromCacheMiddleware"
+    else:
+        return None
+    replacement = _PAGE_CACHE_REPLACEMENTS[stock]
+    # By dotted path: importing codenerix.debug_middleware here would be a cyclic import.
+    # The combined codenerix class also bypasses for each half of the pair
+    bypassing = (
+        import_string(replacement),
+        import_string(_PAGE_CACHE_REPLACEMENTS["django.middleware.cache.CacheMiddleware"]),
+    )
+    return issubclass(middleware, bypassing), replacement
+
+
+def _both_or_all(paths: list[str]) -> str:
+    if len(paths) == 2:
+        return f"{paths[0]} and {paths[1]} are both"
+    return f"{', '.join(paths)} are all"
+
+
+def _middleware_errors(family: tuple[str, ...]) -> list[tuple[str, str]]:
+    middleware: list[str] = list(getattr(settings, "MIDDLEWARE", None) or ())
     tools = [i for i, path in enumerate(middleware) if path in family]
     if not tools:
         return []
     errors = []
-    cache = [i for i, path in enumerate(middleware) if path in _PAGE_CACHE_MIDDLEWARES]
+    if len(tools) > 1:
+        # e.g. pyinstrument's middleware listed after autoload() added the codenerix one
+        errors.append(
+            (
+                E_DUPLICATE,
+                f"{_both_or_all([middleware[i] for i in tools])} in MIDDLEWARE: they would "
+                "run on the same request. Keep only one.",
+            ),
+        )
+    kinds = {path: _page_cache_kind(path) for path in middleware}
+    cache = [i for i, path in enumerate(middleware) if kinds[path] is not None]
     if cache and max(tools) > min(cache):
         errors.append(
-            f"{middleware[max(tools)]} comes after {middleware[min(cache)]} in MIDDLEWARE: "
-            "the page cache would store its output and serve it to every client. "
-            "Move it before the page cache middlewares.",
+            (
+                E_ORDER,
+                f"{middleware[max(tools)]} comes after {middleware[min(cache)]} in MIDDLEWARE: "
+                "the page cache would store its output and serve it to every client. "
+                "Move it before the page cache middlewares.",
+            ),
         )
-    stock = [path for path in middleware if path in _PAGE_CACHE_REPLACEMENTS]
-    if stock:
-        replacement = _PAGE_CACHE_REPLACEMENTS[stock[0]]
-        if replacement in middleware:
+    errors += [(E_CACHE, error) for error in _page_cache_errors(middleware, kinds)]
+    return errors
+
+
+def _page_cache_errors(
+    middleware: list[str],
+    kinds: dict[str, tuple[bool, str] | None],
+) -> list[str]:
+    errors = []
+    for path, kind in kinds.items():
+        if kind is None or kind[0]:
+            continue
+        replacement = kind[1]
+        if path not in _PAGE_CACHE_REPLACEMENTS:
+            errors.append(
+                f"{path} subclasses Django's page cache middleware but not {replacement}: "
+                "debug requests would be served from and stored in the page cache. "
+                f"Derive it from {replacement}.",
+            )
+        elif replacement in middleware:
             # Typical cause: an "if <stock path> not in MIDDLEWARE" guard run after autoload()
             errors.append(
-                f"{stock[0]} and {replacement} are both in MIDDLEWARE: {stock[0]} was added "
+                f"{path} and {replacement} are both in MIDDLEWARE: {path} was added "
                 "again after autoload() replaced it, so the page cache runs twice and debug "
                 "requests would be served from and stored in it. Code that checks MIDDLEWARE "
-                f"for {stock[0]} after calling autoload() must also accept {replacement}.",
+                f"for {path} after calling autoload() must also accept {replacement}.",
             )
         else:
             errors.append(
-                f"{stock[0]} in MIDDLEWARE together with debug tools: debug requests would be "
+                f"{path} in MIDDLEWARE together with debug tools: debug requests would be "
                 "served from and stored in the page cache. Add the page cache middlewares "
                 f"before calling autoload(), or use {replacement}.",
             )
@@ -179,12 +268,23 @@ def _require_superuser() -> bool:
 
 
 def _session_user(request: HttpRequest) -> Any:
-    """Read the logged-in user from the session cookie, without side effects.
+    """Read the logged-in user from the session cookie, without changing the session.
 
     Debug middlewares run before SessionMiddleware and AuthenticationMiddleware,
     so request.user does not exist yet. django.contrib.auth.get_user() is not
     used: on a fallback or stale session hash it cycles or flushes the session
     in the store, which would log the real request out.
+
+    Loading the session has the side effects SessionMiddleware has on the same
+    request: the file backend deletes and recreates an expired or undecodable
+    session file, cached_db fills the cache on a miss; db and signed_cookies
+    write nothing. Stricter than get_user(): a user object without
+    get_session_auth_hash() is rejected, and a SESSION_ENGINE that cannot be
+    imported means nobody.
+
+    For an allowed IP carrying a session cookie, SessionMiddleware loads the
+    session again later. Deliberately not shared: handing this user to
+    AuthenticationMiddleware would skip get_user()'s rotation and flush.
     """
     from django.apps import apps
 
@@ -202,7 +302,12 @@ def _session_user(request: HttpRequest) -> Any:
     )
     from django.utils.crypto import constant_time_compare
 
-    session = import_module(settings.SESSION_ENGINE).SessionStore(session_key)
+    try:
+        session_store = import_module(settings.SESSION_ENGINE).SessionStore
+    except (ImportError, AttributeError):
+        # Fail closed: without SessionMiddleware nothing else trips on a broken engine
+        return None
+    session = session_store(session_key)
     try:
         user_id = get_user_model()._meta.pk.to_python(session[SESSION_KEY])
         backend_path = session[BACKEND_SESSION_KEY]
@@ -243,6 +348,9 @@ def is_debug_request(request: HttpRequest) -> bool:
     so projects may define them anywhere in their settings module. The result
     is memoised on the request, so every debug middleware and the page cache
     bypass agree on it.
+
+    The superuser is read from the session cookie: a user authenticated later
+    in the chain (a token or OTP middleware setting request.user) never passes.
     """
     decision = getattr(request, _DEBUG_REQUEST_ATTR, None)
     if decision is None:
@@ -277,6 +385,8 @@ def show_pyinstrument(request: HttpRequest) -> bool:
 
     codenerix.debug_middleware.ProfilerMiddleware applies it on its own; set it
     as PYINSTRUMENT_SHOW_CALLBACK when using pyinstrument's middleware directly.
+    On URLs that end in a slash, ?profile needs it too (/page/?profile): without
+    it the profile is that of CommonMiddleware's redirect, not of the view.
     """
     if _middleware_errors(_PROFILER_MIDDLEWARES):
         # Fail closed; the system check reports the misconfiguration
@@ -352,15 +462,20 @@ def autoload(
         EXTRA_MIDDLEWARES.append(
             "django.contrib.messages.middleware.MessageMiddleware",
         )
+    # Raised only where they used to take effect, which already failed at startup
+    if DEBUG_TOOLBAR and debug_tools and DEBUG_PANEL:
+        raise ValueError(
+            "autoload(DEBUG_PANEL=True) is no longer supported: django-debug-panel does not "
+            "import on Django 2.0 or later. Use DEBUG_PANEL=False.",
+        )
+    if DEBUG and SNIPPET_SCREAM:
+        raise ValueError(
+            "autoload(SNIPPET_SCREAM=True) is no longer supported: django-snippetscream does "
+            "not import on Python 3. Use SNIPPET_SCREAM=False, or DEBUG_PYINSTRUMENT.",
+        )
     if DEBUG_TOOLBAR and debug_tools:
         INSTALLED_APPS += ("debug_toolbar",)
-        if DEBUG_PANEL:
-            INSTALLED_APPS += ("debug_panel",)
-            debug_middlewares.append("debug_panel.middleware.DebugPanelMiddleware")
-        else:
-            debug_middlewares.append("debug_toolbar.middleware.DebugToolbarMiddleware")
-    if DEBUG and SNIPPET_SCREAM:
-        EXTRA_MIDDLEWARES.append("snippetscream.ProfileMiddleware")
+        debug_middlewares.append("debug_toolbar.middleware.DebugToolbarMiddleware")
     if DEBUG and GRAPH_MODELS:
         INSTALLED_APPS += ("django_extensions",)
     profiler = DEBUG_PYINSTRUMENT and debug_tools
@@ -386,6 +501,21 @@ def autoload(
 
     # Return final results
     return (INSTALLED_APPS, MIDDLEWARE)
+
+
+def _debug_only(view: Callable[..., HttpResponseBase]) -> Callable[..., HttpResponseBase]:
+    """Serve view only to requests is_debug_request() accepts; 404 for anyone else."""
+    from django.http import Http404
+    from django.views.decorators.cache import never_cache
+
+    @functools.wraps(view)
+    def gated(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
+        if not is_debug_request(request):
+            raise Http404
+        return view(request, *args, **kwargs)
+
+    # Kept out of the page cache, which autoload() leaves stock when no debug tool is on
+    return never_cache(gated)
 
 
 # Autourl
@@ -421,7 +551,13 @@ def autourl(
                 ),
             ]
     if DEBUG and SPAGHETTI:
-        URLPATTERNS += [re_path(r"^plate/", include("django_spaghetti.urls"))]
+        from django.urls import path
+        from django.utils.module_loading import import_string
+
+        # Same route and namespace as django_spaghetti.urls, behind the debug gate
+        plate = import_string("django_spaghetti.views.plate")
+        spaghetti = ([path("", _debug_only(plate), name="plate")], "spaghetti")
+        URLPATTERNS += [re_path(r"^plate/", include(spaghetti))]
     # Follow what autoload() installed instead of re-deriving it from DEBUG
     if DEBUG_TOOLBAR and "debug_toolbar" in settings.INSTALLED_APPS:
         URLPATTERNS += [re_path(r"^__debug__/", include(debug_toolbar.urls))]

@@ -65,8 +65,8 @@ Open source enterprise business management system built on top of Django + Angul
 
 ### Ready for
 
-- Debug Panel (<https://github.com/recamshak/django-debug-panel>)
 - Debug Toolbar (<https://github.com/jazzband/django-debug-toolbar>)
+- pyinstrument (<https://github.com/joerick/pyinstrument>)
 - Spaghetti and Meatballs (<https://github.com/LegoStormtroopr/django-spaghetti-and-meatballs>)
 
 ### New fields and widgets

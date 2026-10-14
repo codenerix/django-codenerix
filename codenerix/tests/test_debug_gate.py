@@ -9,9 +9,11 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core.cache import caches
 from django.http import HttpRequest, JsonResponse
+from django.middleware import cache as django_cache
 from django.test import Client, RequestFactory, override_settings
 from django.urls import URLPattern, URLResolver, path
 
+from codenerix import debug_middleware
 from codenerix.checks import check_debug_access
 from codenerix.debug import autoload, show_pyinstrument, show_toolbar
 
@@ -119,7 +121,9 @@ def test_profiler_behind_page_cache_fails_closed_and_is_reported(
     ):
         assert show_pyinstrument(_request(MY_IP)) is False
         messages = check_debug_access(None)
-        assert {e.id for e in messages} == {"codenerix.E001"}
+        # The stock pair is also reported as not bypassed (E003)
+        expected = {"codenerix.E002"} | ({"codenerix.E003"} if cache == PAGE_CACHE else set())
+        assert {e.id for e in messages} == expected
         assert any(f"{profiler} comes after" in e.msg for e in messages)
 
 
@@ -147,6 +151,121 @@ def test_page_cache_added_again_after_autoload_is_reported() -> None:
     (message,) = _stock_cache_messages(middleware)
     assert f"{UPDATE_CACHE_MW} and {CDNX_UPDATE_CACHE_MW} are both in MIDDLEWARE" in message
     assert "added again after autoload()" in message
+
+
+def test_every_duplicated_stock_path_is_named() -> None:
+    middleware = autoload((), list(PAGE_CACHE), DEBUG=True, DEBUG_PYINSTRUMENT=True)[1]
+    middleware = [UPDATE_CACHE_MW, *middleware, FETCH_CACHE_MW]
+    with override_settings(
+        DEBUG=True,
+        DEBUG_ALLOWED_IPS=[MY_IP],
+        DEBUG_REQUIRE_SUPERUSER=False,
+        MIDDLEWARE=middleware,
+    ):
+        messages = [e.msg for e in check_debug_access(None) if e.id == "codenerix.E003"]
+    assert any(m.startswith(f"{UPDATE_CACHE_MW} and {CDNX_UPDATE_CACHE_MW}") for m in messages)
+    assert any(m.startswith(f"{FETCH_CACHE_MW} and {CDNX_FETCH_CACHE_MW}") for m in messages)
+
+
+# --- Project subclasses of the page cache middlewares --------------------------
+
+
+class ProjectUpdateCache(django_cache.UpdateCacheMiddleware):
+    pass
+
+
+class ProjectFetchCache(django_cache.FetchFromCacheMiddleware):
+    pass
+
+
+class ProjectCache(django_cache.CacheMiddleware):
+    pass
+
+
+class ProjectBypassedUpdateCache(debug_middleware.UpdateCacheMiddleware):
+    pass
+
+
+class ProjectBypassedFetchCache(debug_middleware.FetchFromCacheMiddleware):
+    pass
+
+
+PROJECT_UPDATE_MW = f"{__name__}.ProjectUpdateCache"
+PROJECT_FETCH_MW = f"{__name__}.ProjectFetchCache"
+PROJECT_CACHE_MW = f"{__name__}.ProjectCache"
+PROJECT_PAGE_CACHE = [PROJECT_UPDATE_MW, COMMON_MW, PROJECT_FETCH_MW]
+BYPASSED_PAGE_CACHE = [
+    f"{__name__}.ProjectBypassedUpdateCache",
+    COMMON_MW,
+    f"{__name__}.ProjectBypassedFetchCache",
+]
+
+
+def _gate_settings(middleware: list[str]) -> Any:
+    return override_settings(
+        DEBUG=True,
+        DEBUG_ALLOWED_IPS=[MY_IP],
+        DEBUG_REQUIRE_SUPERUSER=False,
+        MIDDLEWARE=middleware,
+    )
+
+
+@pytest.mark.parametrize(
+    ("cache", "expected"),
+    [
+        (
+            PROJECT_PAGE_CACHE,
+            {PROJECT_UPDATE_MW: CDNX_UPDATE_CACHE_MW, PROJECT_FETCH_MW: CDNX_FETCH_CACHE_MW},
+        ),
+        ([PROJECT_CACHE_MW], {PROJECT_CACHE_MW: CDNX_CACHE_MW}),
+    ],
+    ids=["split", "combined"],
+)
+def test_unbypassed_cache_subclass_fails_closed_and_is_reported(
+    cache: list[str],
+    expected: dict[str, str],
+) -> None:
+    middleware = autoload((), list(cache), DEBUG=True, DEBUG_PYINSTRUMENT=True)[1]
+    with _gate_settings(middleware):
+        assert show_pyinstrument(_request(MY_IP)) is False
+        messages = [e.msg for e in check_debug_access(None) if e.id == "codenerix.E003"]
+    for subclass, replacement in expected.items():
+        assert any(
+            m.startswith(
+                f"{subclass} subclasses Django's page cache middleware but not {replacement}"
+            )
+            for m in messages
+        )
+
+
+def test_bypassed_cache_subclass_is_allowed() -> None:
+    with _gate_settings([PROFILER_MW, *BYPASSED_PAGE_CACHE]):
+        assert show_pyinstrument(_request(MY_IP)) is True
+        assert check_debug_access(None) == []
+
+
+def test_profiler_behind_cache_subclass_is_reported() -> None:
+    with _gate_settings([*BYPASSED_PAGE_CACHE, PROFILER_MW]):
+        assert show_pyinstrument(_request(MY_IP)) is False
+        (check,) = check_debug_access(None)
+    assert check.id == "codenerix.E002"
+    assert check.msg.startswith(f"{PROFILER_MW} comes after {BYPASSED_PAGE_CACHE[0]}")
+
+
+# --- More than one middleware of a kind ----------------------------------------
+
+
+@pytest.mark.parametrize(
+    "profilers",
+    [[UPSTREAM_PROFILER_MW, PROFILER_MW], [PROFILER_MW, PROFILER_MW]],
+    ids=["upstream-and-codenerix", "listed-twice"],
+)
+def test_duplicated_profiler_fails_closed_and_is_reported(profilers: list[str]) -> None:
+    with _gate_settings([*profilers, *CDNX_PAGE_CACHE]):
+        assert show_pyinstrument(_request(MY_IP, "?profile")) is False
+        (check,) = check_debug_access(None)
+    assert check.id == "codenerix.E005"
+    assert check.msg.startswith(f"{profilers[0]} and {profilers[1]} are both in MIDDLEWARE")
 
 
 @override_settings(
@@ -192,7 +311,7 @@ def test_toolbar_ignores_profile_argument_without_profiler() -> None:
 def test_toolbar_without_codenerix_callback_is_reported() -> None:
     # DEBUG_TOOLBAR_CONFIG unset: upstream's callback would ignore DEBUG_ALLOWED_IPS
     messages = check_debug_access(None)
-    assert [e.id for e in messages] == ["codenerix.E001"]
+    assert [e.id for e in messages] == ["codenerix.E004"]
     assert "SHOW_TOOLBAR_CALLBACK" in messages[0].msg
 
 
@@ -267,6 +386,24 @@ def test_profile_never_reaches_page_cache(mode: dict[str, bool], cache: list[str
         assert PROFILE_MARKER in mine.content
 
 
+def test_duplicated_profiler_does_not_crash() -> None:
+    # pyinstrument's own middleware listed by the project next to the codenerix one
+    middleware = [
+        UPSTREAM_PROFILER_MW,
+        *autoload((), list(PAGE_CACHE), DEBUG=True, DEBUG_PYINSTRUMENT=True)[1],
+    ]
+    with _cached_site(
+        middleware,
+        DEBUG=True,
+        DEBUG_REQUIRE_SUPERUSER=False,
+        PYINSTRUMENT_SHOW_CALLBACK="codenerix.debug.show_pyinstrument",
+    ):
+        for ip in (MY_IP, OTHER_IP):
+            response = Client(REMOTE_ADDR=ip).get("/json/?profile")
+            assert response.status_code == 200
+            assert PROFILE_MARKER not in response.content
+
+
 # --- Superuser from the session, before SessionMiddleware ---------------------
 
 SESSION_SITE = [UPDATE_CACHE_MW, SESSION_MW, AUTH_MW, FETCH_CACHE_MW]
@@ -299,6 +436,17 @@ def test_anonymous_is_not_profiled() -> None:
     middleware = autoload((), list(SESSION_SITE), DEBUG=True, DEBUG_PYINSTRUMENT=True)[1]
     with _cached_site(middleware, DEBUG=True):
         response = Client(REMOTE_ADDR=MY_IP).get("/json/?profile")
+        assert PROFILE_MARKER not in response.content
+
+
+def test_broken_session_engine_fails_closed() -> None:
+    # No SessionMiddleware, so Django itself never imports the engine
+    middleware = autoload((), list(PAGE_CACHE), DEBUG=True, DEBUG_PYINSTRUMENT=True)[1]
+    with _cached_site(middleware, DEBUG=True, SESSION_ENGINE="codenerix.tests.no_such_engine"):
+        client = Client(REMOTE_ADDR=MY_IP)
+        client.cookies["sessionid"] = "any-session-key"
+        response = client.get("/json/?profile")
+        assert response.status_code == 200
         assert PROFILE_MARKER not in response.content
 
 

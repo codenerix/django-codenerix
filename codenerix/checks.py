@@ -23,18 +23,19 @@ from typing import Any
 from django.apps import AppConfig
 from django.core.checks import CheckMessage, Error
 
-from codenerix.debug import debug_access_errors
+from codenerix.debug import debug_access_checks
 
 
 def check_debug_access(
     app_configs: Sequence[AppConfig] | None,
     **kwargs: Any,
 ) -> list[CheckMessage]:
-    """Report unsafe, malformed or removed debug access settings, debug tools
-    placed behind the page cache middlewares, and a page cache that debug
-    requests would not bypass.
+    """Report unsafe, malformed or removed debug access settings (E001), debug
+    tools placed behind the page cache middlewares (E002), a page cache that
+    debug requests would not bypass (E003), a toolbar callback that ignores
+    DEBUG_ALLOWED_IPS (E004) and more than one middleware of a debug tool (E005).
 
     The debug gates already fail closed on these; this makes the cause visible
     on runserver and on any management command (e.g. `manage.py check --deploy`).
     """
-    return [Error(message, id="codenerix.E001") for message in debug_access_errors()]
+    return [Error(message, id=check_id) for check_id, message in debug_access_checks()]

@@ -1,6 +1,8 @@
 """OTPAuth emits one fail2ban-friendly log line per failed attempt, and nothing else."""
 
+import datetime
 import logging
+from types import SimpleNamespace
 
 import pyotp
 import pytest
@@ -62,7 +64,21 @@ def test_user_without_otp_key_is_logged(caplog: pytest.LogCaptureFixture) -> Non
     assert _lines(caplog) == [f"OTPAuth failure ip={CLIENT_IP}"]
 
 
-def test_success_is_not_logged(user: User, caplog: pytest.LogCaptureFixture) -> None:
+class _FrozenClock(datetime.datetime):
+    """pyotp's clock pinned mid-step, so a 30 s boundary cannot fall between now() and verify()."""
+
+    @classmethod
+    def now(cls, tz: datetime.tzinfo | None = None) -> "_FrozenClock":
+        return cls(2026, 1, 1, 12, 0, 15, tzinfo=tz)
+
+
+def test_success_is_not_logged(
+    user: User,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Only pyotp's view of the datetime module is replaced, not the module itself
+    monkeypatch.setattr(pyotp.totp, "datetime", SimpleNamespace(datetime=_FrozenClock))
     caplog.set_level(logging.WARNING, logger=LOGGER)
     token = pyotp.TOTP(OTP_KEY).now()
     assert _auth(_request(), username="alice", password=PASSWORD, authtoken=token) == user

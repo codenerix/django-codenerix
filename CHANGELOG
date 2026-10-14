@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0] - 2026-10-14
+### Changed (breaking)
+- System check `codenerix.E001` is split by kind of problem, so each can be silenced on its own: `codenerix.E001` (removed, malformed or public debug access settings), `codenerix.E002` (a debug tool behind the page cache middlewares), `codenerix.E003` (a page cache that debug requests would not bypass: stock middlewares next to a debug tool, added again after `autoload()`, or a project subclass), `codenerix.E004` (a toolbar `SHOW_TOOLBAR_CALLBACK` that ignores `DEBUG_ALLOWED_IPS`) and `codenerix.E005` (more than one middleware of a debug tool). Projects that list `"codenerix.E001"` in `SILENCED_SYSTEM_CHECKS` see the other ids, and those stop `runserver` and `migrate`. Silencing never changed the gates, which still fail closed on every one of them. New `codenerix.debug.debug_access_checks()` returns `(check id, message)` pairs; `debug_access_errors()` still returns the messages alone.
+- `autoload(DEBUG_PANEL=True)` (with the toolbar installed) and `autoload(SNIPPET_SCREAM=True)` (with `DEBUG`) raise `ValueError`: django-debug-panel 0.8.3, its last release, imports `django.core.urlresolvers`, removed in Django 2.0, and django-snippetscream 0.0.7 is Python 2 code. Both configurations already stopped Django at startup with an `ImportError`. The keywords are still accepted, so settings that pass `False` keep working. `DebugPanelMiddleware` is no longer treated as a toolbar middleware.
+- `autourl(..., SPAGHETTI=True)` puts django_spaghetti's `/plate/` behind the debug gate: it answers 404 unless `codenerix.debug.is_debug_request()` accepts the request (`DEBUG_ALLOWED_IPS`, and a superuser login by default), and is sent with `Cache-Control: no-store`. It was open to any client with `DEBUG` on. Route and namespace (`spaghetti:plate`) are unchanged.
+
+### Security
+- System check `codenerix.E003` reports a project subclass of Django's page cache middlewares (`UpdateCacheMiddleware`, `FetchFromCacheMiddleware`, `CacheMiddleware`) that does not derive from the `codenerix.debug_middleware` class of the same name, when a debug tool is installed, and the debug tools fail closed on it. `autoload()` can only replace the stock dotted paths: it runs while settings load and cannot import project middlewares. Such a subclass was neither replaced nor reported, so debug requests were served from and stored in the page cache, as in 5.3.3 and earlier. Subclasses must derive from `codenerix.debug_middleware.UpdateCacheMiddleware`, `FetchFromCacheMiddleware` or `CacheMiddleware`, which behave as Django's for every other request. The middleware order check also counts such subclasses as page cache middlewares. Projects in this situation that start today get `runserver` and `migrate` refused until the subclass is fixed.
+- `codenerix.E005` reports more than one profiler middleware (`pyinstrument.middleware.ProfilerMiddleware` and `codenerix.debug_middleware.ProfilerMiddleware`, or either one listed twice), and more than one toolbar middleware, and the tool concerned fails closed. Two profilers run on the same request: `?profile` answered 500 to the allowed IP, and to every client when `PYINSTRUMENT_SHOW_CALLBACK` was not set. Typical cause: pyinstrument's own middleware added after `autoload()` installed the codenerix one.
+
+### Fixed
+- With `DEBUG_REQUIRE_SUPERUSER`, a `SESSION_ENGINE` that cannot be imported no longer answers 500 to allowed IPs carrying a session cookie: the gate fails closed. Without `SessionMiddleware` in `MIDDLEWARE`, nothing else imports the engine.
+
+### Changed
+- `codenerix.E003` names every stock page cache middleware it finds next to a debug tool, one message each. 6.0.1 named only the first, so fixing the settings for one left the error on under another name.
+
+### Documentation
+- The debug gate reads the superuser from the session cookie only: a superuser authenticated later in the chain, by `codenerix.authbackend.TokenAuthMiddleware` or `OTPAuthMiddleware` setting `request.user`, never sees the debug tools.
+- Loading the session in the gate has the side effects `SessionMiddleware` has on the same request: the `file` backend deletes and recreates an expired or undecodable session file, `cached_db` fills the cache on a miss; `db` and `signed_cookies` write nothing (6.0.0 said "without side effects"). A user object without `get_session_auth_hash()` is rejected, where Django's `get_user()` accepts it unverified.
+- Correction to 6.0.0, "Toolbar captures are also always cache misses now": not for views decorated with `cache_page`, whose cache middleware instance `autoload()` does not see. Nothing leaks (the view cache stores the response before the toolbar runs), but a repeated capture shows only the cache GET.
+- `?profile` on a URL that ends in a slash needs the slash (`/page/?profile`): without it pyinstrument profiles `CommonMiddleware`'s redirect, not the view.
+- For an allowed IP carrying a session cookie, the gate loads the session and `SessionMiddleware` loads it again. Kept on purpose: handing the gate's user to `AuthenticationMiddleware` would skip `get_user()`'s session rotation and flush.
+
+### Maintenance
+- CI: the `uv run --no-sync --no-build` steps drop `--locked`, which does nothing without a sync; the lock is checked by `uv sync --locked` in each job's sync step.
+
 ## [6.0.1] - 2026-10-14
 ### Changed
 - System check `codenerix.E001` names the real cause when a stock page cache middleware (`django.middleware.cache.UpdateCacheMiddleware`, `FetchFromCacheMiddleware` or `CacheMiddleware`) is in `MIDDLEWARE` together with the `codenerix.debug_middleware` subclass that `autoload()` put in its place. That happens when settings code runs after `autoload()` and adds the middleware again because it tests `MIDDLEWARE` for the stock path only (`if "django.middleware.cache.UpdateCacheMiddleware" not in MIDDLEWARE: ...`), so the page cache runs twice. The message used to suggest adding the page cache before calling `autoload()`, which those projects already do; it now says the middleware was added again after `autoload()` replaced it and that such checks must also accept the `codenerix.debug_middleware` path. Only the message changes: the debug tools still fail closed in that configuration.

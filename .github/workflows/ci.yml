@@ -32,9 +32,9 @@ jobs:
       - name: Sync (dev)
         run: uv sync --locked
       - name: ruff check
-        run: uv run --locked --no-sync --no-build ruff check .
+        run: uv run --no-sync --no-build ruff check .
       - name: ruff format --check
-        run: uv run --locked --no-sync --no-build ruff format --check .
+        run: uv run --no-sync --no-build ruff format --check .
 
   types:
     name: Type check (mypy + basedpyright)
@@ -48,9 +48,9 @@ jobs:
       - name: Sync (dev)
         run: uv sync --locked
       - name: mypy
-        run: uv run --locked --no-sync --no-build mypy codenerix
+        run: uv run --no-sync --no-build mypy codenerix
       - name: basedpyright
-        run: uv run --locked --no-sync --no-build basedpyright codenerix
+        run: uv run --no-sync --no-build basedpyright codenerix
 
   test:
     name: Tests (py${{ matrix.python-version }})
@@ -70,4 +70,4 @@ jobs:
       - name: pytest
         # Necesita DJANGO_SETTINGS_MODULE; lo fijamos en
         # [tool.pytest.ini_options] del pyproject (igual que en channels).
-        run: uv run --locked --no-sync --no-build pytest
+        run: uv run --no-sync --no-build pytest

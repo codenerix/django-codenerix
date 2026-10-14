@@ -60,7 +60,9 @@ class ProfilerMiddleware(pyinstrument_middleware.ProfilerMiddleware):
 class _SkipFetchForDebug(cache.FetchFromCacheMiddleware):
     def process_request(self, request: HttpRequest) -> HttpResponse | None:
         if is_debug_request(request):
-            # A hit would bypass the debug tools; a miss must not be stored either
+            # A hit would bypass the debug tools; a miss must not be stored either.
+            # Only read by a non-codenerix UpdateCacheMiddleware outside with no later Fetch;
+            # the no-store header added by _SkipUpdateForDebug covers every other order
             request._cache_update_cache = False  # type: ignore[attr-defined]
             return None
         return super().process_request(request)

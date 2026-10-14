@@ -4,8 +4,9 @@ The gate shared with the profiler and the page cache bypass is covered in
 test_debug_gate.py.
 """
 
+import sys
 from collections.abc import Iterator
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 from typing import Any
 
 import pytest
@@ -13,7 +14,7 @@ from django.conf import settings
 from django.core.cache import caches
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.test import Client, RequestFactory, override_settings
-from django.urls import URLPattern, URLResolver, include, path
+from django.urls import URLPattern, URLResolver, include, path, reverse
 from django.utils.module_loading import import_string
 
 from codenerix.checks import check_debug_access
@@ -28,7 +29,6 @@ MY_IP = "203.0.113.7"
 OTHER_IP = "198.51.100.9"
 
 TOOLBAR_MW = "debug_toolbar.middleware.DebugToolbarMiddleware"
-PANEL_MW = "debug_panel.middleware.DebugPanelMiddleware"
 UPDATE_CACHE_MW = "django.middleware.cache.UpdateCacheMiddleware"
 FETCH_CACHE_MW = "django.middleware.cache.FetchFromCacheMiddleware"
 COMMON_MW = "django.middleware.common.CommonMiddleware"
@@ -183,9 +183,25 @@ def test_autoload_puts_toolbar_before_page_cache(container: type) -> None:
     assert list(middleware) == [TOOLBAR_MW, *CDNX_PAGE_CACHE]
 
 
-def test_autoload_places_debug_panel_like_the_toolbar() -> None:
-    middleware = _production_middleware(list(PAGE_CACHE), DEBUG_PANEL=True)
-    assert middleware == [PANEL_MW, *CDNX_PAGE_CACHE]
+@pytest.mark.parametrize(
+    "dead",
+    [
+        {"DEBUG_TOOLBAR": True, "DEBUG_PANEL": True},
+        {"SNIPPET_SCREAM": True},
+    ],
+    ids=["debug_panel", "snippetscream"],
+)
+def test_autoload_rejects_dead_packages(dead: dict[str, bool]) -> None:
+    # Neither package imports on supported Django / Python: startup failed anyway
+    with pytest.raises(ValueError, match="no longer supported"):
+        autoload((), list(PAGE_CACHE), DEBUG=True, **dead)
+
+
+def test_autoload_ignores_dead_packages_where_they_never_applied() -> None:
+    # Same conditions as before: without DEBUG (and the toolbar) they never took effect
+    assert autoload((), list(PAGE_CACHE), DEBUG_PANEL=True, SNIPPET_SCREAM=True)[1] == PAGE_CACHE
+    middleware = _production_middleware(list(PAGE_CACHE), DEBUG_PANEL=False)
+    assert middleware == [TOOLBAR_MW, *CDNX_PAGE_CACHE]
 
 
 def test_autoload_puts_toolbar_after_content_encoding() -> None:
@@ -250,8 +266,10 @@ def test_toolbar_behind_page_cache_fails_closed_and_is_reported(
         **access,
     ):
         assert show_toolbar(_request(MY_IP)) is False
-        # Order and unbypassed cache are separate messages, all under the one id
-        assert {e.id for e in check_debug_access(None)} == {"codenerix.E001"}
+        # Order (E002) and unbypassed cache (E003) are separate checks
+        ids = {e.id for e in check_debug_access(None)}
+        assert ids
+        assert ids <= {"codenerix.E002", "codenerix.E003"}
 
 
 @override_settings(
@@ -322,18 +340,23 @@ def cached_site_with_toolbar() -> Iterator[None]:
                 show_toolbar_func_or_path.cache_clear()
 
 
+# Injected by the toolbar into HTML pages that have a </body>
+TOOLBAR_MARKUP = b'id="djDebug"'
+
+
 @pytest.mark.parametrize(
-    ("url", "body"),
+    ("url", "body", "markup"),
     [
-        ("/json/", b'{"ok": true}'),
-        ("/html/", b"<html><body><p>page</p></body></html>"),
+        ("/json/", b'{"ok": true}', False),
+        ("/html/", b"<html><body><p>page</p></body></html>", True),
     ],
 )
 @pytest.mark.usefixtures("cached_site_with_toolbar")
-def test_toolbar_output_never_reaches_page_cache(url: str, body: bytes) -> None:
+def test_toolbar_output_never_reaches_page_cache(url: str, body: bytes, markup: bool) -> None:
     mine = Client(REMOTE_ADDR=MY_IP).get(url)
     # Guard against a vacuous pass: the toolbar must really run for the allowed IP
     assert "djdt-request-id" in mine.headers
+    assert (TOOLBAR_MARKUP in mine.content) is markup
     # Debug responses are kept out of browser and shared HTTP caches too
     assert "no-store" in mine.headers["Cache-Control"]
 
@@ -355,6 +378,26 @@ def test_toolbar_output_never_reaches_page_cache(url: str, body: bytes) -> None:
     assert other.content == body
 
 
+@pytest.mark.usefixtures("cached_site_with_toolbar")
+def test_toolbar_endpoints_never_reach_page_cache() -> None:
+    # render_panel answers a cookie-less 200 JSON: cacheable unless the bypass applies
+    request_id = Client(REMOTE_ADDR=MY_IP).get("/html/").headers["djdt-request-id"]
+    url = f"/__debug__/render_panel/?request_id={request_id}&panel_id=HeadersPanel"
+
+    mine = Client(REMOTE_ADDR=MY_IP).get(url)
+    assert mine.status_code == 200
+    # Guard against a vacuous pass: the panel content, not the "not available" stub
+    assert "HTTP_REMOTE_ADDR" in mine.json()["content"] or MY_IP in mine.json()["content"]
+    assert "no-store" in mine.headers["Cache-Control"]
+
+    other = Client(REMOTE_ADDR=OTHER_IP).get(url)
+    assert other.status_code == 404
+    assert "Age" not in other.headers
+
+    mine = Client(REMOTE_ADDR=MY_IP).get(url)
+    assert "Age" not in mine.headers
+
+
 def test_autourl_follows_installed_apps() -> None:
     def mounted() -> bool:
         patterns = autourl(
@@ -366,3 +409,56 @@ def test_autourl_follows_installed_apps() -> None:
     with override_settings(STATIC_URL="/static/"):
         with override_settings(INSTALLED_APPS=_TOOLBAR_APPS):
             assert mounted() is True
+
+
+# --- django_spaghetti's /plate/ behind the debug gate --------------------------
+
+PLATE_BODY = b"plate"
+
+
+def _plate(request: HttpRequest) -> HttpResponse:
+    return HttpResponse(PLATE_BODY)
+
+
+@pytest.fixture
+def spaghetti_site(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    # Stand-in for django_spaghetti.views: only autourl()'s wiring is under test
+    monkeypatch.setitem(sys.modules, "django_spaghetti", ModuleType("django_spaghetti"))
+    views = ModuleType("django_spaghetti.views")
+    views.plate = _plate  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "django_spaghetti.views", views)
+    with override_settings(
+        MIDDLEWARE=list(PAGE_CACHE),
+        ROOT_URLCONF=__name__,
+        DEBUG=True,
+        DEBUG_ALLOWED_IPS=[MY_IP],
+        DEBUG_REQUIRE_SUPERUSER=False,
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "codenerix-plate-e2e",
+            },
+        },
+        CACHE_MIDDLEWARE_SECONDS=600,
+    ):
+        caches["default"].clear()
+        urlpatterns[:] = autourl([], DEBUG=True, ROSETTA=False, ADMINSITE=False, SPAGHETTI=True)
+        try:
+            yield
+        finally:
+            urlpatterns.clear()
+
+
+@pytest.mark.usefixtures("spaghetti_site")
+def test_plate_is_behind_the_debug_gate() -> None:
+    assert reverse("spaghetti:plate") == "/plate/"
+
+    mine = Client(REMOTE_ADDR=MY_IP).get("/plate/")
+    assert mine.status_code == 200
+    assert mine.content == PLATE_BODY
+    # Stock page cache (no debug tool installed): kept out of it by the headers
+    assert "no-store" in mine.headers["Cache-Control"]
+
+    other = Client(REMOTE_ADDR=OTHER_IP).get("/plate/")
+    assert other.status_code == 404
+    assert "Age" not in other.headers
