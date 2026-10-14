@@ -23,17 +23,18 @@ from typing import Any
 from django.apps import AppConfig
 from django.core.checks import CheckMessage, Error
 
-from codenerix.debug import debug_toolbar_access_errors
+from codenerix.debug import debug_access_errors
 
 
-def check_debug_toolbar_access(
+def check_debug_access(
     app_configs: Sequence[AppConfig] | None,
     **kwargs: Any,
 ) -> list[CheckMessage]:
-    """Report unsafe or malformed DEBUG_TOOLBAR_ALLOWED_IPS settings, and a
-    toolbar middleware placed behind the page cache middlewares.
+    """Report unsafe, malformed or removed debug access settings, debug tools
+    placed behind the page cache middlewares, and a page cache that debug
+    requests would not bypass.
 
-    show_toolbar() already fails closed on these; this makes the cause visible
+    The debug gates already fail closed on these; this makes the cause visible
     on runserver and on any management command (e.g. `manage.py check --deploy`).
     """
-    return [Error(message, id="codenerix.E001") for message in debug_toolbar_access_errors()]
+    return [Error(message, id="codenerix.E001") for message in debug_access_errors()]

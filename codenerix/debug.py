@@ -21,7 +21,8 @@
 from __future__ import annotations
 
 from collections.abc import Collection
-from typing import TYPE_CHECKING
+from importlib import import_module
+from typing import TYPE_CHECKING, Any
 
 import debug_toolbar
 from django import VERSION
@@ -31,99 +32,247 @@ if TYPE_CHECKING:
     # Type-only: keep settings-time imports of this module minimal
     from django.http import HttpRequest
 
-# Sentinel in DEBUG_TOOLBAR_ALLOWED_IPS meaning "any client address". It can
-# never be a real REMOTE_ADDR, so it cannot collide with a listed client.
-DEBUG_TOOLBAR_ANY_IP = "0.0.0.0"
+# Sentinel in DEBUG_ALLOWED_IPS meaning "any client address". It can never be
+# a real REMOTE_ADDR, so it cannot collide with a listed client.
+DEBUG_ANY_IP = "0.0.0.0"
+
+# Settings removed in 6.0.0, mapped to what replaces them
+_REMOVED_SETTINGS = {
+    "DEBUG_TOOLBAR_ALLOWED_IPS": "DEBUG_ALLOWED_IPS",
+    "DEBUG_TOOLBAR_REQUIRE_SUPERUSER": "DEBUG_REQUIRE_SUPERUSER",
+    "DEBUG_TOOLBAR_PRODUCTION": "autoload(..., DEBUG_PRODUCTION=...)",
+}
 
 # Matched by dotted path: settings-time code cannot import project middlewares
 _TOOLBAR_MIDDLEWARES = (
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "debug_panel.middleware.DebugPanelMiddleware",
 )
-_PAGE_CACHE_MIDDLEWARES = (
-    "django.middleware.cache.UpdateCacheMiddleware",
-    "django.middleware.cache.CacheMiddleware",
-    "django.middleware.cache.FetchFromCacheMiddleware",
+_PROFILER_MIDDLEWARE = "codenerix.debug_middleware.ProfilerMiddleware"
+_PROFILER_MIDDLEWARES = (
+    "pyinstrument.middleware.ProfilerMiddleware",
+    _PROFILER_MIDDLEWARE,
 )
+# Stock page cache middlewares and the codenerix subclasses that skip the
+# cache for debug requests; autoload() swaps one for the other
+_PAGE_CACHE_REPLACEMENTS = {
+    "django.middleware.cache.UpdateCacheMiddleware": (
+        "codenerix.debug_middleware.UpdateCacheMiddleware"
+    ),
+    "django.middleware.cache.CacheMiddleware": "codenerix.debug_middleware.CacheMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware": (
+        "codenerix.debug_middleware.FetchFromCacheMiddleware"
+    ),
+}
+_PAGE_CACHE_MIDDLEWARES = (*_PAGE_CACHE_REPLACEMENTS, *_PAGE_CACHE_REPLACEMENTS.values())
 _CONTENT_ENCODING_MIDDLEWARES = ("django.middleware.gzip.GZipMiddleware",)
+_DEBUG_REQUEST_ATTR = "_codenerix_debug_request"
 
 
-def debug_toolbar_access_errors() -> list[str]:
-    """Return the problems found in the toolbar access settings, if any.
+def debug_access_errors() -> list[str]:
+    """Return every problem found in the debug access settings, if any.
 
-    Shared by show_toolbar() (which fails closed on any of them) and the
-    codenerix system check (which reports them at startup).
+    Reported at startup by the codenerix system check. The gates fail closed on
+    them: is_debug_request() on the access settings, and each tool on the
+    placement of its own middleware.
     """
-    errors = _middleware_order_errors()
-    allowed = getattr(settings, "DEBUG_TOOLBAR_ALLOWED_IPS", None)
-    if allowed is None:
-        return errors
+    errors = _access_errors()
+    for family in (_TOOLBAR_MIDDLEWARES, _PROFILER_MIDDLEWARES):
+        errors += [error for error in _middleware_errors(family) if error not in errors]
+    errors += _toolbar_callback_errors()
+    return errors
+
+
+def _access_errors() -> list[str]:
+    errors = [
+        f"{old} was removed in django-codenerix 6.0.0; use {new}."
+        for old, new in _REMOVED_SETTINGS.items()
+        if hasattr(settings, old)
+    ]
+    allowed = getattr(settings, "DEBUG_ALLOWED_IPS", ())
     # A bare string would turn the membership test into a substring match
     if isinstance(allowed, str) or not isinstance(allowed, Collection):
-        errors.append("DEBUG_TOOLBAR_ALLOWED_IPS must be a list, tuple or set of IP strings.")
-    elif DEBUG_TOOLBAR_ANY_IP in allowed and not settings.DEBUG and not _require_superuser():
+        errors.append("DEBUG_ALLOWED_IPS must be a list, tuple or set of IP strings.")
+    elif DEBUG_ANY_IP in allowed and not settings.DEBUG and not _require_superuser():
         errors.append(
-            f"DEBUG_TOOLBAR_ALLOWED_IPS contains {DEBUG_TOOLBAR_ANY_IP!r} with DEBUG=False "
-            "and DEBUG_TOOLBAR_REQUIRE_SUPERUSER=False: the toolbar would be public.",
+            f"DEBUG_ALLOWED_IPS contains {DEBUG_ANY_IP!r} with DEBUG=False and "
+            "DEBUG_REQUIRE_SUPERUSER=False: the debug tools would be public. "
+            "List the client IPs instead.",
         )
     return errors
 
 
-def _middleware_order_errors() -> list[str]:
+def _middleware_errors(family: tuple[str, ...]) -> list[str]:
     middleware = list(getattr(settings, "MIDDLEWARE", None) or ())
-    toolbar = [i for i, path in enumerate(middleware) if path in _TOOLBAR_MIDDLEWARES]
+    tools = [i for i, path in enumerate(middleware) if path in family]
+    if not tools:
+        return []
+    errors = []
     cache = [i for i, path in enumerate(middleware) if path in _PAGE_CACHE_MIDDLEWARES]
-    if not toolbar or not cache or max(toolbar) < min(cache):
+    if cache and max(tools) > min(cache):
+        errors.append(
+            f"{middleware[max(tools)]} comes after {middleware[min(cache)]} in MIDDLEWARE: "
+            "the page cache would store its output and serve it to every client. "
+            "Move it before the page cache middlewares.",
+        )
+    stock = [path for path in middleware if path in _PAGE_CACHE_REPLACEMENTS]
+    if stock:
+        errors.append(
+            f"{stock[0]} in MIDDLEWARE together with debug tools: debug requests would be "
+            "served from and stored in the page cache. Add the page cache middlewares "
+            "before calling autoload(), or use "
+            f"{_PAGE_CACHE_REPLACEMENTS[stock[0]]}.",
+        )
+    return errors
+
+
+def _toolbar_callback_errors() -> list[str]:
+    middleware = getattr(settings, "MIDDLEWARE", None) or ()
+    if not any(path in _TOOLBAR_MIDDLEWARES for path in middleware):
+        return []
+    config = getattr(settings, "DEBUG_TOOLBAR_CONFIG", None) or {}
+    callback = config.get("SHOW_TOOLBAR_CALLBACK")
+    if callback in (DEBUG_TOOLBAR_DEFAULT_CONFIG["SHOW_TOOLBAR_CALLBACK"], show_toolbar):
         return []
     return [
-        f"{middleware[max(toolbar)]} comes after {middleware[min(cache)]} in MIDDLEWARE: "
-        "the page cache would store toolbar output and serve it to every client. "
-        "Move the toolbar middleware before the page cache middlewares.",
+        "DEBUG_TOOLBAR_CONFIG['SHOW_TOOLBAR_CALLBACK'] is not codenerix.debug.show_toolbar: "
+        "the toolbar ignores DEBUG_ALLOWED_IPS. Set DEBUG_TOOLBAR_CONFIG = "
+        "DEBUG_TOOLBAR_DEFAULT_CONFIG.",
     ]
 
 
-def _insert_toolbar_middleware(
+def _insert_debug_middlewares(
     middleware: list[str] | tuple[str, ...],
-    toolbar: str,
+    debug_middlewares: list[str],
 ) -> list[str] | tuple[str, ...]:
     # As early as possible, but after anything that encodes the response body
     # (django-debug-toolbar installation docs); early also keeps it outside the page cache
     encoders = [i for i, path in enumerate(middleware) if path in _CONTENT_ENCODING_MIDDLEWARES]
     position = encoders[-1] + 1 if encoders else 0
     if isinstance(middleware, tuple):
-        return (*middleware[:position], toolbar, *middleware[position:])
-    middleware.insert(position, toolbar)
+        return (*middleware[:position], *debug_middlewares, *middleware[position:])
+    middleware[position:position] = debug_middlewares
+    return middleware
+
+
+def _replace_page_cache_middlewares(
+    middleware: list[str] | tuple[str, ...],
+) -> list[str] | tuple[str, ...]:
+    replaced = [_PAGE_CACHE_REPLACEMENTS.get(path, path) for path in middleware]
+    if isinstance(middleware, tuple):
+        return tuple(replaced)
+    middleware[:] = replaced
     return middleware
 
 
 def _require_superuser() -> bool:
-    # Login required by default only outside development
-    return bool(getattr(settings, "DEBUG_TOOLBAR_REQUIRE_SUPERUSER", not settings.DEBUG))
+    return bool(getattr(settings, "DEBUG_REQUIRE_SUPERUSER", True))
+
+
+def _session_user(request: HttpRequest) -> Any:
+    """Read the logged-in user from the session cookie, without side effects.
+
+    Debug middlewares run before SessionMiddleware and AuthenticationMiddleware,
+    so request.user does not exist yet. django.contrib.auth.get_user() is not
+    used: on a fallback or stale session hash it cycles or flushes the session
+    in the store, which would log the real request out.
+    """
+    from django.apps import apps
+
+    if not apps.is_installed("django.contrib.auth"):
+        return None
+    session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
+    if not session_key:
+        return None
+    from django.contrib.auth import (
+        BACKEND_SESSION_KEY,
+        HASH_SESSION_KEY,
+        SESSION_KEY,
+        get_user_model,
+        load_backend,
+    )
+    from django.utils.crypto import constant_time_compare
+
+    session = import_module(settings.SESSION_ENGINE).SessionStore(session_key)
+    try:
+        user_id = get_user_model()._meta.pk.to_python(session[SESSION_KEY])
+        backend_path = session[BACKEND_SESSION_KEY]
+        session_hash = session[HASH_SESSION_KEY]
+    except KeyError:
+        return None
+    if backend_path not in settings.AUTHENTICATION_BACKENDS:
+        return None
+    user = load_backend(backend_path).get_user(user_id)
+    if user is None or not hasattr(user, "get_session_auth_hash"):
+        return None
+    # Current secret only: a fallback hash needs a session rotation we must not do here
+    if not constant_time_compare(session_hash, user.get_session_auth_hash()):
+        return None
+    return user
+
+
+def _client_allowed(request: HttpRequest) -> bool:
+    if _access_errors():
+        # Fail closed; the system check reports the misconfiguration
+        return False
+    allowed = getattr(settings, "DEBUG_ALLOWED_IPS", ())
+    if DEBUG_ANY_IP not in allowed and request.META.get("REMOTE_ADDR") not in allowed:
+        return False
+    if not _require_superuser():
+        return True
+    user = getattr(request, "user", None)
+    if user is None:
+        user = _session_user(request)
+    return bool(user is not None and user.is_authenticated and user.is_superuser)
+
+
+def is_debug_request(request: HttpRequest) -> bool:
+    """Whether this request may see debug tools output.
+
+    Driven by DEBUG_ALLOWED_IPS (default: nobody; "0.0.0.0" means any client)
+    and DEBUG_REQUIRE_SUPERUSER (default True). Settings are read per request,
+    so projects may define them anywhere in their settings module. The result
+    is memoised on the request, so every debug middleware and the page cache
+    bypass agree on it.
+    """
+    decision = getattr(request, _DEBUG_REQUEST_ATTR, None)
+    if decision is None:
+        decision = _client_allowed(request)
+        setattr(request, _DEBUG_REQUEST_ATTR, decision)
+    return decision
+
+
+def _profile_requested(request: HttpRequest) -> bool:
+    middleware = getattr(settings, "MIDDLEWARE", None) or ()
+    if not any(path in _PROFILER_MIDDLEWARES for path in middleware):
+        return False
+    return getattr(settings, "PYINSTRUMENT_URL_ARGUMENT", "profile") in request.GET
 
 
 def show_toolbar(request: HttpRequest) -> bool:
-    """SHOW_TOOLBAR_CALLBACK driven by DEBUG_TOOLBAR_ALLOWED_IPS.
+    """SHOW_TOOLBAR_CALLBACK: is_debug_request(), unless the toolbar is misplaced.
 
-    Without DEBUG_TOOLBAR_ALLOWED_IPS the upstream default applies unchanged
-    (DEBUG and REMOTE_ADDR in INTERNAL_IPS). Settings are read per request, so
-    projects may define them anywhere in their settings module.
+    The toolbar also stands aside on pyinstrument's ?profile requests: the
+    profile replaces the response, and the toolbar's own cost would only skew it.
     """
-
-    if debug_toolbar_access_errors():
+    if _middleware_errors(_TOOLBAR_MIDDLEWARES):
         # Fail closed; the system check reports the misconfiguration
         return False
-    allowed = getattr(settings, "DEBUG_TOOLBAR_ALLOWED_IPS", None)
-    if allowed is None:
-        # Imported lazily: debug.py is loaded from settings.py, before apps are ready
-        from debug_toolbar.middleware import show_toolbar as upstream_show_toolbar
-
-        return upstream_show_toolbar(request)
-    if DEBUG_TOOLBAR_ANY_IP not in allowed and request.META.get("REMOTE_ADDR") not in allowed:
+    if _profile_requested(request):
         return False
-    if _require_superuser():
-        user = getattr(request, "user", None)
-        return bool(user is not None and user.is_authenticated and user.is_superuser)
-    return True
+    return is_debug_request(request)
+
+
+def show_pyinstrument(request: HttpRequest) -> bool:
+    """PYINSTRUMENT_SHOW_CALLBACK: is_debug_request(), unless the profiler is misplaced.
+
+    codenerix.debug_middleware.ProfilerMiddleware applies it on its own; set it
+    as PYINSTRUMENT_SHOW_CALLBACK when using pyinstrument's middleware directly.
+    """
+    if _middleware_errors(_PROFILER_MIDDLEWARES):
+        # Fail closed; the system check reports the misconfiguration
+        return False
+    return is_debug_request(request)
 
 
 # Full set of built-in panels, in upstream order. Requires
@@ -158,7 +307,7 @@ DEBUG_TOOLBAR_DEFAULT_CONFIG = {
     "SHOW_COLLAPSED": True,
     # Panel options
     "SQL_WARNING_THRESHOLD": 100,  # milliseconds
-    # Visibility rules (DEBUG_TOOLBAR_ALLOWED_IPS); upstream default when unset
+    # Visibility rules (DEBUG_ALLOWED_IPS, DEBUG_REQUIRE_SUPERUSER)
     "SHOW_TOOLBAR_CALLBACK": "codenerix.debug.show_toolbar",
 }
 
@@ -177,10 +326,13 @@ def autoload(
     GRAPH_MODELS=False,
     CODENERIX_DISABLE_LOG=False,
     DEBUG_PYINSTRUMENT=False,
-    DEBUG_TOOLBAR_PRODUCTION: bool = False,
+    DEBUG_PRODUCTION: bool = False,
 ):
     EXTRA_MIDDLEWARES = []  # noqa: N806
-    toolbar_middleware: str | None = None
+    # Outermost first: [profiler, toolbar, ...]
+    debug_middlewares: list[str] = []
+    # Production use is opt-in; per-request visibility is then up to is_debug_request
+    debug_tools = DEBUG or DEBUG_PRODUCTION
     if DEBUG and SPAGHETTI:
         INSTALLED_APPS += ("django_spaghetti",)
     if DEBUG and ROSETTA:
@@ -191,20 +343,22 @@ def autoload(
         EXTRA_MIDDLEWARES.append(
             "django.contrib.messages.middleware.MessageMiddleware",
         )
-    # Production use is opt-in; per-request visibility is then up to show_toolbar
-    if DEBUG_TOOLBAR and (DEBUG or DEBUG_TOOLBAR_PRODUCTION):
+    if DEBUG_TOOLBAR and debug_tools:
         INSTALLED_APPS += ("debug_toolbar",)
         if DEBUG_PANEL:
             INSTALLED_APPS += ("debug_panel",)
-            toolbar_middleware = "debug_panel.middleware.DebugPanelMiddleware"
+            debug_middlewares.append("debug_panel.middleware.DebugPanelMiddleware")
         else:
-            toolbar_middleware = "debug_toolbar.middleware.DebugToolbarMiddleware"
+            debug_middlewares.append("debug_toolbar.middleware.DebugToolbarMiddleware")
     if DEBUG and SNIPPET_SCREAM:
         EXTRA_MIDDLEWARES.append("snippetscream.ProfileMiddleware")
     if DEBUG and GRAPH_MODELS:
         INSTALLED_APPS += ("django_extensions",)
-    if DEBUG and DEBUG_PYINSTRUMENT:
-        EXTRA_MIDDLEWARES.append("pyinstrument.middleware.ProfilerMiddleware")
+    profiler = DEBUG_PYINSTRUMENT and debug_tools
+    # A pyinstrument middleware already in MIDDLEWARE is kept instead
+    if profiler and not set(_PROFILER_MIDDLEWARES) & set(MIDDLEWARE):
+        # Outside the toolbar, which stands aside on ?profile requests (show_toolbar)
+        debug_middlewares.insert(0, _PROFILER_MIDDLEWARE)
 
     # Attach new middlewares
     existing = set(MIDDLEWARE)
@@ -213,9 +367,13 @@ def autoload(
         MIDDLEWARE += tuple(extra)
     else:
         MIDDLEWARE += extra
-    # Not appended: behind the page cache its output would be cached for everyone
-    if toolbar_middleware is not None and toolbar_middleware not in existing:
-        MIDDLEWARE = _insert_toolbar_middleware(MIDDLEWARE, toolbar_middleware)  # noqa: N806
+    # Not appended: behind the page cache their output would be cached for everyone
+    new_debug = [middleware for middleware in debug_middlewares if middleware not in existing]
+    if new_debug:
+        MIDDLEWARE = _insert_debug_middlewares(MIDDLEWARE, new_debug)  # noqa: N806
+    if debug_middlewares or profiler:
+        # Debug requests must neither read nor fill the page cache
+        MIDDLEWARE = _replace_page_cache_middlewares(MIDDLEWARE)  # noqa: N806
 
     # Return final results
     return (INSTALLED_APPS, MIDDLEWARE)
