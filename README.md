@@ -213,7 +213,7 @@ Check the filter against your log and reload fail2ban:
 
 ## Credits
 
-We are thankful to :
+We are thankful to:
 
 | Author             | Module           | Contribution                                                                         |
 |--------------------|------------------|--------------------------------------------------------------------------------------|
