@@ -37,10 +37,8 @@ dependencies = [
     "Pillow",
     "Unidecode",
     "codenerix_lib>=1.0.31",
-    "elasticsearch>=7,<8",
     "django-debug-toolbar>=7.1.0",
     "django-debug-toolbar-request-history",
-    "django-haystack>=2.6.1",
     "django-recaptcha>=1.2.1,<1.3",
     "django-rosetta>=0.9.8",
     "html5lib",
@@ -57,6 +55,11 @@ dependencies = [
     "typing_extensions>=4.1; python_version < '3.11'",
     "django-stubs-ext",
 ]
+
+[project.optional-dependencies]
+# GenList(haystack=True) search through django-haystack; the search backend
+# (Elasticsearch, Solr, Whoosh, Xapian) is installed and configured by the project.
+haystack = ["django-haystack>=2.6.1"]
 
 [project.urls]
 Homepage = "https://github.com/codenerix/django-codenerix"
@@ -102,7 +105,7 @@ dev = [
 ]
 
 # ----------------------------------------------------------------------------
-# Ruff — linter and formatter (copied from channels root)
+# Ruff - linter and formatter (copied from channels root)
 # ----------------------------------------------------------------------------
 [tool.ruff]
 line-length = 100
@@ -317,12 +320,12 @@ disable    = [
     # Django CBVs: deep mixin chains and state set in dispatch()/setup(), not __init__
     "too-many-ancestors",
     "attribute-defined-outside-init",
-    "broad-exception-caught",      # W0718 — capturas defensivas a propósito (envío email OTP, parseo JSON, etc.)
-    "broad-exception-raised",      # W0719 — raise Exception() de framework; cambiar el tipo rompería except de llamantes
-    "too-many-return-statements",  # R0911 — funciones legacy grandes (get_queryset, helpers)
-    "too-many-locals",             # R0914 — get_queryset tiene 131 locals, refactor fuera de alcance
-    "too-many-lines",              # C0302 — views.py 5689 líneas, dividir el módulo es otro proyecto
-    "wrong-import-position",       # C0413 — FP del patrón import condicional (if sys.version_info / assert_never)
+    "broad-exception-caught",      # W0718: capturas defensivas a propósito (envío email OTP, parseo JSON, etc.)
+    "broad-exception-raised",      # W0719: raise Exception() de framework; cambiar el tipo rompería except de llamantes
+    "too-many-return-statements",  # R0911: funciones legacy grandes (get_queryset, helpers)
+    "too-many-locals",             # R0914: get_queryset tiene 131 locals, refactor fuera de alcance
+    "too-many-lines",              # C0302: views.py 5689 líneas, dividir el módulo es otro proyecto
+    "wrong-import-position",       # C0413: FP del patrón import condicional (if sys.version_info / assert_never)
     "no-else-raise",                 # R1720
     "no-else-break",                 # R1723
     "consider-using-get",            # R1715
@@ -335,10 +338,10 @@ disable    = [
     "redefined-outer-name",          # W0621 (shadowing de nombres de módulo, ruidoso)
     "eval-used",                     # W0123 (intencionado en multiforms)
     "keyword-arg-before-vararg",     # W1113 (angular __init__)
-    "http-response-with-content-type-json",  # R5102 — HttpResponse(content_type=...) a propósito
-    "http-response-with-json-dumps",          # R5101 — idem
-    "imported-auth-user",                     # E5142 — GenPerson/GenRole usan el User por defecto por diseño
-    "model-has-unicode",                      # W5102 — Log mantiene un shim __unicode__ (py2 legacy)
+    "http-response-with-content-type-json",  # R5102: HttpResponse(content_type=...) a propósito
+    "http-response-with-json-dumps",          # R5101: idem
+    "imported-auth-user",                     # E5142: GenPerson/GenRole usan el User por defecto por diseño
+    "model-has-unicode",                      # W5102: Log mantiene un shim __unicode__ (py2 legacy)
 ]
 enable = ["c-extension-no-member"]
 

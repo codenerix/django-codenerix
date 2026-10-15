@@ -1485,7 +1485,7 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
         search_filter_button = True                 # Enable filtering system by default
         datetime_filter = 'field'                   # It will force the datetie filter on the specified 'field'
         autofiltering = False                       # Disable autofiltering system
-        haystack = True                             # Enable Haystack support
+        haystack = True                             # Enable Haystack support (needs django-codenerix[haystack])
         onlybase = True                             # Will set the GenList to work only as a Base render for another View but not as a List itself
 
     Templates will be selected using the next process:
@@ -1971,7 +1971,14 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
         if not self.haystack:
             queryset = super().get_queryset()
         else:
-            from haystack.query import SearchQuerySet
+            # django-haystack is an optional extra since 6.2.0
+            try:
+                from haystack.query import SearchQuerySet
+            except ImportError as exc:
+                raise ImproperlyConfigured(
+                    f"{type(self).__name__}.haystack is True but django-haystack "
+                    "is not installed: install django-codenerix[haystack]",
+                ) from exc
 
             queryset = SearchQuerySet().models(self.model)
 

@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.2.0] - 2026-10-15
+### Removed (breaking)
+- `codenerix.contrib` and its `haystack_engines` module (`AsciifoldingElasticSearchEngine`, `AsciifoldingElasticBackend`). Projects that set `'ENGINE': 'codenerix.contrib.haystack_engines.AsciifoldingElasticSearchEngine'` in `HAYSTACK_CONNECTIONS` get an `ImportError` when Haystack loads its connections: copy the class into the project, or use Haystack's own `haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine`.
+- `elasticsearch` is no longer a dependency.
+
+### Changed (breaking)
+- `django-haystack` is no longer a dependency: it moves to the optional extra `haystack`. Views with `haystack = True` need `pip install django-codenerix[haystack]` (or `django-haystack` in the project's own dependencies) plus the search backend the project uses; without it, `get_queryset()` raises `ImproperlyConfigured` naming the view. Projects that relied on `django-codenerix` pulling in `django-haystack` or `elasticsearch` transitively must now list them themselves.
+
 ## [6.1.0] - 2026-10-14
 ### Changed (breaking)
 - System check `codenerix.E001` is split by kind of problem, so each can be silenced on its own: `codenerix.E001` (removed, malformed or public debug access settings), `codenerix.E002` (a debug tool behind the page cache middlewares), `codenerix.E003` (a page cache that debug requests would not bypass: stock middlewares next to a debug tool, added again after `autoload()`, or a project subclass), `codenerix.E004` (a toolbar `SHOW_TOOLBAR_CALLBACK` that ignores `DEBUG_ALLOWED_IPS`) and `codenerix.E005` (more than one middleware of a debug tool). Projects that list `"codenerix.E001"` in `SILENCED_SYSTEM_CHECKS` see the other ids, and those stop `runserver` and `migrate`. Silencing never changed the gates, which still fail closed on every one of them. New `codenerix.debug.debug_access_checks()` returns `(check id, message)` pairs; `debug_access_errors()` still returns the messages alone.
@@ -122,7 +130,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.0.87] - 2026-07-10
 ### Maintenance
-- Squashed migrations 0001–0024 into 0001_squashed_0024_alter_remotelog_options (originals kept for transition, non-breaking via `replaces`)
+- Squashed migrations 0001-0024 into 0001_squashed_0024_alter_remotelog_options (originals kept for transition, non-breaking via `replaces`)
 
 ## [5.0.86] - 2026-06-30
 ### Bugfix

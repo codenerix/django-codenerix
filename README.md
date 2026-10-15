@@ -49,7 +49,7 @@ Open source enterprise business management system built on top of Django + Angul
 
 - hotkeys support
 
-- [Haystack](https://github.com/django-haystack/django-haystack) support (Search engines like: Solr, Elasticsearch, Whoosh and Xapian)
+- optional [Haystack](https://github.com/django-haystack/django-haystack) support in list views (`pip install django-codenerix[haystack]`; the search engine, such as Solr, Elasticsearch, Whoosh or Xapian, is installed and configured by your project)
 
 - nice packages with plenty of icons ready to use (Glyphicon, Font Awesome & Font Awesome Animation)
 
@@ -217,7 +217,7 @@ We are thankful to:
 
 | Author             | Module           | Contribution                                                                         |
 |--------------------|------------------|--------------------------------------------------------------------------------------|
-| Mounir Messelmeni  | Haystack Engines | Contribution with Asciifolding support for Haystack Elasticsearch Engine             |
+| Mounir Messelmeni  | Haystack Engines | Asciifolding support for the Haystack Elasticsearch engine (removed in 6.2.0)        |
 | Khanh TO           | ngReallyClick    | We added codenerixReallyClick as a version that works with uibModal of ngReallyClick |
 | Francisco Torrejon | Core             | He was one of the first developers and part of the original project until 2015       |
 
