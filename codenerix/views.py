@@ -1973,7 +1973,7 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
         else:
             # django-haystack is an optional extra since 6.2.0
             try:
-                from haystack.query import SearchQuerySet
+                from haystack.query import SearchQuerySet  # pyright: ignore[reportMissingImports]
             except ImportError as exc:
                 raise ImproperlyConfigured(
                     f"{type(self).__name__}.haystack is True but django-haystack "
