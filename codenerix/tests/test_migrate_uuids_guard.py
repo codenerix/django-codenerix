@@ -390,3 +390,38 @@ def test_tmpdir_message_names_the_flag(planned: dict[str, Any]) -> None:
     planned["free_space"](100 * GIB, tmpdir_free=7 * GIB)
     planned["connect_planned"](bulk="ON")
     assert "--disable-copy-bulk if the database user has SUPER" in _run(36)
+
+
+# --- Order of the statements per column -----------------------------------------
+
+
+def _order(log: list[str], table: str) -> list[str]:
+    return [sql.split()[0] for sql in log if sql.startswith(("ALTER", "UPDATE")) and table in sql]
+
+
+def test_target_32_removes_the_dashes_before_narrowing(
+    planned: dict[str, Any],
+    statements: dict[str, Any],
+) -> None:
+    # MySQL 8.0, 2026-10-19: narrowing first truncated every dashed value (non-strict) or
+    # failed with 1265 (strict) before the UPDATE ran
+    planned["free_space"](100 * GIB)
+    db = statements["connect"](
+        MYSQL,
+        native=False,
+        column_length=36,
+        datadir=planned["datadir"],
+        tmpdir=planned["tmpdir"],
+        sizes=SIZES,
+    )
+    assert "Migration completed successfully." in _run(32, execute=True)
+    for table in SIZES:
+        assert _order(db.log, table) == ["UPDATE", "ALTER"]
+
+
+def test_target_36_widens_before_adding_the_dashes(planned: dict[str, Any]) -> None:
+    planned["free_space"](100 * GIB)
+    db = planned["connect_planned"]()
+    assert "Migration completed successfully." in _run(36, execute=True)
+    for table in SIZES:
+        assert _order(db.log, table) == ["ALTER", "UPDATE"]

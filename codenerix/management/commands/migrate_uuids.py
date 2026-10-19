@@ -200,14 +200,10 @@ class Command(BaseCommand):
                 f"Plan: {op['model']} -> {table}.{col} ({op['current']} -> {op['target']})",
             )
 
-            # A. Alter Table Structure
-            sql_commands.append(
-                f"ALTER TABLE `{table}` MODIFY `{col}` CHAR({target_length}) {null_stmt};",
-            )
-
-            # B. Convert Data
+            alter = f"ALTER TABLE `{table}` MODIFY `{col}` CHAR({target_length}) {null_stmt};"
             if target_length == 36:
-                # Convert 32 hex to 36 dashed (Format: 8-4-4-4-12)
+                # Widen first, then convert 32 hex to 36 dashed (Format: 8-4-4-4-12)
+                sql_commands.append(alter)
                 sql_commands.append(
                     f"""
                     UPDATE `{table}`
@@ -222,7 +218,9 @@ class Command(BaseCommand):
                 """,
                 )
             elif target_length == 32:
-                # Convert 36 dashed to 32 hex (Remove dashes)
+                # Remove the dashes while the column is still wide, then narrow it:
+                # narrowing first truncates every dashed value (or fails with 1265 in
+                # strict mode) before the UPDATE can run
                 sql_commands.append(
                     f"""
                     UPDATE `{table}`
@@ -230,6 +228,7 @@ class Command(BaseCommand):
                     WHERE CHAR_LENGTH(`{col}`) = 36;
                 """,
                 )
+                sql_commands.append(alter)
 
         # Re-enable Foreign Keys
         sql_commands.append("SET FOREIGN_KEY_CHECKS=1;")

@@ -17,6 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 from collections.abc import Iterator, Sequence
 from importlib.util import find_spec
 from typing import Any
@@ -70,13 +71,18 @@ def _haystack_view_errors() -> list[str]:
     request, which nothing reported before."""
     if _haystack_installed():
         return []
-    from codenerix.views import GenList
-
     try:
         patterns = get_resolver().url_patterns
     except Exception:  # noqa: BLE001
         # A URLconf that does not import is reported by Django's own urls.* checks
         return []
+    # Not imported here: codenerix.views reads STATIC_URL at import and would stop every
+    # management command of a project that leaves it unset. Resolving the URLconf imported
+    # every routed view, so if no view module loaded it, no routed view derives from GenList
+    views = sys.modules.get("codenerix.views")
+    if views is None:
+        return []
+    GenList = views.GenList  # noqa: N806
     seen: set[type] = set()
     errors = []
     for view_class in _routed_view_classes(patterns):

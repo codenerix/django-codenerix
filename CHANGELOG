@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.3.1] - 2026-10-19
+### Fixed
+- System check `codenerix.E006` no longer imports `codenerix.views`, which reads `STATIC_URL` at import: in 6.3.0, a project without django-haystack that leaves `STATIC_URL` unset (Django's default `None`) had every management command (`check`, `migrate`, `runserver`...) stop with `TypeError: expected str, bytes or os.PathLike object, not NoneType`, even with no codenerix view routed. The check now looks for `GenList` subclasses only when the project's URLconf has loaded `codenerix.views` itself.
+- `manage.py migrate_uuids --target 32` removes the dashes before narrowing the columns to `CHAR(32)`. It narrowed first, so on MySQL every dashed UUID was cut to its first 32 characters (lookups then match nothing, with "Migration completed successfully") or, under a strict `sql_mode`, the run failed with error 1265. The `--target 36` refusal on MySQL, which points to `--target 32`, is now safe to follow. `--target 36` is unchanged.
+
 ## [6.3.0] - 2026-10-19
 ### Added
 - `OTP_VALID_WINDOW` (default `1`): steps accepted on each side of the current one when `OTPAuth` verifies a 30 s TOTP code, as RFC 6238 recommends. Until now the direct TOTP and the non-mail paths used pyotp's default of `0`, so a correct code typed around the 30 s step boundary was refused; the OTP by email keeps its own window of one 5 minute step. Set it to `0` to keep the old behaviour.

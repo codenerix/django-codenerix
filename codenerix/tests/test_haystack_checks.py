@@ -3,8 +3,11 @@ first request: a routed view with haystack = True without the extra (E006) and
 a HAYSTACK_CONNECTIONS engine under the removed codenerix.contrib (E007)."""
 
 import importlib.util
+import subprocess
 import sys
+import textwrap
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 from django.contrib.auth.models import User
@@ -128,3 +131,62 @@ def test_other_engines_pass(haystack_present: None) -> None:
 @override_settings(HAYSTACK_CONNECTIONS={"default": {"ENGINE": CONTRIB_ENGINE}})
 def test_both_problems_are_reported_together(routed: None, haystack_absent: None) -> None:
     assert _ids(check_haystack(None)) == [E006, E007]
+
+
+def test_check_never_imports_codenerix_views(
+    routed: None,
+    haystack_absent: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Stands for a project whose URLconf loaded no codenerix view: the check must not
+    # import codenerix.views itself (it reads STATIC_URL at import)
+    monkeypatch.delitem(sys.modules, "codenerix.views")
+    assert check_haystack(None) == []
+    assert "codenerix.views" not in sys.modules
+
+
+def test_manage_py_check_without_static_url(tmp_path: Path) -> None:
+    # A fresh interpreter: codenerix.views must not be loaded by anything but the check
+    (tmp_path / "f1_settings.py").write_text(
+        textwrap.dedent(
+            """
+            SECRET_KEY = "x"
+            ROOT_URLCONF = "f1_urls"
+            DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
+            INSTALLED_APPS = [
+                "django.contrib.contenttypes", "django.contrib.auth", "django.contrib.admin",
+                "django.contrib.sessions", "django.contrib.messages", "codenerix",
+            ]
+            # STATIC_URL left unset on purpose (Django's default is None)
+            SILENCED_SYSTEM_CHECKS = ["admin.E403", "admin.E408", "admin.E409", "admin.E410"]
+            """,
+        ),
+    )
+    (tmp_path / "f1_urls.py").write_text(
+        "from django.urls import path\n"
+        "from django.views.generic import TemplateView\n"
+        'urlpatterns = [path("", TemplateView.as_view(template_name="x.html"))]\n',
+    )
+    script = textwrap.dedent(
+        """
+        import os, sys
+        sys.modules["haystack"] = None  # find_spec() -> None: E006 runs even if it is installed
+        os.environ["DJANGO_SETTINGS_MODULE"] = "f1_settings"
+        import django
+        django.setup()
+        from django.core.management import call_command
+        call_command("check")
+        print("codenerix.views loaded:", "codenerix.views" in sys.modules)
+        """,
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=tmp_path,
+        env={"PYTHONPATH": str(tmp_path), "PATH": "/usr/bin:/bin"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "System check identified no issues" in result.stdout
+    assert "codenerix.views loaded: False" in result.stdout
