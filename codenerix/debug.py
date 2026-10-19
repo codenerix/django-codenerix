@@ -148,12 +148,18 @@ def _page_cache_kind(path: str) -> tuple[bool, str] | None:
         return None
     replacement = _PAGE_CACHE_REPLACEMENTS[stock]
     # By dotted path: importing codenerix.debug_middleware here would be a cyclic import.
-    # The combined codenerix class also bypasses for each half of the pair
-    bypassing = (
-        import_string(replacement),
-        import_string(_PAGE_CACHE_REPLACEMENTS["django.middleware.cache.CacheMiddleware"]),
+    # Each half is bypassed by the codenerix class of its kind or by the combined one, so a
+    # class deriving from both codenerix halves counts as bypassed too
+    combined = import_string(_PAGE_CACHE_REPLACEMENTS["django.middleware.cache.CacheMiddleware"])
+    bypassed = all(
+        issubclass(middleware, (import_string(_PAGE_CACHE_REPLACEMENTS[half]), combined))
+        for half, present in (
+            ("django.middleware.cache.UpdateCacheMiddleware", update),
+            ("django.middleware.cache.FetchFromCacheMiddleware", fetch),
+        )
+        if present
     )
-    return issubclass(middleware, bypassing), replacement
+    return bypassed, replacement
 
 
 def _both_or_all(paths: list[str]) -> str:

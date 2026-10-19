@@ -374,6 +374,10 @@ class OTPAuth(ModelBackend, Debugger):
             "OTP_BYMAIL_INTERVAL",
             300,
         )  # 5 minutes
+        # Steps accepted on each side of the current one for the 30 s TOTP paths
+        # (RFC 6238 recommends one): with 0 a correct code typed around the step
+        # boundary is refused. The mail OTP keeps its own window below.
+        otp_valid_window = getattr(settings, "OTP_VALID_WINDOW", 1)
 
         # Check we have all parameters
         if not username or not password or not authtoken:
@@ -439,6 +443,8 @@ class OTPAuth(ModelBackend, Debugger):
                             if bymail:
                                 interval["interval"] = byemail_interval
                                 valid_window["valid_window"] = 1  # 5 minutes
+                            else:
+                                valid_window["valid_window"] = otp_valid_window
                             # Calculate OTP token
                             try:
                                 direct_otp = pyotp.TOTP(user_key)
@@ -534,7 +540,10 @@ class OTPAuth(ModelBackend, Debugger):
                             # User not authenticated on this request
                             answer = None
                             otp_requested = True
-                        elif direct_otp is not None and direct_otp.verify(remote_otp):
+                        elif direct_otp is not None and direct_otp.verify(
+                            remote_otp,
+                            valid_window=otp_valid_window,
+                        ):
                             user.backend = f"{self.__class__.__module__}.{self.__class__.__name__}"  # noqa: E501
                             answer = user
 

@@ -1,0 +1,130 @@
+"""System checks for the haystack configurations that 6.2.0 left to fail on the
+first request: a routed view with haystack = True without the extra (E006) and
+a HAYSTACK_CONNECTIONS engine under the removed codenerix.contrib (E007)."""
+
+import importlib.util
+import sys
+from collections.abc import Iterator
+
+import pytest
+from django.contrib.auth.models import User
+from django.test import override_settings
+from django.urls import clear_url_caches, include, path
+from django.views.generic import TemplateView
+
+from codenerix import checks
+from codenerix.checks import check_haystack
+
+# codenerix.views reads STATIC_URL while its classes are created, and the test
+# settings leave it unset on purpose (see test_debug_toolbar.py)
+with override_settings(STATIC_URL="/static/"):
+    from codenerix.views import GenList
+
+E006 = "codenerix.E006"
+E007 = "codenerix.E007"
+CONTRIB_ENGINE = "codenerix.contrib.haystack_engines.AsciifoldingElasticSearchEngine"
+SIMPLE_ENGINE = "haystack.backends.simple_backend.SimpleEngine"
+
+
+class PlainList(GenList):
+    model = User
+
+
+class SearchList(GenList):
+    model = User
+    haystack = True
+
+
+class NotCodenerix(TemplateView):
+    # A non-codenerix view with the same attribute must not be reported
+    haystack = True
+
+
+nested = [path("search/", SearchList.as_view(), name="search")]
+urlpatterns = [
+    path("plain/", PlainList.as_view(), name="plain"),
+    path("nested/", include(nested)),
+    path("other/", NotCodenerix.as_view(), name="other"),
+    path("again/", SearchList.as_view(), name="again"),
+]
+
+
+@pytest.fixture
+def routed() -> Iterator[None]:
+    with override_settings(ROOT_URLCONF=__name__):
+        clear_url_caches()
+        yield
+    clear_url_caches()
+
+
+@pytest.fixture
+def haystack_absent(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(checks, "_haystack_installed", lambda: False)
+
+
+@pytest.fixture
+def haystack_present(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(checks, "_haystack_installed", lambda: True)
+
+
+def _ids(errors: list) -> list[str]:
+    return [e.id for e in errors]
+
+
+def test_routed_haystack_view_without_the_extra_is_reported(
+    routed: None,
+    haystack_absent: None,
+) -> None:
+    (error,) = check_haystack(None)
+    assert error.id == E006
+    # Reported once although it is routed twice; the plain and non-codenerix views are not
+    assert error.msg.startswith(f"{__name__}.SearchList.haystack is True")
+    assert "django-codenerix[haystack]" in error.msg
+
+
+def test_routed_haystack_view_with_the_extra_passes(routed: None, haystack_present: None) -> None:
+    assert check_haystack(None) == []
+
+
+@pytest.mark.parametrize(
+    "urlconf",
+    ["django.contrib.auth.urls", "codenerix.tests.no_such_urlconf"],
+    ids=["no-codenerix-views", "urlconf-does-not-import"],
+)
+def test_unrouted_haystack_view_is_not_reported(haystack_absent: None, urlconf: str) -> None:
+    # SearchList exists but is not routed, so nothing can fail at request time; a URLconf
+    # that does not import is left to Django's own urls.* checks
+    with override_settings(ROOT_URLCONF=urlconf):
+        clear_url_caches()
+        assert check_haystack(None) == []
+    clear_url_caches()
+
+
+def test_haystack_availability_is_probed_without_importing() -> None:
+    # Holds whether or not the venv has the optional extra: uv run does not remove
+    # packages left over from before 6.2.0, so django-haystack may still be there
+    was_loaded = "haystack" in sys.modules
+    assert checks._haystack_installed() is (importlib.util.find_spec("haystack") is not None)
+    assert ("haystack" in sys.modules) is was_loaded
+
+
+@override_settings(HAYSTACK_CONNECTIONS={"default": {"ENGINE": CONTRIB_ENGINE}})
+def test_removed_contrib_engine_is_reported(haystack_present: None) -> None:
+    (error,) = check_haystack(None)
+    assert error.id == E007
+    assert error.msg.startswith(f"HAYSTACK_CONNECTIONS['default']['ENGINE'] is {CONTRIB_ENGINE}")
+
+
+@override_settings(
+    HAYSTACK_CONNECTIONS={
+        "default": {"ENGINE": SIMPLE_ENGINE},
+        "odd": "not a dict",
+    },
+)
+def test_other_engines_pass(haystack_present: None) -> None:
+    assert check_haystack(None) == []
+
+
+@override_settings(HAYSTACK_CONNECTIONS={"default": {"ENGINE": CONTRIB_ENGINE}})
+def test_both_problems_are_reported_together(routed: None, haystack_absent: None) -> None:
+    assert _ids(check_haystack(None)) == [E006, E007]

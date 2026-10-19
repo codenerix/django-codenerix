@@ -190,6 +190,14 @@ class ProjectBypassedFetchCache(debug_middleware.FetchFromCacheMiddleware):
     pass
 
 
+class ProjectBypassedBothHalves(
+    debug_middleware.UpdateCacheMiddleware,
+    debug_middleware.FetchFromCacheMiddleware,
+    django_cache.CacheMiddleware,
+):
+    pass
+
+
 PROJECT_UPDATE_MW = f"{__name__}.ProjectUpdateCache"
 PROJECT_FETCH_MW = f"{__name__}.ProjectFetchCache"
 PROJECT_CACHE_MW = f"{__name__}.ProjectCache"
@@ -240,6 +248,13 @@ def test_unbypassed_cache_subclass_fails_closed_and_is_reported(
 
 def test_bypassed_cache_subclass_is_allowed() -> None:
     with _gate_settings([PROFILER_MW, *BYPASSED_PAGE_CACHE]):
+        assert show_pyinstrument(_request(MY_IP)) is True
+        assert check_debug_access(None) == []
+
+
+def test_subclass_of_both_codenerix_halves_is_allowed() -> None:
+    # Bypasses both halves without deriving from codenerix CacheMiddleware
+    with _gate_settings([PROFILER_MW, f"{__name__}.ProjectBypassedBothHalves"]):
         assert show_pyinstrument(_request(MY_IP)) is True
         assert check_debug_access(None) == []
 
