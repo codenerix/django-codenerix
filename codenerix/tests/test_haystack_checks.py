@@ -2,6 +2,7 @@
 first request: a routed view with haystack = True without the extra (E006) and
 a HAYSTACK_CONNECTIONS engine under the removed codenerix.contrib (E007)."""
 
+import importlib
 import importlib.util
 import subprocess
 import sys
@@ -103,12 +104,28 @@ def test_unrouted_haystack_view_is_not_reported(haystack_absent: None, urlconf: 
     clear_url_caches()
 
 
-def test_haystack_availability_is_probed_without_importing() -> None:
-    # Holds whether or not the venv has the optional extra: uv run does not remove
-    # packages left over from before 6.2.0, so django-haystack may still be there
-    was_loaded = "haystack" in sys.modules
-    assert checks._haystack_installed() is (importlib.util.find_spec("haystack") is not None)
-    assert ("haystack" in sys.modules) is was_loaded
+def test_haystack_availability_is_probed_without_importing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # A stand-in package first on sys.path, whatever the venv holds: importing it would
+    # create the marker file, so finding it must leave no marker behind
+    package = tmp_path / "haystack"
+    package.mkdir()
+    marker = tmp_path / "imported"
+    (package / "__init__.py").write_text(f"open({str(marker)!r}, 'w').close()\n")
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.delitem(sys.modules, "haystack", raising=False)
+    importlib.invalidate_caches()
+    assert checks._haystack_installed() is True
+    assert not marker.exists()
+    assert "haystack" not in sys.modules
+
+
+def test_haystack_marked_absent_is_not_installed(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A None entry in sys.modules is how an import is blocked: find_spec returns None
+    monkeypatch.setitem(sys.modules, "haystack", None)
+    assert checks._haystack_installed() is False
 
 
 @override_settings(HAYSTACK_CONNECTIONS={"default": {"ENGINE": CONTRIB_ENGINE}})

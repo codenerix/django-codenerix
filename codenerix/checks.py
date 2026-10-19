@@ -31,6 +31,7 @@ from codenerix.debug import debug_access_checks
 
 E_HAYSTACK_MISSING = "codenerix.E006"  # routed view with haystack = True, extra not installed
 E_HAYSTACK_CONTRIB = "codenerix.E007"  # HAYSTACK_CONNECTIONS engine under the removed contrib
+E_OTP_WINDOW = "codenerix.E008"  # OTP_VALID_WINDOW that is not a non-negative integer
 
 REMOVED_CONTRIB = "codenerix.contrib."
 
@@ -113,7 +114,8 @@ def _haystack_engine_errors() -> list[str]:
                 f"HAYSTACK_CONNECTIONS[{alias!r}]['ENGINE'] is {engine}: codenerix.contrib was "
                 "removed in django-codenerix 6.2.0, so the engine cannot be imported. Copy the "
                 "engine class into the project, or use "
-                "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine.",
+                "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine, whose "
+                "client the project must now install itself (elasticsearch>=7,<8).",
             )
     return errors
 
@@ -126,10 +128,39 @@ def check_haystack(
     on the first request: a routed view with haystack = True without the extra
     (E006) and a HAYSTACK_CONNECTIONS engine under the removed codenerix.contrib
     (E007). A missing "haystack" app with the package absent cannot be a check:
-    Django stops while populating INSTALLED_APPS, before any check runs.
+    Django stops while populating INSTALLED_APPS, before any check runs. E006
+    probes the package with find_spec, without importing it, so an installed but
+    broken django-haystack passes here and fails on the view's first request.
     """
     errors: list[CheckMessage] = [
         Error(message, id=E_HAYSTACK_MISSING) for message in _haystack_view_errors()
     ]
     errors += [Error(message, id=E_HAYSTACK_CONTRIB) for message in _haystack_engine_errors()]
     return errors
+
+
+def otp_valid_window(value: object) -> int | None:
+    """OTP_VALID_WINDOW as OTPAuth uses it: a non-negative integer, else None."""
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return None
+    return value
+
+
+def check_otp_valid_window(
+    app_configs: Sequence[AppConfig] | None,
+    **kwargs: Any,
+) -> list[CheckMessage]:
+    """Report an OTP_VALID_WINDOW that is not a non-negative integer (E008): a
+    string from an environment variable used to raise TypeError at login, and a
+    negative value refused every code. OTPAuth falls back to 0 meanwhile."""
+    value = getattr(settings, "OTP_VALID_WINDOW", 1)
+    if otp_valid_window(value) is not None:
+        return []
+    return [
+        Error(
+            f"OTP_VALID_WINDOW is {value!r}: it must be a non-negative integer (steps of 30 s "
+            "accepted on each side of the current one). OTPAuth falls back to 0, the current "
+            "step only.",
+            id=E_OTP_WINDOW,
+        ),
+    ]

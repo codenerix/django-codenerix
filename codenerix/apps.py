@@ -9,7 +9,8 @@ class MyAppConfig(AppConfig):
         # Registered here, not via @register at import, so the import is actually used
         from django.core.checks import register
 
-        from codenerix.checks import check_debug_access, check_haystack
+        from codenerix.checks import check_debug_access, check_haystack, check_otp_valid_window
 
         register(check_debug_access)
         register(check_haystack)
+        register(check_otp_valid_window)

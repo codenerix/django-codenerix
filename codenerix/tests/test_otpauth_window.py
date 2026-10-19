@@ -10,6 +10,7 @@ from django.http import HttpRequest
 from django.test import RequestFactory, override_settings
 
 from codenerix.authbackend import OTPAuth
+from codenerix.checks import check_otp_valid_window
 
 PASSWORD = "correct-horse-battery"
 OTP_KEY = pyotp.random_base32(32)
@@ -67,5 +68,30 @@ def test_code_two_steps_old_is_refused(user: User, clock: None) -> None:
 @override_settings(OTP_VALID_WINDOW=0)
 def test_window_zero_refuses_the_previous_step(user: User, clock: None) -> None:
     # The 6.2.0 behaviour, kept available for deployments that want it
+    assert _auth(_code_at(1)) is None
+    assert _auth(_code_at(0)) == user
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["1", 1.5, -1, True, None],
+    ids=["string", "float", "negative", "bool", "none"],
+)
+def test_invalid_window_is_reported(value: object) -> None:
+    with override_settings(OTP_VALID_WINDOW=value):
+        (error,) = check_otp_valid_window(None)
+    assert error.id == "codenerix.E008"
+    assert error.msg.startswith(f"OTP_VALID_WINDOW is {value!r}: it must be a non-negative integer")
+
+
+@pytest.mark.parametrize("value", [0, 1, 2])
+def test_valid_window_is_not_reported(value: int) -> None:
+    with override_settings(OTP_VALID_WINDOW=value):
+        assert check_otp_valid_window(None) == []
+
+
+@override_settings(OTP_VALID_WINDOW="1")
+def test_invalid_window_fails_closed_at_login(user: User, clock: None) -> None:
+    # A string from an environment variable used to raise TypeError inside pyotp
     assert _auth(_code_at(1)) is None
     assert _auth(_code_at(0)) == user

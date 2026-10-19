@@ -43,6 +43,8 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
 
+from codenerix.checks import otp_valid_window as valid_otp_window
+
 logger = logging.getLogger(__name__)
 
 # Dedicated logger for failed OTPAuth attempts, meant to be routed to its own
@@ -374,10 +376,10 @@ class OTPAuth(ModelBackend, Debugger):
             "OTP_BYMAIL_INTERVAL",
             300,
         )  # 5 minutes
-        # Steps accepted on each side of the current one for the 30 s TOTP paths
-        # (RFC 6238 recommends one): with 0 a correct code typed around the step
-        # boundary is refused. The mail OTP keeps its own window below.
-        otp_valid_window = getattr(settings, "OTP_VALID_WINDOW", 1)
+        # Steps accepted on each side of the current one for the 30 s TOTP paths: with 0
+        # a correct code typed around the step boundary is refused. The mail OTP keeps its
+        # own window below. An invalid value (reported by codenerix.E008) fails closed to 0
+        otp_valid_window = valid_otp_window(getattr(settings, "OTP_VALID_WINDOW", 1)) or 0
 
         # Check we have all parameters
         if not username or not password or not authtoken:
