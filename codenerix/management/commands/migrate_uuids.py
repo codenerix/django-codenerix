@@ -1,20 +1,33 @@
 import os
+import re
 import shutil
 import socket
 from typing import Any
 
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
-from django.db import connection
+from django.db import DatabaseError, connection
 from django.db.models import ForeignKey, UUIDField
 
 HEX32 = "^[0-9a-fA-F]{32}$"
 DASHED36 = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 # Merge files of a bulk index build and the binary log of the UPDATE phase were measured at
 # 1.6x to 2.46x the table (CDNX-6.2-FOLLOWUP REVIEWs, BECAS-HYG-010 REVIEWs): 2.5x covers both,
-# with a thin margin. The binary log of a ROW_FORMAT=COMPRESSED table can exceed it (3.34x
-# measured): the estimate is then short and a full disk stops the run with exit status 1
+# with a thin margin. ROW_FORMAT=COMPRESSED tables exceed it on their size on disk, so they
+# are scaled to their uncompressed size first (see Command.compression_scale)
 SPACE_FACTOR = 2.5
+SET_SQL_MODE = "SET SESSION sql_mode = %s"
+# The narrowest UUID value: a row cannot take less, which exposes a stale size
+UUID_BYTES = 32
+
+
+def _filename(name: str) -> str:
+    """How InnoDB spells a schema or table name in its tablespace list: ASCII characters
+    other than letters, digits and "_" become "@" and four hex digits ("a-b" -> "a@002db").
+    Non-ASCII names are encoded differently: they miss the lookup and keep the estimate."""
+    return "".join(
+        c if c.isascii() and (c.isalnum() or c == "_") else f"@{ord(c):04x}" for c in name
+    )
 
 
 def _device(path: str) -> int:
@@ -40,8 +53,9 @@ class Command(BaseCommand):
             "--skip-space-check",
             action="store_true",
             help="Execute even if a directory of the database server has less free "
-            "space than the estimate for the rebuilds and the UPDATE phase, or the "
-            "server is on another host and its free space cannot be checked.",
+            "space than the estimate for the rebuilds and the UPDATE phase, when the "
+            "server is on another host and its free space cannot be checked, or when "
+            "the table statistics are stale.",
         )
         parser.add_argument(
             "--disable-copy-bulk",
@@ -59,9 +73,9 @@ class Command(BaseCommand):
 
     def handle(  # pylint: disable=unused-argument,too-many-branches,too-many-locals,too-many-statements # noqa: E501
         self,
-        *args,
-        **options,
-    ):
+        *args: Any,
+        **options: Any,
+    ) -> None:
         target_length = options["target"]
         execute_mode = options["execute"]
         dry_run = not execute_mode
@@ -154,12 +168,16 @@ class Command(BaseCommand):
                 "leave them unreadable, or truncate them.",
             )
 
+        counted: dict[str, int] = {}
+        for op in operations:
+            counted[op["table"]] = max(counted.get(op["table"], 0), op["rows"])
         copy_bulk = self.check_resources(
             sorted({op["table"] for op in operations if op["action"] == "alter"}),
             sorted({op["table"] for op in operations}),
             execute_mode and not options["skip_space_check"],
             options["disable_copy_bulk"],
             options["skip_space_check"],
+            counted,
         )
 
         # SQL Generation
@@ -248,7 +266,8 @@ class Command(BaseCommand):
         if restore_copy_bulk:
             self.set_copy_bulk("OFF")
         self.restore_failed = False
-        failure: tuple[str, Exception] | None = None
+        failure: tuple[str, Exception | KeyboardInterrupt] | None = None
+        restore_errors: list[str] = []
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT @@SESSION.sql_mode")
@@ -256,7 +275,7 @@ class Command(BaseCommand):
                 # A value that does not fit must stop the run, not be truncated, also on a
                 # server configured without strict mode
                 cursor.execute(
-                    "SET SESSION sql_mode = %s",
+                    SET_SQL_MODE,
                     [",".join(filter(None, [sql_mode, "STRICT_ALL_TABLES"]))],
                 )
                 try:
@@ -264,35 +283,63 @@ class Command(BaseCommand):
                     for sql in sql_commands:
                         try:
                             cursor.execute(sql)
-                        except Exception as e:  # pylint: disable=broad-except
+                        # Ctrl-C reaches Python only once the server has finished the
+                        # statement in progress: report it like a failure, not a traceback
+                        except (Exception, KeyboardInterrupt) as e:  # pylint: disable=broad-except
                             failure = (" ".join(sql.split()), e)
                             break
                 finally:
-                    try:
-                        cursor.execute(fk_on)
-                    finally:
-                        cursor.execute("SET SESSION sql_mode = %s", [sql_mode])
+                    # Each restore on its own: one failing must not skip the other
+                    restores = (
+                        (fk_on, None, fk_on.rstrip(";")),
+                        (SET_SQL_MODE, [sql_mode], f"SET SESSION sql_mode = '{sql_mode}'"),
+                    )
+                    for statement, params, shown in restores:
+                        try:
+                            cursor.execute(statement, params)
+                        except Exception as e:  # pylint: disable=broad-except
+                            restore_errors.append(f"{shown}: {e}")
         finally:
+            if restore_errors or (
+                failure is not None and isinstance(failure[1], KeyboardInterrupt)
+            ):
+                # The session may be out of sync or left half restored: drop it, so the
+                # global restore, the report and any later caller get a fresh one
+                connection.close()
             if restore_copy_bulk:
                 self.set_copy_bulk("ON")
 
+        for error_text in restore_errors:
+            self.stdout.write(self.style.ERROR(f"Could not restore the session: {error_text}"))
         if failure is not None:
             statement, error = failure
-            self.stdout.write(self.style.ERROR(f"CRITICAL ERROR executing migration: {error}"))
-            self.stdout.write(f"Failed statement: {statement}")
-            self.stdout.write("State of every UUID column now:")
-            for col in self.scan_columns(target_length):
-                if col["action"] == "alter":
-                    state = f"not converted (CHAR({col['current']}))"
-                elif col["action"] == "update":
-                    state = f"half converted ({col['pending']} values in the old format)"
-                else:
-                    state = "converted"
-                self.stdout.write(f"  {col['table']}.{col['column']}: {state}")
+            interrupted = isinstance(error, KeyboardInterrupt)
+            if interrupted:
+                self.stdout.write(self.style.ERROR(f"Interrupted while running: {statement}"))
+                self.stdout.write(
+                    "The server finishes a statement it has started, so this one may have "
+                    "completed: the state below says where the run stopped.",
+                )
+            else:
+                self.stdout.write(self.style.ERROR(f"CRITICAL ERROR executing migration: {error}"))
+                self.stdout.write(f"Failed statement: {statement}")
+            self.report_state(target_length)
+            # A cut ALTER or UPDATE leaves the statistics behind the data
+            self.stdout.write(
+                "If the next run reports stale statistics, run ANALYZE TABLE on the tables "
+                "listed as not or half converted first.",
+            )
             raise CommandError(
-                "Migration failed; the columns listed as not or half converted are still "
-                "pending. Fix the cause and run the command again: it resumes them.",
+                f"Migration {'interrupted' if interrupted else 'failed'}; the columns listed as "
+                "not or half converted are still pending. "
+                f"{'Run' if interrupted else 'Fix the cause and run'} the command again: it "
+                "resumes them.",
             ) from error
+        if restore_errors:
+            raise CommandError(
+                "Migration completed, but the session could not be restored (see above); the "
+                "connection was closed.",
+            )
         if self.restore_failed:
             raise CommandError(
                 "Migration completed, but innodb_alter_copy_bulk could not be restored (see "
@@ -301,6 +348,24 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS("Migration completed successfully."),
         )
+
+    def report_state(self, target_length: int) -> None:
+        """Where a failed or interrupted run stopped, column by column."""
+        self.stdout.write("State of every UUID column now:")
+        try:
+            columns = self.scan_columns(target_length)
+        except Exception as e:  # pylint: disable=broad-except
+            # A dead connection must not hide the failure reported above
+            self.stdout.write(self.style.ERROR(f"  could not read the column state: {e}"))
+            return
+        for col in columns:
+            if col["action"] == "alter":
+                state = f"not converted (CHAR({col['current']}))"
+            elif col["action"] == "update":
+                state = f"half converted ({col['pending']} values in the old format)"
+            else:
+                state = "converted"
+            self.stdout.write(f"  {col['table']}.{col['column']}: {state}")
 
     def scan_columns(self, target_length: int) -> list[dict[str, Any]]:
         """Every UUID column with its type and what its values look like.
@@ -372,6 +437,8 @@ class Command(BaseCommand):
                             "null": field.null,
                             "pending": pending,
                             "malformed": values - hex32 - dashed,
+                            # A lower bound of the table's rows, to spot stale statistics
+                            "rows": values,
                             "action": action,
                         },
                     )
@@ -423,6 +490,7 @@ class Command(BaseCommand):
         refuse_without_space: bool,
         disable_copy_bulk: bool,
         skip_space_check: bool = False,
+        counted: dict[str, int] | None = None,
     ) -> str | None:
         """Estimate the disk the run needs per directory of the server and compare
         it with what is free, when those directories are on this host. Returns the
@@ -438,34 +506,91 @@ class Command(BaseCommand):
           cache there too, SPACE_FACTOR times the largest updated table.
         - Binary log directory: with a ROW binary log, SPACE_FACTOR times the sum of
           the updated tables.
-        Directories on the same filesystem add their requirements up.
+        Directories on the same filesystem add their requirements up. A table's size is
+        its tablespace file when readable (current after an import), else the estimate of
+        information_schema.TABLES, refused under --execute when it is stale; a
+        ROW_FORMAT=COMPRESSED table counts uncompressed for merge files and binary log.
         """
         tables = sorted(set(rebuilt) | set(updated))
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT TABLE_NAME, TABLE_ROWS, DATA_LENGTH + INDEX_LENGTH
+                SELECT TABLE_NAME, TABLE_ROWS, DATA_LENGTH + INDEX_LENGTH, ROW_FORMAT,
+                       CREATE_OPTIONS
                 FROM information_schema.TABLES
                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN %s
                 """,
                 [tuple(tables)],
             )
-            sizes = {name: (rows or 0, size or 0) for name, rows, size in cursor.fetchall()}
+            stats = {
+                str(name): (int(rows or 0), int(size or 0), str(fmt or ""), str(opts or ""))
+                for name, rows, size, fmt, opts in cursor.fetchall()
+            }
             cursor.execute(
                 "SHOW VARIABLES WHERE Variable_name IN ('datadir', 'tmpdir', 'hostname', "
-                "'log_bin', 'log_bin_basename', 'binlog_format', 'innodb_alter_copy_bulk')",
+                "'log_bin', 'log_bin_basename', 'binlog_format', 'innodb_alter_copy_bulk', "
+                "'innodb_page_size')",
             )
             variables = {str(name): str(value) for name, value in cursor.fetchall()}
+        files = self.file_sizes(tables)
+        page_size = int(variables.get("innodb_page_size") or 16384)
 
+        # On-disk size (what the copy in the data directory takes) and the uncompressed
+        # size (what the merge files and the binary log are proportional to)
+        sizes: dict[str, int] = {}
+        expanded: dict[str, int] = {}
+        stale: list[tuple[str, str]] = []
         for table in tables:
-            rows, size = sizes.get(table, (0, 0))
-            self.stdout.write(f"Size: {table}: ~{rows} rows, {self.human(size)}")
-        self.stdout.write(
-            "Sizes are InnoDB estimates; right after an import they can be far too low: "
-            "run ANALYZE TABLE on these tables first.",
+            rows, estimate, row_format, create_options = stats.get(table, (0, 0, "", ""))
+            sizes[table] = max(estimate, files.get(table, 0))
+            scale = self.compression_scale(row_format, create_options, page_size)
+            expanded[table] = int(sizes[table] * scale)
+            line = f"Size: {table}: ~{rows} rows, {self.human(sizes[table])}"
+            if scale > 1:
+                line += (
+                    f" (ROW_FORMAT=COMPRESSED: counted as {self.human(expanded[table])} for "
+                    "merge files and the binary log)"
+                )
+            self.stdout.write(line)
+            # Without the file size, figures far below the rows just counted mean an import
+            # not yet analyzed. MariaDB keeps TABLE_ROWS current while DATA_LENGTH waits for
+            # ANALYZE (seen on 11.8.6), so the size is checked too: a row holds its UUID
+            rows_counted = (counted or {}).get(table, 0)
+            if table not in files and (
+                2 * rows < rows_counted or estimate < UUID_BYTES * rows_counted
+            ):
+                stale.append(
+                    (
+                        table,
+                        f"{table} ({self.human(estimate)} and ~{rows} rows reported, "
+                        f"{rows_counted} rows counted)",
+                    ),
+                )
+        row_binlog = variables.get("log_bin", "").upper() in ("ON", "1") and (
+            variables.get("binlog_format", "").upper() == "ROW"
         )
-        rebuilt_sizes = [sizes.get(table, (0, 0))[1] for table in rebuilt]
-        updated_sizes = [sizes.get(table, (0, 0))[1] for table in updated]
+        # A size only matters where it feeds a requirement: a rebuild, or the binary log
+        # of an UPDATE in ROW format. Otherwise asking for ANALYZE would only block a resume
+        measured = set(rebuilt) | (set(updated) if row_binlog else set())
+        if any(table not in files for table in measured):
+            self.stdout.write(
+                "Sizes without a tablespace file size (it needs the PROCESS privilege) are "
+                "InnoDB estimates; right after an import they can be far too low: run "
+                "ANALYZE TABLE on these tables first.",
+            )
+        relevant = [text for table, text in stale if table in measured]
+        if relevant:
+            message = (
+                f"Stale statistics: {', '.join(relevant)}. Sizes that low cannot check the disk. "
+                "Run ANALYZE TABLE on these tables first, or run with --skip-space-check to "
+                "proceed anyway."
+            )
+            if refuse_without_space:
+                raise CommandError(message)
+            self.stdout.write(self.style.WARNING(message))
+        rebuilt_sizes = [sizes[table] for table in rebuilt]
+        rebuilt_expanded = [expanded[table] for table in rebuilt]
+        updated_sizes = [expanded[table] for table in updated]
         self.stdout.write(
             f"Estimated space needed for the rebuilds: {self.human(sum(rebuilt_sizes))}",
         )
@@ -473,9 +598,6 @@ class Command(BaseCommand):
         bulk = variables.get("innodb_alter_copy_bulk")
         # Only an ALTER builds indexes: with half-converted columns alone the variable is moot
         bulk_on = bool(rebuilt) and bulk is not None and bulk.upper() in ("ON", "1")
-        row_binlog = variables.get("log_bin", "").upper() in ("ON", "1") and (
-            variables.get("binlog_format", "").upper() == "ROW"
-        )
         # (what, directory, bytes needed); entries sharing a key take the largest
         needs: list[tuple[str, str, int]] = [
             ("data directory", variables.get("datadir", ""), sum(rebuilt_sizes)),
@@ -491,7 +613,7 @@ class Command(BaseCommand):
                 "innodb_alter_copy_bulk is ON: each rebuild also writes merge-sort files of "
                 f"up to {SPACE_FACTOR}x the table in tmpdir.",
             )
-            tmp_need = int(SPACE_FACTOR * max(rebuilt_sizes, default=0))
+            tmp_need = int(SPACE_FACTOR * max(rebuilt_expanded, default=0))
         if row_binlog:
             self.stdout.write(
                 "Binary log is ON in ROW format: the UPDATE phase logs every converted row "
@@ -569,6 +691,51 @@ class Command(BaseCommand):
         for group in groups.values():
             self.check_free_space(group, refuse_without_space, workaround)
         return "ON" if bulk_on else None
+
+    def file_sizes(self, tables: list[str]) -> dict[str, int]:
+        """Size of each table's tablespace file, current even right after an import,
+        unlike the statistics of information_schema.TABLES. Empty without the PROCESS
+        privilege the view needs, and for tables outside a file of their own."""
+        # Attribute of Django's MySQL backend only, which handle() has already required
+        mariadb = getattr(connection, "mysql_is_mariadb", False)
+        view = "INNODB_SYS_TABLESPACES" if mariadb else "INNODB_TABLESPACES"
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT DATABASE()")
+                schema = str(cursor.fetchone()[0])
+                # MariaDB lists encoded names, MySQL 8.0 plain ones (REVIEW 4): ask for both
+                names = {f"{_filename(schema)}/{_filename(table)}": table for table in tables}
+                names.update({f"{schema}/{table}": table for table in tables})
+                cursor.execute(
+                    f"SELECT NAME, FILE_SIZE FROM information_schema.{view} WHERE NAME IN %s",
+                    [tuple(names)],
+                )
+                return {
+                    names[str(name)]: int(size or 0)
+                    for name, size in cursor.fetchall()
+                    if str(name) in names
+                }
+        except DatabaseError:
+            return {}
+
+    @staticmethod
+    def compression_scale(row_format: str, create_options: str, page_size: int) -> float:
+        """How much larger than on disk the rows of a table are once uncompressed.
+
+        ROW_FORMAT=COMPRESSED packs each page into KEY_BLOCK_SIZE (half a page unless
+        given), while merge files and the binary log hold the rows uncompressed: on
+        10.11.14 and 11.8.6, with a highly compressible 200-character text per row, they
+        reached 4.2x (default), 8.4x (4K) and 18.4x (1K) the size on disk, and 1.1x to
+        2.1x once scaled by page size / KEY_BLOCK_SIZE; less compressible rows stay lower.
+        """
+        compressed = row_format.lower() == "compressed" or (
+            "row_format=compressed" in create_options.lower()
+        )
+        if not compressed:
+            return 1.0
+        match = re.search(r"key_block_size=(\d+)", create_options, re.IGNORECASE)
+        block = int(match.group(1)) * 1024 if match and int(match.group(1)) else page_size // 2
+        return max(1.0, page_size / block)
 
     def check_free_space(
         self,
