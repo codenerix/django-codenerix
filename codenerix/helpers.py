@@ -871,7 +871,9 @@ def obj_to_html(  # pylint: disable=too-many-arguments
     Function to convert JSON to HTML
     """
 
-    if doc is None:
+    # Whoever opens the document closes it, so the tags always pair up
+    opened = doc is None
+    if opened:
         doc, tag, text = cast(Any, Doc().tagtext())
         doc.asis("<html>")
         doc.asis("<body>")
@@ -967,9 +969,13 @@ def obj_to_html(  # pylint: disable=too-many-arguments
         # Add it as text
         text(str(pobj))
 
-    if not _internal:
+    if opened:
         if wrap:
             doc.asis("</div>")
+        doc.asis("</body>")
+        doc.asis("</html>")
+
+    if not _internal:
         return (kind, SafeString(doc.getvalue()))
     return None
 

@@ -182,3 +182,13 @@ def test_obj_to_html_renders_any_type_as_text(value, expected):
     kind, html = obj_to_html(value)
     assert kind == "OBJ"
     assert expected in html
+
+
+@pytest.mark.parametrize("wrap", [True, False])
+@pytest.mark.parametrize("value", ["plain text", {"a": [1, {"b": Decimal("2.50")}]}])
+def test_obj_to_html_closes_every_tag_it_opens(value, wrap):
+    _, html = obj_to_html(value, wrap=wrap)
+    assert html.startswith("<html><body>")
+    assert html.endswith("</div></body></html>" if wrap else "</body></html>")
+    for name in ("html", "body", "div", "ul", "li"):
+        assert html.count(f"<{name}>") + html.count(f"<{name} ") == html.count(f"</{name}>")
