@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.3.5] - 2026-11-06
+### Fixed
+- `obj_to_html()` renders any value as its text: yattag only takes `str`, `int` and `float`, so a `UUID`, `date`, `datetime`, `time` or `bytes` (and `Decimal` before 6.3.4) raised `TypeError`. Values of the types it already took render as before.
+- Saving a `GenLogFull` model that changes a `Decimal`, `date`, `time` or `UUID` field no longer raises `TypeError`/`ValueError` before the row is written: the old value went into the change log unchecked, and bson's `json_util` cannot encode those types. It is now stored as its text, like the new value already was.
+- CSV, XLS and JSON exports encode dict cells with `DjangoJSONEncoder`, so a dict holding a `Decimal`, a date or a `UUID` no longer makes the export fail.
+
 ## [6.3.4] - 2026-11-06
 ### Fixed
 - `obj_to_html()` parse correctly Decimal to xml/html text node. The original error was 'You can only insert a string, an int or a float inside a xml/html text node. God Decimal('100.00') (type <class 'decimal.Decimal'>) instead.' Now Decimal is converted to text before insert in the text node.
