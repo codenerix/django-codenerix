@@ -17,11 +17,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import decimal
 import importlib
 import io
 import json
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any, Literal, cast, overload
 
 try:
@@ -737,7 +737,7 @@ def JSONEncoder_newdefault(  # noqa: N802
             return str(o)
         if ("time" in kind) and isinstance(o, time.struct_time):
             return datetime.fromtimestamp(time.mktime(o))
-        if ("decimal" in kind) and isinstance(o, decimal.Decimal):
+        if ("decimal" in kind) and isinstance(o, Decimal):
             return str(o)
         if "user" in kind:
             if isinstance(o, User):
@@ -964,6 +964,10 @@ def obj_to_html(  # pylint: disable=too-many-arguments
         doc.asis(xml_str)
 
     else:
+        # Make sure to convert Decimal to str
+        if isinstance(pobj, Decimal):
+            pobj = str(pobj)
+
         # If pobj is a string or any other type, add it as text
         text(pobj)
 
