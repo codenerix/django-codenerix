@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.3.4] - 2026-11-06
+### Fixed
+- `obj_to_html()` parse correctly Decimal to xml/html text node. The original error was 'You can only insert a string, an int or a float inside a xml/html text node. God Decimal('100.00') (type <class 'decimal.Decimal'>) instead.' Now Decimal is converted to text before insert in the text node.
+
 ## [6.3.3] - 2026-10-20
 ### Changed
 - `manage.py migrate_uuids --execute` stopped with Ctrl-C now reports like a failed run and exits with status 1: the statement it was running (which the server finishes anyway, since Ctrl-C reaches Python only when the statement returns, so it may have completed) and the state of every UUID column, instead of a traceback. The session is restored and the connection closed; `innodb_alter_copy_bulk` is restored as before. A second Ctrl-C while the report is printed still ends with a traceback.
