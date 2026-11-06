@@ -3908,7 +3908,7 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
                 if isinstance(row[cid], list):
                     tmp.append("\n".join(row[cid]))
                 elif isinstance(row[cid], dict):
-                    tmp.append(json.dumps(row[cid]))
+                    tmp.append(json.dumps(row[cid], cls=DjangoJSONEncoder))
                 else:
                     cell = self.__cell_format(key_col + 1, key_row + 2, "{}")
 
@@ -3999,7 +3999,7 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
                     if isinstance(row[cid], list):
                         tmp.append("\n".join(row[cid]))
                     elif isinstance(row[cid], dict):
-                        tmp.append(json.dumps(row[cid]))
+                        tmp.append(json.dumps(row[cid], cls=DjangoJSONEncoder))
                     else:
                         if row[cid] and not isinstance(row[cid], float):
                             # Rewrite row[cid] if required
@@ -4069,7 +4069,7 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
                 if isinstance(row[cid], list):
                     tmp.append("\n".join(row[cid]))
                 elif isinstance(row[cid], dict):
-                    tmp.append(json.dumps(row[cid]))
+                    tmp.append(json.dumps(row[cid], cls=DjangoJSONEncoder))
                 else:
                     if row[cid] and not isinstance(row[cid], float):
                         # Rewrite row[cid] if required
@@ -4134,7 +4134,7 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
                     if isinstance(row[cid], list):
                         tmp[cid] = "\n".join(row[cid])
                     elif isinstance(row[cid], dict):
-                        tmp[cid] = json.dumps(row[cid])
+                        tmp[cid] = json.dumps(row[cid], cls=DjangoJSONEncoder)
                     else:
                         if row[cid] and not isinstance(row[cid], float):
                             # Rewrite row[cid] if required
@@ -4207,7 +4207,7 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
                 if isinstance(row[cid], list):
                     tmp.append("\n".join(row[cid]))
                 elif isinstance(row[cid], dict):
-                    tmp.append(json.dumps(row[cid]))
+                    tmp.append(json.dumps(row[cid], cls=DjangoJSONEncoder))
                 else:
                     if row[cid] and not isinstance(row[cid], float):
                         # Rewrite row[cid] if required

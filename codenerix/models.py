@@ -50,6 +50,16 @@ SEPARATOR = "\u8594"
 SEPARATOR_HTML = " &rarr; "
 
 
+def _log_value(value: object) -> object:
+    """Value as stored in the change log: kept when bson's json_util can encode
+    it, its text otherwise (Decimal, date, time and UUID it cannot)."""
+    try:
+        json.dumps(value, default=json_util.default)
+    except (TypeError, ValueError, OverflowError):
+        return str(value)
+    return value
+
+
 class CodenerixMetaType(dict):
     """
     Define type for CodenerixMeta of the instance NOT the class
@@ -645,8 +655,9 @@ class GenLog(CodenerixModel):
                                         field,
                                     )
                                 else:
+                                    # The old value is checked like the new one
                                     attrs[key] = (
-                                        attrs_bd[key],
+                                        _log_value(attrs_bd[key]),
                                         field,
                                     )
                         except Exception:  # pylint: disable=broad-except
@@ -656,8 +667,9 @@ class GenLog(CodenerixModel):
                                 if key not in attrs_bd or not self.CodenerixMeta.log_full:
                                     attrs[key] = field
                                 else:
+                                    # Same type as the new value, so it fails the same way
                                     attrs[key] = (
-                                        attrs_bd[key],
+                                        _log_value(attrs_bd[key]),
                                         field,
                                     )
 

@@ -964,12 +964,8 @@ def obj_to_html(  # pylint: disable=too-many-arguments
         doc.asis(xml_str)
 
     else:
-        # Make sure to convert Decimal to str
-        if isinstance(pobj, Decimal):
-            pobj = str(pobj)
-
-        # If pobj is a string or any other type, add it as text
-        text(pobj)
+        # Add it as text
+        text(str(pobj))
 
     if not _internal:
         if wrap:

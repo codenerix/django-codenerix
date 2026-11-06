@@ -6,12 +6,15 @@ own ``REMOTE_ADDR`` default, which is exactly the value several of these cases
 need to be absent, so an explicit META dict keeps each scenario unambiguous.
 """
 
+import datetime
+import uuid
+from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
 from django.test import override_settings
 
-from codenerix.helpers import get_client_ip
+from codenerix.helpers import get_client_ip, obj_to_html
 
 CLIENT = "203.0.113.9"
 EDGE = "198.51.100.7"
@@ -148,3 +151,34 @@ def test_explicit_argument_overrides_setting():
     meta = {"REMOTE_ADDR": "", "HTTP_X_FORWARDED_FOR": f"{CLIENT}, {EDGE}"}
     with override_settings(CODENERIX_TRUSTED_PROXIES=1):
         assert get_client_ip(req(**meta), trusted_proxies=2) == CLIENT
+
+
+class _Markup:
+    """Object whose text needs escaping."""
+
+    def __str__(self):
+        return "<b>&"
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        # yattag only takes str, int and float: anything else used to raise TypeError
+        (Decimal("100.00"), "100.00"),
+        (uuid.UUID(int=1), "00000000-0000-0000-0000-000000000001"),
+        (datetime.date(2026, 1, 1), "2026-01-01"),
+        (datetime.datetime(2026, 1, 1, 2, 3), "2026-01-01 02:03:00"),
+        (datetime.time(1, 2), "01:02:00"),
+        (b"x", "b'x'"),
+        (_Markup(), "&lt;b&gt;&amp;"),
+        # Types yattag already took render as before
+        (7, ">7<"),
+        (1.5, ">1.5<"),
+        (True, ">True<"),
+        ("plain text", ">plain text<"),
+    ],
+)
+def test_obj_to_html_renders_any_type_as_text(value, expected):
+    kind, html = obj_to_html(value)
+    assert kind == "OBJ"
+    assert expected in html
