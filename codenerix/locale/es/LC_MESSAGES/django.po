@@ -654,6 +654,118 @@ msgstr "Zona horaria"
 msgid "Code province"
 msgstr "Código de provincia"
 
+#: codenerix/helpers.py
+msgid "Tree"
+msgstr "Árbol"
+
+#: codenerix/helpers.py
+msgid "Table"
+msgstr "Tabla"
+
+#: codenerix/helpers.py
+msgid "Query"
+msgstr "Consulta"
+
+#: codenerix/helpers.py
+msgid "Flat"
+msgstr "Plano"
+
+#: codenerix/helpers.py
+msgid "Schema"
+msgstr "Esquema"
+
+#: codenerix/helpers.py
+msgid "Columns"
+msgstr "Columnas"
+
+#: codenerix/helpers.py
+msgid "Source"
+msgstr "Fuente"
+
+#: codenerix/helpers.py
+msgid "Simple"
+msgstr "Simple"
+
+#: codenerix/helpers.py
+msgid "Search in keys and values"
+msgstr "Buscar en claves y valores"
+
+#: codenerix/helpers.py
+msgid "Expand"
+msgstr "Expandir"
+
+#: codenerix/helpers.py
+msgid "Collapse"
+msgstr "Plegar"
+
+#: codenerix/helpers.py
+msgid "There are no lists of objects in this data"
+msgstr "No hay listas de objetos en estos datos"
+
+#: codenerix/helpers.py
+msgid "rows of"
+msgstr "filas de"
+
+#: codenerix/helpers.py
+msgid "filter"
+msgstr "filtrar"
+
+#: codenerix/helpers.py
+msgid "results"
+msgstr "resultados"
+
+#: codenerix/helpers.py
+msgid "Invalid filter"
+msgstr "Filtro no válido"
+
+#: codenerix/helpers.py
+msgid "Filter by path or value"
+msgstr "Filtrar por ruta o valor"
+
+#: codenerix/helpers.py
+msgid "leaves"
+msgstr "hojas"
+
+#: codenerix/helpers.py
+msgid "Path"
+msgstr "Ruta"
+
+#: codenerix/helpers.py
+msgid "Type"
+msgstr "Tipo"
+
+#: codenerix/helpers.py
+msgid "Value"
+msgstr "Valor"
+
+#: codenerix/helpers.py
+msgid "Types"
+msgstr "Tipos"
+
+#: codenerix/helpers.py
+msgid "Occurrences"
+msgstr "Apariciones"
+
+#: codenerix/helpers.py
+msgid "Examples"
+msgstr "Ejemplos"
+
+#: codenerix/helpers.py
+msgid "Copy"
+msgstr "Copiar"
+
+#: codenerix/helpers.py
+msgid "Copied"
+msgstr "Copiado"
+
+#: codenerix/helpers.py
+msgid "Show original XML"
+msgstr "Ver XML original"
+
+#: codenerix/helpers.py
+msgid "Show JSON"
+msgstr "Ver JSON"
+
 #~ msgid ""
 #~ " WARNING: DATERANGEPICKER_OPTIONS is not set in your configuration!!! "
 #~ msgstr ""

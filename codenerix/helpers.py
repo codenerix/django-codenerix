@@ -17,9 +17,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import importlib
 import io
 import json
+import math
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any, Literal, cast, overload
@@ -831,6 +834,208 @@ def otpauth(issuer, label, secret):
         return None
 
 
+# Views offered by obj_to_html(), in their default order ("simple" is the
+# classic nested-list rendering, the only one that works without AngularJS)
+OBJ_TO_HTML_VIEWS: tuple[str, ...] = (
+    "tree",
+    "table",
+    "query",
+    "flat",
+    "schema",
+    "columns",
+    "source",
+    "simple",
+)
+
+# Scoped styles for the viewer, shipped inside its own output so projects do
+# not need to include a new stylesheet
+_OBJ_VIEWER_CSS = (
+    ".cdnx-objviewer .cdnx-ov-bar{margin-bottom:10px}"
+    ".cdnx-objviewer .cdnx-ov-bar .btn{color:#333;background-color:#fff;"
+    "border-color:#ccc}"
+    ".cdnx-objviewer .cdnx-ov-bar .btn.active{color:#fff;"
+    "background-color:#337ab7;border-color:#2e6da4}"
+    ".cdnx-objviewer .cdnx-ov-mono{font-family:Menlo,Monaco,Consolas,"
+    '"Courier New",monospace;font-size:12px}'
+    ".cdnx-objviewer .cdnx-ov-key{color:#31708f;cursor:pointer}"
+    ".cdnx-objviewer .cdnx-ov-muted{color:#999}"
+    ".cdnx-objviewer .cdnx-ov-toggle{display:inline-block;width:14px;"
+    "cursor:pointer;color:#777}"
+    ".cdnx-objviewer mark{background:#fcf8e3;padding:0}"
+    ".cdnx-objviewer .cdnx-ov-chip{cursor:pointer;display:inline-block;"
+    "margin:0 2px 2px 0}"
+    ".cdnx-objviewer .cdnx-ov-cols{display:flex;overflow-x:auto;"
+    "border:1px solid #ddd}"
+    ".cdnx-objviewer .cdnx-ov-col{min-width:160px;border-right:1px solid #ddd}"
+    ".cdnx-objviewer .cdnx-ov-item{padding:3px 8px;cursor:pointer;"
+    "display:flex;justify-content:space-between}"
+    ".cdnx-objviewer .cdnx-ov-item.active{background:#337ab7;color:#fff}"
+    ".cdnx-objviewer th.cdnx-ov-sort{cursor:pointer;white-space:nowrap}"
+    ".cdnx-objviewer pre{font-size:12px}"
+    ".cdnx-objviewer.cdnx-ov-wrap{word-break:break-all;"
+    "overflow-wrap:break-word}"
+    ".cdnx-objviewer.cdnx-ov-wrap pre{white-space:pre-wrap}"
+)
+
+
+def _obj_viewer_labels() -> dict[str, str]:
+    """
+    Texts shown by the AngularJS viewer, translated on the server because the
+    static partial has no translation mechanism of its own
+    """
+    return {
+        "tree": str(__("Tree")),
+        "table": str(__("Table")),
+        "query": str(__("Query")),
+        "flat": str(__("Flat")),
+        "schema": str(__("Schema")),
+        "columns": str(__("Columns")),
+        "source": str(__("Source")),
+        "simple": str(__("Simple")),
+        "search": str(__("Search in keys and values")),
+        "expand": str(__("Expand")),
+        "collapse": str(__("Collapse")),
+        "no_tables": str(__("There are no lists of objects in this data")),
+        "rows_of": str(__("rows of")),
+        "filter": str(__("filter")),
+        "results": str(__("results")),
+        "bad_filter": str(__("Invalid filter")),
+        "filter_flat": str(__("Filter by path or value")),
+        "leaves": str(__("leaves")),
+        "path": str(__("Path")),
+        "type": str(__("Type")),
+        "value": str(__("Value")),
+        "types": str(__("Types")),
+        "count": str(__("Occurrences")),
+        "examples": str(__("Examples")),
+        "copy": str(__("Copy")),
+        "copied": str(__("Copied")),
+        "show_raw": str(__("Show original XML")),
+        "show_json": str(__("Show JSON")),
+    }
+
+
+def _obj_detect(obj: Any, depth: int) -> tuple[str, Any]:
+    """
+    Decide how obj_to_html() reads an object: a string is tried as JSON and
+    then as XML while there is depth left, anything else is a Python object
+    """
+    if depth and isinstance(obj, str):
+        try:
+            return ("JSON", json.loads(obj))
+        except json.JSONDecodeError:
+            try:
+                return ("XML", minidom.parseString(obj))
+            except ExpatError:
+                return ("OBJ", obj)
+    return ("OBJ", obj)
+
+
+def _xml_to_tree(node: Any) -> dict[str, Any]:
+    """
+    Convert an XML element into a dict: attributes as "@name", text as
+    "#text" and repeated sibling tags as a list in document order
+    """
+    tree: dict[str, Any] = {}
+    repeated: set[str] = set()
+    texts: list[str] = []
+    for name, value in node.attributes.items():
+        tree[f"@{name}"] = value
+    for child in node.childNodes:
+        if child.nodeType == child.ELEMENT_NODE:
+            value = _xml_to_tree(child)
+            name = child.tagName
+            if name not in tree:
+                tree[name] = value
+            elif name in repeated:
+                tree[name].append(value)
+            else:
+                tree[name] = [tree[name], value]
+                repeated.add(name)
+        elif child.nodeType in (child.TEXT_NODE, child.CDATA_SECTION_NODE):
+            if child.data.strip():
+                texts.append(child.data.strip())
+    if texts:
+        tree["#text"] = " ".join(texts)
+    return tree
+
+
+def _obj_to_jsonable(obj: Any, depth: int) -> Any:
+    """
+    Turn an object into plain JSON data for the viewer, parsing nested
+    JSON/XML strings with the same depth rules as the "simple" view
+    """
+    kind, pobj = _obj_detect(obj, depth)
+    if kind == "XML":
+        root = pobj.documentElement
+        return {root.tagName: _xml_to_tree(root)}
+    subdepth = depth and (depth - 1)
+    if isinstance(pobj, dict):
+        return {str(k): _obj_to_jsonable(v, subdepth) for k, v in pobj.items()}
+    if isinstance(pobj, (set, frozenset)):
+        # Sets have no order, sort them so the output is deterministic
+        return [_obj_to_jsonable(v, subdepth) for v in sorted(pobj, key=str)]
+    if isinstance(pobj, (list, tuple)):
+        return [_obj_to_jsonable(v, subdepth) for v in pobj]
+    if pobj is None or isinstance(pobj, (bool, int, str)):
+        return pobj
+    if isinstance(pobj, float):
+        # NaN and Infinity are not valid JSON and JSON.parse() would reject them
+        return pobj if math.isfinite(pobj) else str(pobj)
+    # Decimal, UUID, dates, bytes and anything else keep their exact text
+    return str(pobj)
+
+
+def _obj_viewer(
+    obj: Any,
+    *,
+    depth: int,
+    wrap: bool,
+    views: tuple[str, ...],
+) -> tuple[str, SafeString]:
+    """
+    Render the AngularJS multi-view viewer, with the "simple" rendering inside
+    as the fallback shown wherever the codenerixObjViewer directive is absent
+    """
+    kind, _ = _obj_detect(obj, depth)
+    payload = {
+        "kind": kind,
+        "data": _obj_to_jsonable(obj, depth),
+        "raw": obj if kind == "XML" else None,
+        "labels": _obj_viewer_labels(),
+    }
+    # Base64 keeps the data out of AngularJS interpolation: a "{{...}}" in a
+    # value must never be evaluated as an expression
+    encoded = base64.b64encode(
+        json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+    ).decode("ascii")
+
+    doc, tag, text = cast(Any, Doc().tagtext())
+    doc.asis("<html>")
+    doc.asis("<body>")
+    with tag("style"):
+        doc.asis(_OBJ_VIEWER_CSS)
+    with tag(
+        "div",
+        ("codenerix-obj-viewer", ""),
+        ("data-views", ",".join(views)),
+        ("data-payload", encoded),
+        klass="cdnx-objviewer cdnx-ov-wrap" if wrap else "cdnx-objviewer",
+    ):
+        obj_to_html(
+            obj,
+            depth=depth,
+            doc=doc,
+            tag=tag,
+            text=text,
+            wrap=wrap,
+            _internal=True,
+        )
+    doc.asis("</body>")
+    doc.asis("</html>")
+    return (kind, SafeString(doc.getvalue()))
+
+
 @overload
 def obj_to_html(  # pylint: disable=too-many-arguments
     obj: Any,
@@ -840,6 +1045,7 @@ def obj_to_html(  # pylint: disable=too-many-arguments
     tag: Any | None = None,
     text: Any | None = None,
     wrap: bool = True,
+    views: Sequence[str] | None = None,
     _internal: Literal[False] = False,
 ) -> tuple[str, SafeString]: ...
 
@@ -853,6 +1059,7 @@ def obj_to_html(  # pylint: disable=too-many-arguments
     tag: Any | None = None,
     text: Any | None = None,
     wrap: bool = True,
+    views: Sequence[str] | None = None,
     _internal: Literal[True],
 ) -> None: ...
 
@@ -865,11 +1072,28 @@ def obj_to_html(  # pylint: disable=too-many-arguments
     tag=None,
     text=None,
     wrap=True,
+    views=None,
     _internal=False,
 ) -> tuple[str, SafeString] | None:
     """
     Function to convert JSON to HTML
+
+    `views` lists the views offered by the viewer, in order, the first being
+    the one shown on load (default: all of OBJ_TO_HTML_VIEWS). Only
+    ("simple",) returns the classic nested-list HTML with no AngularJS.
     """
+
+    # The viewer wraps the whole document, so only a top-level call builds it
+    if doc is None and not _internal:
+        selected = OBJ_TO_HTML_VIEWS if views is None else tuple(views)
+        unknown = [v for v in selected if v not in OBJ_TO_HTML_VIEWS]
+        if not selected or unknown:
+            raise ValueError(
+                f"obj_to_html() views must be a non-empty subset of "
+                f"{OBJ_TO_HTML_VIEWS}, got {selected!r}",
+            )
+        if selected != ("simple",):
+            return _obj_viewer(obj, depth=depth, wrap=wrap, views=selected)
 
     # Whoever opens the document closes it, so the tags always pair up
     opened = doc is None
@@ -883,27 +1107,7 @@ def obj_to_html(  # pylint: disable=too-many-arguments
             )
 
     # If the object is an string, try to convert it
-    if depth:
-        if isinstance(obj, str):
-            try:
-                pobj = json.loads(obj)
-                kind = "JSON"
-            except json.JSONDecodeError:
-                # Try to parse as XML
-                try:
-                    pobj = minidom.parseString(obj)
-                    kind = "XML"
-                except ExpatError:
-                    pobj = obj
-                    kind = "OBJ"
-        else:
-            # If the object is not a string, assume it's a Python object
-            pobj = obj
-            kind = "OBJ"
-    else:
-        # Negative depth, user doesn't want more prettyfier
-        pobj = obj
-        kind = "OBJ"
+    kind, pobj = _obj_detect(obj, depth)
 
     if tag is None or text is None:
         _, tag, text = doc.tagtext()

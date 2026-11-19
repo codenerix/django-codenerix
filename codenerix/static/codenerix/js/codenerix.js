@@ -2155,6 +2155,501 @@ var codenerix_directive_copytoclipboard = [
     ]
 ];
 
+// Multi-view viewer for the HTML built by obj_to_html() in codenerix.helpers:
+// the data travels base64-encoded in data-payload and the element content is
+// the classic "simple" rendering, shown as-is (never compiled by AngularJS)
+var codenerix_directive_objviewer = [
+    'codenerixObjViewer',
+    [
+        '$compile', '$templateRequest', '$timeout',
+        function($compile, $templateRequest, $timeout) {
+            var ICONS = {
+                tree: 'fa-sitemap', table: 'fa-table', query: 'fa-filter',
+                flat: 'fa-list-ul', schema: 'fa-code-fork',
+                columns: 'fa-columns', source: 'fa-file-code-o',
+                simple: 'fa-align-left'
+            };
+
+            function decode(b64) {
+                var bin = atob(b64), bytes = new Uint8Array(bin.length);
+                for (var i = 0; i < bin.length; i++) {
+                    bytes[i] = bin.charCodeAt(i);
+                }
+                return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+            }
+            function isObj(x) {
+                return x !== null && typeof x === 'object';
+            }
+            function typeOf(v) {
+                return v === null ? 'null' :
+                                    Array.isArray(v) ? 'array' : typeof v;
+            }
+            function show(v) {
+                return v === null ? 'null' : String(v);
+            }
+            function childPath(p, k, arr) {
+                return arr ? p + '[' + k + ']' : (p ? p + '.' + k : String(k));
+            }
+            function isNum(v) {
+                return typeof v === 'number' ||
+                    (typeof v === 'string' && v.trim() !== '' && !isNaN(v));
+            }
+            // Numeric strings (Decimal is sent as text) sort as numbers
+            function cmp(a, b) {
+                if (isNum(a) && isNum(b)) {
+                    a = +a;
+                    b = +b;
+                }
+                return a > b ? 1 : a < b ? -1 : 0;
+            }
+            // Split a text around the first match so it can be highlighted
+            // with interpolation only, no HTML injection
+            function split(s, q) {
+                s = String(s);
+                var i = q ? s.toLowerCase().indexOf(q) : -1;
+                return i < 0 ? [s, '', ''] : [
+                    s.slice(0, i), s.slice(i, i + q.length),
+                    s.slice(i + q.length)
+                ];
+            }
+            function matches(k, v, q) {
+                if (String(k).toLowerCase().indexOf(q) >= 0) {
+                    return true;
+                }
+                if (!isObj(v)) {
+                    return show(v).toLowerCase().indexOf(q) >= 0;
+                }
+                return Object.keys(v).some(function(kk) {
+                    return matches(kk, v[kk], q);
+                });
+            }
+            function getPath(o, p) {
+                return p.split('.').reduce(function(a, k) {
+                    return isObj(a) ? a[k] : undefined;
+                }, o);
+            }
+            function evalPath(root, expr, badFilter) {
+                var toks = expr.match(/\[[^\]]*\]|[^.\[\]]+/g) || [];
+                var cur = [root];
+                angular.forEach(toks, function(t) {
+                    var nx = [];
+                    angular.forEach(cur, function(c) {
+                        if (!isObj(c)) {
+                            return;
+                        }
+                        var items = Array.isArray(c) ? c : [c];
+                        if (t === '*' || t === '[*]') {
+                            Object.keys(c).forEach(function(k) {
+                                nx.push(c[k]);
+                            });
+                        } else if (/^\[\d+\]$/.test(t)) {
+                            var v = c[+t.slice(1, -1)];
+                            if (v !== undefined) {
+                                nx.push(v);
+                            }
+                        } else if (t.charAt(0) === '[') {
+                            var m = t.slice(1, -1).match(
+                                /^([\w.@#-]+)\s*(>=|<=|!=|=|>|<|~)\s*(.+)$/);
+                            if (!m) {
+                                throw badFilter + ': ' + t;
+                            }
+                            var raw = m[3].replace(/^['"]|['"]$/g, '');
+                            items.forEach(function(it) {
+                                var a = getPath(it, m[1]);
+                                if (a === undefined) {
+                                    return;
+                                }
+                                var r = cmp(a, raw), ok = {
+                                    '>': r > 0, '<': r < 0, '>=': r >= 0,
+                                    '<=': r <= 0, '=': r === 0, '!=': r !== 0,
+                                    '~': show(a).toLowerCase().indexOf(
+                                        raw.toLowerCase()) >= 0
+                                }[m[2]];
+                                if (ok) {
+                                    nx.push(it);
+                                }
+                            });
+                        } else {
+                            items.forEach(function(it) {
+                                if (isObj(it) && it[t] !== undefined) {
+                                    nx.push(it[t]);
+                                }
+                            });
+                        }
+                    });
+                    cur = nx;
+                });
+                return cur;
+            }
+            function findTables(node, p, out) {
+                if (Array.isArray(node) && node.length &&
+                    node.every(function(r) {
+                        return isObj(r) && !Array.isArray(r);
+                    })) {
+                    var cols = [];
+                    node.forEach(function(r) {
+                        Object.keys(r).forEach(function(c) {
+                            if (cols.indexOf(c) < 0) {
+                                cols.push(c);
+                            }
+                        });
+                    });
+                    out.push({
+                        path: p || '$', rows: node, cols: cols, hidden: {},
+                        filters: {}, sort: null, rev: false
+                    });
+                }
+                if (isObj(node)) {
+                    var arr = Array.isArray(node);
+                    Object.keys(node).forEach(function(k) {
+                        findTables(node[k], childPath(p, k, arr), out);
+                    });
+                }
+                return out;
+            }
+            function leaves(x, p, out) {
+                if (isObj(x) && Object.keys(x).length) {
+                    var arr = Array.isArray(x);
+                    Object.keys(x).forEach(function(k) {
+                        leaves(x[k], childPath(p, k, arr), out);
+                    });
+                } else {
+                    out.push({path: p, type: typeOf(x), value: show(x)});
+                }
+                return out;
+            }
+            function schema(x, p, acc) {
+                if (Array.isArray(x)) {
+                    x.forEach(function(it) {
+                        schema(it, p + '[]', acc);
+                    });
+                } else if (isObj(x)) {
+                    Object.keys(x).forEach(function(k) {
+                        var kp = p ? p + '.' + k : k, v = x[k];
+                        var e = acc[kp] || (acc[kp] = {
+                            path: kp, types: {}, count: 0, examples: []
+                        });
+                        e.types[typeOf(v)] = true;
+                        e.count++;
+                        if (!isObj(v) && v !== null && e.examples.length < 3 &&
+                            e.examples.indexOf(String(v)) < 0) {
+                            e.examples.push(String(v));
+                        }
+                        schema(v, kp, acc);
+                    });
+                }
+                return acc;
+            }
+            function copyText(value, done) {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(value).then(done);
+                } else {
+                    // Clipboard API needs HTTPS, fall back to the legacy way
+                    var area = document.createElement('textarea');
+                    area.value = value;
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(area);
+                    done();
+                }
+            }
+
+            return {
+                restrict: 'A',
+                scope: {},
+                // Terminal: the fallback content must never be compiled, a
+                // "{{...}}" inside the data would run as an expression
+                terminal: true,
+                priority: 1000,
+                compile: function(tElement) {
+                    var fallback = tElement.html();
+                    tElement.empty();
+                    return function(scope, element, attrs) {
+                        var payload = decode(attrs.payload);
+                        var data = payload.data, built = {};
+                        var vm = scope.vm = {l: payload.labels};
+                        vm.raw = payload.raw;
+                        vm.views = (attrs.views || 'simple')
+                                       .split(',')
+                                       .filter(function(v) {
+                                           return ICONS[v];
+                                       })
+                                       .map(function(v) {
+                                           return {
+                                               id: v, icon: ICONS[v],
+                                               label: vm.l[v]
+                                           };
+                                       });
+
+                        vm.tree = {q: '', level: 2, open: {}, rows: [], path: ''};
+                        vm.buildTree = function() {
+                            var t = vm.tree, q = t.q.toLowerCase(), rows = [];
+                            (function visit(node, p, depth, keep) {
+                                if (!isObj(node)) {
+                                    return;
+                                }
+                                var arr = Array.isArray(node);
+                                Object.keys(node).forEach(function(k) {
+                                    var v = node[k], cp = childPath(p, k, arr);
+                                    if (q && !keep && !matches(k, v, q)) {
+                                        return;
+                                    }
+                                    var c = isObj(v);
+                                    var open = c &&
+                                        (t.open.hasOwnProperty(cp) ?
+                                             t.open[cp] :
+                                             (q ? true : depth < t.level));
+                                    rows.push({
+                                        path: cp, depth: depth, container: c,
+                                        open: open,
+                                        key: split(arr ? '[' + k + ']' : k, q),
+                                        size: c ? (Array.isArray(v) ?
+                                                       '[' + v.length + ']' :
+                                                       '{' + Object.keys(v).length + '}') :
+                                                  '',
+                                        val: c ? null : split(show(v), q)
+                                    });
+                                    if (open) {
+                                        // Once a key matches, show its whole
+                                        // subtree instead of filtering it
+                                        visit(v, cp, depth + 1,
+                                              keep || (q && String(k).toLowerCase().indexOf(q) >= 0));
+                                    }
+                                });
+                            })(data, '', 0, false);
+                            t.rows = rows;
+                        };
+                        vm.treeLevel = function(n) {
+                            vm.tree.level = n;
+                            vm.tree.open = {};
+                            vm.buildTree();
+                        };
+                        vm.toggle = function(r) {
+                            if (r.container) {
+                                vm.tree.open[r.path] = !r.open;
+                                vm.buildTree();
+                            }
+                        };
+
+                        vm.cell = function(v) {
+                            // A row without that key shows an empty cell
+                            if (v === undefined) {
+                                return '';
+                            }
+                            return isObj(v) ? JSON.stringify(v) : show(v);
+                        };
+                        vm.refreshTable = function(t) {
+                            t.vis = t.cols.filter(function(c) {
+                                return !t.hidden[c];
+                            });
+                            var rows = t.rows.filter(function(row) {
+                                return t.vis.every(function(c) {
+                                    var f = t.filters[c];
+                                    return !f ||
+                                        vm.cell(row[c]).toLowerCase().indexOf(
+                                            f.toLowerCase()) >= 0;
+                                });
+                            });
+                            if (t.sort) {
+                                rows = rows.slice().sort(function(a, b) {
+                                    return cmp(a[t.sort], b[t.sort]) *
+                                        (t.rev ? -1 : 1);
+                                });
+                            }
+                            t.view = rows;
+                        };
+                        vm.sortBy = function(t, c) {
+                            if (t.sort === c) {
+                                t.rev = !t.rev;
+                            } else {
+                                t.sort = c;
+                                t.rev = false;
+                            }
+                            vm.refreshTable(t);
+                        };
+                        vm.toggleCol = function(t, c) {
+                            t.hidden[c] = !t.hidden[c];
+                            vm.refreshTable(t);
+                        };
+
+                        vm.query = {expr: '', results: [], error: '', examples: []};
+                        vm.runQuery = function() {
+                            vm.query.error = '';
+                            try {
+                                vm.query.results =
+                                    evalPath(data, vm.query.expr, vm.l.bad_filter)
+                                        .map(function(v) {
+                                            return isObj(v) ?
+                                                JSON.stringify(v, null, 2) :
+                                                show(v);
+                                        });
+                            } catch (e) {
+                                vm.query.error = String(e);
+                                vm.query.results = [];
+                            }
+                        };
+
+                        vm.flat = {q: '', sort: 'path', rev: false, all: [], rows: []};
+                        vm.refreshFlat = function() {
+                            var f = vm.flat, q = f.q.toLowerCase();
+                            f.rows = f.all
+                                         .filter(function(r) {
+                                             return !q ||
+                                                 (r.path + ' ' + r.value)
+                                                     .toLowerCase()
+                                                     .indexOf(q) >= 0;
+                                         })
+                                         .sort(function(a, b) {
+                                             return cmp(a[f.sort], b[f.sort]) *
+                                                 (f.rev ? -1 : 1);
+                                         });
+                        };
+                        vm.flatSort = function(c) {
+                            vm.flat.rev = vm.flat.sort === c ? !vm.flat.rev : false;
+                            vm.flat.sort = c;
+                            vm.refreshFlat();
+                        };
+                        vm.csv = function() {
+                            var lines = [['path', 'type', 'value']]
+                                            .concat(vm.flat.rows.map(function(r) {
+                                                return [r.path, r.type, r.value];
+                                            }))
+                                            .map(function(row) {
+                                                return row.map(function(c) {
+                                                    return '"' + String(c).replace(/"/g, '""') + '"';
+                                                }).join(',');
+                                            });
+                            var link = document.createElement('a');
+                            link.href = URL.createObjectURL(new Blob(
+                                [lines.join('\n')], {type: 'text/csv'}));
+                            link.download = 'data.csv';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        };
+
+                        vm.cols = {sel: [], list: [], leaf: null};
+                        vm.colsBuild = function() {
+                            var c = vm.cols, cur = data, list = [];
+                            c.leaf = null;
+                            for (var l = 0; l <= c.sel.length; l++) {
+                                if (!isObj(cur)) {
+                                    c.leaf = {
+                                        path: c.sel.join('.'), value: show(cur),
+                                        type: typeOf(cur)
+                                    };
+                                    break;
+                                }
+                                list.push(columnItems(cur, c.sel[l]));
+                                if (l < c.sel.length) {
+                                    cur = cur[c.sel[l]];
+                                }
+                            }
+                            c.list = list;
+                        };
+                        function columnItems(node, selected) {
+                            var arr = Array.isArray(node);
+                            return Object.keys(node).map(function(k) {
+                                return {
+                                    k: k, label: arr ? '[' + k + ']' : k,
+                                    container: isObj(node[k]),
+                                    active: selected === k
+                                };
+                            });
+                        }
+                        vm.colsPick = function(level, k) {
+                            vm.cols.sel = vm.cols.sel.slice(0, level).concat([k]);
+                            vm.colsBuild();
+                        };
+
+                        vm.copy = function() {
+                            copyText(vm.showRaw ? vm.raw : vm.source, function() {
+                                $timeout(function() {
+                                    vm.copied = true;
+                                });
+                                $timeout(function() {
+                                    vm.copied = false;
+                                }, 1500);
+                            });
+                        };
+
+                        var builders = {
+                            tree: vm.buildTree,
+                            table: function() {
+                                vm.tables = findTables(data, '', []);
+                                vm.tables.forEach(vm.refreshTable);
+                            },
+                            query: function() {
+                                // Offer examples built from the data itself
+                                var tables = findTables(data, '', []);
+                                if (tables.length) {
+                                    var t = tables[0], col = t.cols[0];
+                                    var first = t.rows[0][col];
+                                    vm.query.examples.push(t.path + '[*].' + col);
+                                    if (!isObj(first)) {
+                                        vm.query.examples.push(
+                                            t.path + '[' + col + '=' + show(first) + ']');
+                                    }
+                                }
+                                if (isObj(data)) {
+                                    Object.keys(data).slice(0, 3).forEach(function(k) {
+                                        vm.query.examples.push(childPath('', k, Array.isArray(data)));
+                                    });
+                                }
+                                vm.query.expr = vm.query.examples[0] || '';
+                                vm.runQuery();
+                            },
+                            flat: function() {
+                                vm.flat.all = leaves(data, '', []);
+                                vm.refreshFlat();
+                            },
+                            schema: function() {
+                                var s = schema(data, '', {});
+                                vm.schema = Object.keys(s).map(function(k) {
+                                    s[k].typeList = Object.keys(s[k].types);
+                                    return s[k];
+                                });
+                            },
+                            columns: function() {
+                                vm.cols.sel = [];
+                                vm.colsBuild();
+                            },
+                            source: function() {
+                                vm.source = JSON.stringify(data, null, 2);
+                            },
+                            simple: angular.noop
+                        };
+                        // Each view is built the first time it is opened, so
+                        // big payloads only pay for what the user looks at
+                        vm.setView = function(id) {
+                            if (!built[id]) {
+                                builders[id]();
+                                built[id] = true;
+                            }
+                            vm.view = id;
+                        };
+
+                        $templateRequest(get_static('codenerix/partials/obj_viewer.html'))
+                            .then(function(template) {
+                                element.html(template);
+                                $compile(element.contents())(scope);
+                                // Inserted after compiling, so it stays inert
+                                var simple = element[0].querySelector('.cdnx-ov-simple');
+                                if (simple) {
+                                    simple.innerHTML = fallback;
+                                }
+                                if (vm.views.length) {
+                                    vm.setView(vm.views[0].id);
+                                }
+                            });
+                    };
+                }
+            };
+        }
+    ]
+];
+
 // We got the example code from https://stackoverflow.com/users/1957251/khanh-to
 // from Khanh TO We then adapted his version from $modal to $uibModal which is
 // the one we use with CODENERIX and we renamed it to codenerixReallyClick
@@ -2480,6 +2975,9 @@ function codenerix_builder(libraries, routes, redirects) {
             .directive(
                 codenerix_directive_copytoclipboard[0],
                 codenerix_directive_copytoclipboard[1])
+            .directive(
+                codenerix_directive_objviewer[0],
+                codenerix_directive_objviewer[1])
 
             // Set routing system
             .run(codenerix_run);

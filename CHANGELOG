@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.4.0] - 2026-11-19
+### Added
+- `obj_to_html()` takes `views`, the list of views to offer and their order (the first one is shown on load): `tree`, `table`, `query`, `flat`, `schema`, `columns`, `source` and `simple`. `OBJ_TO_HTML_VIEWS` holds them in the default order. An unknown name or an empty list raises `ValueError`.
+- `codenerixObjViewer` AngularJS directive, registered by `codenerix_builder()`, with its template in `codenerix/partials/obj_viewer.html`. It needs no new library: AngularJS, Bootstrap 3 and Font Awesome 4 already ship with codenerix. Its styles travel inside the output of `obj_to_html()`, so projects do not need a new stylesheet.
+- Spanish translations for the viewer texts.
+
+### Changed
+- `obj_to_html()` returns the multi-view viewer by default. The data travels base64-encoded in `data-payload`, so AngularJS never evaluates a `{{...}}` found in it, and the classic rendering stays inside as the fallback shown wherever the directive is absent (emails, PDF, admin). `views=("simple",)` returns exactly the HTML of 6.3.6.
+- XML is turned into a tree for the viewer: attributes as `@name`, text as `#text` and repeated sibling tags as a list.
+
 ## [6.3.6] - 2026-11-06
 ### Fixed
 - `obj_to_html()` closes the `<body>` and `<html>` it opens, so it returns a complete document (it only closed the wrapping `<div>`). A call that passes its own `doc` gets no closing tags, as it gets no opening ones.

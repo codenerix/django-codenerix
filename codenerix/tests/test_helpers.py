@@ -6,7 +6,10 @@ own ``REMOTE_ADDR`` default, which is exactly the value several of these cases
 need to be absent, so an explicit META dict keeps each scenario unambiguous.
 """
 
+import base64
 import datetime
+import json
+import re
 import uuid
 from decimal import Decimal
 from types import SimpleNamespace
@@ -14,7 +17,7 @@ from types import SimpleNamespace
 import pytest
 from django.test import override_settings
 
-from codenerix.helpers import get_client_ip, obj_to_html
+from codenerix.helpers import OBJ_TO_HTML_VIEWS, get_client_ip, obj_to_html
 
 CLIENT = "203.0.113.9"
 EDGE = "198.51.100.7"
@@ -192,3 +195,115 @@ def test_obj_to_html_closes_every_tag_it_opens(value, wrap):
     assert html.endswith("</div></body></html>" if wrap else "</body></html>")
     for name in ("html", "body", "div", "ul", "li"):
         assert html.count(f"<{name}>") + html.count(f"<{name} ") == html.count(f"</{name}>")
+
+
+def _payload(html):
+    """Decode the data-payload attribute of the viewer."""
+    encoded = re.search(r'data-payload="([^"]+)"', html).group(1)
+    return json.loads(base64.b64decode(encoded).decode("utf-8"))
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        # Captured from 6.3.6, before views existed
+        (
+            {"a": [1, None]},
+            '<html><body><div style="word-break: break-all; overflow-wrap: break-word;">'
+            "<ul><li><strong>a: </strong><ul><li>1</li><li>None</li></ul></li></ul>"
+            "</div></body></html>",
+        ),
+        (
+            '{"k": "v"}',
+            '<html><body><div style="word-break: break-all; overflow-wrap: break-word;">'
+            "<ul><li><strong>k: </strong>v</li></ul></div></body></html>",
+        ),
+    ],
+)
+def test_obj_to_html_simple_view_keeps_classic_output(value, expected):
+    _, html = obj_to_html(value, views=("simple",))
+    assert html == expected
+
+
+def test_obj_to_html_offers_every_view_by_default_in_order():
+    kind, html = obj_to_html({"a": 1})
+    assert kind == "OBJ"
+    assert "codenerix-obj-viewer" in html
+    views = re.search(r'data-views="([^"]+)"', html).group(1)
+    assert tuple(views.split(",")) == OBJ_TO_HTML_VIEWS
+    assert OBJ_TO_HTML_VIEWS[0] == "tree"
+    assert OBJ_TO_HTML_VIEWS[-1] == "simple"
+
+
+def test_obj_to_html_keeps_the_requested_views_order():
+    _, html = obj_to_html({"a": 1}, views=["flat", "tree"])
+    assert 'data-views="flat,tree"' in html
+
+
+@pytest.mark.parametrize("views", [[], ["tree", "nope"]])
+def test_obj_to_html_rejects_unknown_or_empty_views(views):
+    with pytest.raises(ValueError):
+        obj_to_html({"a": 1}, views=views)
+
+
+def test_obj_to_html_viewer_keeps_simple_rendering_as_fallback():
+    _, simple = obj_to_html({"a": [1, 2]}, views=("simple",))
+    _, viewer = obj_to_html({"a": [1, 2]})
+    inner = "<ul><li><strong>a: </strong><ul><li>1</li><li>2</li></ul></li></ul>"
+    assert inner in simple
+    assert inner in viewer
+
+
+def test_obj_to_html_payload_roundtrips_unicode_and_odd_types():
+    value = {
+        "name": "Málaga",
+        "price": Decimal("142.50"),
+        "id": uuid.UUID(int=1),
+        "day": datetime.date(2026, 1, 1),
+        "pair": (1, 2),
+        "set": {"b", "a"},
+        3: float("nan"),
+    }
+    payload = _payload(obj_to_html(value)[1])
+    assert payload["kind"] == "OBJ"
+    assert payload["raw"] is None
+    assert payload["data"] == {
+        "name": "Málaga",
+        "price": "142.50",
+        "id": "00000000-0000-0000-0000-000000000001",
+        "day": "2026-01-01",
+        "pair": [1, 2],
+        "set": ["a", "b"],
+        "3": "nan",
+    }
+    assert payload["labels"]["tree"]
+
+
+def test_obj_to_html_payload_turns_xml_into_a_tree():
+    xml = '<Res v="2"><Status>OK</Status><Room n="1"/><Room n="2">x</Room></Res>'
+    kind, html = obj_to_html(xml)
+    payload = _payload(html)
+    assert kind == "XML"
+    assert payload["raw"] == xml
+    assert payload["data"] == {
+        "Res": {
+            "@v": "2",
+            "Status": {"#text": "OK"},
+            "Room": [{"@n": "1"}, {"@n": "2", "#text": "x"}],
+        },
+    }
+
+
+def test_obj_to_html_payload_respects_depth_for_nested_strings():
+    value = '{"inner": "{\\"x\\": 1}"}'
+    assert _payload(obj_to_html(value)[1])["data"] == {"inner": '{"x": 1}'}
+    assert _payload(obj_to_html(value, depth=2)[1])["data"] == {"inner": {"x": 1}}
+
+
+def test_obj_to_html_viewer_hides_angular_expressions():
+    # The fallback is never compiled and the data travels base64-encoded, so
+    # no "{{" may reach the markup outside the payload
+    _, html = obj_to_html({"evil": "{{constructor.constructor('x')()}}"})
+    markup = re.sub(r'data-payload="[^"]+"', "", html)
+    assert "{{" not in re.sub(r"<ul>.*</ul>", "", markup)
+    assert _payload(html)["data"]["evil"].startswith("{{")
