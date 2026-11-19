@@ -240,8 +240,8 @@ def test_obj_to_html_keeps_the_requested_views_order():
     assert 'data-views="flat,tree"' in html
 
 
-@pytest.mark.parametrize("views", [[], ["tree", "nope"]])
-def test_obj_to_html_rejects_unknown_or_empty_views(views):
+@pytest.mark.parametrize("views", [[], ["tree", "nope"], ["tree", "flat", "tree"]])
+def test_obj_to_html_rejects_unknown_empty_or_repeated_views(views):
     with pytest.raises(ValueError):
         obj_to_html({"a": 1}, views=views)
 

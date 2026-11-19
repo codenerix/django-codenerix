@@ -6,9 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.4.0] - 2026-11-19
 ### Added
-- `obj_to_html()` takes `views`, the list of views to offer and their order (the first one is shown on load): `tree`, `table`, `query`, `flat`, `schema`, `columns`, `source` and `simple`. `OBJ_TO_HTML_VIEWS` holds them in the default order. An unknown name or an empty list raises `ValueError`.
+- `obj_to_html()` takes `views`, the list of views to offer and their order (the first one is shown on load): `tree`, `table`, `query`, `flat`, `schema`, `columns`, `source` and `simple`. `OBJ_TO_HTML_VIEWS` holds them in the default order. An unknown name, a repeated one or an empty list raises `ValueError`.
 - `codenerixObjViewer` AngularJS directive, registered by `codenerix_builder()`, with its template in `codenerix/partials/obj_viewer.html`. It needs no new library: AngularJS, Bootstrap 3 and Font Awesome 4 already ship with codenerix. Its styles travel inside the output of `obj_to_html()`, so projects do not need a new stylesheet.
 - Spanish translations for the viewer texts.
+- The "query" view takes paths like `a.b`, `[0]`, `[-1]`, `[*]`, Python slices (`[1:3]`, `[:3]`, `[2:]`, `[::2]`), inclusive ranges (`[1..3]`, `[..3]`, `[2..]`) and filters (`[field>10]`, `[field=1..5]`, `[field~text]`).
+- Table column filters and query filters share one syntax: `abc` contains, `=abc` exact (`=13` does not match `131`), `!abc` negation, `^abc` prefix, `abc$` suffix, `>10`, `<=5`, `!=3`, inclusive ranges `10..20`, `10..` and `..20`, and `a|b` for any of them. Numbers, including `Decimal` sent as text, compare as numbers.
 
 ### Changed
 - `obj_to_html()` returns the multi-view viewer by default. The data travels base64-encoded in `data-payload`, so AngularJS never evaluates a `{{...}}` found in it, and the classic rendering stays inside as the fallback shown wherever the directive is absent (emails, PDF, admin). `views=("simple",)` returns exactly the HTML of 6.3.6.

@@ -2196,9 +2196,16 @@ var codenerix_directive_objviewer = [
             }
             // Numeric strings (Decimal is sent as text) sort as numbers
             function cmp(a, b) {
+                if (a === undefined || b === undefined) {
+                    // Missing values sort last
+                    return a === b ? 0 : a === undefined ? 1 : -1;
+                }
                 if (isNum(a) && isNum(b)) {
                     a = +a;
                     b = +b;
+                } else {
+                    a = show(a).toLowerCase();
+                    b = show(b).toLowerCase();
                 }
                 return a > b ? 1 : a < b ? -1 : 0;
             }
@@ -2228,11 +2235,109 @@ var codenerix_directive_objviewer = [
                     return isObj(a) ? a[k] : undefined;
                 }, o);
             }
+            function unquote(s) {
+                return s.trim().replace(/^(['"])(.*)\1$/, '$2');
+            }
+            // Filter grammar shared by table columns and query filters:
+            // "abc" contains, "=abc" exact, "!abc" negation, "^abc" prefix,
+            // "abc$" suffix, ">10" "<=5" "!=3" comparisons, "10..20" "10.."
+            // "..20" inclusive ranges, "~abc" contains and "a|b" any of them
+            function matchExpr(value, expr) {
+                expr = expr.trim();
+                if (!expr) {
+                    return true;
+                }
+                if (expr.indexOf('|') >= 0) {
+                    // "=3|7" means "=3" or "=7": an alternative without its
+                    // own operator takes the one before it
+                    var lastOp = '';
+                    return expr.split('|').some(function(e) {
+                        var own = e.trim().match(/^(>=|<=|!=|>|<|=|~)/);
+                        lastOp = own ? own[1] : lastOp;
+                        return matchExpr(value, own ? e : lastOp + e);
+                    });
+                }
+                if (expr.charAt(0) === '!' && expr.charAt(1) !== '=') {
+                    return !matchExpr(value, expr.slice(1));
+                }
+                var text = value === undefined ? '' :
+                                                 isObj(value) ? JSON.stringify(value) :
+                                                                show(value);
+                var m = expr.match(/^(>=|<=|!=|>|<|=|~)\s*(.*)$/);
+                var op = m ? m[1] : null, rest = unquote(m ? m[2] : expr);
+                var low = rest.toLowerCase();
+                if (op === '~') {
+                    return text.toLowerCase().indexOf(low) >= 0;
+                }
+                var range = rest.match(/^(.*?)\.\.(.*)$/);
+                if ((op === null || op === '=') && range && (range[1] || range[2])) {
+                    if (value === undefined || isObj(value)) {
+                        return false;
+                    }
+                    var lo = unquote(range[1]), hi = unquote(range[2]);
+                    return (lo === '' || cmp(value, lo) >= 0) &&
+                        (hi === '' || cmp(value, hi) <= 0);
+                }
+                if (op === null) {
+                    if (rest.charAt(0) === '^') {
+                        return text.toLowerCase().indexOf(low.slice(1)) === 0;
+                    }
+                    if (rest.length > 1 && rest.charAt(rest.length - 1) === '$') {
+                        var tail = low.slice(0, -1);
+                        return text.toLowerCase().slice(-tail.length) === tail;
+                    }
+                    return text.toLowerCase().indexOf(low) >= 0;
+                }
+                if (value === undefined || isObj(value)) {
+                    return op === '!=';
+                }
+                var r = cmp(value, rest);
+                return {
+                    '>': r > 0, '<': r < 0, '>=': r >= 0, '<=': r <= 0,
+                    '=': r === 0, '!=': r !== 0
+                }[op];
+            }
+            // Python slice semantics for "a:b:s"; "a..b" includes both ends
+            function sliceArray(arr, a, sep, b, step) {
+                var n = arr.length, out = [], i;
+                if (sep === '..') {
+                    var lo = a === '' ? 0 : (+a < 0 ? +a + n : +a);
+                    var hi = b === '' ? n - 1 : (+b < 0 ? +b + n : +b);
+                    return arr.slice(Math.max(0, lo), Math.max(0, hi + 1));
+                }
+                step = step === undefined || step === '' ? 1 : +step;
+                if (step === 0) {
+                    throw 'step 0';
+                }
+                function norm(x, dflt, low, high) {
+                    if (x === '') {
+                        return dflt;
+                    }
+                    x = +x;
+                    x = x < 0 ? x + n : x;
+                    return Math.min(Math.max(x, low), high);
+                }
+                if (step > 0) {
+                    var start = norm(a, 0, 0, n), stop = norm(b, n, 0, n);
+                    for (i = start; i < stop; i += step) {
+                        out.push(arr[i]);
+                    }
+                } else {
+                    var first = norm(a, n - 1, -1, n - 1), last = norm(b, -1, -1, n - 1);
+                    for (i = first; i > last; i += step) {
+                        out.push(arr[i]);
+                    }
+                }
+                return out;
+            }
             function evalPath(root, expr, badFilter) {
                 var toks = expr.match(/\[[^\]]*\]|[^.\[\]]+/g) || [];
-                var cur = [root];
+                // Lists built by a slice or a filter stay one value, so the
+                // next step works on the whole list ("[f=1][0:2]"), and are
+                // only spread into separate results at the end
+                var cur = [root], made = [];
                 angular.forEach(toks, function(t) {
-                    var nx = [];
+                    var nx = [], m;
                     angular.forEach(cur, function(c) {
                         if (!isObj(c)) {
                             return;
@@ -2242,33 +2347,36 @@ var codenerix_directive_objviewer = [
                             Object.keys(c).forEach(function(k) {
                                 nx.push(c[k]);
                             });
-                        } else if (/^\[\d+\]$/.test(t)) {
-                            var v = c[+t.slice(1, -1)];
+                        } else if ((m = t.match(/^\[(-?\d+)\]$/))) {
+                            var idx = +m[1];
+                            var v = c[Array.isArray(c) && idx < 0 ? idx + c.length : idx];
                             if (v !== undefined) {
                                 nx.push(v);
                             }
+                        } else if ((m = t.match(/^\[\s*(-?\d*)\s*(:|\.\.)\s*(-?\d*)\s*(?::\s*(-?\d*)\s*)?\]$/))) {
+                            if (Array.isArray(c)) {
+                                if (m[4] !== undefined && m[2] === '..') {
+                                    throw badFilter + ': ' + t;
+                                }
+                                var part = sliceArray(c, m[1], m[2], m[3], m[4]);
+                                made.push(part);
+                                nx.push(part);
+                            }
                         } else if (t.charAt(0) === '[') {
-                            var m = t.slice(1, -1).match(
-                                /^([\w.@#-]+)\s*(>=|<=|!=|=|>|<|~)\s*(.+)$/);
+                            m = t.slice(1, -1).match(
+                                /^\s*([\w@#-]+(?:\.[\w@#-]+)*)\s*((?:>=|<=|!=|>|<|=|~|!).*)$/);
                             if (!m) {
                                 throw badFilter + ': ' + t;
                             }
-                            var raw = m[3].replace(/^['"]|['"]$/g, '');
-                            items.forEach(function(it) {
-                                var a = getPath(it, m[1]);
-                                if (a === undefined) {
-                                    return;
-                                }
-                                var r = cmp(a, raw), ok = {
-                                    '>': r > 0, '<': r < 0, '>=': r >= 0,
-                                    '<=': r <= 0, '=': r === 0, '!=': r !== 0,
-                                    '~': show(a).toLowerCase().indexOf(
-                                        raw.toLowerCase()) >= 0
-                                }[m[2]];
-                                if (ok) {
-                                    nx.push(it);
-                                }
+                            var hits = items.filter(function(it) {
+                                return matchExpr(getPath(it, m[1]), m[2]);
                             });
+                            if (Array.isArray(c)) {
+                                made.push(hits);
+                                nx.push(hits);
+                            } else {
+                                Array.prototype.push.apply(nx, hits);
+                            }
                         } else {
                             items.forEach(function(it) {
                                 if (isObj(it) && it[t] !== undefined) {
@@ -2279,7 +2387,9 @@ var codenerix_directive_objviewer = [
                     });
                     cur = nx;
                 });
-                return cur;
+                return cur.reduce(function(out, c) {
+                    return out.concat(made.indexOf(c) >= 0 ? c : [c]);
+                }, []);
             }
             function findTables(node, p, out) {
                 if (Array.isArray(node) && node.length &&
@@ -2306,6 +2416,14 @@ var codenerix_directive_objviewer = [
                     });
                 }
                 return out;
+            }
+            function depthOf(x) {
+                if (!isObj(x)) {
+                    return 0;
+                }
+                return 1 + Object.keys(x).reduce(function(m, k) {
+                    return Math.max(m, depthOf(x[k]));
+                }, 0);
             }
             function leaves(x, p, out) {
                 if (isObj(x) && Object.keys(x).length) {
@@ -2382,7 +2500,9 @@ var codenerix_directive_objviewer = [
                                            };
                                        });
 
-                        vm.tree = {q: '', level: 2, open: {}, rows: [], path: ''};
+                        // Level n opens the containers above depth n; max fully expands the data
+                        var maxLevel = Math.max(depthOf(data) - 1, 1);
+                        vm.tree = {q: '', level: Math.min(2, maxLevel), max: maxLevel, open: {}, rows: [], path: ''};
                         vm.buildTree = function() {
                             var t = vm.tree, q = t.q.toLowerCase(), rows = [];
                             (function visit(node, p, depth, keep) {
@@ -2420,6 +2540,9 @@ var codenerix_directive_objviewer = [
                             })(data, '', 0, false);
                             t.rows = rows;
                         };
+                        vm.treeStep = function(d) {
+                            vm.treeLevel(Math.min(Math.max(vm.tree.level + d, 1), vm.tree.max));
+                        };
                         vm.treeLevel = function(n) {
                             vm.tree.level = n;
                             vm.tree.open = {};
@@ -2432,6 +2555,32 @@ var codenerix_directive_objviewer = [
                             }
                         };
 
+                        vm.isObj = isObj;
+                        // Nodes for the "table" view: dicts as key/value
+                        // tables, lists of objects as filterable grids and
+                        // lists of plain values as chips
+                        function tableNode(v, p) {
+                            if (!isObj(v) || !Object.keys(v).length) {
+                                return {kind: 'scalar', text: isObj(v) ? (Array.isArray(v) ? '[]' : '{}') : show(v)};
+                            }
+                            if (Array.isArray(v)) {
+                                if (v.every(function(x) { return !isObj(x); })) {
+                                    return {kind: 'chips', chips: v.map(show)};
+                                }
+                                if (v.every(function(x) { return isObj(x) && !Array.isArray(x); })) {
+                                    var grid = findTables(v, p, [])[0];
+                                    vm.refreshTable(grid);
+                                    return {kind: 'grid', grid: grid};
+                                }
+                            }
+                            var arr = Array.isArray(v);
+                            return {
+                                kind: 'dict', hidden: {},
+                                items: Object.keys(v).map(function(k) {
+                                    return {key: arr ? '[' + k + ']' : k, node: tableNode(v[k], childPath(p, k, arr))};
+                                })
+                            };
+                        }
                         vm.cell = function(v) {
                             // A row without that key shows an empty cell
                             if (v === undefined) {
@@ -2445,10 +2594,8 @@ var codenerix_directive_objviewer = [
                             });
                             var rows = t.rows.filter(function(row) {
                                 return t.vis.every(function(c) {
-                                    var f = t.filters[c];
-                                    return !f ||
-                                        vm.cell(row[c]).toLowerCase().indexOf(
-                                            f.toLowerCase()) >= 0;
+                                    return !t.filters[c] ||
+                                        matchExpr(row[c], t.filters[c]);
                                 });
                             });
                             if (t.sort) {
@@ -2577,8 +2724,14 @@ var codenerix_directive_objviewer = [
                         var builders = {
                             tree: vm.buildTree,
                             table: function() {
-                                vm.tables = findTables(data, '', []);
-                                vm.tables.forEach(vm.refreshTable);
+                                // Skip single-key wrappers such as {"booking": {...}}
+                                var root = data, path = '';
+                                while (isObj(root) && !Array.isArray(root) && Object.keys(root).length === 1 &&
+                                       isObj(root[Object.keys(root)[0]]) && !Array.isArray(root[Object.keys(root)[0]])) {
+                                    path = childPath(path, Object.keys(root)[0], false);
+                                    root = root[Object.keys(root)[0]];
+                                }
+                                vm.table = {path: path, root: tableNode(root, path)};
                             },
                             query: function() {
                                 // Offer examples built from the data itself
@@ -2587,6 +2740,7 @@ var codenerix_directive_objviewer = [
                                     var t = tables[0], col = t.cols[0];
                                     var first = t.rows[0][col];
                                     vm.query.examples.push(t.path + '[*].' + col);
+                                    vm.query.examples.push(t.path + '[0:2]');
                                     if (!isObj(first)) {
                                         vm.query.examples.push(
                                             t.path + '[' + col + '=' + show(first) + ']');
@@ -2630,7 +2784,7 @@ var codenerix_directive_objviewer = [
                             vm.view = id;
                         };
 
-                        $templateRequest(get_static('codenerix/partials/obj_viewer.html'))
+                        $templateRequest(get_static('codenerix/partials/obj_viewer.html'), true)
                             .then(function(template) {
                                 element.html(template);
                                 $compile(element.contents())(scope);
@@ -2642,6 +2796,10 @@ var codenerix_directive_objviewer = [
                                 if (vm.views.length) {
                                     vm.setView(vm.views[0].id);
                                 }
+                            }, function() {
+                                // Without the template show the classic
+                                // rendering again, still uncompiled
+                                element[0].innerHTML = fallback;
                             });
                     };
                 }

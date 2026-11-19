@@ -699,10 +699,6 @@ msgid "Collapse"
 msgstr "Plegar"
 
 #: codenerix/helpers.py
-msgid "There are no lists of objects in this data"
-msgstr "No hay listas de objetos en estos datos"
-
-#: codenerix/helpers.py
 msgid "rows of"
 msgstr "filas de"
 
@@ -765,6 +761,14 @@ msgstr "Ver XML original"
 #: codenerix/helpers.py
 msgid "Show JSON"
 msgstr "Ver JSON"
+
+#: codenerix/helpers.py
+msgid "Level"
+msgstr "Nivel"
+
+#: codenerix/helpers.py
+msgid "Visible keys"
+msgstr "Claves visibles"
 
 #~ msgid ""
 #~ " WARNING: DATERANGEPICKER_OPTIONS is not set in your configuration!!! "

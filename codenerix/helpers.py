@@ -871,6 +871,9 @@ _OBJ_VIEWER_CSS = (
     "display:flex;justify-content:space-between}"
     ".cdnx-objviewer .cdnx-ov-item.active{background:#337ab7;color:#fff}"
     ".cdnx-objviewer th.cdnx-ov-sort{cursor:pointer;white-space:nowrap}"
+    ".cdnx-objviewer .cdnx-ov-level{min-width:34px;opacity:1;cursor:default}"
+    ".cdnx-objviewer .cdnx-ov-kv{margin-bottom:0}"
+    ".cdnx-objviewer .cdnx-ov-kvkey{width:1%;white-space:nowrap}"
     ".cdnx-objviewer pre{font-size:12px}"
     ".cdnx-objviewer.cdnx-ov-wrap{word-break:break-all;"
     "overflow-wrap:break-word}"
@@ -893,9 +896,10 @@ def _obj_viewer_labels() -> dict[str, str]:
         "source": str(__("Source")),
         "simple": str(__("Simple")),
         "search": str(__("Search in keys and values")),
+        "level": str(__("Level")),
+        "visible_keys": str(__("Visible keys")),
         "expand": str(__("Expand")),
         "collapse": str(__("Collapse")),
-        "no_tables": str(__("There are no lists of objects in this data")),
         "rows_of": str(__("rows of")),
         "filter": str(__("filter")),
         "results": str(__("results")),
@@ -1087,10 +1091,10 @@ def obj_to_html(  # pylint: disable=too-many-arguments
     if doc is None and not _internal:
         selected = OBJ_TO_HTML_VIEWS if views is None else tuple(views)
         unknown = [v for v in selected if v not in OBJ_TO_HTML_VIEWS]
-        if not selected or unknown:
+        if not selected or unknown or len(set(selected)) != len(selected):
             raise ValueError(
                 f"obj_to_html() views must be a non-empty subset of "
-                f"{OBJ_TO_HTML_VIEWS}, got {selected!r}",
+                f"{OBJ_TO_HTML_VIEWS} without repetitions, got {selected!r}",
             )
         if selected != ("simple",):
             return _obj_viewer(obj, depth=depth, wrap=wrap, views=selected)
