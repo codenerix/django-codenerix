@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-10 12:38+0200\n"
+"POT-Creation-Date: 2026-11-06 14:26+0100\n"
 "PO-Revision-Date: 2026-02-02 10:11+0100\n"
 "Last-Translator: B7DNY3IT66KAJYWSRXJ64HAT47F3SKN5  <yo@br0th3r.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -123,19 +123,19 @@ msgstr "ATENCIÓN: CODENERIX_CSS no está presente en tu configuración!!!"
 msgid "WARNING: CODENERIX_JS is not set in your configuration!!!"
 msgstr "ATENCIÓN: CODENERIX_JS no está presente en tu configuración!!!"
 
-#: codenerix/context.py:128
+#: codenerix/context.py:129
 msgid "From"
 msgstr "Desde"
 
-#: codenerix/context.py:129
+#: codenerix/context.py:130
 msgid "To"
 msgstr "Para"
 
-#: codenerix/context.py:130
+#: codenerix/context.py:131
 msgid "Apply"
 msgstr "Aplicar"
 
-#: codenerix/context.py:131 codenerix/templates/codenerix/addmodal.html:43
+#: codenerix/context.py:132 codenerix/templates/codenerix/addmodal.html:43
 #: codenerix/templates/codenerix/addmodal.html:44
 #: codenerix/templates/codenerix/formmodal.html:73
 #: codenerix/templates/codenerix/remote_log.html:29
@@ -145,79 +145,79 @@ msgstr "Aplicar"
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: codenerix/context.py:132
+#: codenerix/context.py:133
 msgid "Su"
 msgstr "Do"
 
-#: codenerix/context.py:133
+#: codenerix/context.py:134
 msgid "Mo"
 msgstr "Lu"
 
-#: codenerix/context.py:134
+#: codenerix/context.py:135
 msgid "Tu"
 msgstr "Ma"
 
-#: codenerix/context.py:135
+#: codenerix/context.py:136
 msgid "We"
 msgstr "Mi"
 
-#: codenerix/context.py:136
+#: codenerix/context.py:137
 msgid "Th"
 msgstr "Ju"
 
-#: codenerix/context.py:137
+#: codenerix/context.py:138
 msgid "Fr"
 msgstr "Vi"
 
-#: codenerix/context.py:138
+#: codenerix/context.py:139
 msgid "Sa"
 msgstr "Sa"
 
-#: codenerix/context.py:139
+#: codenerix/context.py:140
 msgid "January"
 msgstr "Enero"
 
-#: codenerix/context.py:140
+#: codenerix/context.py:141
 msgid "February"
 msgstr "Febrero"
 
-#: codenerix/context.py:141
+#: codenerix/context.py:142
 msgid "March"
 msgstr "Marzo"
 
-#: codenerix/context.py:142
+#: codenerix/context.py:143
 msgid "April"
 msgstr "Abril"
 
-#: codenerix/context.py:143
+#: codenerix/context.py:144
 msgid "May"
 msgstr "Mayo"
 
-#: codenerix/context.py:144
+#: codenerix/context.py:145
 msgid "June"
 msgstr "Junio"
 
-#: codenerix/context.py:145
+#: codenerix/context.py:146
 msgid "July"
 msgstr "Julio"
 
-#: codenerix/context.py:146
+#: codenerix/context.py:147
 msgid "August"
 msgstr "Agosto"
 
-#: codenerix/context.py:147
+#: codenerix/context.py:148
 msgid "September"
 msgstr "Septiembre"
 
-#: codenerix/context.py:148
+#: codenerix/context.py:149
 msgid "October"
 msgstr "Octubre"
 
-#: codenerix/context.py:149
+#: codenerix/context.py:150
 msgid "November"
 msgstr "Noviembre"
 
-#: codenerix/context.py:150
+#: codenerix/context.py:151
 msgid "December"
 msgstr "Diciembre"
 
@@ -242,23 +242,23 @@ msgstr[1] ""
 msgid "This input self does not contain valid data."
 msgstr "Este input no tiene datos válidos."
 
-#: codenerix/fields.py:75
+#: codenerix/fields.py:77
 msgid "Invalid date"
 msgstr "Fecha inválida"
 
-#: codenerix/fields.py:77
+#: codenerix/fields.py:79
 msgid "Date too old"
 msgstr "Fecha demasiado antigua"
 
-#: codenerix/fields.py:86 codenerix/multi_email_field/forms.py:10
+#: codenerix/fields.py:88 codenerix/multi_email_field/forms.py:10
 msgid "Enter valid email addresses."
 msgstr "Introduzca una dirección válida de email."
 
-#: codenerix/fields.py:128
+#: codenerix/fields.py:130
 msgid "Incorrect, please try again."
 msgstr "Incorrecto, por favor inténtelo de nuevo."
 
-#: codenerix/fields.py:129
+#: codenerix/fields.py:131
 msgid "Error verifying input, please try again."
 msgstr "Error verificando la entrada, por favor inténtelo de nuevo."
 
@@ -270,15 +270,15 @@ msgstr "ID no válido detectado en SelectMultiple"
 msgid "Invalid color"
 msgstr "Color inválido"
 
-#: codenerix/models.py:42 codenerix/models.py:404
+#: codenerix/models.py:42 codenerix/models.py:421
 msgid "Add"
 msgstr "Añadir"
 
-#: codenerix/models.py:43 codenerix/models.py:406
+#: codenerix/models.py:43 codenerix/models.py:423
 msgid "Change"
 msgstr "Cambiar"
 
-#: codenerix/models.py:44 codenerix/models.py:408
+#: codenerix/models.py:44 codenerix/models.py:425
 #: codenerix/templates/codenerix/details.html:81
 #: codenerix/templates/codenerix/details.html:82
 #: codenerix/templates/codenerix/details.html:84
@@ -294,77 +294,77 @@ msgstr "Cambiar"
 msgid "Delete"
 msgstr "Borrar"
 
-#: codenerix/models.py:153 codenerix/models.py:863
+#: codenerix/models.py:170 codenerix/models.py:882
 #: codenerix/models_people.py:109
 msgid "Created"
 msgstr "Creado"
 
-#: codenerix/models.py:158
+#: codenerix/models.py:175
 msgid "Updated"
 msgstr "Actualizado"
 
-#: codenerix/models.py:244
+#: codenerix/models.py:261
 #, python-format
 msgid "Cannot delete item, relationship with %(model_name)s"
 msgstr "No se puede borrar el elemento, existe una relación con %(model_name)s"
 
-#: codenerix/models.py:348 codenerix/models.py:422 codenerix/models.py:479
+#: codenerix/models.py:365 codenerix/models.py:439 codenerix/models.py:496
 msgid "Action"
 msgstr "Acción"
 
-#: codenerix/models.py:417 codenerix/models.py:474
+#: codenerix/models.py:434 codenerix/models.py:491
 msgid "Date"
 msgstr "Fecha"
 
-#: codenerix/models.py:418 codenerix/models.py:485 codenerix/models.py:864
+#: codenerix/models.py:435 codenerix/models.py:502 codenerix/models.py:883
 msgid "Actual user"
 msgstr "Usuario actual"
 
-#: codenerix/models.py:419 codenerix/models.py:490 codenerix/models.py:865
+#: codenerix/models.py:436 codenerix/models.py:507 codenerix/models.py:884
 msgid "Original user"
 msgstr "Usuario original"
 
-#: codenerix/models.py:421 codenerix/models.py:495
+#: codenerix/models.py:438 codenerix/models.py:512
 msgid "APP Name"
 msgstr "Nombre de la APP"
 
-#: codenerix/models.py:425 codenerix/models.py:483 codenerix/models.py:862
+#: codenerix/models.py:442 codenerix/models.py:500 codenerix/models.py:881
 msgid "ID"
 msgstr "ID"
 
-#: codenerix/models.py:427 codenerix/models.py:521
+#: codenerix/models.py:444 codenerix/models.py:538
 msgid "Txt"
 msgstr "Txt"
 
-#: codenerix/models.py:439
+#: codenerix/models.py:456
 msgid "add"
 msgstr "añadir"
 
-#: codenerix/models.py:440
+#: codenerix/models.py:457
 msgid "addition"
 msgstr "adición"
 
-#: codenerix/models.py:446
+#: codenerix/models.py:463
 msgid "change"
 msgstr "cambiar"
 
-#: codenerix/models.py:447
+#: codenerix/models.py:464
 msgid "changed"
 msgstr "cambiado"
 
-#: codenerix/models.py:453
+#: codenerix/models.py:470
 msgid "edit"
 msgstr "editar"
 
-#: codenerix/models.py:454
+#: codenerix/models.py:471
 msgid "edition"
 msgstr "edicción"
 
-#: codenerix/models.py:460
+#: codenerix/models.py:477
 msgid "delete"
 msgstr "borrar"
 
-#: codenerix/models.py:461
+#: codenerix/models.py:478
 msgid "deleted"
 msgstr "borrado"
 
