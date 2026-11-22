@@ -2475,18 +2475,25 @@ var codenerix_directive_objviewer = [
                 }
                 return acc;
             }
+            function legacyCopy(value, done) {
+                var area = document.createElement('textarea');
+                area.value = value;
+                document.body.appendChild(area);
+                area.select();
+                document.execCommand('copy');
+                document.body.removeChild(area);
+                done();
+            }
             function copyText(value, done) {
                 if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(value).then(done);
+                    // The browser may refuse the clipboard (permission,
+                    // focus): try the legacy way then
+                    navigator.clipboard.writeText(value).then(done, function() {
+                        legacyCopy(value, done);
+                    });
                 } else {
                     // Clipboard API needs HTTPS, fall back to the legacy way
-                    var area = document.createElement('textarea');
-                    area.value = value;
-                    document.body.appendChild(area);
-                    area.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(area);
-                    done();
+                    legacyCopy(value, done);
                 }
             }
 
