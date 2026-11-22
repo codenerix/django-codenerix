@@ -2195,6 +2195,11 @@ var codenerix_directive_objviewer = [
             function childId(id, k, arr) {
                 return arr ? id + '[' + k + ']' : id + '.' + JSON.stringify(String(k));
             }
+            // Data keys may be named like Object.prototype members
+            // ("constructor", "toString"): only own properties are data
+            function own(o, k) {
+                return Object.prototype.hasOwnProperty.call(o, k);
+            }
             function isNum(v) {
                 return typeof v === 'number' ||
                     (typeof v === 'string' && v.trim() !== '' && !isNaN(v));
@@ -2237,7 +2242,7 @@ var codenerix_directive_objviewer = [
             }
             function getPath(o, p) {
                 return p.split('.').reduce(function(a, k) {
-                    return isObj(a) ? a[k] : undefined;
+                    return isObj(a) && own(a, k) ? a[k] : undefined;
                 }, o);
             }
             function unquote(s) {
@@ -2354,9 +2359,9 @@ var codenerix_directive_objviewer = [
                             });
                         } else if ((m = t.match(/^\[(-?\d+)\]$/))) {
                             var idx = +m[1];
-                            var v = c[Array.isArray(c) && idx < 0 ? idx + c.length : idx];
-                            if (v !== undefined) {
-                                nx.push(v);
+                            var at = Array.isArray(c) && idx < 0 ? idx + c.length : idx;
+                            if (own(c, at)) {
+                                nx.push(c[at]);
                             }
                         } else if ((m = t.match(/^\[\s*(-?\d*)\s*(:|\.\.)\s*(-?\d*)\s*(?::\s*(-?\d*)\s*)?\]$/))) {
                             if (Array.isArray(c)) {
@@ -2384,7 +2389,7 @@ var codenerix_directive_objviewer = [
                             }
                         } else {
                             items.forEach(function(it) {
-                                if (isObj(it) && it[t] !== undefined) {
+                                if (isObj(it) && own(it, t)) {
                                     nx.push(it[t]);
                                 }
                             });
@@ -2410,8 +2415,13 @@ var codenerix_directive_objviewer = [
                         });
                     });
                     out.push({
-                        path: p || '$', rows: node, cols: cols, hidden: {},
-                        filters: {}, sort: null, rev: false
+                        path: p || '$', rows: node, cols: cols, sort: null,
+                        rev: false,
+                        // One state object per column: a template indexing a
+                        // map by a data key fails, $parse refuses "__proto__"
+                        colState: cols.map(function(c) {
+                            return {name: c, hidden: false, filter: ''};
+                        })
                     });
                 }
                 if (isObj(node)) {
@@ -2451,7 +2461,8 @@ var codenerix_directive_objviewer = [
                         var kp = p ? p + '.' + k : k, v = x[k];
                         var kid = childId(id, k, false);
                         var e = acc[kid] || (acc[kid] = {
-                            id: kid, path: kp, types: {}, count: 0, examples: []
+                            id: kid, path: kp, types: Object.create(null),
+                            count: 0, examples: []
                         });
                         e.types[typeOf(v)] = true;
                         e.count++;
@@ -2508,7 +2519,7 @@ var codenerix_directive_objviewer = [
 
                         // Level n opens the containers above depth n; max fully expands the data
                         var maxLevel = Math.max(depthOf(data) - 1, 1);
-                        vm.tree = {q: '', level: Math.min(2, maxLevel), max: maxLevel, open: {}, rows: [], path: ''};
+                        vm.tree = {q: '', level: Math.min(2, maxLevel), max: maxLevel, open: Object.create(null), rows: [], path: ''};
                         vm.buildTree = function() {
                             var t = vm.tree, q = t.q.toLowerCase(), rows = [];
                             (function visit(node, p, id, depth, keep) {
@@ -2524,7 +2535,7 @@ var codenerix_directive_objviewer = [
                                     }
                                     var c = isObj(v);
                                     var open = c &&
-                                        (t.open.hasOwnProperty(cid) ?
+                                        (own(t.open, cid) ?
                                              t.open[cid] :
                                              (q ? true : depth < t.level));
                                     rows.push({
@@ -2552,7 +2563,7 @@ var codenerix_directive_objviewer = [
                         };
                         vm.treeLevel = function(n) {
                             vm.tree.level = n;
-                            vm.tree.open = {};
+                            vm.tree.open = Object.create(null);
                             vm.buildTree();
                         };
                         vm.toggle = function(r) {
@@ -2562,7 +2573,6 @@ var codenerix_directive_objviewer = [
                             }
                         };
 
-                        vm.isObj = isObj;
                         // Nodes for the "table" view: dicts as key/value
                         // tables, lists of objects as filterable grids and
                         // lists of plain values as chips
@@ -2582,32 +2592,41 @@ var codenerix_directive_objviewer = [
                             }
                             var arr = Array.isArray(v);
                             return {
-                                kind: 'dict', hidden: {},
+                                kind: 'dict',
                                 items: Object.keys(v).map(function(k) {
-                                    return {key: arr ? '[' + k + ']' : k, node: tableNode(v[k], childPath(p, k, arr))};
+                                    return {
+                                        key: arr ? '[' + k + ']' : k, hidden: false,
+                                        node: tableNode(v[k], childPath(p, k, arr))
+                                    };
                                 })
                             };
                         }
-                        vm.cell = function(v) {
+                        vm.cell = function(row, c) {
                             // A row without that key shows an empty cell
-                            if (v === undefined) {
+                            if (!own(row, c)) {
                                 return '';
                             }
-                            return isObj(v) ? JSON.stringify(v) : show(v);
+                            return isObj(row[c]) ? JSON.stringify(row[c]) : show(row[c]);
                         };
+                        vm.cellIsObj = function(row, c) {
+                            return own(row, c) && isObj(row[c]);
+                        };
+                        function cellOf(row, c) {
+                            return own(row, c) ? row[c] : undefined;
+                        }
                         vm.refreshTable = function(t) {
-                            t.vis = t.cols.filter(function(c) {
-                                return !t.hidden[c];
+                            t.vis = t.colState.filter(function(s) {
+                                return !s.hidden;
                             });
                             var rows = t.rows.filter(function(row) {
-                                return t.vis.every(function(c) {
-                                    return !t.filters[c] ||
-                                        matchExpr(row[c], t.filters[c]);
+                                return t.vis.every(function(s) {
+                                    return !s.filter ||
+                                        matchExpr(cellOf(row, s.name), s.filter);
                                 });
                             });
                             if (t.sort) {
                                 rows = rows.slice().sort(function(a, b) {
-                                    return cmp(a[t.sort], b[t.sort]) *
+                                    return cmp(cellOf(a, t.sort), cellOf(b, t.sort)) *
                                         (t.rev ? -1 : 1);
                                 });
                             }
@@ -2622,8 +2641,8 @@ var codenerix_directive_objviewer = [
                             }
                             vm.refreshTable(t);
                         };
-                        vm.toggleCol = function(t, c) {
-                            t.hidden[c] = !t.hidden[c];
+                        vm.toggleCol = function(t, s) {
+                            s.hidden = !s.hidden;
                             vm.refreshTable(t);
                         };
 
@@ -2766,7 +2785,7 @@ var codenerix_directive_objviewer = [
                                 vm.refreshFlat();
                             },
                             schema: function() {
-                                var s = schema(data, '', '', {});
+                                var s = schema(data, '', '', Object.create(null));
                                 vm.schema = Object.keys(s).map(function(k) {
                                     s[k].typeList = Object.keys(s[k].types);
                                     return s[k];

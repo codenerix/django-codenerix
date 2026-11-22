@@ -26,18 +26,18 @@
     <span ng-if="node.kind === 'scalar'" class="cdnx-ov-mono">{{node.text}}</span>
     <span ng-if="node.kind === 'chips'"><span class="label label-default cdnx-ov-chip" ng-repeat="c in node.chips track by $index">{{c}}</span></span>
     <table ng-if="node.kind === 'dict'" class="table table-condensed cdnx-ov-kv">
-        <tr ng-repeat="it in node.items track by it.key" ng-if="!node.hidden[it.key]">
+        <tr ng-repeat="it in node.items track by it.key" ng-if="!it.hidden">
             <td class="cdnx-ov-muted cdnx-ov-kvkey">{{it.key}}</td>
             <td ng-init="node = it.node" ng-include="'cdnx-ov-node.html'"></td>
         </tr>
     </table>
     <div ng-if="node.kind === 'grid'" ng-init="t = node.grid">
-        <div style="margin-bottom: 6px;"><span class="label cdnx-ov-chip" ng-repeat="c in t.cols track by c" ng-class="t.hidden[c] ? 'label-default' : 'label-primary'" ng-click="vm.toggleCol(t, c)">{{c}}</span></div>
+        <div style="margin-bottom: 6px;"><span class="label cdnx-ov-chip" ng-repeat="s in t.colState track by s.name" ng-class="s.hidden ? 'label-default' : 'label-primary'" ng-click="vm.toggleCol(t, s)">{{s.name}}</span></div>
         <div class="table-responsive">
             <table class="table table-condensed table-striped table-bordered" style="margin-bottom: 2px;">
-                <tr><th class="cdnx-ov-sort" ng-repeat="c in t.vis track by c" ng-click="vm.sortBy(t, c)">{{c}} <i class="fa" ng-if="t.sort === c" ng-class="t.rev ? 'fa-sort-desc' : 'fa-sort-asc'"></i></th></tr>
-                <tr><td ng-repeat="c in t.vis track by c"><input type="text" class="form-control input-sm" placeholder="{{vm.l.filter}}" title="abc  =abc  !abc  ^abc  abc$  >10  <=5  !=3  10..20  10..  ..20  a|b" ng-model="t.filters[c]" ng-change="vm.refreshTable(t)"></td></tr>
-                <tr ng-repeat="row in t.view track by $index"><td class="cdnx-ov-mono" ng-repeat="c in t.vis track by c" ng-class="{'cdnx-ov-muted': vm.isObj(row[c])}">{{vm.cell(row[c])}}</td></tr>
+                <tr><th class="cdnx-ov-sort" ng-repeat="s in t.vis track by s.name" ng-click="vm.sortBy(t, s.name)">{{s.name}} <i class="fa" ng-if="t.sort === s.name" ng-class="t.rev ? 'fa-sort-desc' : 'fa-sort-asc'"></i></th></tr>
+                <tr><td ng-repeat="s in t.vis track by s.name"><input type="text" class="form-control input-sm" placeholder="{{vm.l.filter}}" title="abc  =abc  !abc  ^abc  abc$  >10  <=5  !=3  10..20  10..  ..20  a|b" ng-model="s.filter" ng-change="vm.refreshTable(t)"></td></tr>
+                <tr ng-repeat="row in t.view track by $index"><td class="cdnx-ov-mono" ng-repeat="s in t.vis track by s.name" ng-class="{'cdnx-ov-muted': vm.cellIsObj(row, s.name)}">{{vm.cell(row, s.name)}}</td></tr>
             </table>
         </div>
         <div class="cdnx-ov-muted small">{{t.view.length}} {{vm.l.rows_of}} {{t.rows.length}}</div>
@@ -47,7 +47,7 @@
     <div ng-if="vm.table.root.kind === 'dict'" style="margin-bottom: 8px;">
         <code ng-if="vm.table.path">{{vm.table.path}}</code>
         <span class="cdnx-ov-muted">{{vm.l.visible_keys}}:</span>
-        <span class="label cdnx-ov-chip" ng-repeat="it in vm.table.root.items track by it.key" ng-class="vm.table.root.hidden[it.key] ? 'label-default' : 'label-primary'" ng-click="vm.table.root.hidden[it.key] = !vm.table.root.hidden[it.key]">{{it.key}}</span>
+        <span class="label cdnx-ov-chip" ng-repeat="it in vm.table.root.items track by it.key" ng-class="it.hidden ? 'label-default' : 'label-primary'" ng-click="it.hidden = !it.hidden">{{it.key}}</span>
     </div>
     <div ng-init="node = vm.table.root" ng-include="'cdnx-ov-node.html'"></div>
 </div>
