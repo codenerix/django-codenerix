@@ -1009,9 +1009,10 @@ def _obj_viewer(
         "labels": _obj_viewer_labels(),
     }
     # Base64 keeps the data out of AngularJS interpolation: a "{{...}}" in a
-    # value must never be evaluated as an expression
+    # value must never be evaluated as an expression. ASCII escapes let a lone
+    # surrogate through, which UTF-8 cannot encode
     encoded = base64.b64encode(
-        json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        json.dumps(payload, ensure_ascii=True).encode("ascii"),
     ).decode("ascii")
 
     doc, tag, text = cast(Any, Doc().tagtext())

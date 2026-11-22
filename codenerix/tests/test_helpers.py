@@ -307,3 +307,14 @@ def test_obj_to_html_viewer_hides_angular_expressions():
     markup = re.sub(r'data-payload="[^"]+"', "", html)
     assert "{{" not in re.sub(r"<ul>.*</ul>", "", markup)
     assert _payload(html)["data"]["evil"].startswith("{{")
+
+
+def test_obj_to_html_payload_carries_lone_surrogates_as_ascii() -> None:
+    # A lone surrogate is a valid Python str but cannot be encoded to UTF-8:
+    # 6.4.0 raised UnicodeEncodeError here, 6.3.6 returned the HTML
+    value = json.loads('{"a": "\\ud800", "b": "M\\u00e1laga"}')
+    _, html = obj_to_html(value)
+    match = re.search(r'data-payload="([^"]+)"', html)
+    assert match is not None
+    assert base64.b64decode(match.group(1)).isascii()
+    assert _payload(html)["data"] == value
