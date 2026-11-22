@@ -318,3 +318,9 @@ def test_obj_to_html_payload_carries_lone_surrogates_as_ascii() -> None:
     assert match is not None
     assert base64.b64decode(match.group(1)).isascii()
     assert _payload(html)["data"] == value
+
+
+def test_obj_to_html_viewer_element_is_not_bindable() -> None:
+    # Without the directive registered, AngularJS must leave the fallback alone
+    _, html = obj_to_html({"a": 1})
+    assert '<div codenerix-obj-viewer="" ng-non-bindable="" data-views=' in html

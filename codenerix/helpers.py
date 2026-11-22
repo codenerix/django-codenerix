@@ -1023,6 +1023,9 @@ def _obj_viewer(
     with tag(
         "div",
         ("codenerix-obj-viewer", ""),
+        # Where the directive is not registered AngularJS would compile the
+        # fallback; ng-non-bindable stops it and lets the directive run
+        ("ng-non-bindable", ""),
         ("data-views", ",".join(views)),
         ("data-payload", encoded),
         klass="cdnx-objviewer cdnx-ov-wrap" if wrap else "cdnx-objviewer",
