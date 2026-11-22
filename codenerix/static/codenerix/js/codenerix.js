@@ -1102,7 +1102,10 @@ function formsubmit(
                     }
                 } else if (stat == 200) {
                     if (answer['error']) {
+                        // Kept for templates that render it; no codenerix
+                        // template does, so the user is told here too
                         $scope.error = answer['error'];
+                        $window.alert(answer['error']);
                     } else {
                         if (next == 'here') {
                             $uibModalInstance.close();
@@ -1131,9 +1134,16 @@ function formsubmit(
                     // Detected 409 error, the form is trying to communicate
                     // that a field has failed and is providing feedaback to
                     // resolve de error
+                    var unbound = [];
                     angular.forEach(answer, function(value, key) {
                         angular.forEach(value, function(msg) {
                             console.log('->' + key + ':' + msg['message']);
+                            if (!form[key]) {
+                                // No control to mark: "__all__" (errors of
+                                // clean()) or a field not on this form
+                                unbound.push(key == '__all__' ? msg['message'] : key + ': ' + msg['message']);
+                                return;
+                            }
                             form.$valid = false;
                             form.$invalid = true;
                             form[key].$valid = false;
@@ -1142,6 +1152,9 @@ function formsubmit(
                             form[key].djng_error_msg = msg['message'];
                         });
                     });
+                    if (unbound.length) {
+                        $window.alert(unbound.join('\n'));
+                    }
                 } else {
                     $window.alert(
                         'Internal error detected (Error was: [ERROR ' + stat +
