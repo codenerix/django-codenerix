@@ -2190,6 +2190,11 @@ var codenerix_directive_objviewer = [
             function childPath(p, k, arr) {
                 return arr ? p + '[' + k + ']' : (p ? p + '.' + k : String(k));
             }
+            // Paths can collide ("a.b" against a > b); ids quote every key as
+            // JSON, which is self-delimiting, so two nodes never share one
+            function childId(id, k, arr) {
+                return arr ? id + '[' + k + ']' : id + '.' + JSON.stringify(String(k));
+            }
             function isNum(v) {
                 return typeof v === 'number' ||
                     (typeof v === 'string' && v.trim() !== '' && !isNaN(v));
@@ -2436,16 +2441,17 @@ var codenerix_directive_objviewer = [
                 }
                 return out;
             }
-            function schema(x, p, acc) {
+            function schema(x, p, id, acc) {
                 if (Array.isArray(x)) {
                     x.forEach(function(it) {
-                        schema(it, p + '[]', acc);
+                        schema(it, p + '[]', id + '[]', acc);
                     });
                 } else if (isObj(x)) {
                     Object.keys(x).forEach(function(k) {
                         var kp = p ? p + '.' + k : k, v = x[k];
-                        var e = acc[kp] || (acc[kp] = {
-                            path: kp, types: {}, count: 0, examples: []
+                        var kid = childId(id, k, false);
+                        var e = acc[kid] || (acc[kid] = {
+                            id: kid, path: kp, types: {}, count: 0, examples: []
                         });
                         e.types[typeOf(v)] = true;
                         e.count++;
@@ -2453,7 +2459,7 @@ var codenerix_directive_objviewer = [
                             e.examples.indexOf(String(v)) < 0) {
                             e.examples.push(String(v));
                         }
-                        schema(v, kp, acc);
+                        schema(v, kp, kid, acc);
                     });
                 }
                 return acc;
@@ -2505,23 +2511,24 @@ var codenerix_directive_objviewer = [
                         vm.tree = {q: '', level: Math.min(2, maxLevel), max: maxLevel, open: {}, rows: [], path: ''};
                         vm.buildTree = function() {
                             var t = vm.tree, q = t.q.toLowerCase(), rows = [];
-                            (function visit(node, p, depth, keep) {
+                            (function visit(node, p, id, depth, keep) {
                                 if (!isObj(node)) {
                                     return;
                                 }
                                 var arr = Array.isArray(node);
                                 Object.keys(node).forEach(function(k) {
                                     var v = node[k], cp = childPath(p, k, arr);
+                                    var cid = childId(id, k, arr);
                                     if (q && !keep && !matches(k, v, q)) {
                                         return;
                                     }
                                     var c = isObj(v);
                                     var open = c &&
-                                        (t.open.hasOwnProperty(cp) ?
-                                             t.open[cp] :
+                                        (t.open.hasOwnProperty(cid) ?
+                                             t.open[cid] :
                                              (q ? true : depth < t.level));
                                     rows.push({
-                                        path: cp, depth: depth, container: c,
+                                        id: cid, path: cp, depth: depth, container: c,
                                         open: open,
                                         key: split(arr ? '[' + k + ']' : k, q),
                                         size: c ? (Array.isArray(v) ?
@@ -2533,11 +2540,11 @@ var codenerix_directive_objviewer = [
                                     if (open) {
                                         // Once a key matches, show its whole
                                         // subtree instead of filtering it
-                                        visit(v, cp, depth + 1,
+                                        visit(v, cp, cid, depth + 1,
                                               keep || (q && String(k).toLowerCase().indexOf(q) >= 0));
                                     }
                                 });
-                            })(data, '', 0, false);
+                            })(data, '', '', 0, false);
                             t.rows = rows;
                         };
                         vm.treeStep = function(d) {
@@ -2550,7 +2557,7 @@ var codenerix_directive_objviewer = [
                         };
                         vm.toggle = function(r) {
                             if (r.container) {
-                                vm.tree.open[r.path] = !r.open;
+                                vm.tree.open[r.id] = !r.open;
                                 vm.buildTree();
                             }
                         };
@@ -2759,7 +2766,7 @@ var codenerix_directive_objviewer = [
                                 vm.refreshFlat();
                             },
                             schema: function() {
-                                var s = schema(data, '', {});
+                                var s = schema(data, '', '', {});
                                 vm.schema = Object.keys(s).map(function(k) {
                                     s[k].typeList = Object.keys(s[k].types);
                                     return s[k];

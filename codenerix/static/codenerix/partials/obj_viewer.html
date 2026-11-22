@@ -17,7 +17,7 @@
         </div>
         <code ng-show="vm.tree.path">{{vm.tree.path}}</code>
     </div>
-    <div class="cdnx-ov-mono" ng-repeat="r in vm.tree.rows track by r.path" ng-style="{'padding-left': (r.depth * 18) + 'px'}">
+    <div class="cdnx-ov-mono" ng-repeat="r in vm.tree.rows track by r.id" ng-style="{'padding-left': (r.depth * 18) + 'px'}">
         <span class="cdnx-ov-toggle" ng-click="vm.toggle(r)"><i ng-if="r.container" class="fa" ng-class="r.open ? 'fa-caret-down' : 'fa-caret-right'"></i></span><span class="cdnx-ov-key" ng-click="vm.tree.path = r.path">{{r.key[0]}}<mark>{{r.key[1]}}</mark>{{r.key[2]}}</span><span ng-if="r.container" class="cdnx-ov-muted"> {{r.size}}</span><span ng-if="!r.container">: {{r.val[0]}}<mark>{{r.val[1]}}</mark>{{r.val[2]}}</span>
     </div>
 </div>
@@ -76,7 +76,7 @@
 <div ng-if="vm.view === 'schema'">
     <table class="table table-condensed table-striped">
         <tr><th>{{vm.l.path}}</th><th>{{vm.l.types}}</th><th>{{vm.l.count}}</th><th>{{vm.l.examples}}</th></tr>
-        <tr ng-repeat="s in vm.schema track by s.path"><td class="cdnx-ov-mono">{{s.path}}</td><td><span class="label" ng-repeat="ty in s.typeList" ng-class="ty === 'null' ? 'label-warning' : 'label-default'">{{ty}}</span></td><td>{{s.count}}</td><td class="text-muted">{{s.examples.join(', ')}}</td></tr>
+        <tr ng-repeat="s in vm.schema track by s.id"><td class="cdnx-ov-mono">{{s.path}}</td><td><span class="label" ng-repeat="ty in s.typeList" ng-class="ty === 'null' ? 'label-warning' : 'label-default'">{{ty}}</span></td><td>{{s.count}}</td><td class="text-muted">{{s.examples.join(', ')}}</td></tr>
     </table>
 </div>
 
