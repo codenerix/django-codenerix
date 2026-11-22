@@ -93,14 +93,18 @@ class CurrentRequestMiddleware:
     def __call__(self, request):
         # Code to be executed for each request before the view (and
         # later middleware) are called.
+        previous = getattr(_thread_locals_request, "value", None)
         self.process_request(request)
 
-        # Get response
-        response = self.get_response(request)  # pyright: ignore[reportOptionalCall]
-
-        # Code to be executed for each request/response after the
-        # view is called
-        # ... pass ...
+        try:
+            # Get response
+            response = self.get_response(request)  # pyright: ignore[reportOptionalCall]
+        finally:
+            # The thread outlives the request: without this, code that runs
+            # later in it (cron, commands, the next request's early phase)
+            # would see this request and its user. Restoring, not clearing,
+            # keeps an outer request when one is nested in the same thread
+            _thread_locals_request.value = previous
 
         # Return response
         return response
