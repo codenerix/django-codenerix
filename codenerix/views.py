@@ -114,6 +114,27 @@ from codenerix.templatetags.codenerix_lists import unlist
 logger = logging.getLogger(__name__)
 
 
+def _to_one_paths(model: Any, rules: list[str]) -> list[str]:
+    """
+    For each list rule ("alias:path" or "path"), the longest prefix of its
+    "__" path made of forward foreign keys and one-to-ones, the joins
+    select_related() can follow; rules with no such prefix give nothing
+    """
+    paths: set[str] = set()
+    for rule in rules:
+        chain: list[str] = []
+        current = model
+        for part in rule.split(":")[-1].split("__"):
+            field = next((f for f in current._meta.fields if f.name == part), None)
+            if field is None or not (field.many_to_one or field.one_to_one):
+                break
+            chain.append(part)
+            current = field.related_model
+        if chain:
+            paths.add("__".join(chain))
+    return sorted(paths)
+
+
 def status(request, status, answer):
     del request  # Unused
     answerjson = urlsafe_base64_decode(answer).decode()
@@ -2915,6 +2936,13 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
 
         if found and query_select_related:
             queryset = queryset.select_related(*query_select_related)
+        elif not found and not self.haystack:
+            # One column that is not a concrete field (a method, a property, a
+            # many-to-many) emptied the list above, so bodybuilder() fetched
+            # every foreign key of every row: select the to-one paths anyway
+            to_one = _to_one_paths(self.model, autorules_keys)
+            if to_one:
+                queryset = queryset.select_related(*to_one)
 
         # If we got the query_optimizer to optimize everything, use it
         # use_extra = False
