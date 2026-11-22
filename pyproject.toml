@@ -60,6 +60,9 @@ dependencies = [
 # GenList(haystack=True) search through django-haystack; the search backend
 # (Elasticsearch, Solr, Whoosh, Xapian) is installed and configured by the project.
 haystack = ["django-haystack>=2.6.1"]
+# ActiveDirectoryGroupMembershipSSLBackend. ldap3 is still a core dependency
+# in 6.4.x and leaves it in 6.5.0: LDAP projects should depend on this extra
+ldap = ["ldap3"]
 
 [project.urls]
 Homepage = "https://github.com/codenerix/django-codenerix"

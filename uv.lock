@@ -468,6 +468,9 @@ dependencies = [
 haystack = [
     { name = "django-haystack" },
 ]
+ldap = [
+    { name = "ldap3" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -508,6 +511,7 @@ requires-dist = [
     { name = "html5lib" },
     { name = "jsonfield" },
     { name = "ldap3" },
+    { name = "ldap3", marker = "extra == 'ldap'" },
     { name = "openpyxl", specifier = "==3.1.2" },
     { name = "pillow" },
     { name = "pyinstrument" },
@@ -520,7 +524,7 @@ requires-dist = [
     { name = "unidecode" },
     { name = "yattag" },
 ]
-provides-extras = ["haystack"]
+provides-extras = ["haystack", "ldap"]
 
 [package.metadata.requires-dev]
 dev = [

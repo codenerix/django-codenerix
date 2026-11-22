@@ -30,18 +30,18 @@ import hashlib
 import ipaddress
 import logging
 import ssl
+from types import ModuleType
 
-import ldap3
 from codenerix_lib.debugger import Debugger
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import Group, User
+from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import send_mail
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
-from ldap3.core.exceptions import LDAPException, LDAPSocketOpenError
 
 from codenerix.checks import otp_valid_window as valid_otp_window
 
@@ -50,6 +50,22 @@ logger = logging.getLogger(__name__)
 # Dedicated logger for failed OTPAuth attempts, meant to be routed to its own
 # file and watched by fail2ban. Its line format is a contract: do not change it.
 otp_failure_logger = logging.getLogger("codenerix.auth.otp")
+
+
+def _ldap3() -> tuple[ModuleType, ModuleType]:
+    """
+    Import ldap3 and its exceptions for the LDAP backend only: importing it
+    at module level loaded ldap3 and pyasn1 (and their DeprecationWarnings)
+    in every project that uses the OTP or token middlewares
+    """
+    try:
+        import ldap3
+        from ldap3.core import exceptions
+    except ImportError as exc:
+        raise ImproperlyConfigured(
+            "ActiveDirectoryGroupMembershipSSLBackend needs ldap3: install django-codenerix[ldap]",
+        ) from exc
+    return ldap3, exceptions
 
 
 def log_otp_failure(request) -> None:
@@ -1303,6 +1319,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 self.__debug.flush()  # pyright: ignore[reportAttributeAccessIssue]
 
     def ldap_link(self, username, password, mode="LOGIN"):
+        ldap3, ldap_exceptions = _ldap3()
         # If no password provided, we will not try to authenticate
         if password:
             # Prepare LDAP connection details
@@ -1349,14 +1366,14 @@ class ActiveDirectoryGroupMembershipSSLBackend:
                 # answer.open()
                 # answer.bind()
                 self.debug("ldap.connected :: Authorized")
-            except LDAPSocketOpenError as e:
+            except ldap_exceptions.LDAPSocketOpenError as e:
                 # The access for this user has been denied, Debug it
                 # if required
                 self.debug(
                     f"LDAP connect failed 'SocketOpenError' for url '{ldap_url}' with error '{e}'",
                 )
                 answer = None
-            except LDAPException as e:
+            except ldap_exceptions.LDAPException as e:
                 # The access for this user has been denied, Debug it
                 # if required
                 self.debug(
@@ -1414,6 +1431,7 @@ class ActiveDirectoryGroupMembershipSSLBackend:
         return user
 
     def get_ad_info(self, username, password):
+        ldap3, _ = _ldap3()
         self.debug(f"get_ad_info for user '{username}'")
 
         # Initialize the answer
