@@ -12,6 +12,8 @@ import json
 import re
 import uuid
 from decimal import Decimal
+from html.parser import HTMLParser
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -324,3 +326,39 @@ def test_obj_to_html_viewer_element_is_not_bindable() -> None:
     # Without the directive registered, AngularJS must leave the fallback alone
     _, html = obj_to_html({"a": 1})
     assert '<div codenerix-obj-viewer="" ng-non-bindable="" data-views=' in html
+
+
+class _ClickTags(HTMLParser):
+    """Collect the tag of every element with ng-click, and every input."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.clickable: list[str] = []
+        self.inputs: list[dict[str, str | None]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        names = dict(attrs)
+        if "ng-click" in names:
+            self.clickable.append(tag)
+        if tag == "input":
+            self.inputs.append(names)
+
+
+def test_obj_viewer_partial_is_keyboard_reachable() -> None:
+    # Buttons get Enter and Space from the browser; any other element with a
+    # click handler would need its own keyboard handler
+    partial = Path(__file__).parent.parent / "static/codenerix/partials/obj_viewer.html"
+    tags = _ClickTags()
+    tags.feed(partial.read_text(encoding="utf-8"))
+    assert len(tags.clickable) == 16
+    assert set(tags.clickable) == {"button"}
+    assert all(i.get("aria-label") or i.get("title") for i in tags.inputs)
+
+
+def test_obj_to_html_viewer_css_resets_buttons() -> None:
+    _, html = obj_to_html({"a": 1})
+    assert ".cdnx-objviewer .cdnx-ov-btn{border:0;margin:0;cursor:pointer}" in html
+    assert (
+        ".cdnx-objviewer .cdnx-ov-btn:not(.label){background:transparent;"
+        "padding:0;font:inherit;color:inherit;text-align:inherit}"
+    ) in html

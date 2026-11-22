@@ -4,7 +4,7 @@
 
 <div ng-if="vm.view === 'tree'">
     <div class="form-inline" style="margin-bottom: 8px;">
-        <input type="text" class="form-control input-sm" placeholder="{{vm.l.search}}" ng-model="vm.tree.q" ng-change="vm.buildTree()">
+        <input type="text" class="form-control input-sm" aria-label="{{vm.l.search}}" placeholder="{{vm.l.search}}" ng-model="vm.tree.q" ng-change="vm.buildTree()">
         <span class="cdnx-ov-muted" style="margin-left: 6px;">{{vm.l.level}}</span>
         <div class="btn-group btn-group-sm">
             <button type="button" class="btn btn-default" ng-click="vm.treeStep(-1)" title="-1"><i class="fa fa-minus"></i></button>
@@ -18,7 +18,7 @@
         <code ng-show="vm.tree.path">{{vm.tree.path}}</code>
     </div>
     <div class="cdnx-ov-mono" ng-repeat="r in vm.tree.rows track by r.id" ng-style="{'padding-left': (r.depth * 18) + 'px'}">
-        <span class="cdnx-ov-toggle" ng-click="vm.toggle(r)"><i ng-if="r.container" class="fa" ng-class="r.open ? 'fa-caret-down' : 'fa-caret-right'"></i></span><span class="cdnx-ov-key" ng-click="vm.tree.path = r.path">{{r.key[0]}}<mark>{{r.key[1]}}</mark>{{r.key[2]}}</span><span ng-if="r.container" class="cdnx-ov-muted"> {{r.size}}</span><span ng-if="!r.container">: {{r.val[0]}}<mark>{{r.val[1]}}</mark>{{r.val[2]}}</span>
+        <button type="button" class="cdnx-ov-btn cdnx-ov-toggle" ng-disabled="!r.container" ng-click="vm.toggle(r)"><i ng-if="r.container" class="fa" ng-class="r.open ? 'fa-caret-down' : 'fa-caret-right'"></i></button><button type="button" class="cdnx-ov-btn cdnx-ov-key" ng-click="vm.tree.path = r.path">{{r.key[0]}}<mark>{{r.key[1]}}</mark>{{r.key[2]}}</button><span ng-if="r.container" class="cdnx-ov-muted"> {{r.size}}</span><span ng-if="!r.container">: {{r.val[0]}}<mark>{{r.val[1]}}</mark>{{r.val[2]}}</span>
     </div>
 </div>
 
@@ -32,10 +32,10 @@
         </tr>
     </table>
     <div ng-if="node.kind === 'grid'" ng-init="t = node.grid">
-        <div style="margin-bottom: 6px;"><span class="label cdnx-ov-chip" ng-repeat="s in t.colState track by s.name" ng-class="s.hidden ? 'label-default' : 'label-primary'" ng-click="vm.toggleCol(t, s)">{{s.name}}</span></div>
+        <div style="margin-bottom: 6px;"><button type="button" class="cdnx-ov-btn label cdnx-ov-chip" ng-repeat="s in t.colState track by s.name" ng-class="s.hidden ? 'label-default' : 'label-primary'" ng-click="vm.toggleCol(t, s)">{{s.name}}</button></div>
         <div class="table-responsive">
             <table class="table table-condensed table-striped table-bordered" style="margin-bottom: 2px;">
-                <tr><th class="cdnx-ov-sort" ng-repeat="s in t.vis track by s.name" ng-click="vm.sortBy(t, s.name)">{{s.name}} <i class="fa" ng-if="t.sort === s.name" ng-class="t.rev ? 'fa-sort-desc' : 'fa-sort-asc'"></i></th></tr>
+                <tr><th ng-repeat="s in t.vis track by s.name"><button type="button" class="cdnx-ov-btn cdnx-ov-sort" ng-click="vm.sortBy(t, s.name)">{{s.name}} <i class="fa" ng-if="t.sort === s.name" ng-class="t.rev ? 'fa-sort-desc' : 'fa-sort-asc'"></i></button></th></tr>
                 <tr><td ng-repeat="s in t.vis track by s.name"><input type="text" class="form-control input-sm" placeholder="{{vm.l.filter}}" title="abc  =abc  !abc  ^abc  abc$  >10  <=5  !=3  10..20  10..  ..20  a|b" ng-model="s.filter" ng-change="vm.refreshTable(t)"></td></tr>
                 <tr ng-repeat="row in t.view track by $index"><td class="cdnx-ov-mono" ng-repeat="s in t.vis track by s.name" ng-class="{'cdnx-ov-muted': vm.cellIsObj(row, s.name)}">{{vm.cell(row, s.name)}}</td></tr>
             </table>
@@ -47,15 +47,15 @@
     <div ng-if="vm.table.root.kind === 'dict'" style="margin-bottom: 8px;">
         <code ng-if="vm.table.path">{{vm.table.path}}</code>
         <span class="cdnx-ov-muted">{{vm.l.visible_keys}}:</span>
-        <span class="label cdnx-ov-chip" ng-repeat="it in vm.table.root.items track by it.key" ng-class="it.hidden ? 'label-default' : 'label-primary'" ng-click="it.hidden = !it.hidden">{{it.key}}</span>
+        <button type="button" class="cdnx-ov-btn label cdnx-ov-chip" ng-repeat="it in vm.table.root.items track by it.key" ng-class="it.hidden ? 'label-default' : 'label-primary'" ng-click="it.hidden = !it.hidden">{{it.key}}</button>
     </div>
     <div ng-init="node = vm.table.root" ng-include="'cdnx-ov-node.html'"></div>
 </div>
 
 <div ng-if="vm.view === 'query'">
-    <input type="text" class="form-control input-sm cdnx-ov-mono" ng-model="vm.query.expr" ng-change="vm.runQuery()">
+    <input type="text" class="form-control input-sm cdnx-ov-mono" aria-label="{{vm.l.query}}" ng-model="vm.query.expr" ng-change="vm.runQuery()">
     <div class="small cdnx-ov-muted cdnx-ov-mono" style="margin-top: 4px;">a.b  [0]  [-1]  [*]  [1:3]  [:3]  [2:]  [::2]  [1..3]  [..3]  [2..]  [f&gt;10]  [f=1..5]  [f=abc]  [f~abc]  [f!abc]  [f=a|b]</div>
-    <div style="margin: 6px 0;"><span class="label label-info cdnx-ov-chip" ng-repeat="e in vm.query.examples" ng-click="vm.query.expr = e; vm.runQuery()">{{e}}</span></div>
+    <div style="margin: 6px 0;"><button type="button" class="cdnx-ov-btn label label-info cdnx-ov-chip" ng-repeat="e in vm.query.examples" ng-click="vm.query.expr = e; vm.runQuery()">{{e}}</button></div>
     <div class="text-danger" ng-if="vm.query.error">{{vm.query.error}}</div>
     <div class="text-muted">{{vm.query.results.length}} {{vm.l.results}}</div>
     <pre ng-repeat="r in vm.query.results track by $index">{{r}}</pre>
@@ -63,12 +63,12 @@
 
 <div ng-if="vm.view === 'flat'">
     <div class="form-inline" style="margin-bottom: 8px;">
-        <input type="text" class="form-control input-sm" placeholder="{{vm.l.filter_flat}}" ng-model="vm.flat.q" ng-change="vm.refreshFlat()">
+        <input type="text" class="form-control input-sm" aria-label="{{vm.l.filter_flat}}" placeholder="{{vm.l.filter_flat}}" ng-model="vm.flat.q" ng-change="vm.refreshFlat()">
         <button type="button" class="btn btn-default btn-sm" ng-click="vm.csv()"><i class="fa fa-download"></i> CSV</button>
         <span class="text-muted">{{vm.flat.rows.length}} {{vm.l.leaves}}</span>
     </div>
     <table class="table table-condensed table-striped">
-        <tr><th class="cdnx-ov-sort" ng-click="vm.flatSort('path')">{{vm.l.path}}</th><th class="cdnx-ov-sort" ng-click="vm.flatSort('type')">{{vm.l.type}}</th><th class="cdnx-ov-sort" ng-click="vm.flatSort('value')">{{vm.l.value}}</th></tr>
+        <tr><th><button type="button" class="cdnx-ov-btn cdnx-ov-sort" ng-click="vm.flatSort('path')">{{vm.l.path}}</button></th><th><button type="button" class="cdnx-ov-btn cdnx-ov-sort" ng-click="vm.flatSort('type')">{{vm.l.type}}</button></th><th><button type="button" class="cdnx-ov-btn cdnx-ov-sort" ng-click="vm.flatSort('value')">{{vm.l.value}}</button></th></tr>
         <tr ng-repeat="r in vm.flat.rows track by $index"><td class="cdnx-ov-mono">{{r.path}}</td><td><span class="label label-default">{{r.type}}</span></td><td>{{r.value}}</td></tr>
     </table>
 </div>
@@ -83,7 +83,7 @@
 <div ng-if="vm.view === 'columns'">
     <div class="cdnx-ov-cols">
         <div class="cdnx-ov-col" ng-repeat="col in vm.cols.list track by $index" ng-init="level = $index">
-            <div class="cdnx-ov-item" ng-repeat="it in col track by it.k" ng-class="{active: it.active}" ng-click="vm.colsPick(level, it.k)"><span>{{it.label}}</span><i class="fa fa-angle-right" ng-if="it.container"></i></div>
+            <button type="button" class="cdnx-ov-btn cdnx-ov-item" ng-repeat="it in col track by it.k" ng-class="{active: it.active}" ng-click="vm.colsPick(level, it.k)"><span>{{it.label}}</span><i class="fa fa-angle-right" ng-if="it.container"></i></button>
         </div>
         <div style="padding: 8px; min-width: 200px;" ng-if="vm.cols.leaf"><code>{{vm.cols.leaf.path}}</code><h4>{{vm.cols.leaf.value}}</h4><span class="label label-default">{{vm.cols.leaf.type}}</span></div>
     </div>
