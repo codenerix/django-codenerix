@@ -329,30 +329,47 @@ def test_obj_to_html_viewer_element_is_not_bindable() -> None:
 
 
 class _ClickTags(HTMLParser):
-    """Collect the tag of every element with ng-click, and every input."""
+    """Collect the attributes of every element with ng-click, and every input."""
 
     def __init__(self) -> None:
         super().__init__()
-        self.clickable: list[str] = []
+        self.clickable: list[tuple[str, dict[str, str | None]]] = []
         self.inputs: list[dict[str, str | None]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         names = dict(attrs)
         if "ng-click" in names:
-            self.clickable.append(tag)
+            self.clickable.append((tag, names))
         if tag == "input":
             self.inputs.append(names)
 
 
+def _partial_tags() -> _ClickTags:
+    partial = Path(__file__).parent.parent / "static/codenerix/partials/obj_viewer.html"
+    text = partial.read_text(encoding="utf-8")
+    tags = _ClickTags()
+    tags.feed(text)
+    # HTMLParser hands a <script> body over as text: the inline ng-template
+    # (grid chips, sort headers, filter inputs) must be parsed on its own
+    for body in re.findall(
+        r'<script type="text/ng-template"[^>]*>(.*?)</script>',
+        text,
+        flags=re.DOTALL,
+    ):
+        tags.feed(body)
+    return tags
+
+
 def test_obj_viewer_partial_is_keyboard_reachable() -> None:
     # Buttons get Enter and Space from the browser; any other element with a
-    # click handler would need its own keyboard handler
-    partial = Path(__file__).parent.parent / "static/codenerix/partials/obj_viewer.html"
-    tags = _ClickTags()
-    tags.feed(partial.read_text(encoding="utf-8"))
-    assert len(tags.clickable) == 16
-    assert set(tags.clickable) == {"button"}
+    # click handler would need its own keyboard handler. type="button" keeps
+    # a viewer inside an ERP <form> from submitting it
+    tags = _partial_tags()
+    assert tags.clickable
+    assert all(tag == "button" and names.get("type") == "button" for tag, names in tags.clickable)
     assert all(i.get("aria-label") or i.get("title") for i in tags.inputs)
+    toggles = [n for _, n in tags.clickable if n.get("ng-click") == "vm.toggle(r)"]
+    assert [n.get("ng-disabled") for n in toggles] == ["!r.container"]
 
 
 def test_obj_to_html_viewer_css_resets_buttons() -> None:
