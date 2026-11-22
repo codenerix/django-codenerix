@@ -19,6 +19,7 @@
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 from codenerix_lib.debugger import Debugger
@@ -64,7 +65,9 @@ class Command(BaseCommand, Debugger):
         while keepworking:
             # Collect
             self.debug("Collecting...", color="blue")
-            cmd = [f"{appdir}/manage", "collectstatic", "--noinput"]
+            # The running interpreter, not manage's shebang: without the
+            # virtualenv active the shebang finds the system Python
+            cmd = [sys.executable, f"{appdir}/manage", "collectstatic", "--noinput"]
             result = subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -108,7 +111,7 @@ class Command(BaseCommand, Debugger):
 
             # Clean
             self.debug("Cleaning...", color="blue")
-            cmd = [f"{appdir}/manage", "clean"]
+            cmd = [sys.executable, f"{appdir}/manage", "clean"]
             result = subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE,
