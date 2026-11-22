@@ -39,7 +39,7 @@ import sys
 import time
 from decimal import Decimal
 from io import BytesIO, StringIO
-from typing import Any, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 if sys.version_info >= (3, 11):
     from typing import assert_never
@@ -4806,7 +4806,18 @@ class GenModify:
             )
 
 
-class GenCreate(GenModify, GenBase, CreateView):  # pyright: ignore[reportIncompatibleVariableOverride, reportIncompatibleMethodOverride]
+# Parametrised for type checkers only: django-stubs 6.1 types the bare views'
+# form_class as ModelForm[Any], refusing codenerix forms in subclasses, and
+# CreateView[...] raises TypeError at run time
+if TYPE_CHECKING:
+    _CreateBase = CreateView[Any, Any]
+    _UpdateBase = UpdateView[Any, Any]
+else:
+    _CreateBase = CreateView
+    _UpdateBase = UpdateView
+
+
+class GenCreate(GenModify, GenBase, _CreateBase):  # pyright: ignore[reportIncompatibleVariableOverride, reportIncompatibleMethodOverride]
     action_permission = "add"
     get_template_names_key = "add"
     success_url = reverse_lazy(
@@ -4825,7 +4836,7 @@ class GenCreateModal(GenCreate):
     is_modal = True
 
 
-class GenUpdate(GenModify, GenBase, UpdateView):  # pyright: ignore[reportIncompatibleVariableOverride, reportIncompatibleMethodOverride]
+class GenUpdate(GenModify, GenBase, _UpdateBase):  # pyright: ignore[reportIncompatibleVariableOverride, reportIncompatibleMethodOverride]
     action_permission = "change"
     get_template_names_key = "form"
     success_url = reverse_lazy(
