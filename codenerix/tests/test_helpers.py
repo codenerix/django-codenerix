@@ -362,3 +362,25 @@ def test_obj_to_html_viewer_css_resets_buttons() -> None:
         ".cdnx-objviewer .cdnx-ov-btn:not(.label){background:transparent;"
         "padding:0;font:inherit;color:inherit;text-align:inherit}"
     ) in html
+
+
+@pytest.mark.parametrize(
+    ("wrap", "klass"),
+    [(True, "cdnx-objviewer cdnx-ov-wrap"), (False, "cdnx-objviewer")],
+)
+def test_obj_to_html_viewer_wrap_class(wrap: bool, klass: str) -> None:
+    _, html = obj_to_html({"a": 1}, wrap=wrap)
+    assert f'class="{klass}"' in html
+
+
+def test_obj_to_html_payload_sorts_frozensets_like_sets() -> None:
+    payload = _payload(obj_to_html({"f": frozenset({"b", "a"})})[1])
+    assert payload["data"] == {"f": ["a", "b"]}
+
+
+def test_obj_to_html_payload_xml_text_is_stripped_joined_and_keeps_cdata() -> None:
+    # Whitespace-only nodes between tags are dropped, other text is stripped
+    # and joined with one space, CDATA counts as text
+    xml = "<m>  a  <b>x</b>\n c <![CDATA[<d>]]> <e/>\n</m>"
+    data = _payload(obj_to_html(xml)[1])["data"]
+    assert data == {"m": {"b": {"#text": "x"}, "e": {}, "#text": "a c <d>"}}
