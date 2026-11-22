@@ -2262,9 +2262,9 @@ var codenerix_directive_objviewer = [
                     // own operator takes the one before it
                     var lastOp = '';
                     return expr.split('|').some(function(e) {
-                        var own = e.trim().match(/^(>=|<=|!=|>|<|=|~)/);
-                        lastOp = own ? own[1] : lastOp;
-                        return matchExpr(value, own ? e : lastOp + e);
+                        var altOp = e.trim().match(/^(>=|<=|!=|>|<|=|~)/);
+                        lastOp = altOp ? altOp[1] : lastOp;
+                        return matchExpr(value, altOp ? e : lastOp + e);
                     });
                 }
                 if (expr.charAt(0) === '!' && expr.charAt(1) !== '=') {
@@ -2771,10 +2771,15 @@ var codenerix_directive_objviewer = [
                                 var tables = findTables(data, '', []);
                                 if (tables.length) {
                                     var t = tables[0], col = t.cols[0];
-                                    var first = t.rows[0][col];
+                                    // The first row may lack the column: read it from
+                                    // the first row that owns it, never an inherited member
+                                    var owner = t.rows.filter(function(r) {
+                                        return own(r, col);
+                                    })[0];
+                                    var first = owner ? owner[col] : undefined;
                                     vm.query.examples.push(t.path + '[*].' + col);
                                     vm.query.examples.push(t.path + '[0:2]');
-                                    if (!isObj(first)) {
+                                    if (owner && !isObj(first)) {
                                         vm.query.examples.push(
                                             t.path + '[' + col + '=' + show(first) + ']');
                                     }

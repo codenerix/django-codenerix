@@ -55,7 +55,7 @@
 <div ng-if="vm.view === 'query'">
     <input type="text" class="form-control input-sm cdnx-ov-mono" aria-label="{{vm.l.query}}" ng-model="vm.query.expr" ng-change="vm.runQuery()">
     <div class="small cdnx-ov-muted cdnx-ov-mono" style="margin-top: 4px;">a.b  [0]  [-1]  [*]  [1:3]  [:3]  [2:]  [::2]  [1..3]  [..3]  [2..]  [f&gt;10]  [f=1..5]  [f=abc]  [f~abc]  [f!abc]  [f=a|b]</div>
-    <div style="margin: 6px 0;"><button type="button" class="cdnx-ov-btn label label-info cdnx-ov-chip" ng-repeat="e in vm.query.examples" ng-click="vm.query.expr = e; vm.runQuery()">{{e}}</button></div>
+    <div style="margin: 6px 0;"><button type="button" class="cdnx-ov-btn label label-info cdnx-ov-chip" ng-repeat="e in vm.query.examples track by $index" ng-click="vm.query.expr = e; vm.runQuery()">{{e}}</button></div>
     <div class="text-danger" ng-if="vm.query.error">{{vm.query.error}}</div>
     <div class="text-muted">{{vm.query.results.length}} {{vm.l.results}}</div>
     <pre ng-repeat="r in vm.query.results track by $index">{{r}}</pre>
