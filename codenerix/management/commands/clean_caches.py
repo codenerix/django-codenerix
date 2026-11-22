@@ -18,21 +18,24 @@
 # limitations under the License.
 
 import subprocess
+from typing import Any
 
 from codenerix_lib.debugger import Debugger
 from django.conf import settings
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand, Debugger):
     # Show this when the user types help
     help = "Clean memcache"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         # Autoconfigure Debugger
         self.set_name("CODENERIX")
         self.set_debug()
 
+        # Every cache is tried; a failed one makes the command fail at the end
+        failed: list[str] = []
         for name, cache in settings.CACHES.items():
             if "memcache" in cache.get("BACKEND", ""):
                 location = cache["LOCATION"]
@@ -67,6 +70,7 @@ class Command(BaseCommand, Debugger):
                         "netcat to flush memcached",
                         color="red",
                     )
+                    failed.append(name)
                     continue
                 status, output = result.returncode, result.stdout.rstrip("\n")
                 if status:
@@ -74,8 +78,12 @@ class Command(BaseCommand, Debugger):
                         f"ERROR at {name}@Memcache -> {output}",
                         color="red",
                     )
+                    failed.append(name)
                 else:
                     self.debug(
                         f"OK at {name}@Memcache located at {host}:{port} -> {output}",
                         color="green",
                     )
+
+        if failed:
+            raise CommandError(f"Could not flush: {', '.join(failed)}")
