@@ -4880,10 +4880,12 @@ class GenModify:
 
 # Parametrised for type checkers only: django-stubs 6.1 types the bare views'
 # form_class as ModelForm[Any], refusing codenerix forms in subclasses, and
-# CreateView[...] raises TypeError at run time
+# CreateView[...] raises TypeError at run time. The trailing markers silence
+# SonarQube's S5644, which does not see the TYPE_CHECKING guard: the subscripts
+# below never run
 if TYPE_CHECKING:
-    _CreateBase = CreateView[Any, Any]
-    _UpdateBase = UpdateView[Any, Any]
+    _CreateBase = CreateView[Any, Any]  # NOSONAR
+    _UpdateBase = UpdateView[Any, Any]  # NOSONAR
 else:
     _CreateBase = CreateView
     _UpdateBase = UpdateView
