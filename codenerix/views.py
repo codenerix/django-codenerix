@@ -67,7 +67,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 # Django
 from django.db import models
-from django.db.models import F, Q
+from django.db.models import F, Q, QuerySet
 from django.forms.models import model_to_dict
 from django.http import (
     Http404,
@@ -133,6 +133,40 @@ def _to_one_paths(model: Any, rules: list[str]) -> list[str]:
         if chain:
             paths.add("__".join(chain))
     return sorted(paths)
+
+
+def _select_to_one(
+    queryset: Any,
+    model: Any,
+    rules: list[str],
+    *,
+    found: bool,
+    haystack: bool,
+) -> Any:
+    """
+    select_related() the to-one paths of the list rules when the list builder
+    dropped its own selection (found is False), on the queryset as it leaves
+    the custom_queryset hook. Anything else is returned untouched.
+    """
+    if found or haystack or not isinstance(queryset, QuerySet):
+        return queryset
+    # Django refuses select_related() after values() or values_list()
+    # (QuerySet._fields is then set) and on a traversed field deferred by
+    # only() or defer() (query.deferred_loading holds field names): such
+    # querysets keep the previous behaviour. These and query.combinator below
+    # are private attributes, pinned by test_list_queries.py
+    # A missing attribute (another Django) counts as "skip"
+    if getattr(queryset, "_fields", ()) is not None or queryset.query.deferred_loading[0]:
+        return queryset
+    # Nor on union(), intersection() or difference() results (NotSupportedError):
+    # query.combinator, also private, names the operation
+    if queryset.query.combinator:
+        return queryset
+    to_one = _to_one_paths(model, rules)
+    # select_related() without arguments would follow every foreign key
+    if not to_one:
+        return queryset
+    return queryset.select_related(*to_one)
 
 
 def status(request, status, answer):
@@ -2936,13 +2970,6 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
 
         if found and query_select_related:
             queryset = queryset.select_related(*query_select_related)
-        elif not found and not self.haystack:
-            # One column that is not a concrete field (a method, a property, a
-            # many-to-many) emptied the list above, so bodybuilder() fetched
-            # every foreign key of every row: select the to-one paths anyway
-            to_one = _to_one_paths(self.model, autorules_keys)
-            if to_one:
-                queryset = queryset.select_related(*to_one)
 
         # If we got the query_optimizer to optimize everything, use it
         # use_extra = False
@@ -2961,6 +2988,18 @@ class GenList(GenBase, ListView):  # pyright: ignore[reportIncompatibleVariableO
         # Custom queryset
         if hasattr(self, "custom_queryset"):
             queryset = self.custom_queryset(queryset, MODELINF)
+
+        # One column that is not a concrete field (a method, a property, a
+        # many-to-many) emptied the selection above, so bodybuilder() fetched
+        # every foreign key of every row: select the to-one paths anyway. After
+        # the hook, so it sees the queryset the list will really read
+        queryset = _select_to_one(
+            queryset,
+            self.model,
+            autorules_keys,
+            found=found,
+            haystack=bool(self.haystack),
+        )
 
         # Internal Codenerix DEBUG for Querysets
         # pylint: disable=pointless-string-statement

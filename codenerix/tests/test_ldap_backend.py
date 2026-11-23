@@ -189,6 +189,8 @@ def test_no_password_never_connects(fake: _FakeLdap) -> None:
 @pytest.mark.django_db
 @override_settings(**AD)
 def test_successful_login_creates_and_synchronises_the_user(fake: _FakeLdap) -> None:
+    import ldap3
+
     Group.objects.create(name="Staff")
     fake.entries = [
         _Entry(
@@ -212,6 +214,7 @@ def test_successful_login_creates_and_synchronises_the_user(fake: _FakeLdap) -> 
     assert list(user.groups.values_list("name", flat=True)) == ["Staff"]
     assert fake.searches[0]["search_filter"] == "(sAMAccountName=ann)"
     assert fake.searches[0]["search_base"] == "dc=corp,dc=example,dc=com"
+    assert fake.searches[0]["search_scope"] == ldap3.SUBTREE
 
 
 @pytest.mark.django_db
