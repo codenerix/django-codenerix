@@ -247,6 +247,7 @@ def test_select_to_one_leaves_other_querysets_alone(qmodels: dict[str, Any]) -> 
         note.objects.only("text"),
         note.objects.defer("text"),
         note.objects.order_by().union(note.objects.order_by()),
+        note.objects.select_for_update(),
         [],
     ):
         assert views._select_to_one(queryset, note, rules, found=False, haystack=False) is queryset

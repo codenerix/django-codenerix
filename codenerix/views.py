@@ -162,6 +162,11 @@ def _select_to_one(
     # query.combinator, also private, names the operation
     if queryset.query.combinator:
         return queryset
+    # Nor under select_for_update(): PostgreSQL cannot lock the nullable side
+    # of the outer joins it adds (NotSupportedError); query.select_for_update
+    # is private as well
+    if queryset.query.select_for_update:
+        return queryset
     to_one = _to_one_paths(model, rules)
     # select_related() without arguments would follow every foreign key
     if not to_one:
